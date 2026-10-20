@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:msg_gestion/data/auth_session.dart';
+import 'package:msg_gestion/data/locale_controller.dart';
 import 'package:msg_gestion/data/repository_locator.dart';
 import 'package:msg_gestion/data/token_storage.dart';
 import 'package:msg_gestion/main.dart';
@@ -10,6 +11,11 @@ import 'fakes.dart';
 
 void main() {
   late FakeAuthRepository auth;
+
+  setUp(() {
+    // A fresh, unsaved choice per test: follow the (test) phone language.
+    LocaleController.debugSetInstance(LocaleController());
+  });
 
   Future<void> pumpLogin(WidgetTester tester, {List<String> tabs = const ['accueil', 'calendrier', 'annonces']}) async {
     tester.platformDispatcher.localesTestValue = const [Locale('fr', 'CM')];
@@ -40,7 +46,7 @@ void main() {
   testWidgets('unknown number shows the server message, stays on the screen', (tester) async {
     await pumpLogin(tester);
     await enterPhone(tester, '699 99 99 99');
-    expect(find.text('Ce numéro n’est pas enregistré.'), findsOneWidget);
+    expect(find.textContaining('Ce numéro n’est pas enregistré.'), findsOneWidget);
     expect(find.text('Votre code PIN'), findsNothing);
   });
 
@@ -102,6 +108,22 @@ void main() {
     await tester.tap(find.byKey(const Key('logout')));
     await tester.pumpAndSettle();
     expect(auth.logouts, 1);
+    expect(find.text('Bienvenue'), findsOneWidget);
+  });
+
+  testWidgets('the in-app switch changes the language on the spot', (tester) async {
+    await pumpLogin(tester);
+    expect(find.text('Bienvenue'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('lang-en')));
+    await tester.pumpAndSettle();
+    expect(find.text('Welcome'), findsOneWidget);
+    await enterPhone(tester, '677452108');
+    await typePin(tester, '0000');
+    expect(find.text('Wrong PIN. 2 attempts left.'), findsOneWidget);
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('lang-fr')));
+    await tester.pumpAndSettle();
     expect(find.text('Bienvenue'), findsOneWidget);
   });
 

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'auth_session.dart';
+import 'locale_controller.dart';
 
 /// Set at build time, never at runtime:
 /// `flutter build apk --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api`
@@ -30,6 +31,9 @@ class ApiException implements Exception {
   }
 
   String? get detail => json?['detail'] as String?;
+
+  /// Stable error code (e.g. `wrong_pin`) the app words in the chosen language.
+  String? get code => json?['code'] as String?;
 
   @override
   String toString() => 'ApiException($statusCode): $body';
@@ -63,7 +67,11 @@ class ApiClient {
       _send('POST', _uri(path), body: body, authenticated: authenticated);
 
   Future<dynamic> _send(String method, Uri uri, {Object? body, bool authenticated = true, bool isRetry = false}) async {
-    final headers = <String, String>{'Content-Type': 'application/json', 'Accept': 'application/json'};
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Accept-Language': LocaleController.instance.languageCode,
+    };
     final access = authenticated ? authSession.accessToken : null;
     if (access != null) headers['Authorization'] = 'Bearer $access';
 

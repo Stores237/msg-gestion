@@ -129,4 +129,76 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noRole => 'No active role';
+
+  @override
+  String get errorUnknownMember =>
+      'This number isn’t registered. The general secretary registers you at the Saturday meeting.';
+
+  @override
+  String errorWrongPin(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Wrong PIN. $n attempts left.',
+      one: 'Wrong PIN. 1 attempt left.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String errorLocked(int minutes) {
+    return 'Account locked after too many attempts. Try again in $minutes min.';
+  }
+
+  @override
+  String get errorNoPin =>
+      'This account has no PIN yet. Ask the general secretary to set one.';
+
+  @override
+  String get errorForbidden => 'Your role doesn’t allow this action.';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get languageFrench => 'Français';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get roleSuperAdmin => 'Super admin';
+
+  @override
+  String get rolePresident => 'President';
+
+  @override
+  String get roleSecretaryGeneral => 'General secretary';
+
+  @override
+  String get roleTreasurer => 'Treasurer';
+
+  @override
+  String get roleAuditor => 'Auditor';
+
+  @override
+  String get roleHeadCensor => 'Head censor';
+
+  @override
+  String get roleTrainer => 'Trainer';
+
+  @override
+  String get roleAdviser => 'Adviser';
+
+  @override
+  String get roleGroupLeader => 'Group leader';
+
+  @override
+  String get roleCensorOfTheDay => 'Censor of the day';
+
+  @override
+  String get roleMember => 'Member';
+
+  @override
+  String get roleGuard => 'Guard';
 }

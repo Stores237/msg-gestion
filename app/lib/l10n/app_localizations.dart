@@ -313,6 +313,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Aucun rôle actif'**
   String get noRole;
+
+  /// No description provided for @errorUnknownMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.'**
+  String get errorUnknownMember;
+
+  /// No description provided for @errorWrongPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}'**
+  String errorWrongPin(int n);
+
+  /// No description provided for @errorLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte bloqué après trop d’erreurs. Réessayez dans {minutes} min.'**
+  String errorLocked(int minutes);
+
+  /// No description provided for @errorNoPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.'**
+  String get errorNoPin;
+
+  /// No description provided for @errorForbidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre rôle ne donne pas accès à cette action.'**
+  String get errorForbidden;
+
+  /// No description provided for @language.
+  ///
+  /// In fr, this message translates to:
+  /// **'Langue'**
+  String get language;
+
+  /// No description provided for @languageFrench.
+  ///
+  /// In fr, this message translates to:
+  /// **'Français'**
+  String get languageFrench;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In fr, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @roleSuperAdmin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Super admin'**
+  String get roleSuperAdmin;
+
+  /// No description provided for @rolePresident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Président'**
+  String get rolePresident;
+
+  /// No description provided for @roleSecretaryGeneral.
+  ///
+  /// In fr, this message translates to:
+  /// **'Secrétaire général'**
+  String get roleSecretaryGeneral;
+
+  /// No description provided for @roleTreasurer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trésorier'**
+  String get roleTreasurer;
+
+  /// No description provided for @roleAuditor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commissaire aux comptes'**
+  String get roleAuditor;
+
+  /// No description provided for @roleHeadCensor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Censeur général'**
+  String get roleHeadCensor;
+
+  /// No description provided for @roleTrainer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Formateur'**
+  String get roleTrainer;
+
+  /// No description provided for @roleAdviser.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseiller'**
+  String get roleAdviser;
+
+  /// No description provided for @roleGroupLeader.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chef de groupe'**
+  String get roleGroupLeader;
+
+  /// No description provided for @roleCensorOfTheDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Censeur du jour'**
+  String get roleCensorOfTheDay;
+
+  /// No description provided for @roleMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre'**
+  String get roleMember;
+
+  /// No description provided for @roleGuard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde'**
+  String get roleGuard;
 }
 
 class _AppLocalizationsDelegate

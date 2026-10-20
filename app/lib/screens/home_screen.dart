@@ -4,6 +4,8 @@ import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
+import '../widgets/labels.dart';
+import '../widgets/language_switch.dart';
 import '../widgets/msg_logo.dart';
 import 'login_phone_screen.dart';
 
@@ -25,8 +27,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.msg;
-    final main = me.roles.where((r) => r.slug != 'membre').map((r) => r.name).toList();
-    final sub = [main.isEmpty ? 'Garde' : main.first, if (me.age != null && me.age! < 18) l.ageYears(me.age!)].join(' · ');
+    final main = me.roles.where((r) => r.slug != 'membre').map((r) => roleLabel(l, r.slug, r.name)).toList();
+    final sub = [main.isEmpty ? l.roleGuard : main.first, if (me.age != null && me.age! < 18) l.ageYears(me.age!)].join(' · ');
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
@@ -58,13 +60,18 @@ class HomeScreen extends StatelessWidget {
                 constraints: const BoxConstraints(minHeight: 56),
                 decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: c.borderSubtle))),
                 child: Row(children: [
-                  Expanded(child: Text(r.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+                  Expanded(child: Text(roleLabel(l, r.slug, r.name), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
                   if (r.endsOn != null)
                     Text(MaterialLocalizations.of(context).formatShortDate(r.endsOn!), style: TextStyle(fontSize: 13, color: c.textSecondary)),
                 ]),
               ),
           ]),
         ),
+        const SizedBox(height: 24),
+        Row(children: [
+          Expanded(child: Text(l.language, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
+          const LanguageSwitch(),
+        ]),
         const SizedBox(height: 24),
         OutlinedButton.icon(
           key: const Key('logout'),

@@ -97,11 +97,12 @@ def test_pin_login_returns_tokens(api):
 def test_three_wrong_pins_lock_the_account(api):
     user = UserFactory(phone="+237677452108", pin="4821")
     first, second = _login(api, "0000"), _login(api, "0000")
-    assert (first.status_code, first.json()["attempts_left"]) == (401, 2)
+    assert (first.status_code, first.json()["attempts_left"], first.json()["code"]) == (401, 2, "wrong_pin")
     assert (second.status_code, second.json()["attempts_left"]) == (401, 1)
     assert "1 essai." in second.json()["detail"]
     third = _login(api, "0000")
     assert third.status_code == 423
+    assert third.json()["code"] == "locked" and third.json()["minutes"] == 15
     # Locked means locked: even the right PIN is refused now.
     assert _login(api, "4821").status_code == 423
     user.refresh_from_db()

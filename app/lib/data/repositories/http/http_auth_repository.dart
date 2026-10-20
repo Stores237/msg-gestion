@@ -11,7 +11,7 @@ class HttpAuthRepository implements AuthRepository {
       final data = await _api.post('/auth/phone/', body: {'phone': phone}, authenticated: false) as Map<String, dynamic>;
       return PhoneLookup(phone: phone, firstName: data['first_name'] as String, hasPin: data['has_pin'] as bool);
     } on ApiException catch (e) {
-      if (e.statusCode == 404) throw UnknownMember(e.detail ?? '');
+      if (e.statusCode == 404) throw const UnknownMember();
       rethrow;
     }
   }
@@ -24,13 +24,13 @@ class HttpAuthRepository implements AuthRepository {
     } on ApiException catch (e) {
       switch (e.statusCode) {
         case 401:
-          throw WrongPin(e.detail ?? '', (e.json?['attempts_left'] as num?)?.toInt() ?? 0);
+          throw WrongPin((e.json?['attempts_left'] as num?)?.toInt() ?? 0);
         case 423:
-          throw AccountLocked(e.detail ?? '');
+          throw AccountLocked((e.json?['minutes'] as num?)?.toInt() ?? 15);
         case 404:
-          throw UnknownMember(e.detail ?? '');
+          throw const UnknownMember();
         case 409:
-          throw NoPinSet(e.detail ?? '');
+          throw const NoPinSet();
       }
       rethrow;
     }

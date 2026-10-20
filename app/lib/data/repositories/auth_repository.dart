@@ -6,27 +6,28 @@ class PhoneLookup {
   final bool hasPin;
 }
 
-/// Why a PIN was refused, with the server's own message.
+/// Why a login was refused. Carries numbers, not sentences: screens word
+/// it in the member's language (see widgets/errors.dart).
 sealed class PinFailure implements Exception {
-  const PinFailure(this.message);
-  final String message;
+  const PinFailure();
 }
 
 class WrongPin extends PinFailure {
-  const WrongPin(super.message, this.attemptsLeft);
+  const WrongPin(this.attemptsLeft);
   final int attemptsLeft;
 }
 
 class AccountLocked extends PinFailure {
-  const AccountLocked(super.message);
+  const AccountLocked(this.minutes);
+  final int minutes;
 }
 
 class UnknownMember extends PinFailure {
-  const UnknownMember(super.message);
+  const UnknownMember();
 }
 
 class NoPinSet extends PinFailure {
-  const NoPinSet(super.message);
+  const NoPinSet();
 }
 
 abstract class AuthRepository {

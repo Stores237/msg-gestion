@@ -13,6 +13,8 @@ from .models import User
 from .serializers import LogoutSerializer, MeSerializer, PhoneLookupSerializer, PinLoginSerializer
 from .services import check_pin_login
 
+# Every error carries a stable `code` (+ numbers) so the app can word it in
+# the member's chosen language (FR/EN); `detail` is the French fallback.
 # One message for "no such number" and "account disabled" so the lookup
 # can't be used to tell a suspended member from a stranger.
 UNKNOWN_PHONE = "Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi."
@@ -40,7 +42,7 @@ class PhoneLookupView(APIView):
         s.is_valid(raise_exception=True)
         user = User.objects.filter(phone=s.validated_data["phone"]).first()
         if not _login_allowed(user):
-            return Response({"detail": UNKNOWN_PHONE}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
         return Response({"first_name": user.first_name, "has_pin": user.has_pin})
 
 
@@ -55,21 +57,24 @@ class PinLoginView(APIView):
         s.is_valid(raise_exception=True)
         user = User.objects.filter(phone=s.validated_data["phone"]).first()
         if not _login_allowed(user):
-            return Response({"detail": UNKNOWN_PHONE}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
         if not user.has_pin:
-            return Response({"detail": "Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser."}, status=status.HTTP_409_CONFLICT)
+            return Response(
+                {"detail": "Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.", "code": "no_pin"},
+                status=status.HTTP_409_CONFLICT,
+            )
 
         result = check_pin_login(user, s.validated_data["pin"], request=request)
         if result.locked_until is not None and not result.ok:
             minutes = max(1, int((result.locked_until - timezone.now()).total_seconds() // 60) + 1)
             return Response(
-                {"detail": f"Compte bloqué après trop d’erreurs. Réessayez dans {minutes} min.", "locked_until": result.locked_until},
+                {"detail": f"Compte bloqué après trop d’erreurs. Réessayez dans {minutes} min.", "code": "locked", "minutes": minutes, "locked_until": result.locked_until},
                 status=status.HTTP_423_LOCKED,
             )
         if not result.ok:
             left = result.attempts_left
             return Response(
-                {"detail": f"Code incorrect. Il vous reste {left} essai{'s' if left > 1 else ''}.", "attempts_left": left},
+                {"detail": f"Code incorrect. Il vous reste {left} essai{'s' if left > 1 else ''}.", "code": "wrong_pin", "attempts_left": left},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 

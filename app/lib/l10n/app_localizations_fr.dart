@@ -130,4 +130,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noRole => 'Aucun rôle actif';
+
+  @override
+  String get errorUnknownMember =>
+      'Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.';
+
+  @override
+  String errorWrongPin(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Code incorrect. Il vous reste $n essais.',
+      one: 'Code incorrect. Il vous reste 1 essai.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String errorLocked(int minutes) {
+    return 'Compte bloqué après trop d’erreurs. Réessayez dans $minutes min.';
+  }
+
+  @override
+  String get errorNoPin =>
+      'Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.';
+
+  @override
+  String get errorForbidden => 'Votre rôle ne donne pas accès à cette action.';
+
+  @override
+  String get language => 'Langue';
+
+  @override
+  String get languageFrench => 'Français';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get roleSuperAdmin => 'Super admin';
+
+  @override
+  String get rolePresident => 'Président';
+
+  @override
+  String get roleSecretaryGeneral => 'Secrétaire général';
+
+  @override
+  String get roleTreasurer => 'Trésorier';
+
+  @override
+  String get roleAuditor => 'Commissaire aux comptes';
+
+  @override
+  String get roleHeadCensor => 'Censeur général';
+
+  @override
+  String get roleTrainer => 'Formateur';
+
+  @override
+  String get roleAdviser => 'Conseiller';
+
+  @override
+  String get roleGroupLeader => 'Chef de groupe';
+
+  @override
+  String get roleCensorOfTheDay => 'Censeur du jour';
+
+  @override
+  String get roleMember => 'Membre';
+
+  @override
+  String get roleGuard => 'Garde';
 }

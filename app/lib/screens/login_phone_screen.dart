@@ -6,6 +6,7 @@ import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/errors.dart';
+import '../widgets/language_switch.dart';
 import '../widgets/msg_logo.dart';
 import '../widgets/notice.dart';
 import 'login_pin_screen.dart';
@@ -51,7 +52,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
       if (!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPinScreen(lookup: lookup)));
     } on UnknownMember catch (e) {
-      setState(() => _error = e.message.isEmpty ? l.noAccountNotice : e.message);
+      setState(() => _error = describeError(context, e));
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
     } finally {
@@ -68,7 +69,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
           children: [
-            const Align(alignment: Alignment.centerLeft, child: MsgLogo(size: 64)),
+            const Row(children: [MsgLogo(size: 64), Spacer(), LanguageSwitch()]),
             const SizedBox(height: 24),
             Text(l.welcome, style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 26)),
             const SizedBox(height: 8),

@@ -26,7 +26,7 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<PhoneLookup> lookupPhone(String phone) async {
     if (phone.replaceAll(' ', '') != '677452108') {
-      throw const UnknownMember('Ce numéro n’est pas enregistré.');
+      throw const UnknownMember();
     }
     return PhoneLookup(phone: phone, firstName: firstName, hasPin: true);
   }
@@ -35,8 +35,8 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> loginWithPin({required String phone, required String pin}) async {
     if (pin == this.pin) return;
     attemptsLeft -= 1;
-    if (attemptsLeft == 0) throw const AccountLocked('Compte bloqué après trop d’erreurs. Réessayez dans 15 min.');
-    throw WrongPin('Code incorrect. Il vous reste $attemptsLeft essai${attemptsLeft > 1 ? 's' : ''}.', attemptsLeft);
+    if (attemptsLeft == 0) throw const AccountLocked(15);
+    throw WrongPin(attemptsLeft);
   }
 
   @override

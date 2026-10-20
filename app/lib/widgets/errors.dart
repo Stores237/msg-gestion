@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
+import '../data/repositories/auth_repository.dart';
 import '../l10n/app_localizations.dart';
 
-/// Turns any failure into a sentence a member can act on. A tap that fails
-/// must never look like nothing happened (playbook §8).
+/// Turns any failure into a sentence in the member's language. A tap that
+/// fails must never look like nothing happened (playbook §8).
 String describeError(BuildContext context, Object error) {
   final l = AppLocalizations.of(context);
-  if (error is NetworkException) return l.networkError;
-  if (error is ApiException) return error.detail ?? l.serverError;
-  return l.serverError;
+  return switch (error) {
+    WrongPin(:final attemptsLeft) => l.errorWrongPin(attemptsLeft),
+    AccountLocked(:final minutes) => l.errorLocked(minutes),
+    UnknownMember() => l.errorUnknownMember,
+    NoPinSet() => l.errorNoPin,
+    NetworkException() => l.networkError,
+    ApiException(statusCode: 403) => l.errorForbidden,
+    // Server-side validation messages are written for people; show them
+    // when there is no code to translate.
+    ApiException(:final detail?) => detail,
+    _ => l.serverError,
+  };
 }
 
 void showErrorSnack(BuildContext context, Object error) {

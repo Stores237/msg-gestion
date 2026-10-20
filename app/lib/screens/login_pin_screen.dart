@@ -57,11 +57,11 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => ShellScreen(me: me)), (_) => false);
     } on AccountLocked catch (e) {
       setState(() {
-        _error = e.message;
+        _error = describeError(context, e);
         _locked = true;
       });
     } on PinFailure catch (e) {
-      setState(() => _error = e.message);
+      setState(() => _error = describeError(context, e));
     } catch (e) {
       // Network or server failure: not the member's fault, keep nothing.
       setState(() => _pin = '');

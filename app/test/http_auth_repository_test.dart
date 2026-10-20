@@ -20,12 +20,15 @@ void main() {
     final repo = repoReturning(401, {'detail': 'Code incorrect. Il vous reste 2 essais.', 'attempts_left': 2});
     await expectLater(
       repo.loginWithPin(phone: '677452108', pin: '0000'),
-      throwsA(isA<WrongPin>().having((e) => e.attemptsLeft, 'attemptsLeft', 2).having((e) => e.message, 'message', contains('2 essais'))),
+      throwsA(isA<WrongPin>().having((e) => e.attemptsLeft, 'attemptsLeft', 2)),
     );
   });
 
   test('423 becomes AccountLocked, 404 UnknownMember, 409 NoPinSet', () async {
-    await expectLater(repoReturning(423, {'detail': 'bloqué'}).loginWithPin(phone: 'x', pin: '1'), throwsA(isA<AccountLocked>()));
+    await expectLater(
+      repoReturning(423, {'detail': 'bloqué', 'code': 'locked', 'minutes': 12}).loginWithPin(phone: 'x', pin: '1'),
+      throwsA(isA<AccountLocked>().having((e) => e.minutes, 'minutes', 12)),
+    );
     await expectLater(repoReturning(404, {'detail': 'inconnu'}).loginWithPin(phone: 'x', pin: '1'), throwsA(isA<UnknownMember>()));
     await expectLater(repoReturning(409, {'detail': 'pas de PIN'}).loginWithPin(phone: 'x', pin: '1'), throwsA(isA<NoPinSet>()));
   });

@@ -14,7 +14,13 @@
   "noAccountNotice": "Pas encore de compte ? Le secrétaire général vous inscrit lors de l’assise du samedi.",
   "pinTitle": "Votre code PIN",
   "pinGreeting": "Bonjour {firstName}, entrez vos 4 chiffres.",
-  "@pinGreeting": {"placeholders": {"firstName": {"type": "String"}}},
+  "@pinGreeting": {
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
   "pinForgot": "Code oublié ?",
   "pinForgotHelp": "Demandez au secrétaire général de réinitialiser votre code lors de l’assise.",
   "keypadFingerprint": "Empreinte",
@@ -24,7 +30,13 @@
   "serverError": "Le serveur ne répond pas correctement. Réessayez dans un instant.",
   "retry": "Réessayer",
   "helloName": "Bonjour {firstName}",
-  "@helloName": {"placeholders": {"firstName": {"type": "String"}}},
+  "@helloName": {
+    "placeholders": {
+      "firstName": {
+        "type": "String"
+      }
+    }
+  },
   "notifications": "Notifications",
   "tabHome": "Accueil",
   "tabMembers": "Membres",
@@ -36,8 +48,54 @@
   "myRoles": "Mes rôles",
   "logout": "Se déconnecter",
   "syncOk": "Synchronisé · dernière synchronisation {time}",
-  "@syncOk": {"placeholders": {"time": {"type": "String"}}},
+  "@syncOk": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "ageYears": "{age} ans",
-  "@ageYears": {"placeholders": {"age": {"type": "int"}}},
-  "noRole": "Aucun rôle actif"
+  "@ageYears": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "noRole": "Aucun rôle actif",
+  "errorUnknownMember": "Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.",
+  "errorWrongPin": "{n, plural, =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}",
+  "@errorWrongPin": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "errorLocked": "Compte bloqué après trop d’erreurs. Réessayez dans {minutes} min.",
+  "@errorLocked": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "errorNoPin": "Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.",
+  "errorForbidden": "Votre rôle ne donne pas accès à cette action.",
+  "language": "Langue",
+  "languageFrench": "Français",
+  "languageEnglish": "English",
+  "roleSuperAdmin": "Super admin",
+  "rolePresident": "Président",
+  "roleSecretaryGeneral": "Secrétaire général",
+  "roleTreasurer": "Trésorier",
+  "roleAuditor": "Commissaire aux comptes",
+  "roleHeadCensor": "Censeur général",
+  "roleTrainer": "Formateur",
+  "roleAdviser": "Conseiller",
+  "roleGroupLeader": "Chef de groupe",
+  "roleCensorOfTheDay": "Censeur du jour",
+  "roleMember": "Membre",
+  "roleGuard": "Garde"
 }

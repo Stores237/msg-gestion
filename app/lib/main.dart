@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'data/locale_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await LocaleController.instance.load();
   runApp(const MsgApp());
 }
 
@@ -18,12 +20,16 @@ class MsgApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ListenableBuilder(
+      listenable: LocaleController.instance,
+      builder: (context, _) => MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),
-      // French unless the phone is set to a language we also ship.
+      // The member's choice (LocaleController); otherwise French unless the
+      // phone is set to a language we also ship.
+      locale: LocaleController.instance.locale,
       localeResolutionCallback: (device, supported) =>
           supported.firstWhere((l) => l.languageCode == device?.languageCode, orElse: () => const Locale('fr')),
       supportedLocales: AppLocalizations.supportedLocales,
@@ -34,6 +40,7 @@ class MsgApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       home: home ?? const SplashScreen(),
+      ),
     );
   }
 }
