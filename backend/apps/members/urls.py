@@ -9,4 +9,5 @@ urlpatterns = [
     path("<int:pk>/role-requests/", views.RoleRequestView.as_view(), name="member-role-request"),
     path("<int:pk>/", views.MemberDetailView.as_view(), name="member-detail"),
     path("<int:pk>/reset-pin/", views.ResetPinView.as_view(), name="member-reset-pin"),
+    path("<int:pk>/photo/", views.PhotoView.as_view(), name="member-photo"),
 ]

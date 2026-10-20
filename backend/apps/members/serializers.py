@@ -27,10 +27,18 @@ class MemberListSerializer(serializers.ModelSerializer):
     age = serializers.IntegerField(read_only=True)
     is_minor = serializers.BooleanField(read_only=True)
     joined_year = serializers.SerializerMethodField()
+    photo = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name", "full_name", "status", "is_diaspora", "city", "age", "is_minor", "joined_year", "roles"]
+        fields = ["id", "last_name", "first_name", "full_name", "status", "is_diaspora", "city", "age", "is_minor", "joined_year", "roles", "photo"]
+
+    def get_photo(self, user) -> str | None:
+        if not user.photo:
+            return None
+        url = user.photo.url  # signed on Supabase Storage
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request and url.startswith("/") else url
 
     def get_roles(self, user) -> list[dict]:
         # The implicit "membre" role says nothing in a list of members.

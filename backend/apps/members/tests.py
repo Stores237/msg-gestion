@@ -127,3 +127,18 @@ def test_treasurer_cannot_register_members():
     api, _ = client_for("tresorier")
     r = api.post("/api/members/", {"last_name": "N", "first_name": "P", "phone": "674583902"}, format="json")
     assert r.status_code == 403
+
+
+def test_photo_upload_checked_and_listed():
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    api, _ = client_for("secretaire-general")
+    m = UserFactory()
+    png = SimpleUploadedFile("p.png", b"\x89PNG\r\n\x1a\n" + b"0" * 32, content_type="image/png")
+    r = api.post(f"/api/members/{m.id}/photo/", {"photo": png}, format="multipart")
+    assert r.status_code == 200 and r.json()["photo"].startswith("http")
+    assert api.get(f"/api/members/{m.id}/").json()["photo"]
+    pdf = SimpleUploadedFile("p.jpg", b"%PDF-1.4", content_type="image/jpeg")
+    assert api.post(f"/api/members/{m.id}/photo/", {"photo": pdf}, format="multipart").json()["code"] == "file_type"
+    member_api, _ = client_for("tresorier")
+    assert member_api.post(f"/api/members/{m.id}/photo/", {"photo": png}, format="multipart").status_code == 403

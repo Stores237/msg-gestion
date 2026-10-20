@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -60,7 +61,7 @@ class MemberListView(APIView):
             qs = qs.filter(status=st)
         if request.query_params.get("diaspora") in ("1", "true"):
             qs = qs.filter(is_diaspora=True)
-        data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate()}).data
+        data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate(), "request": request}).data
         return Response({"counts": counts, "results": data})
 
     @extend_schema(request=MemberCreateSerializer, responses=MemberDetailSerializer)
@@ -88,7 +89,7 @@ class MemberListView(APIView):
         notify([u for u in bureau if u.pk != request.user.pk], "member", "Nouveau membre",
                f"{user.full_name} a rejoint le mouvement", {"type": "member", "id": user.pk})
         user = _members().get(pk=user.pk)
-        body = dict(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user}).data)
+        body = dict(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user, "request": request}).data)
         # Shown once to whoever registered the member, who passes it on in
         # person. Replaced by an SMS once Twilio is set up (TODOS.md).
         body["temporary_pin"] = pin
@@ -101,7 +102,7 @@ class MemberDetailView(APIView):
     @extend_schema(responses=MemberDetailSerializer)
     def get(self, request, pk):
         user = get_object_or_404(_members(), pk=pk)
-        return Response(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user}).data)
+        return Response(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user, "request": request}).data)
 
 
 class BureauView(APIView):
@@ -119,7 +120,7 @@ class BureauView(APIView):
             .order_by("role__sort_order", "user__last_name")
         )
         data = [{"member": a.user, "role": a.role, "ends_on": a.ends_on} for a in rows]
-        return Response(BureauEntrySerializer(data, many=True, context={"today": timezone.localdate()}).data)
+        return Response(BureauEntrySerializer(data, many=True, context={"today": timezone.localdate(), "request": request}).data)
 
 
 class ResetPinView(APIView):
@@ -163,3 +164,34 @@ class RequestableRolesView(APIView):
     def get(self, request):
         return Response([{"slug": r.slug, "name": r.name, "kind": r.kind}
                          for r in Role.objects.filter(kind__in=REQUESTABLE_KINDS, is_archived=False).exclude(slug="membre")])
+
+
+class PhotoView(APIView):
+    """POST multipart `photo` (JPEG/PNG ≤ 5 MB) — design: "Ajouter une photo"."""
+
+    permission_classes = [require("members.profile", "change")]
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, pk):
+        from apps.announcements.files import sniff
+
+        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        upload = request.FILES.get("photo")
+        if upload is None:
+            return Response({"detail": "Aucune photo.", "code": "no_file"}, status=400)
+        if upload.size > 5 * 1024 * 1024:
+            return Response({"detail": "Photo trop lourde (5 Mo maximum).", "code": "file_too_large"}, status=400)
+        if sniff(upload) not in ("image/jpeg", "image/png"):
+            return Response({"detail": "JPEG ou PNG uniquement.", "code": "file_type"}, status=400)
+        if member.photo:
+            member.photo.delete(save=False)
+        member.photo.save(f"{member.pk}-{upload.name.rsplit('/', 1)[-1]}", upload, save=True)
+        audit.record("Photo modifiée", actor=request.user, obj=member, request=request)
+        return Response({"photo": _photo_url(request, member)})
+
+
+def _photo_url(request, member):
+    if not member.photo:
+        return None
+    url = member.photo.url
+    return request.build_absolute_uri(url) if url.startswith("/") else url
