@@ -80,3 +80,25 @@ String collectionKindLabel(AppLocalizations l, String k) => switch (k) {
   'medaille' => l.kindMedal,
   _ => l.kindOther,
 };
+
+String postLabel(AppLocalizations l, String post) => switch (post) {
+  'premiere_centrale' => l.postPremiereCentrale,
+  'deuxieme_centrale' => l.postDeuxiemeCentrale,
+  'controle' => l.postControle,
+  'petites_portes' => l.postPetitesPortes,
+  'mesanie' => l.postMesanie,
+  _ => post,
+};
+
+String sideLabel(AppLocalizations l, String side) =>
+    side == 'yapoma' ? l.sideYapoma : l.sidePariso;
+
+String dutyStatusLabel(AppLocalizations l, String s) => switch (s) {
+  'conf' => l.dutyConfirmed,
+  'swap' => l.dutySwap,
+  'repl' => l.dutyReplaced,
+  'absent' => l.dutyAbsent,
+  _ => l.dutyPending,
+};
+
+const serviceSizes = [2, 4, 6, 8, 10, 12];

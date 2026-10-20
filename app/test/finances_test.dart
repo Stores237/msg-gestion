@@ -143,7 +143,10 @@ void main() {
     await tester.scrollUntilVisible(find.byTooltip('Trimestre suivant'), -200);
     await tester.tap(find.byTooltip('Trimestre suivant'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.byTooltip('Trimestre précédent'), -200);
+    await tester.scrollUntilVisible(
+      find.byTooltip('Trimestre précédent'),
+      -200,
+    );
     await tester.tap(find.byTooltip('Trimestre précédent'));
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(

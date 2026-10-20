@@ -9,6 +9,8 @@ import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
 import '../../widgets/ui.dart';
+import '../planning/my_duties_view.dart';
+import '../planning/planning_week_view.dart';
 import 'event_detail_screen.dart';
 import 'event_form_screen.dart';
 
@@ -89,6 +91,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final canCreate = widget.me.can('calendar.events', 'create');
+    final planner = widget.me.can('calendar.planning', 'view');
+    final seg = Seg2(
+      options: [
+        l.monthView,
+        l.agendaView,
+        planner ? l.planningView : l.myDutiesView,
+      ],
+      selected: _view,
+      onChanged: (i) {
+        setState(() {
+          _view = i;
+          _events = null;
+        });
+        if (i < 2) _load();
+      },
+    );
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [seg, const SizedBox(height: 12)],
+    );
+    if (_view == 2) {
+      return Column(
+        children: [
+          ScreenHeader(title: l.tabCalendar),
+          Expanded(
+            child: planner
+                ? PlanningWeekView(me: widget.me, header: header)
+                : MyDutiesView(header: header),
+          ),
+        ],
+      );
+    }
     return Column(
       children: [
         ScreenHeader(
@@ -110,17 +144,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [
-                Seg2(
-                  options: [l.monthView, l.agendaView],
-                  selected: _view,
-                  onChanged: (i) {
-                    setState(() {
-                      _view = i;
-                      _events = null;
-                    });
-                    _load();
-                  },
-                ),
+                seg,
                 const SizedBox(height: 12),
                 if (_error != null && _events == null)
                   EmptyState(

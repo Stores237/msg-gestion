@@ -1014,4 +1014,308 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fine => 'Fine';
+
+  @override
+  String get planningView => 'Rota';
+
+  @override
+  String get myDutiesView => 'My duties';
+
+  @override
+  String weekOf(String start, String end) {
+    return 'Week of $start to $end';
+  }
+
+  @override
+  String get previousWeek => 'Previous week';
+
+  @override
+  String get nextWeek => 'Next week';
+
+  @override
+  String get postPremiereCentrale => 'First central';
+
+  @override
+  String get postDeuxiemeCentrale => 'Second central';
+
+  @override
+  String get postControle => 'Control';
+
+  @override
+  String get postPetitesPortes => 'Side doors';
+
+  @override
+  String get postMesanie => 'Mésanie';
+
+  @override
+  String get sidePariso => 'Pariso';
+
+  @override
+  String get sideYapoma => 'Yapoma';
+
+  @override
+  String get freeSlot => '+ Free';
+
+  @override
+  String chefLabel(String name) {
+    return 'Lead: $name';
+  }
+
+  @override
+  String filledOf(int filled, int size) {
+    return '$filled/$size';
+  }
+
+  @override
+  String alertsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n alerts',
+      one: '1 alert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String alertUnderstaffed(String title, int filled, int size) {
+    return '$title: $filled of $size';
+  }
+
+  @override
+  String alertDouble(String name) {
+    return '$name has two duties the same day';
+  }
+
+  @override
+  String alertOnLeave(String name) {
+    return '$name is on leave';
+  }
+
+  @override
+  String get publishAndNotify => 'Publish and notify';
+
+  @override
+  String get published => 'Published';
+
+  @override
+  String publishedDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Rota published · $n guards notified.',
+      one: 'Rota published · 1 guard notified.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noServicesWeek => 'No duties planned this week.';
+
+  @override
+  String get setServiceSize => 'Plan the duty';
+
+  @override
+  String get serviceSize => 'Number of guards';
+
+  @override
+  String get assignGroup => 'Assign a group';
+
+  @override
+  String groupAssigned(int assigned, int empty) {
+    return '$assigned slots filled · $empty still free';
+  }
+
+  @override
+  String groupMembersInfo(int n, int available) {
+    return '$n guards · $available available';
+  }
+
+  @override
+  String get leastSolicitedFirst => 'Least solicited first';
+
+  @override
+  String servicesThisMonth(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n duties this month',
+      one: '1 duty this month',
+      zero: 'No duty this month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagBusy => 'Already on duty that day';
+
+  @override
+  String get flagLeave => 'On leave';
+
+  @override
+  String get flagMany => 'Many duties already this month';
+
+  @override
+  String get assign => 'Assign';
+
+  @override
+  String get assignAnyway => 'Anyway';
+
+  @override
+  String get clearSlot => 'Free the slot';
+
+  @override
+  String get dutyPending => 'To confirm';
+
+  @override
+  String get dutyConfirmed => 'Confirmed';
+
+  @override
+  String get dutySwap => 'Swap requested';
+
+  @override
+  String get dutyReplaced => 'Replaced';
+
+  @override
+  String get dutyAbsent => 'Absence reported';
+
+  @override
+  String get conflict => 'Conflict';
+
+  @override
+  String get confirmDuty => 'Confirm';
+
+  @override
+  String get swapDuty => 'Swap';
+
+  @override
+  String get swapTitle => 'Swap my duty';
+
+  @override
+  String get withWhom => 'With whom?';
+
+  @override
+  String get reasonOptional => 'Reason (optional)';
+
+  @override
+  String get sendRequest => 'Send the request';
+
+  @override
+  String get declareAbsence => 'I can’t make it';
+
+  @override
+  String get requestSent => 'Request sent.';
+
+  @override
+  String get noDuties => 'No duties planned for you.';
+
+  @override
+  String get myNextDuty => 'My next duty';
+
+  @override
+  String get requests => 'Requests';
+
+  @override
+  String requestsPending(int n) {
+    return '$n pending';
+  }
+
+  @override
+  String swapForYou(String name) {
+    return '$name offers you their duty';
+  }
+
+  @override
+  String get accept => 'Accept';
+
+  @override
+  String get refuse => 'Decline';
+
+  @override
+  String get approve => 'Approve';
+
+  @override
+  String swapLine(String from, String to) {
+    return '$from ⇄ $to';
+  }
+
+  @override
+  String absenceLine(String name) {
+    return 'Absence · $name';
+  }
+
+  @override
+  String get chooseReplacement => 'Choose a replacement';
+
+  @override
+  String get noRequests => 'No pending requests.';
+
+  @override
+  String get albs => 'Alb washing';
+
+  @override
+  String albsWeek(String date) {
+    return 'Week of $date';
+  }
+
+  @override
+  String albsCount(int n) {
+    return '$n albs';
+  }
+
+  @override
+  String get albToWash => 'To wash';
+
+  @override
+  String get albWashed => 'Washed';
+
+  @override
+  String get albReturned => 'Returned';
+
+  @override
+  String get markWashed => 'Mark as washed';
+
+  @override
+  String get markReturned => 'Mark as returned';
+
+  @override
+  String get nextWeeks => 'Next weeks';
+
+  @override
+  String get fairness12 => 'Fairness · washes over 12 months';
+
+  @override
+  String get scheduleAlbs => 'Schedule a week';
+
+  @override
+  String responsible(String name) {
+    return 'Responsible: $name';
+  }
+
+  @override
+  String get noAlbs => 'No week scheduled.';
+
+  @override
+  String get group => 'Group';
+
+  @override
+  String get groups => 'Groups';
+
+  @override
+  String get planned => 'Planned';
+
+  @override
+  String get notificationsEmpty => 'No notifications.';
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get today => 'Today';
+
+  @override
+  String get thisWeek => 'This week';
+
+  @override
+  String get earlier => 'Earlier';
 }

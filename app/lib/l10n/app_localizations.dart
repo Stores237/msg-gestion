@@ -1849,6 +1849,504 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Amende'**
   String get fine;
+
+  /// No description provided for @planningView.
+  ///
+  /// In fr, this message translates to:
+  /// **'Planning'**
+  String get planningView;
+
+  /// No description provided for @myDutiesView.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes services'**
+  String get myDutiesView;
+
+  /// No description provided for @weekOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine du {start} au {end}'**
+  String weekOf(String start, String end);
+
+  /// No description provided for @previousWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine précédente'**
+  String get previousWeek;
+
+  /// No description provided for @nextWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine suivante'**
+  String get nextWeek;
+
+  /// No description provided for @postPremiereCentrale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Première centrale'**
+  String get postPremiereCentrale;
+
+  /// No description provided for @postDeuxiemeCentrale.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deuxième centrale'**
+  String get postDeuxiemeCentrale;
+
+  /// No description provided for @postControle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contrôle'**
+  String get postControle;
+
+  /// No description provided for @postPetitesPortes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites portes'**
+  String get postPetitesPortes;
+
+  /// No description provided for @postMesanie.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mésanie'**
+  String get postMesanie;
+
+  /// No description provided for @sidePariso.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pariso'**
+  String get sidePariso;
+
+  /// No description provided for @sideYapoma.
+  ///
+  /// In fr, this message translates to:
+  /// **'Yapoma'**
+  String get sideYapoma;
+
+  /// No description provided for @freeSlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'+ Libre'**
+  String get freeSlot;
+
+  /// No description provided for @chefLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chef : {name}'**
+  String chefLabel(String name);
+
+  /// No description provided for @filledOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{filled}/{size}'**
+  String filledOf(int filled, int size);
+
+  /// No description provided for @alertsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 alerte} other{{n} alertes}}'**
+  String alertsCount(int n);
+
+  /// No description provided for @alertUnderstaffed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} : {filled} sur {size}'**
+  String alertUnderstaffed(String title, int filled, int size);
+
+  /// No description provided for @alertDouble.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} a deux services le même jour'**
+  String alertDouble(String name);
+
+  /// No description provided for @alertOnLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est en congé'**
+  String alertOnLeave(String name);
+
+  /// No description provided for @publishAndNotify.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier et notifier'**
+  String get publishAndNotify;
+
+  /// No description provided for @published.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publié'**
+  String get published;
+
+  /// No description provided for @publishedDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}'**
+  String publishedDone(int n);
+
+  /// No description provided for @noServicesWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun service prévu cette semaine.'**
+  String get noServicesWeek;
+
+  /// No description provided for @setServiceSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévoir le service'**
+  String get setServiceSize;
+
+  /// No description provided for @serviceSize.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nombre de gardes'**
+  String get serviceSize;
+
+  /// No description provided for @assignGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affecter un groupe'**
+  String get assignGroup;
+
+  /// No description provided for @groupAssigned.
+  ///
+  /// In fr, this message translates to:
+  /// **'{assigned} postes remplis · {empty} encore libres'**
+  String groupAssigned(int assigned, int empty);
+
+  /// No description provided for @groupMembersInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} gardes · {available} disponibles'**
+  String groupMembersInfo(int n, int available);
+
+  /// No description provided for @leastSolicitedFirst.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les moins sollicités en premier'**
+  String get leastSolicitedFirst;
+
+  /// No description provided for @servicesThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =0{Aucun service ce mois} =1{1 service ce mois} other{{n} services ce mois}}'**
+  String servicesThisMonth(int n);
+
+  /// No description provided for @flagBusy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà de service ce jour-là'**
+  String get flagBusy;
+
+  /// No description provided for @flagLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'En congé'**
+  String get flagLeave;
+
+  /// No description provided for @flagMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà beaucoup de services ce mois'**
+  String get flagMany;
+
+  /// No description provided for @assign.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affecter'**
+  String get assign;
+
+  /// No description provided for @assignAnyway.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand même'**
+  String get assignAnyway;
+
+  /// No description provided for @clearSlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libérer le poste'**
+  String get clearSlot;
+
+  /// No description provided for @dutyPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'À confirmer'**
+  String get dutyPending;
+
+  /// No description provided for @dutyConfirmed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmé'**
+  String get dutyConfirmed;
+
+  /// No description provided for @dutySwap.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échange demandé'**
+  String get dutySwap;
+
+  /// No description provided for @dutyReplaced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplacé'**
+  String get dutyReplaced;
+
+  /// No description provided for @dutyAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Absence déclarée'**
+  String get dutyAbsent;
+
+  /// No description provided for @conflict.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conflit'**
+  String get conflict;
+
+  /// No description provided for @confirmDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get confirmDuty;
+
+  /// No description provided for @swapDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échanger'**
+  String get swapDuty;
+
+  /// No description provided for @swapTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échanger mon service'**
+  String get swapTitle;
+
+  /// No description provided for @withWhom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec qui ?'**
+  String get withWhom;
+
+  /// No description provided for @reasonOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Raison (facultatif)'**
+  String get reasonOptional;
+
+  /// No description provided for @sendRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get sendRequest;
+
+  /// No description provided for @declareAbsence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne pourrai pas venir'**
+  String get declareAbsence;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée.'**
+  String get requestSent;
+
+  /// No description provided for @noDuties.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun service prévu pour vous.'**
+  String get noDuties;
+
+  /// No description provided for @myNextDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon prochain service'**
+  String get myNextDuty;
+
+  /// No description provided for @requests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes'**
+  String get requests;
+
+  /// No description provided for @requestsPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} en attente'**
+  String requestsPending(int n);
+
+  /// No description provided for @swapForYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} vous propose son service'**
+  String swapForYou(String name);
+
+  /// No description provided for @accept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get accept;
+
+  /// No description provided for @refuse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get refuse;
+
+  /// No description provided for @approve.
+  ///
+  /// In fr, this message translates to:
+  /// **'Approuver'**
+  String get approve;
+
+  /// No description provided for @swapLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} ⇄ {to}'**
+  String swapLine(String from, String to);
+
+  /// No description provided for @absenceLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Absence · {name}'**
+  String absenceLine(String name);
+
+  /// No description provided for @chooseReplacement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un remplaçant'**
+  String get chooseReplacement;
+
+  /// No description provided for @noRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande en attente.'**
+  String get noRequests;
+
+  /// No description provided for @albs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lavage des aubes'**
+  String get albs;
+
+  /// No description provided for @albsWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Semaine du {date}'**
+  String albsWeek(String date);
+
+  /// No description provided for @albsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} aubes'**
+  String albsCount(int n);
+
+  /// No description provided for @albToWash.
+  ///
+  /// In fr, this message translates to:
+  /// **'À laver'**
+  String get albToWash;
+
+  /// No description provided for @albWashed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lavées'**
+  String get albWashed;
+
+  /// No description provided for @albReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rendues'**
+  String get albReturned;
+
+  /// No description provided for @markWashed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer « lavées »'**
+  String get markWashed;
+
+  /// No description provided for @markReturned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Marquer « rendues »'**
+  String get markReturned;
+
+  /// No description provided for @nextWeeks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochaines semaines'**
+  String get nextWeeks;
+
+  /// No description provided for @fairness12.
+  ///
+  /// In fr, this message translates to:
+  /// **'Équité · lavages sur 12 mois'**
+  String get fairness12;
+
+  /// No description provided for @scheduleAlbs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Programmer une semaine'**
+  String get scheduleAlbs;
+
+  /// No description provided for @responsible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Responsable : {name}'**
+  String responsible(String name);
+
+  /// No description provided for @noAlbs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune semaine programmée.'**
+  String get noAlbs;
+
+  /// No description provided for @group.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe'**
+  String get group;
+
+  /// No description provided for @groups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes'**
+  String get groups;
+
+  /// No description provided for @planned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévu'**
+  String get planned;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune notification.'**
+  String get notificationsEmpty;
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout lire'**
+  String get markAllRead;
+
+  /// No description provided for @today.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd’hui'**
+  String get today;
+
+  /// No description provided for @thisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette semaine'**
+  String get thisWeek;
+
+  /// No description provided for @earlier.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus ancien'**
+  String get earlier;
 }
 
 class _AppLocalizationsDelegate

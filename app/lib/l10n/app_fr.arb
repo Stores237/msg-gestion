@@ -619,5 +619,235 @@
       }
     }
   },
-  "fine": "Amende"
+  "fine": "Amende",
+  "planningView": "Planning",
+  "myDutiesView": "Mes services",
+  "weekOf": "Semaine du {start} au {end}",
+  "@weekOf": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "previousWeek": "Semaine précédente",
+  "nextWeek": "Semaine suivante",
+  "postPremiereCentrale": "Première centrale",
+  "postDeuxiemeCentrale": "Deuxième centrale",
+  "postControle": "Contrôle",
+  "postPetitesPortes": "Petites portes",
+  "postMesanie": "Mésanie",
+  "sidePariso": "Pariso",
+  "sideYapoma": "Yapoma",
+  "freeSlot": "+ Libre",
+  "chefLabel": "Chef : {name}",
+  "@chefLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "filledOf": "{filled}/{size}",
+  "@filledOf": {
+    "placeholders": {
+      "filled": {
+        "type": "int"
+      },
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "alertsCount": "{n, plural, =1{1 alerte} other{{n} alertes}}",
+  "@alertsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "alertUnderstaffed": "{title} : {filled} sur {size}",
+  "@alertUnderstaffed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "filled": {
+        "type": "int"
+      },
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "alertDouble": "{name} a deux services le même jour",
+  "@alertDouble": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "alertOnLeave": "{name} est en congé",
+  "@alertOnLeave": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "publishAndNotify": "Publier et notifier",
+  "published": "Publié",
+  "publishedDone": "{n, plural, =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}",
+  "@publishedDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "noServicesWeek": "Aucun service prévu cette semaine.",
+  "setServiceSize": "Prévoir le service",
+  "serviceSize": "Nombre de gardes",
+  "assignGroup": "Affecter un groupe",
+  "groupAssigned": "{assigned} postes remplis · {empty} encore libres",
+  "@groupAssigned": {
+    "placeholders": {
+      "assigned": {
+        "type": "int"
+      },
+      "empty": {
+        "type": "int"
+      }
+    }
+  },
+  "groupMembersInfo": "{n} gardes · {available} disponibles",
+  "@groupMembersInfo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "available": {
+        "type": "int"
+      }
+    }
+  },
+  "leastSolicitedFirst": "Les moins sollicités en premier",
+  "servicesThisMonth": "{n, plural, =0{Aucun service ce mois} =1{1 service ce mois} other{{n} services ce mois}}",
+  "@servicesThisMonth": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "flagBusy": "Déjà de service ce jour-là",
+  "flagLeave": "En congé",
+  "flagMany": "Déjà beaucoup de services ce mois",
+  "assign": "Affecter",
+  "assignAnyway": "Quand même",
+  "clearSlot": "Libérer le poste",
+  "dutyPending": "À confirmer",
+  "dutyConfirmed": "Confirmé",
+  "dutySwap": "Échange demandé",
+  "dutyReplaced": "Remplacé",
+  "dutyAbsent": "Absence déclarée",
+  "conflict": "Conflit",
+  "confirmDuty": "Confirmer",
+  "swapDuty": "Échanger",
+  "swapTitle": "Échanger mon service",
+  "withWhom": "Avec qui ?",
+  "reasonOptional": "Raison (facultatif)",
+  "sendRequest": "Envoyer la demande",
+  "declareAbsence": "Je ne pourrai pas venir",
+  "requestSent": "Demande envoyée.",
+  "noDuties": "Aucun service prévu pour vous.",
+  "myNextDuty": "Mon prochain service",
+  "requests": "Demandes",
+  "requestsPending": "{n} en attente",
+  "@requestsPending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "swapForYou": "{name} vous propose son service",
+  "@swapForYou": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "accept": "Accepter",
+  "refuse": "Refuser",
+  "approve": "Approuver",
+  "swapLine": "{from} ⇄ {to}",
+  "@swapLine": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "absenceLine": "Absence · {name}",
+  "@absenceLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseReplacement": "Choisir un remplaçant",
+  "noRequests": "Aucune demande en attente.",
+  "albs": "Lavage des aubes",
+  "albsWeek": "Semaine du {date}",
+  "@albsWeek": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "albsCount": "{n} aubes",
+  "@albsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "albToWash": "À laver",
+  "albWashed": "Lavées",
+  "albReturned": "Rendues",
+  "markWashed": "Marquer « lavées »",
+  "markReturned": "Marquer « rendues »",
+  "nextWeeks": "Prochaines semaines",
+  "fairness12": "Équité · lavages sur 12 mois",
+  "scheduleAlbs": "Programmer une semaine",
+  "responsible": "Responsable : {name}",
+  "@responsible": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noAlbs": "Aucune semaine programmée.",
+  "group": "Groupe",
+  "groups": "Groupes",
+  "planned": "Prévu",
+  "notificationsEmpty": "Aucune notification.",
+  "markAllRead": "Tout lire",
+  "today": "Aujourd’hui",
+  "thisWeek": "Cette semaine",
+  "earlier": "Plus ancien"
 }

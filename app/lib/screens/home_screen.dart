@@ -5,13 +5,16 @@ import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
 import '../models/finance.dart';
+import '../models/planning.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
 import '../widgets/labels.dart';
 import '../widgets/money.dart';
 import '../widgets/msg_logo.dart';
+import '../widgets/notification_bell.dart';
 import '../widgets/ui.dart';
 import 'account_screen.dart';
+import 'planning/my_duties_view.dart';
 import 'announcements/announcement_detail_screen.dart';
 import 'calendar/event_detail_screen.dart';
 
@@ -22,7 +25,9 @@ class _HomeData {
     this.unread = 0,
     this.dues,
     this.summary,
+    this.nextDuty,
   });
+  final DutyAssignment? nextDuty;
   final CalendarEvent? nextEvent;
   final Announcement? lastAnnouncement;
   final int unread;
@@ -59,6 +64,7 @@ class HomeScreen extends StatelessWidget {
         .where((e) => (e.endsAt ?? e.startsAt).isAfter(now))
         .toList();
     final dues = _orNull(repos.finances.mine());
+    final duties = _orNull(repos.planning.mine());
     final summary = me.can('finances.cashbook', 'view')
         ? _orNull(repos.finances.summary())
         : Future<FinanceSummary?>.value();
@@ -69,6 +75,7 @@ class HomeScreen extends StatelessWidget {
       unread: f.unread,
       dues: await dues,
       summary: await summary,
+      nextDuty: ((await duties) ?? const []).firstOrNull,
     );
   }
 
@@ -91,6 +98,7 @@ class HomeScreen extends StatelessWidget {
           subtitle: sub,
           leading: const MsgLogo(size: 40),
           actions: [
+            const NotificationBell(),
             Semantics(
               button: true,
               label: l.openAccount,
@@ -117,6 +125,12 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 children: [
+                  if (data.nextDuty != null) ...[
+                    SectionLabel(l.myNextDuty),
+                    const SizedBox(height: 8),
+                    DutyCard(duty: data.nextDuty!, onChanged: reload),
+                    const SizedBox(height: 24),
+                  ],
                   if (data.summary != null) ...[
                     _Stats(
                       summary: data.summary!,

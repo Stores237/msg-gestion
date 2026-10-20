@@ -6,10 +6,12 @@ import 'repositories/announcements_repository.dart';
 import 'repositories/auth_repository.dart';
 import 'repositories/events_repository.dart';
 import 'repositories/finances_repository.dart';
+import 'repositories/planning_repository.dart';
 import 'repositories/http/http_announcements_repository.dart';
 import 'repositories/http/http_auth_repository.dart';
 import 'repositories/http/http_events_repository.dart';
 import 'repositories/http/http_finances_repository.dart';
+import 'repositories/http/http_planning_repository.dart';
 import 'repositories/http/http_members_repository.dart';
 import 'repositories/http/http_profile_repository.dart';
 import 'repositories/members_repository.dart';
@@ -27,6 +29,8 @@ class RepositoryLocator {
     EventsRepository? events,
     AnnouncementsRepository? announcements,
     FinancesRepository? finances,
+    PlanningRepository? planning,
+    NotificationsRepository? notifications,
   }) : authSession = authSession ?? AuthSession.instance,
        apiClient =
            apiClient ??
@@ -38,6 +42,9 @@ class RepositoryLocator {
     this.announcements =
         announcements ?? HttpAnnouncementsRepository(this.apiClient);
     this.finances = finances ?? HttpFinancesRepository(this.apiClient);
+    this.planning = planning ?? HttpPlanningRepository(this.apiClient);
+    this.notifications =
+        notifications ?? HttpNotificationsRepository(this.apiClient);
   }
 
   static RepositoryLocator instance = RepositoryLocator();
@@ -54,4 +61,6 @@ class RepositoryLocator {
   late final EventsRepository events;
   late final AnnouncementsRepository announcements;
   late final FinancesRepository finances;
+  late final PlanningRepository planning;
+  late final NotificationsRepository notifications;
 }

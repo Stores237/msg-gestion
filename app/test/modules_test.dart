@@ -230,6 +230,11 @@ void main() {
     );
     expect(find.text('PROCHAIN RENDEZ-VOUS'), findsOneWidget);
     expect(find.text('Assise hebdomadaire'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Répétition des chants'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Répétition des chants'), findsOneWidget);
   });
 }

@@ -1017,4 +1017,308 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fine => 'Amende';
+
+  @override
+  String get planningView => 'Planning';
+
+  @override
+  String get myDutiesView => 'Mes services';
+
+  @override
+  String weekOf(String start, String end) {
+    return 'Semaine du $start au $end';
+  }
+
+  @override
+  String get previousWeek => 'Semaine précédente';
+
+  @override
+  String get nextWeek => 'Semaine suivante';
+
+  @override
+  String get postPremiereCentrale => 'Première centrale';
+
+  @override
+  String get postDeuxiemeCentrale => 'Deuxième centrale';
+
+  @override
+  String get postControle => 'Contrôle';
+
+  @override
+  String get postPetitesPortes => 'Petites portes';
+
+  @override
+  String get postMesanie => 'Mésanie';
+
+  @override
+  String get sidePariso => 'Pariso';
+
+  @override
+  String get sideYapoma => 'Yapoma';
+
+  @override
+  String get freeSlot => '+ Libre';
+
+  @override
+  String chefLabel(String name) {
+    return 'Chef : $name';
+  }
+
+  @override
+  String filledOf(int filled, int size) {
+    return '$filled/$size';
+  }
+
+  @override
+  String alertsCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n alertes',
+      one: '1 alerte',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String alertUnderstaffed(String title, int filled, int size) {
+    return '$title : $filled sur $size';
+  }
+
+  @override
+  String alertDouble(String name) {
+    return '$name a deux services le même jour';
+  }
+
+  @override
+  String alertOnLeave(String name) {
+    return '$name est en congé';
+  }
+
+  @override
+  String get publishAndNotify => 'Publier et notifier';
+
+  @override
+  String get published => 'Publié';
+
+  @override
+  String publishedDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Planning publié · $n gardes notifiés.',
+      one: 'Planning publié · 1 garde notifié.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noServicesWeek => 'Aucun service prévu cette semaine.';
+
+  @override
+  String get setServiceSize => 'Prévoir le service';
+
+  @override
+  String get serviceSize => 'Nombre de gardes';
+
+  @override
+  String get assignGroup => 'Affecter un groupe';
+
+  @override
+  String groupAssigned(int assigned, int empty) {
+    return '$assigned postes remplis · $empty encore libres';
+  }
+
+  @override
+  String groupMembersInfo(int n, int available) {
+    return '$n gardes · $available disponibles';
+  }
+
+  @override
+  String get leastSolicitedFirst => 'Les moins sollicités en premier';
+
+  @override
+  String servicesThisMonth(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n services ce mois',
+      one: '1 service ce mois',
+      zero: 'Aucun service ce mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get flagBusy => 'Déjà de service ce jour-là';
+
+  @override
+  String get flagLeave => 'En congé';
+
+  @override
+  String get flagMany => 'Déjà beaucoup de services ce mois';
+
+  @override
+  String get assign => 'Affecter';
+
+  @override
+  String get assignAnyway => 'Quand même';
+
+  @override
+  String get clearSlot => 'Libérer le poste';
+
+  @override
+  String get dutyPending => 'À confirmer';
+
+  @override
+  String get dutyConfirmed => 'Confirmé';
+
+  @override
+  String get dutySwap => 'Échange demandé';
+
+  @override
+  String get dutyReplaced => 'Remplacé';
+
+  @override
+  String get dutyAbsent => 'Absence déclarée';
+
+  @override
+  String get conflict => 'Conflit';
+
+  @override
+  String get confirmDuty => 'Confirmer';
+
+  @override
+  String get swapDuty => 'Échanger';
+
+  @override
+  String get swapTitle => 'Échanger mon service';
+
+  @override
+  String get withWhom => 'Avec qui ?';
+
+  @override
+  String get reasonOptional => 'Raison (facultatif)';
+
+  @override
+  String get sendRequest => 'Envoyer la demande';
+
+  @override
+  String get declareAbsence => 'Je ne pourrai pas venir';
+
+  @override
+  String get requestSent => 'Demande envoyée.';
+
+  @override
+  String get noDuties => 'Aucun service prévu pour vous.';
+
+  @override
+  String get myNextDuty => 'Mon prochain service';
+
+  @override
+  String get requests => 'Demandes';
+
+  @override
+  String requestsPending(int n) {
+    return '$n en attente';
+  }
+
+  @override
+  String swapForYou(String name) {
+    return '$name vous propose son service';
+  }
+
+  @override
+  String get accept => 'Accepter';
+
+  @override
+  String get refuse => 'Refuser';
+
+  @override
+  String get approve => 'Approuver';
+
+  @override
+  String swapLine(String from, String to) {
+    return '$from ⇄ $to';
+  }
+
+  @override
+  String absenceLine(String name) {
+    return 'Absence · $name';
+  }
+
+  @override
+  String get chooseReplacement => 'Choisir un remplaçant';
+
+  @override
+  String get noRequests => 'Aucune demande en attente.';
+
+  @override
+  String get albs => 'Lavage des aubes';
+
+  @override
+  String albsWeek(String date) {
+    return 'Semaine du $date';
+  }
+
+  @override
+  String albsCount(int n) {
+    return '$n aubes';
+  }
+
+  @override
+  String get albToWash => 'À laver';
+
+  @override
+  String get albWashed => 'Lavées';
+
+  @override
+  String get albReturned => 'Rendues';
+
+  @override
+  String get markWashed => 'Marquer « lavées »';
+
+  @override
+  String get markReturned => 'Marquer « rendues »';
+
+  @override
+  String get nextWeeks => 'Prochaines semaines';
+
+  @override
+  String get fairness12 => 'Équité · lavages sur 12 mois';
+
+  @override
+  String get scheduleAlbs => 'Programmer une semaine';
+
+  @override
+  String responsible(String name) {
+    return 'Responsable : $name';
+  }
+
+  @override
+  String get noAlbs => 'Aucune semaine programmée.';
+
+  @override
+  String get group => 'Groupe';
+
+  @override
+  String get groups => 'Groupes';
+
+  @override
+  String get planned => 'Prévu';
+
+  @override
+  String get notificationsEmpty => 'Aucune notification.';
+
+  @override
+  String get markAllRead => 'Tout lire';
+
+  @override
+  String get today => 'Aujourd’hui';
+
+  @override
+  String get thisWeek => 'Cette semaine';
+
+  @override
+  String get earlier => 'Plus ancien';
 }
