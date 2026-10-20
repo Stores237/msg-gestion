@@ -306,6 +306,7 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       authorName: 'Din Y.',
       createdAt: DateTime(2026, 10, 19),
       unread: true,
+      attachments: const [AttachmentInfo(id: 9, name: 'Programme.pdf', size: 245760, contentType: 'application/pdf', url: 'https://example.test/p.pdf')],
     ),
   ];
 
@@ -351,4 +352,22 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
 
   @override
   Future<List<ReadReceipt>> receipts(int id) async => const [];
+
+  final attached = <String>[];
+
+  @override
+  Future<AttachmentInfo> attach(
+    int announcementId, {
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    attached.add('$announcementId:$filename');
+    return AttachmentInfo(
+      id: attached.length,
+      name: filename,
+      size: bytes.length,
+      contentType: 'application/pdf',
+      url: 'https://example.test/f.pdf',
+    );
+  }
 }

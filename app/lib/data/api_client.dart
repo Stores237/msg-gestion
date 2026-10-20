@@ -85,6 +85,54 @@ class ApiClient {
 
   Future<dynamic> delete(String path) => _send('DELETE', _uri(path));
 
+  /// Multipart upload of one file field (attachments). Retries once after
+  /// a token refresh, like every other call.
+  Future<dynamic> postFile(
+    String path, {
+    required String field,
+    required List<int> bytes,
+    required String filename,
+    bool isRetry = false,
+  }) async {
+    final request = http.MultipartRequest('POST', _uri(path))
+      ..files.add(
+        http.MultipartFile.fromBytes(field, bytes, filename: filename),
+      );
+    final access = authSession.accessToken;
+    if (access != null) request.headers['Authorization'] = 'Bearer $access';
+    request.headers['Accept-Language'] = LocaleController.instance.languageCode;
+    final http.Response response;
+    try {
+      response = await http.Response.fromStream(
+        await _client.send(request).timeout(const Duration(seconds: 120)),
+      );
+    } on SocketException catch (e) {
+      throw NetworkException(e);
+    } on TimeoutException catch (e) {
+      throw NetworkException(e);
+    } on http.ClientException catch (e) {
+      throw NetworkException(e);
+    }
+    if (response.statusCode == 401 &&
+        !isRetry &&
+        authSession.refreshToken != null &&
+        await authSession.refreshAccessToken(this)) {
+      return postFile(
+        path,
+        field: field,
+        bytes: bytes,
+        filename: filename,
+        isRetry: true,
+      );
+    }
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response.body.isEmpty
+          ? null
+          : jsonDecode(utf8.decode(response.bodyBytes));
+    }
+    throw ApiException(response.statusCode, utf8.decode(response.bodyBytes));
+  }
+
   Future<dynamic> _send(
     String method,
     Uri uri, {

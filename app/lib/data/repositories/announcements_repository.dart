@@ -12,4 +12,11 @@ abstract class AnnouncementsRepository {
     bool pinned = false,
   });
   Future<List<ReadReceipt>> receipts(int id);
+
+  /// Upload a PDF/JPEG/PNG (≤ 10 MB) to an announcement you wrote.
+  Future<AttachmentInfo> attach(
+    int announcementId, {
+    required List<int> bytes,
+    required String filename,
+  });
 }

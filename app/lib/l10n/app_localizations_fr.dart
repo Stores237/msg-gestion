@@ -729,4 +729,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get confirm => 'Confirmer';
+
+  @override
+  String get attachFile => 'Joindre un fichier (PDF, photo)';
+
+  @override
+  String get attachHint => 'PDF, JPEG ou PNG · 10 Mo maximum';
+
+  @override
+  String get fileTooLarge => 'Fichier trop lourd (10 Mo maximum).';
+
+  @override
+  String get fileType => 'Seuls les PDF, JPEG et PNG sont acceptés.';
+
+  @override
+  String attachmentFailed(String name) {
+    return 'Annonce publiée, mais « $name » n’a pas pu être joint.';
+  }
+
+  @override
+  String get openFileFailed => 'Impossible d’ouvrir le fichier.';
+
+  @override
+  String get removeFile => 'Retirer';
+
+  @override
+  String sizeKb(int n) {
+    return '$n Ko';
+  }
+
+  @override
+  String sizeMb(String n) {
+    return '$n Mo';
+  }
 }

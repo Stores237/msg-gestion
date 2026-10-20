@@ -57,4 +57,19 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
         ),
     ];
   }
+
+  @override
+  Future<AttachmentInfo> attach(
+    int announcementId, {
+    required List<int> bytes,
+    required String filename,
+  }) async => AttachmentInfo.fromJson(
+    await _api.postFile(
+          '/announcements/$announcementId/attachments/',
+          field: 'file',
+          bytes: bytes,
+          filename: filename,
+        )
+        as Map<String, dynamic>,
+  );
 }

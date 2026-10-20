@@ -402,5 +402,35 @@
       }
     }
   },
-  "confirm": "Confirmer"
+  "confirm": "Confirmer",
+  "attachFile": "Joindre un fichier (PDF, photo)",
+  "attachHint": "PDF, JPEG ou PNG · 10 Mo maximum",
+  "fileTooLarge": "Fichier trop lourd (10 Mo maximum).",
+  "fileType": "Seuls les PDF, JPEG et PNG sont acceptés.",
+  "attachmentFailed": "Annonce publiée, mais « {name} » n’a pas pu être joint.",
+  "@attachmentFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "openFileFailed": "Impossible d’ouvrir le fichier.",
+  "removeFile": "Retirer",
+  "sizeKb": "{n} Ko",
+  "@sizeKb": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "sizeMb": "{n} Mo",
+  "@sizeMb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  }
 }

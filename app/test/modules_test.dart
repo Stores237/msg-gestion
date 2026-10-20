@@ -176,6 +176,8 @@ void main() {
       await tester.tap(find.byKey(const Key('tab-annonces')));
       await tester.pumpAndSettle();
       expect(find.text('Non lues 1'), findsOneWidget);
+      expect(find.text('Programme.pdf'), findsOneWidget);
+      expect(find.text('PDF · 240 Ko'), findsOneWidget);
       await tester.tap(find.text('Répétition des chants'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Retour'));

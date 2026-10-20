@@ -5,6 +5,7 @@ import '../models/announcement.dart';
 import '../models/event.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
+import 'attachments.dart';
 import 'dates.dart';
 import 'errors.dart';
 import 'labels.dart';
@@ -919,6 +920,8 @@ class AnnouncementCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                if (a.attachments.isNotEmpty)
+                  AttachmentList(items: a.attachments),
                 if (a.isConvocation && a.eventStartsAt != null) ...[
                   const SizedBox(height: 8),
                   Row(

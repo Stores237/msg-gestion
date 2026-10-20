@@ -33,3 +33,22 @@ class Read(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["announcement", "member"], name="one_read_per_member")]
+
+
+class Attachment(models.Model):
+    """A PDF or image joined to an announcement (design: "Convocation_AG_nov2026.pdf").
+    Stored in the Supabase bucket; downloaded through a short-lived signed URL."""
+
+    announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="attachments")
+    file = models.FileField(upload_to="announcements/%Y/%m/")
+    name = models.CharField(max_length=160)
+    size = models.PositiveIntegerField()
+    content_type = models.CharField(max_length=60)
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return self.name

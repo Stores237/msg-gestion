@@ -2,7 +2,20 @@ from rest_framework import serializers
 
 from apps.events.models import Event
 
-from .models import Announcement
+from .models import Announcement, Attachment
+
+
+class AttachmentSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Attachment
+        fields = ["id", "name", "size", "content_type", "url"]
+
+    def get_url(self, a) -> str:
+        url = a.file.url  # signed and short-lived on S3/Supabase
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request and url.startswith("/") else url
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):
@@ -12,10 +25,11 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     unread = serializers.SerializerMethodField()
     reads = serializers.SerializerMethodField()
+    attachments = AttachmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Announcement
-        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "created_at", "unread", "reads"]
+        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "created_at", "unread", "reads", "attachments"]
         read_only_fields = ["created_at"]
 
     def get_author_name(self, a) -> str | None:

@@ -211,5 +211,14 @@
   "resetPin": "Reset PIN",
   "resetPinConfirm": "A new temporary PIN will be created for {name}. The old one will stop working.",
   "resetPinDone": "{name}’s new temporary PIN: {pin}. Give it in person; it won’t be shown again.",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "attachFile": "Attach a file (PDF, photo)",
+  "attachHint": "PDF, JPEG or PNG · 10 MB max",
+  "fileTooLarge": "File too large (10 MB max).",
+  "fileType": "Only PDF, JPEG and PNG files are accepted.",
+  "attachmentFailed": "Announcement published, but “{name}” couldn’t be attached.",
+  "openFileFailed": "Couldn’t open the file.",
+  "removeFile": "Remove",
+  "sizeKb": "{n} KB",
+  "sizeMb": "{n} MB"
 }

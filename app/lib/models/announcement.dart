@@ -1,3 +1,28 @@
+class AttachmentInfo {
+  const AttachmentInfo({
+    required this.id,
+    required this.name,
+    required this.size,
+    required this.contentType,
+    required this.url,
+  });
+  final int id;
+  final String name;
+  final int size;
+  final String contentType;
+  final String url;
+
+  bool get isPdf => contentType == 'application/pdf';
+
+  factory AttachmentInfo.fromJson(Map<String, dynamic> j) => AttachmentInfo(
+    id: j['id'] as int,
+    name: j['name'] as String,
+    size: j['size'] as int,
+    contentType: j['content_type'] as String,
+    url: j['url'] as String,
+  );
+}
+
 class Announcement {
   const Announcement({
     required this.id,
@@ -13,6 +38,7 @@ class Announcement {
     required this.unread,
     this.readCount,
     this.audience,
+    this.attachments = const [],
   });
 
   final int id;
@@ -32,6 +58,7 @@ class Announcement {
   /// Only for the author / people who manage announcements.
   final int? readCount;
   final int? audience;
+  final List<AttachmentInfo> attachments;
 
   bool get isConvocation => kind == 'convocation';
 
@@ -49,6 +76,7 @@ class Announcement {
     unread: unread ?? this.unread,
     readCount: readCount,
     audience: audience,
+    attachments: attachments,
   );
 
   factory Announcement.fromJson(Map<String, dynamic> j) {
@@ -69,6 +97,10 @@ class Announcement {
       unread: j['unread'] as bool,
       readCount: reads?['read'] as int?,
       audience: reads?['total'] as int?,
+      attachments: [
+        for (final a in (j['attachments'] as List?) ?? const [])
+          AttachmentInfo.fromJson(a as Map<String, dynamic>),
+      ],
     );
   }
 }

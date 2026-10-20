@@ -1369,6 +1369,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Confirmer'**
   String get confirm;
+
+  /// No description provided for @attachFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre un fichier (PDF, photo)'**
+  String get attachFile;
+
+  /// No description provided for @attachHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF, JPEG ou PNG · 10 Mo maximum'**
+  String get attachHint;
+
+  /// No description provided for @fileTooLarge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fichier trop lourd (10 Mo maximum).'**
+  String get fileTooLarge;
+
+  /// No description provided for @fileType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les PDF, JPEG et PNG sont acceptés.'**
+  String get fileType;
+
+  /// No description provided for @attachmentFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce publiée, mais « {name} » n’a pas pu être joint.'**
+  String attachmentFailed(String name);
+
+  /// No description provided for @openFileFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d’ouvrir le fichier.'**
+  String get openFileFailed;
+
+  /// No description provided for @removeFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get removeFile;
+
+  /// No description provided for @sizeKb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} Ko'**
+  String sizeKb(int n);
+
+  /// No description provided for @sizeMb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} Mo'**
+  String sizeMb(String n);
 }
 
 class _AppLocalizationsDelegate

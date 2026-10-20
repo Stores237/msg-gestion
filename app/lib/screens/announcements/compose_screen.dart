@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/repository_locator.dart';
@@ -6,7 +7,15 @@ import '../../models/event.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/attachments.dart';
 import '../../widgets/ui.dart';
+
+/// A file chosen in the composer, uploaded after the announcement exists.
+class PickedFile {
+  PickedFile(this.name, this.bytes);
+  final String name;
+  final List<int> bytes;
+}
 
 /// "Rédiger une annonce": announcement or convocation (linked to an
 /// upcoming event), optionally pinned. Goes to every member.
@@ -26,6 +35,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
   bool _pinned = false;
   bool _busy = false;
   bool _eventMissing = false;
+  final List<PickedFile> _files = [];
 
   @override
   void dispose() {
@@ -77,6 +87,34 @@ class _ComposeScreenState extends State<ComposeScreen> {
     }
   }
 
+  static const _maxBytes = 10 * 1024 * 1024;
+
+  Future<void> _pickFile() async {
+    final l = AppLocalizations.of(context);
+    final List<PlatformFile> picked;
+    try {
+      picked = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
+      );
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+      return;
+    }
+    for (final p in picked) {
+      if ((await p.length() ?? 0) > _maxBytes) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l.fileTooLarge)));
+        }
+        continue;
+      }
+      final bytes = await p.readAsBytes();
+      if (mounted) setState(() => _files.add(PickedFile(p.name, bytes)));
+    }
+  }
+
   Future<void> _send() async {
     final formOk = _form.currentState!.validate();
     setState(() => _eventMissing = _kind == 1 && _event == null);
@@ -84,13 +122,26 @@ class _ComposeScreenState extends State<ComposeScreen> {
     setState(() => _busy = true);
     final l = AppLocalizations.of(context);
     try {
-      await RepositoryLocator.instance.announcements.create(
+      final repo = RepositoryLocator.instance.announcements;
+      final created = await repo.create(
         kind: _kind == 1 ? 'convocation' : 'annonce',
         title: _title.text.trim(),
         body: _body.text.trim(),
         eventId: _kind == 1 ? _event?.id : null,
         pinned: _pinned,
       );
+      for (final f in _files) {
+        try {
+          await repo.attach(created.id, bytes: f.bytes, filename: f.name);
+        } catch (_) {
+          // The announcement is out; say which file is missing.
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l.attachmentFailed(f.name))));
+          }
+        }
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -158,6 +209,21 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       decoration: deco(),
                     ),
                     const SizedBox(height: 16),
+                    for (final (i, f) in _files.indexed)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: AttachmentTile(
+                          key: Key('picked-$i'),
+                          name: f.name,
+                          subtitle: fileSize(l, f.bytes.length),
+                          isPdf: f.name.toLowerCase().endsWith('.pdf'),
+                          trailing: IconButton(
+                            tooltip: l.removeFile,
+                            icon: const Icon(Icons.close),
+                            onPressed: () => setState(() => _files.removeAt(i)),
+                          ),
+                        ),
+                      ),
                     GroupCard(
                       children: [
                         if (_kind == 1)
@@ -183,6 +249,16 @@ class _ComposeScreenState extends State<ComposeScreen> {
                             chevron: true,
                             onTap: _pickEvent,
                           ),
+                        ListRow(
+                          key: const Key('a-attach'),
+                          lead: const IconChip(
+                            Icons.attach_file,
+                            tone: Tone.red,
+                          ),
+                          title: Text(l.attachFile),
+                          subtitle: Text(l.attachHint),
+                          onTap: _pickFile,
+                        ),
                         ListRow(
                           lead: const IconChip(
                             Icons.groups_outlined,

@@ -726,4 +726,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirm => 'Confirm';
+
+  @override
+  String get attachFile => 'Attach a file (PDF, photo)';
+
+  @override
+  String get attachHint => 'PDF, JPEG or PNG · 10 MB max';
+
+  @override
+  String get fileTooLarge => 'File too large (10 MB max).';
+
+  @override
+  String get fileType => 'Only PDF, JPEG and PNG files are accepted.';
+
+  @override
+  String attachmentFailed(String name) {
+    return 'Announcement published, but “$name” couldn’t be attached.';
+  }
+
+  @override
+  String get openFileFailed => 'Couldn’t open the file.';
+
+  @override
+  String get removeFile => 'Remove';
+
+  @override
+  String sizeKb(int n) {
+    return '$n KB';
+  }
+
+  @override
+  String sizeMb(String n) {
+    return '$n MB';
+  }
 }
