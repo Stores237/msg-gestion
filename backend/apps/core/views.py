@@ -7,10 +7,9 @@ from django.http import Http404, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-# Management commands that cron-job.org may trigger on staging. Empty for
-# now; each scheduled job is added here *and* as a Render Cron Job service
-# for production (render.yaml) in the same change.
-TASKS = {}
+# Management commands that cron-job.org may trigger on staging. Each one
+# is also a Render Cron Job service for production (render.yaml).
+TASKS = {"reminders": "send_reminders"}
 
 
 def healthz(request):

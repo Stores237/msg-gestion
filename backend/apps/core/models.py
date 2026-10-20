@@ -27,3 +27,29 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.created_at:%Y-%m-%d %H:%M} {self.action} {self.object_repr}"
+
+
+class Notification(models.Model):
+    """In-app notification (design: "Notifications"). Push delivery to the
+    phone comes later; these rows are what the app lists either way."""
+
+    class Kind(models.TextChoices):
+        DUTY = "duty", "Service"
+        ANNOUNCEMENT = "announcement", "Annonce"
+        CONVOCATION = "convocation", "Convocation"
+        PAYMENT = "payment", "Paiement"
+        MEMBER = "member", "Membre"
+        REQUEST = "request", "Demande"
+        REMINDER = "reminder", "Rappel"
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    kind = models.CharField(max_length=14, choices=Kind.choices)
+    title = models.CharField(max_length=160)
+    body = models.CharField(max_length=300, blank=True)
+    # What to open: {"type": "event", "id": 12} etc.
+    target = models.JSONField(default=dict, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]

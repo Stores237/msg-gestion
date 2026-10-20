@@ -13,6 +13,7 @@ from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.permissions import require
 from apps.accounts.services import assign_role, reset_pin, temporary_pin
 from apps.core import audit
+from apps.core.notify import notify
 
 from .serializers import BureauEntrySerializer, MemberCreateSerializer, MemberDetailSerializer, MemberListSerializer
 
@@ -70,6 +71,9 @@ class MemberListView(APIView):
             user.save()
             assign_role(user, Role.objects.get(slug="membre"), reason="Inscription", by=request.user, request=request)
         audit.record("Membre inscrit", actor=request.user, obj=user, request=request)
+        bureau = [a.user for a in RoleAssignment.objects.active().filter(role__slug__in=["president", "secretaire-general"]).select_related("user")]
+        notify([u for u in bureau if u.pk != request.user.pk], "member", "Nouveau membre",
+               f"{user.full_name} a rejoint le mouvement", {"type": "member", "id": user.pk})
         user = _members().get(pk=user.pk)
         body = dict(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user}).data)
         # Shown once to whoever registered the member, who passes it on in

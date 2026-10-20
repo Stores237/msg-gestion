@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.core import audit
+from apps.core.notify import notify
 
 from .models import Collection, Due, Entry, QuarterReport
 
@@ -53,6 +54,8 @@ def validate_entry(entry, *, by, request=None):
     entry.validated_at = timezone.now()
     entry.save(update_fields=["status", "validated_by", "validated_at"])
     audit.record("Opération validée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
+    if entry.member_id:
+        notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} FCFA", {"type": "dues"})
 
 
 def open_collection(*, by, kind, title, amount_per_member, installments=3, opened_on=None, request=None):

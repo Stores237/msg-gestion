@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from apps.accounts.models import User
 from apps.accounts.permissions import require
 from apps.core import audit
+from apps.core.notify import notify
 
 from .files import MAX_BYTES, sniff
 from .models import Announcement, Attachment, Read
@@ -58,6 +59,13 @@ class AnnouncementListView(APIView):
         s.is_valid(raise_exception=True)
         item = s.save(author=request.user)
         Read.objects.create(announcement=item, member=request.user)  # the author has read it
+        notify(
+            _audience().exclude(pk=request.user.pk),
+            "convocation" if item.kind == Announcement.Kind.CONVOCATION else "announcement",
+            ("Nouvelle convocation" if item.kind == Announcement.Kind.CONVOCATION else "Nouvelle annonce"),
+            item.title,
+            {"type": "announcement", "id": item.pk},
+        )
         audit.record("Convocation envoyée" if item.kind == Announcement.Kind.CONVOCATION else "Annonce publiée",
                      actor=request.user, obj=item, request=request, detail={"destinataires": _audience().count()})
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data, status=status.HTTP_201_CREATED)

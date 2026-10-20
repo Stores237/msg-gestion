@@ -148,3 +148,26 @@ services:
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
+
+  # Production's scheduled jobs: Render Cron Job services running the same
+  # image (no public trigger endpoint). Staging runs the same commands via
+  # cron-job.org → /internal/tasks/<name>/ (RENDER_STAGING.md §3).
+  - type: cron
+    name: msg-production-reminders
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    dockerCommand: python manage.py send_reminders
+    rootDir: backend
+    plan: starter
+    region: frankfurt
+    branch: main
+    # 19:00 UTC = 20:00 in Douala (UTC+1): "la veille à 20:00".
+    schedule: "0 19 * * *"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
