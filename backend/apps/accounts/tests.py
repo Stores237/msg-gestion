@@ -331,3 +331,25 @@ def test_every_seeded_permission_is_applicable_and_not_locked():
     for p in RolePermission.objects.select_related("role"):
         assert registry.is_applicable(p.resource, p.action), p
         assert not registry.is_locked(p.role.slug, p.resource, p.action), p
+
+
+# --- bootstrap_admin ---------------------------------------------------------------------
+
+
+def test_bootstrap_admin_creates_super_admin_once():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    out = StringIO()
+    call_command("bootstrap_admin", "659802679", "Alpha", "Suisse Japoma", stdout=out)
+    user = User.objects.get(phone="+237659802679")
+    password = out.getvalue().split("password=")[1].split("\t")[0]
+    assert user.check_password(password) and user.has_pin
+    assert user.is_super_admin and "membre" in user.role_slugs()
+    assert AuditLog.objects.filter(action="Rôle affecté", object_id=str(user.pk)).count() == 2
+
+    again = StringIO()
+    call_command("bootstrap_admin", "659802679", "Alpha", "Suisse Japoma", stdout=again)
+    assert "already existed" in again.getvalue()
+    assert user.assignments.count() == 2

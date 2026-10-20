@@ -16,3 +16,4 @@ app/build/
 # Local artefacts
 *.apk
 *.log
+backend/.staging-admins.txt

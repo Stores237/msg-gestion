@@ -53,10 +53,10 @@ command instead (`render.yaml`), never the HTTP endpoint.
    health check queries the database, so a bad `DATABASE_URL` shows up here.
 2. Confirm errors are visible **before** anyone needs to debug: with `SENTRY_DSN` set, open
    Sentry and check the release appears; otherwise, check Render's Logs tab shows the startup.
-3. Create the first two super admins. Until the back-office can do it, use the Django admin
-   (`/admin/`, `DJANGO_SUPERUSER_PHONE`): add each person, give them a password, and add a
-   "Super admin" role assignment with a reason. Two are required; the back-office refuses to go
-   below two.
+3. Create the first two super admins from a machine with `.env.staging` loaded and prod
+   settings: `manage.py bootstrap_admin <phone> <nom> <prénoms>`. It assigns Super admin +
+   Membre through the audited service and prints a temporary password and PIN once. Done on
+   2026-10-20 for both staging admins.
 4. Log in at `/bo/` with one of them; the SMS code must arrive.
 5. Build the beta app against staging:
    `flutter build apk --release --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api --build-number=N`

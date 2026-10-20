@@ -12,8 +12,10 @@ These need an account, a decision or a person — not code.
 - [ ] **Twilio** account, Verify Service and API key. Blocks: back-office login on staging
   (codes can't be sent without it) and SMS PIN reset.
 - [ ] **Sentry** project (free). Strongly recommended before the first tester.
-- [ ] **The first two super admins** — contactgardesuisse@gmail.com and storefix237@gmail.com.
-  Still needed for each: full name and mobile number (back-office login is phone + SMS code).
+- [x] **The first two super admins** on staging (2026-10-20): Alpha Suisse Japoma
+  (659802679, contactgardesuisse@gmail.com) and Omega Store's User (654858138,
+  storefix237@gmail.com). Temporary credentials in gitignored `backend/.staging-admins.txt`.
+  Back-office login still needs Twilio.
 - [ ] **Real member list** to import (spreadsheet: name, phone, group, date of birth, parent
   contact for minors). For now `seed_demo` has 21 made-up members (10 added 2026-10-20).
 - [ ] **Revoke the tokens pasted in chat on 2026-10-20**, once setup is done: the Supabase access
