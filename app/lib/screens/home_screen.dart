@@ -95,6 +95,7 @@ class HomeScreen extends StatelessWidget {
       children: [
         ScreenHeader(
           title: l.helloName(me.firstName),
+          sync: true,
           subtitle: sub,
           leading: const MsgLogo(size: 40),
           actions: [

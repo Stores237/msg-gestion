@@ -114,7 +114,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     if (_view == 2) {
       return Column(
         children: [
-          ScreenHeader(title: l.tabCalendar),
+          ScreenHeader(title: l.tabCalendar, sync: true),
           Expanded(
             child: planner
                 ? PlanningWeekView(me: widget.me, header: header)
@@ -127,6 +127,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       children: [
         ScreenHeader(
           title: l.tabCalendar,
+          sync: true,
           actions: [
             if (canCreate)
               IconButton(

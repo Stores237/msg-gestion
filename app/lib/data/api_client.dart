@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'auth_session.dart';
 import 'locale_controller.dart';
+import 'offline.dart';
 
 /// Set at build time, never at runtime:
 /// `flutter build apk --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api`
@@ -68,8 +69,59 @@ class ApiClient {
     '$baseUrl$path',
   ).replace(queryParameters: query?.isEmpty ?? true ? null : query);
 
-  Future<dynamic> get(String path, {Map<String, String>? query}) =>
-      _send('GET', _uri(path, query));
+  /// GET with the offline cache: a success is remembered; without network
+  /// the last remembered answer is returned and the app shows "Hors ligne".
+  Future<dynamic> get(String path, {Map<String, String>? query}) async {
+    final uri = _uri(path, query);
+    final key = uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path;
+    final offline = OfflineState.instance;
+    try {
+      final data = await _send('GET', uri);
+      await offline.remember(key, data);
+      _flushSoon();
+      return data;
+    } on NetworkException {
+      if (offline.has(key)) {
+        offline.markOffline();
+        return offline.recall(key);
+      }
+      rethrow;
+    }
+  }
+
+  /// A write that may wait for the network (idempotent operations only).
+  /// Without network it is queued and [QueuedOffline] is thrown.
+  Future<dynamic> sendOrQueue(
+    String method,
+    String path, {
+    Object? body,
+    required String kind,
+  }) async {
+    try {
+      final data = await _send(method, _uri(path), body: body);
+      _flushSoon();
+      return data;
+    } on NetworkException {
+      final item = OutboxItem(
+        method: method,
+        path: path,
+        body: body,
+        kind: kind,
+      );
+      await OfflineState.instance.enqueue(item);
+      throw QueuedOffline(item);
+    }
+  }
+
+  /// Send whatever waited for the network.
+  Future<void> flushOutbox() => OfflineState.instance.flush(
+    (item) => _send(item.method, _uri(item.path), body: item.body),
+    isNetworkError: (e) => e is NetworkException,
+  );
+
+  void _flushSoon() {
+    if (OfflineState.instance.pending > 0) unawaited(flushOutbox());
+  }
 
   Future<dynamic> post(
     String path, {

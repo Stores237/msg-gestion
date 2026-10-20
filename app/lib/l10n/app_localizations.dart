@@ -2347,6 +2347,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Plus ancien'**
   String get earlier;
+
+  /// No description provided for @offlineBar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne'**
+  String get offlineBar;
+
+  /// No description provided for @offlinePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}'**
+  String offlinePending(int n);
+
+  /// No description provided for @syncedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchronisé · dernière synchronisation {time}'**
+  String syncedAt(String time);
+
+  /// No description provided for @syncing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchronisation en cours…'**
+  String get syncing;
+
+  /// No description provided for @offlineSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne · dernière synchronisation {time}'**
+  String offlineSince(String time);
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échec de la synchronisation'**
+  String get syncFailed;
+
+  /// No description provided for @savedOnPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré sur le téléphone. Envoi dès le retour du réseau.'**
+  String get savedOnPhone;
+
+  /// No description provided for @pendingSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 envoi en attente} other{{n} envois en attente}}'**
+  String pendingSend(int n);
+
+  /// No description provided for @never.
+  ///
+  /// In fr, this message translates to:
+  /// **'jamais'**
+  String get never;
 }
 
 class _AppLocalizationsDelegate

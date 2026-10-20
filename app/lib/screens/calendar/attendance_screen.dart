@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/offline.dart';
 import '../../data/repositories/events_repository.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
@@ -64,6 +65,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).rollCallSaved)),
       );
+    } on QueuedOffline catch (e) {
+      // Kept on the phone (design: "Fonctionne hors ligne"); sent later.
+      if (!mounted) return;
+      setState(() => _changes.clear());
+      showErrorSnack(context, e);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
     } finally {

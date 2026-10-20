@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/offline.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/finance.dart';
@@ -64,6 +65,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
       ).showSnackBar(SnackBar(content: Text(l.paymentsSaved)));
       _selected.clear();
       await _load();
+    } on QueuedOffline catch (e) {
+      if (!mounted) return;
+      setState(() => _selected.clear());
+      showErrorSnack(context, e);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
     } finally {

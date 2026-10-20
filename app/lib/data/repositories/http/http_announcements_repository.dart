@@ -1,5 +1,6 @@
 import '../../../models/announcement.dart';
 import '../../api_client.dart';
+import '../../offline.dart';
 import '../announcements_repository.dart';
 
 class HttpAnnouncementsRepository implements AnnouncementsRepository {
@@ -21,7 +22,13 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
   }
 
   @override
-  Future<void> markRead(int id) => _api.post('/announcements/$id/read/');
+  Future<void> markRead(int id) async {
+    try {
+      await _api.sendOrQueue('POST', '/announcements/$id/read/', kind: 'read');
+    } on QueuedOffline {
+      // Sent later; nothing to tell the member.
+    }
+  }
 
   @override
   Future<Announcement> create({

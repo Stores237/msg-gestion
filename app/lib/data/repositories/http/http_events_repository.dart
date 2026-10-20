@@ -36,8 +36,12 @@ class HttpEventsRepository implements EventsRepository {
       );
 
   @override
-  Future<void> excuse(int eventId, {String reason = ''}) =>
-      _api.post('/events/$eventId/excuse/', body: {'reason': reason});
+  Future<void> excuse(int eventId, {String reason = ''}) => _api.sendOrQueue(
+    'POST',
+    '/events/$eventId/excuse/',
+    body: {'reason': reason},
+    kind: 'excuse',
+  );
 
   AttendanceSheet _sheet(Map<String, dynamic> data) => AttendanceSheet(
     counts: (data['counts'] as Map<String, dynamic>).map(
@@ -59,8 +63,10 @@ class HttpEventsRepository implements EventsRepository {
     int eventId,
     Map<int, String> marks,
   ) async => _sheet(
-    await _api.put(
+    await _api.sendOrQueue(
+          'PUT',
           '/events/$eventId/attendance/',
+          kind: 'attendance',
           body: {
             'marks': [
               for (final e in marks.entries)

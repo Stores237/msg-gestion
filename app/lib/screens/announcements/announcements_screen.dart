@@ -95,7 +95,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
           : null,
       body: Column(
         children: [
-          ScreenHeader(title: l.tabAnnouncements),
+          ScreenHeader(title: l.tabAnnouncements, sync: true),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _load,

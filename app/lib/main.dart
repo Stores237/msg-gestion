@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/locale_controller.dart';
+import 'data/offline.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
@@ -11,6 +12,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocaleController.instance.load();
   await initializeDateFormatting();
+  await OfflineState.instance.load();
   runApp(const MsgApp());
 }
 

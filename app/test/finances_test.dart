@@ -153,6 +153,8 @@ void main() {
       find.byKey(const Key('validate-report')),
       200,
     );
+    await tester.ensureVisible(find.byKey(const Key('validate-report')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('validate-report')));
     await tester.pumpAndSettle();
     expect(f.finances.reportValidated, isTrue);

@@ -59,7 +59,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
     final out = _direction == 1;
     final category = out ? 'depense' : _category;
     try {
-      await RepositoryLocator.instance.finances.createEntry(
+      final saved = await RepositoryLocator.instance.finances.createEntry(
         NewEntry(
           direction: out ? 'out' : 'in',
           amount: _value,
@@ -74,9 +74,9 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
         ),
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.entrySaved)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(saved.local ? l.savedOnPhone : l.entrySaved)),
+      );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);

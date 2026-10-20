@@ -96,6 +96,7 @@ class _MembersScreenState extends State<MembersScreen> {
         children: [
           ScreenHeader(
             title: l.tabMembers,
+            sync: true,
             subtitle: _page == null ? null : l.membersSubtitle(counts.all),
           ),
           Expanded(

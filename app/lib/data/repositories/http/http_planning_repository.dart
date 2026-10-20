@@ -1,5 +1,6 @@
 import '../../../models/planning.dart';
 import '../../api_client.dart';
+import '../../offline.dart';
 import '../planning_repository.dart';
 
 String _day(DateTime d) =>
@@ -74,8 +75,11 @@ class HttpPlanningRepository implements PlanningRepository {
   ];
 
   @override
-  Future<void> confirm(int assignmentId) =>
-      _api.post('/planning/assignments/$assignmentId/confirm/');
+  Future<void> confirm(int assignmentId) => _api.sendOrQueue(
+    'POST',
+    '/planning/assignments/$assignmentId/confirm/',
+    kind: 'confirm',
+  );
 
   @override
   Future<List<Candidate>> swapCandidates(int assignmentId) async => _cands(
@@ -171,6 +175,16 @@ class HttpNotificationsRepository implements NotificationsRepository {
   }
 
   @override
-  Future<void> markRead({List<int>? ids}) =>
-      _api.post('/notifications/read/', body: {'ids': ?ids});
+  Future<void> markRead({List<int>? ids}) async {
+    try {
+      await _api.sendOrQueue(
+        'POST',
+        '/notifications/read/',
+        body: {'ids': ?ids},
+        kind: 'notifications',
+      );
+    } on QueuedOffline {
+      // Sent later.
+    }
+  }
 }

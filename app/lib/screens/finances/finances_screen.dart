@@ -82,7 +82,7 @@ class _FinancesScreenState extends State<FinancesScreen> {
           : null,
       body: Column(
         children: [
-          ScreenHeader(title: l.tabFinances),
+          ScreenHeader(title: l.tabFinances, sync: true),
           Expanded(
             child: KeyedSubtree(
               key: _reload,
@@ -213,11 +213,13 @@ class EntryRow extends StatelessWidget {
               children: [
                 Icon(Icons.cloud_off, size: 13, color: c.textSecondary),
                 const SizedBox(width: 4),
-                Text(
-                  l.notSentYet,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    l.notSentYet,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],

@@ -1321,4 +1321,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get earlier => 'Plus ancien';
+
+  @override
+  String get offlineBar => 'Hors ligne';
+
+  @override
+  String offlinePending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Hors ligne · $n saisies en attente d’envoi',
+      one: 'Hors ligne · 1 saisie en attente d’envoi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncedAt(String time) {
+    return 'Synchronisé · dernière synchronisation $time';
+  }
+
+  @override
+  String get syncing => 'Synchronisation en cours…';
+
+  @override
+  String offlineSince(String time) {
+    return 'Hors ligne · dernière synchronisation $time';
+  }
+
+  @override
+  String get syncFailed => 'Échec de la synchronisation';
+
+  @override
+  String get savedOnPhone =>
+      'Enregistré sur le téléphone. Envoi dès le retour du réseau.';
+
+  @override
+  String pendingSend(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n envois en attente',
+      one: '1 envoi en attente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get never => 'jamais';
 }

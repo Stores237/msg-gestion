@@ -849,5 +849,42 @@
   "markAllRead": "Tout lire",
   "today": "Aujourd’hui",
   "thisWeek": "Cette semaine",
-  "earlier": "Plus ancien"
+  "earlier": "Plus ancien",
+  "offlineBar": "Hors ligne",
+  "offlinePending": "{n, plural, =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}",
+  "@offlinePending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "syncedAt": "Synchronisé · dernière synchronisation {time}",
+  "@syncedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncing": "Synchronisation en cours…",
+  "offlineSince": "Hors ligne · dernière synchronisation {time}",
+  "@offlineSince": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncFailed": "Échec de la synchronisation",
+  "savedOnPhone": "Enregistré sur le téléphone. Envoi dès le retour du réseau.",
+  "pendingSend": "{n, plural, =1{1 envoi en attente} other{{n} envois en attente}}",
+  "@pendingSend": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "never": "jamais"
 }

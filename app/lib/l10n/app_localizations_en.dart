@@ -1318,4 +1318,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get earlier => 'Earlier';
+
+  @override
+  String get offlineBar => 'Offline';
+
+  @override
+  String offlinePending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Offline · $n entries waiting to be sent',
+      one: 'Offline · 1 entry waiting to be sent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String syncedAt(String time) {
+    return 'Synced · last sync $time';
+  }
+
+  @override
+  String get syncing => 'Syncing…';
+
+  @override
+  String offlineSince(String time) {
+    return 'Offline · last sync $time';
+  }
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get savedOnPhone =>
+      'Saved on the phone. It will be sent when the network is back.';
+
+  @override
+  String pendingSend(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n sends waiting',
+      one: '1 send waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get never => 'never';
 }

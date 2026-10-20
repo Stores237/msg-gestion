@@ -9,6 +9,7 @@ import 'attachments.dart';
 import 'dates.dart';
 import 'errors.dart';
 import 'labels.dart';
+import 'sync_widgets.dart';
 
 /// Screen title row (design: .appbar).
 class ScreenHeader extends StatelessWidget {
@@ -20,8 +21,11 @@ class ScreenHeader extends StatelessWidget {
     this.leading,
     this.actions = const [],
     this.small = false,
+    this.sync = false,
   });
 
+  /// Show the sync line under the header (tab root screens, design: SyncLine).
+  final bool sync;
   final String title;
   final String? subtitle;
   final bool back;
@@ -33,7 +37,7 @@ class ScreenHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.msg;
     final l = AppLocalizations.of(context);
-    return Padding(
+    final row = Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
       child: Row(
         children: [
@@ -74,6 +78,17 @@ class ScreenHeader extends StatelessWidget {
           ...actions,
         ],
       ),
+    );
+    if (!sync) return row;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        row,
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: SyncLine(),
+        ),
+      ],
     );
   }
 }

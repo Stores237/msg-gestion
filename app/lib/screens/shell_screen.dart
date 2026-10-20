@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+
 import '../data/current_user.dart';
+import '../data/offline.dart';
+import '../data/repository_locator.dart';
+import '../widgets/sync_widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import 'announcements/announcements_screen.dart';
@@ -21,7 +26,8 @@ class ShellScreen extends StatefulWidget {
   State<ShellScreen> createState() => _ShellScreenState();
 }
 
-class _ShellScreenState extends State<ShellScreen> {
+class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
+  Timer? _flushTimer;
   int _index = 0;
   int _unread = 0;
 
@@ -29,6 +35,28 @@ class _ShellScreenState extends State<ShellScreen> {
   void initState() {
     super.initState();
     currentUser.value = widget.me;
+    WidgetsBinding.instance.addObserver(this);
+    // While saves wait for the network, try again every 30 s.
+    _flushTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (OfflineState.instance.pending > 0) {
+        RepositoryLocator.instance.apiClient.flushOutbox();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _flushTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        OfflineState.instance.pending > 0) {
+      RepositoryLocator.instance.apiClient.flushOutbox();
+    }
   }
 
   static (IconData, IconData, String Function(AppLocalizations)) _def(
@@ -80,9 +108,16 @@ class _ShellScreenState extends State<ShellScreen> {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: KeyedSubtree(
-          key: ValueKey(tabs[index]),
-          child: _screen(tabs[index]),
+        child: Column(
+          children: [
+            const NetBar(),
+            Expanded(
+              child: KeyedSubtree(
+                key: ValueKey(tabs[index]),
+                child: _screen(tabs[index]),
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: tabs.length < 2

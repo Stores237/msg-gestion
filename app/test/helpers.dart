@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:msg_gestion/data/auth_session.dart';
 import 'package:msg_gestion/data/locale_controller.dart';
+import 'package:msg_gestion/data/offline.dart';
 import 'package:msg_gestion/data/repository_locator.dart';
 import 'package:msg_gestion/data/token_storage.dart';
 import 'package:msg_gestion/main.dart';
@@ -27,6 +28,7 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   tester.platformDispatcher.localesTestValue = const [Locale('fr', 'CM')];
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   LocaleController.debugSetInstance(LocaleController());
+  OfflineState.debugSetInstance(OfflineState(storage: MemoryOfflineStorage()));
   final f = Fakes();
   RepositoryLocator.debugSetInstance(
     RepositoryLocator(

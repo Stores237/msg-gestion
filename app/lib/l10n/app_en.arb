@@ -374,5 +374,14 @@
   "markAllRead": "Mark all read",
   "today": "Today",
   "thisWeek": "This week",
-  "earlier": "Earlier"
+  "earlier": "Earlier",
+  "offlineBar": "Offline",
+  "offlinePending": "{n, plural, =1{Offline · 1 entry waiting to be sent} other{Offline · {n} entries waiting to be sent}}",
+  "syncedAt": "Synced · last sync {time}",
+  "syncing": "Syncing…",
+  "offlineSince": "Offline · last sync {time}",
+  "syncFailed": "Sync failed",
+  "savedOnPhone": "Saved on the phone. It will be sent when the network is back.",
+  "pendingSend": "{n, plural, =1{1 send waiting} other{{n} sends waiting}}",
+  "never": "never"
 }
