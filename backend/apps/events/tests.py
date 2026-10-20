@@ -102,3 +102,18 @@ def test_detail_shows_counts_only_to_attendance_viewers():
     censor_api, _ = client_for("censeur-general")
     assert "attendance_counts" not in member_api.get(f"/api/events/{event.id}/").json()
     assert censor_api.get(f"/api/events/{event.id}/").json()["attendance_counts"] == {"present": 0, "absent": 0, "excuse": 0}
+
+
+def test_demo_content_is_replaceable_and_removable():
+    from django.core.management import call_command
+
+    from apps.announcements.models import Announcement
+
+    real = make_event(5, title="Vraie assise")
+    call_command("add_demo_content")
+    call_command("add_demo_content")  # replaces, doesn't duplicate
+    assert Event.objects.filter(notes__contains="[démo]").count() == 11
+    assert Announcement.objects.count() == 3
+    call_command("add_demo_content", "--remove")
+    assert list(Event.objects.all()) == [real]
+    assert Announcement.objects.count() == 0
