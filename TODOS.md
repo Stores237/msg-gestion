@@ -32,6 +32,10 @@ These need an account, a decision or a person — not code.
 
 ## Engineering backlog
 
+### Pending on the owner's accounts
+- [ ] SMS (Twilio): "Code oublié ?" and back-office codes by SMS. Everything else works; back-office login uses backup codes meanwhile.
+- [ ] Push notifications (Firebase project): notifications are in-app today; push to the lock screen needs an FCM project.
+
 ### P0 — before the first tester
 - [ ] PIN setup and reset by SMS (imported members get an SMS to create their PIN; "Code
   oublié ?"). Today a PIN can only be set with `manage.py set_pin`.

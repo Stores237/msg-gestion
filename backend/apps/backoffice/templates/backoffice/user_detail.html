@@ -1,0 +1,70 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}{{ member.full_name }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:users' %}">Utilisateurs</a> ›</div>{% endblock %}
+{% block heading %}{{ member.full_name }}{% endblock %}
+{% block acts %}{% if can_edit %}
+  <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="reset_pin">{% icon 'key-round' %}Réinitialiser le PIN</button></form>
+  {% if member.status == 'suspendu' %}
+  <button class="btn btn-outline" onclick="document.getElementById('dlg-status').showModal()">Réactiver</button>
+  {% else %}
+  <button class="btn btn-danger" onclick="document.getElementById('dlg-status').showModal()">Suspendre</button>
+  {% endif %}
+{% endif %}{% endblock %}
+{% block body %}
+{% if once %}
+<div class="notice warn" role="status">{% icon 'triangle-alert' %}<span><b>{{ once.label }} :</b> <span class="tnum" style="font:800 18px var(--font-mono)">{{ once.value }}</span> — notez-le et communiquez-le en personne ; il ne sera plus affiché.
+  {% if once.codes %}<br>Codes de secours : <span class="tnum" style="font-family:var(--font-mono)">{{ once.codes|join:"  ·  " }}</span>{% endif %}</span></div>
+{% endif %}
+<div class="bo-cols">
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <section class="panel"><div class="panel-h"><h2>Rôles</h2>{% if can_edit %}<div class="acts"><button class="btn btn-primary btn-sm" onclick="document.getElementById('dlg-assign').showModal()">{% icon 'plus' 16 %}Affecter un rôle</button></div>{% endif %}</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rôle</th><th>Début</th><th>Fin</th><th>Échéance</th><th></th></tr></thead><tbody>
+      {% for r in rows %}<tr{% if not r.active %} style="opacity:.6"{% endif %}><td>{% role_badge r.a.role r.a.ends_on %}</td><td class="tnum">{{ r.a.starts_on|date:"d/m/Y" }}</td><td class="tnum">{{ r.a.ends_on|date:"d/m/Y"|default:"sans fin" }}</td>
+        <td>{% if r.a.revoked_at %}<span class="status off"><i></i>Retiré le {{ r.a.revoked_at|date:"d/m/Y" }}</span>{% elif r.expired %}<span class="status off"><i></i>Expiré</span>{% elif r.progress is not None %}<div class="timeline" style="min-width:160px"><div class="tl-bar" style="height:10px"><i class="{% if r.left_days is not None and r.left_days <= 30 %}w{% endif %}" style="left:0;width:{{ r.progress }}%"></i></div><div class="tl-l"><span>{{ r.progress }} %</span><span>reste {{ r.left_days }} j</span></div></div>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td style="text-align:right">{% if can_edit and r.active %}<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('revoke-id').value='{{ r.a.pk }}';document.getElementById('revoke-name').textContent='{{ r.a.role.name|escapejs }}';document.getElementById('dlg-revoke').showModal()">Retirer</button>{% endif %}</td></tr>
+      {% empty %}<tr class="empty-row"><td colspan="5">Aucun rôle.</td></tr>{% endfor %}</tbody></table></div></section>
+    <form class="panel" method="post">{% csrf_token %}<input type="hidden" name="action" value="groups"><div class="panel-h"><h2>Groupes</h2>{% if can_edit %}<div class="acts"><button class="btn btn-secondary btn-sm">Enregistrer</button></div>{% endif %}</div>
+      <div class="panel-b"><div class="rbs">{% for g in groups %}<label class="fsel{% if g.pk in member_groups %} on{% endif %}"><input type="checkbox" name="groups" value="{{ g.pk }}"{% if g.pk in member_groups %} checked{% endif %}{% if not can_edit %} disabled{% endif %}> {{ g.name }}{% if g.chef_id == member.pk %} · chef{% endif %}</label>{% empty %}<span class="muted">Aucun groupe. Les groupes se créent depuis l’app (Planning).</span>{% endfor %}</div></div></form>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <section class="panel"><div class="panel-h"><h2>Identité</h2></div><div class="panel-b"><dl class="dl">
+      <dt>Téléphone</dt><dd class="tnum">{{ phone }}</dd><dt>Statut</dt><dd>{% status member %}</dd>
+      <dt>Membre depuis</dt><dd>{{ member.joined_on|date:"l j F Y" }}</dd><dt>Date de naissance</dt><dd>{{ member.birth_date|date:"d/m/Y"|default:"—" }}</dd>
+      {% if member.is_diaspora %}<dt>Diaspora</dt><dd>{{ member.city|default:"oui" }}</dd>{% endif %}
+      <dt>Dernière connexion</dt><dd>{{ member.last_login|date:"d/m/Y H:i"|default:"jamais" }}</dd>
+      <dt>PIN</dt><dd>{% if member.pin_locked_until and member.pin_locked_until > now %}Bloqué{% elif member.pin_must_change %}Provisoire{% else %}Personnel{% endif %}</dd>
+    </dl></div></section>
+    <section class="panel"><div class="panel-h"><h2>Accès au back-office</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:10px">
+      {% if backoffice %}<span class="status ok"><i></i>Mot de passe défini · {{ codes_left }} codes de secours</span>{% else %}<span class="status off"><i></i>Pas d’accès (application seulement)</span>{% endif %}
+      <span style="font-size:13px;color:var(--text-secondary)">L’accès dépend aussi des permissions de ses rôles (Utilisateurs et rôles, Journal).</span>
+      {% if can_edit %}<form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="password">{% if backoffice %}Nouveau mot de passe provisoire{% else %}Donner un accès (mot de passe provisoire){% endif %}</button></form>{% endif %}
+    </div></section>
+  </div>
+</div>
+{% if can_edit %}
+<dialog id="dlg-assign" class="dialog wide" style="border:none;padding:24px;max-width:640px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="assign">
+  <h3>Affecter un rôle à {{ member.short_name }}</h3>
+  <div class="form-grid">
+    <label class="fld"><span class="fld-l">Rôle<em> *</em></span><span class="fld-box"><select name="role" id="f-role" required onchange="var e=JSON.parse(document.getElementById('role-ends').textContent)[this.value];document.getElementById('f-end').value=e||''"><option value="">—</option>{% for r in roles %}<option value="{{ r.slug }}">{{ r.name }}{% if r.mandate_months %} (mandat {{ r.mandate_months }} mois){% endif %}</option>{% endfor %}</select></span></label>
+    <label class="fld"><span class="fld-l">Début<em> *</em></span><span class="fld-box"><input type="date" name="starts_on" value="{{ today|date:'Y-m-d' }}" required></span></label>
+    <label class="fld"><span class="fld-l">Fin</span><span class="fld-box"><input type="date" name="ends_on" id="f-end"></span><span class="fld-h">Mandat du bureau : début + 2 ans − 1 jour, proposé automatiquement.</span></label>
+    <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required placeholder="Élection en assemblée générale…"></span></label>
+  </div>
+  <div class="notice">{% icon 'shield-check' %}<span>Les cumuls interdits (trésorier et commissaire aux comptes) sont refusés à l’enregistrement.</span></div>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Affecter</button></div>
+</form></dialog>
+{{ role_ends|json_script:"role-ends" }}
+<dialog id="dlg-revoke" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="revoke"><input type="hidden" name="assignment" id="revoke-id">
+  <h3>Retirer le rôle « <span id="revoke-name"></span> » ?</h3>
+  <p>Le retrait est daté et inscrit au journal. Il faut toujours au moins deux super admins.</p>
+  <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Retirer</button></div>
+</form></dialog>
+<dialog id="dlg-status" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="{% if member.status == 'suspendu' %}reactivate{% else %}suspend{% endif %}">
+  <h3>{% if member.status == 'suspendu' %}Réactiver{% else %}Suspendre{% endif %} {{ member.short_name }} ?</h3>
+  <p>{% if member.status == 'suspendu' %}Le membre pourra de nouveau se connecter.{% else %}Le membre ne pourra plus se connecter à l’application.{% endif %}</p>
+  <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Confirmer</button></div>
+</form></dialog>
+{% endif %}
+{% endblock %}

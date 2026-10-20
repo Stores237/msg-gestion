@@ -2,15 +2,32 @@
 {% block title %}Code de vérification{% endblock %}
 {% block frame %}
 <div class="bo-center">{% include "backoffice/_login_side.html" %}
-  <div class="r"><form class="bo-card" method="post" autocomplete="off">{% csrf_token %}
-    <span class="caps">Étape 2 sur 2</span><div style="font-size:24px;font-weight:800">Code de vérification</div>
-    <p style="margin:0;color:var(--text-secondary);font-size:15px;line-height:1.5">Envoyé par SMS au {{ masked }}. Valable 5 minutes.</p>
-    {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
-    {% if info %}<div class="notice ok">{% icon 'circle-check' %}<span>{{ info }}</span></div>{% endif %}
-    <label class="fld"><span class="fld-l">Code à 6 chiffres</span><span class="fld-box"><input name="code" inputmode="numeric" pattern="\d{6}" maxlength="6" autocomplete="one-time-code" style="font-size:24px;font-weight:800;letter-spacing:.4em" autofocus></span></label>
-    <label style="display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;gap:12px">Faire confiance à cet ordinateur 30 jours<input class="toggle" type="checkbox" name="trust" value="1"></label>
-    <button class="btn btn-primary btn-full">Vérifier</button>
-  </form>
-  </div></div>
-<form method="post" style="position:absolute;bottom:24px;right:24px">{% csrf_token %}<button class="btn btn-ghost btn-sm" name="resend" value="1">Renvoyer le code</button></form>
+  <div class="r">
+  {% if backup %}
+    <form class="bo-card" method="post" autocomplete="off">{% csrf_token %}
+      <span class="caps">Étape 2 sur 2</span><div style="font-size:24px;font-weight:800">Code de secours</div>
+      {% if not sms_ok %}<div class="notice warn">{% icon 'triangle-alert' %}<span>L’envoi de SMS n’est pas encore disponible. Utilisez un de vos codes de secours (8 chiffres).</span></div>{% endif %}
+      {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
+      <label class="fld"><span class="fld-l">Code de secours</span><span class="fld-box"><input name="backup_code" inputmode="numeric" autocomplete="one-time-code" placeholder="1234-5678" style="font-size:22px;font-weight:800;letter-spacing:.2em" autofocus></span></label>
+      <p style="margin:0;font-size:13px;color:var(--text-secondary);line-height:1.5">Chaque code ne fonctionne qu’une fois. Régénérez-les dans « Sécurité du compte ».</p>
+      <button class="btn btn-primary btn-full">Vérifier</button>
+      {% if sms_ok %}<a href="{% url 'backoffice:otp' %}" style="font-size:14px">Revenir au code SMS</a>{% endif %}
+    </form>
+  {% else %}
+    <form class="bo-card" method="post" autocomplete="off">{% csrf_token %}
+      <span class="caps">Étape 2 sur 2</span><div style="font-size:24px;font-weight:800">Code de vérification</div>
+      <p style="margin:0;color:var(--text-secondary);font-size:15px;line-height:1.5">Envoyé par SMS au {{ masked }}. Valable 5 minutes.</p>
+      {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
+      {% if info %}<div class="notice ok">{% icon 'circle-check' %}<span>{{ info }}</span></div>{% endif %}
+      <label class="fld"><span class="fld-l">Code à 6 chiffres</span><span class="fld-box"><input name="code" inputmode="numeric" pattern="\d{6}" maxlength="6" autocomplete="one-time-code" style="font-size:24px;font-weight:800;letter-spacing:.4em" autofocus></span></label>
+      <label style="display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;gap:12px">Faire confiance à cet ordinateur 30 jours<input class="toggle" type="checkbox" name="trust" value="1"></label>
+      <button class="btn btn-primary btn-full">Vérifier</button>
+      <div style="display:flex;justify-content:space-between;font-size:14px;gap:12px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" name="resend" value="1" style="padding:0">Renvoyer le code</button>
+        <a href="?secours=1">Utiliser un code de secours</a>
+      </div>
+    </form>
+  {% endif %}
+  </div>
+</div>
 {% endblock %}

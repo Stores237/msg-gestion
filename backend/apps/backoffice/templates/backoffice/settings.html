@@ -1,0 +1,40 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Paramètres{% endblock %}
+{% block heading %}Paramètres{% endblock %}
+{% block body %}
+<form method="post">{% csrf_token %}
+<div class="bo-cols half">
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <section class="panel"><div class="panel-h"><h2>Mouvement</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;gap:16px;align-items:center"><div class="msg-logo" style="width:80px;height:80px;border-radius:24px;font-size:24px">MSG</div><div style="font-size:13px;color:var(--text-secondary);line-height:1.5">Logo actuel : le monogramme MSG.<br>Un logo dessiné le remplacera (PNG ou SVG, 512 px).</div></div>
+      <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" value="{{ s.name }}"></span></label>
+      <label class="fld"><span class="fld-l">Paroisse</span><span class="fld-box"><input name="parish" value="{{ s.parish }}"></span></label>
+      <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" value="{{ s.motto }}"></span></label>
+    </div></section>
+    <section class="panel"><div class="panel-h"><h2>Montants</h2></div><div class="panel-b"><div class="list" style="padding:0">
+      <div class="row"><div class="row-main"><div class="row-t">Inscription</div></div><span class="fld-box" style="min-height:44px;width:160px"><input name="fee_registration" type="number" min="0" value="{{ s.fee_registration }}" style="text-align:right;font-weight:700">FCFA</span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Médaille, diplôme, sacrement</div></div><span class="fld-box" style="min-height:44px;width:160px"><input name="fee_medal" type="number" min="0" value="{{ s.fee_medal }}" style="text-align:right;font-weight:700">FCFA</span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Maladie</div></div><span class="fld-box" style="min-height:44px;width:160px"><input name="fee_illness" type="number" min="0" value="{{ s.fee_illness }}" style="text-align:right;font-weight:700">FCFA</span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Décès</div></div><span class="fld-box" style="min-height:44px;width:160px"><input name="fee_death" type="number" min="0" value="{{ s.fee_death }}" style="text-align:right;font-weight:700">FCFA</span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Recouvrement</div><div class="row-s">Nombre de tranches, une par semaine</div></div><span class="fld-box" style="min-height:44px;width:160px"><input name="installments" type="number" min="1" max="6" value="{{ s.installments }}" style="text-align:right;font-weight:700">tranches</span></div>
+    </div></div></section>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <section class="panel"><div class="panel-h"><h2>Calendrier</h2></div><div class="panel-b"><div class="list" style="padding:0">
+      <div class="row"><div class="row-main"><div class="row-t">Assise du samedi</div></div><span class="fld-box" style="min-height:44px;width:140px"><input name="assise_time" type="time" value="{{ s.assise_time|time:'H:i' }}"></span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Grande veillée · début</div></div><span class="fld-box" style="min-height:44px;width:140px"><input name="vigil_time" type="time" value="{{ s.vigil_time|time:'H:i' }}"></span></div>
+      <div class="row"><div class="row-main"><div class="row-t">Rappel par défaut · la veille</div></div><span class="fld-box" style="min-height:44px;width:140px"><input name="reminder_time" type="time" value="{{ s.reminder_time|time:'H:i' }}"></span></div>
+    </div></div></section>
+    <section class="panel"><div class="panel-h"><h2>Modèles de notification</h2></div><div class="panel-b">
+      <label class="fld"><span class="fld-l">Nouveau service</span><span class="fld-box multi"><textarea name="duty_template" rows="3">{{ s.duty_template }}</textarea></span><span class="fld-h">Variables : {prénom} {date} {heure} {poste} {côté}</span></label>
+    </div></section>
+    <section class="panel"><div class="panel-h"><h2>Données et sauvegarde</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+      <span class="status ok"><i></i>Sauvegardes quotidiennes automatiques de la base (Supabase)</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn btn-secondary btn-sm" href="{% url 'backoffice:users_export' %}">Exporter les membres (CSV)</a><a class="btn btn-secondary btn-sm" href="{% url 'backoffice:audit_export' %}">Exporter le journal (CSV)</a></div>
+      <span style="font-size:13px;color:var(--text-secondary)">Une restauration se fait depuis le tableau de bord Supabase (Database → Backups), par l’équipe technique.</span>
+    </div></section>
+  </div>
+</div>
+<div style="margin-top:24px"><button class="btn btn-primary">Enregistrer</button></div>
+</form>
+{% endblock %}

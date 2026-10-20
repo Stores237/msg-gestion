@@ -2,17 +2,27 @@
 {% block title %}Utilisateurs{% endblock %}
 {% block crumb %}<div class="crumb">{{ total }} compte{{ total|pluralize }}</div>{% endblock %}
 {% block heading %}Utilisateurs{% endblock %}
+{% block acts %}{% if can_create %}<a class="btn btn-outline" href="{% url 'backoffice:users_import' %}">{% icon 'file-spreadsheet' %}Importer</a><a class="btn btn-primary" href="{% url 'backoffice:user_new' %}">{% icon 'user-plus' %}Nouvel utilisateur</a>{% endif %}{% endblock %}
 {% block body %}
 <section class="panel">
   <form class="filters" method="get">
     <div class="search">{% icon 'search' 16 %}<input name="q" value="{{ q }}" placeholder="Nom, téléphone…" aria-label="Rechercher"></div>
     <label class="fsel{% if statut %} on{% endif %}"><select name="statut" onchange="this.form.submit()" style="border:none;background:transparent;font:inherit;color:inherit" aria-label="Statut"><option value="">Statut : tous sauf archivés</option>{% for v, l in statuses %}{% if v != 'archive' %}<option value="{{ v }}"{% if v == statut %} selected{% endif %}>{{ l }}</option>{% endif %}{% endfor %}</select></label>
-    {% if q or statut %}<a style="font-size:13px;margin-left:auto" href="{% url 'backoffice:users' %}">Réinitialiser</a>{% endif %}
+    <label class="fsel{% if role %} on{% endif %}"><select name="role" onchange="this.form.submit()" style="border:none;background:transparent;font:inherit;color:inherit" aria-label="Rôle"><option value="">Rôle</option>{% for r in roles %}<option value="{{ r.slug }}"{% if r.slug == role %} selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></label>
+    <label class="fsel{% if groupe %} on{% endif %}"><select name="groupe" onchange="this.form.submit()" style="border:none;background:transparent;font:inherit;color:inherit" aria-label="Groupe"><option value="">Groupe</option>{% for g in groups %}<option value="{{ g.pk }}"{% if g.pk|stringformat:"d" == groupe %} selected{% endif %}>{{ g.name }}</option>{% endfor %}</select></label>
+    <label class="fsel{% if diaspora %} on{% endif %}"><select name="diaspora" onchange="this.form.submit()" style="border:none;background:transparent;font:inherit;color:inherit" aria-label="Diaspora"><option value="">Diaspora</option><option value="1"{% if diaspora == '1' %} selected{% endif %}>Diaspora seulement</option><option value="0"{% if diaspora == '0' %} selected{% endif %}>Sans la diaspora</option></select></label>
+    {% if q or statut or role or groupe or diaspora %}<a style="font-size:13px;margin-left:auto" href="{% url 'backoffice:users' %}">Réinitialiser</a>{% endif %}
   </form>
-  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Téléphone</th><th>Statut</th><th>Rôles</th><th>Dernière connexion</th></tr></thead><tbody>
-    {% for u, roles in rows %}<tr><td><span class="who">{% avatar u 36 %}<span><b>{{ u.full_name }}</b>{% if u.is_diaspora %}<small>Diaspora{% if u.city %} · {{ u.city }}{% endif %}</small>{% endif %}</span></span></td><td class="tnum muted">{{ u.phone|phone }}</td><td>{% status u %}</td><td><span class="rbs">{% for a in roles %}{% role_badge a.role a.ends_on %}{% empty %}<span class="muted">—</span>{% endfor %}</span></td><td class="muted">{{ u.last_login|date:"d/m/Y H:i"|default:"jamais" }}</td></tr>
-    {% empty %}<tr class="empty-row"><td colspan="5">Aucun utilisateur ne correspond.</td></tr>{% endfor %}
+  <form method="post" action="{% url 'backoffice:users_bulk' %}" id="bulk">{% csrf_token %}
+  {% if can_edit %}<div class="bulk" id="bulk-bar" hidden><span id="bulk-count">0 sélectionné</span><div class="acts"><button name="action" value="reset_pin">Réinitialiser le PIN</button><button name="action" value="suspend">Suspendre</button><button name="action" value="export">Exporter</button></div></div>{% endif %}
+  <div class="tbl-wrap"><table class="tbl"><thead><tr>{% if can_edit %}<th><input type="checkbox" aria-label="Tout sélectionner" onchange="document.querySelectorAll('.row-cb').forEach(c=>c.checked=this.checked);bulkUpdate()"></th>{% endif %}<th>Nom</th><th>Téléphone</th><th>Statut</th><th>Rôles</th><th>Dernière connexion</th></tr></thead><tbody>
+    {% for u, roles in rows %}<tr>{% if can_edit %}<td><input class="row-cb" type="checkbox" name="ids" value="{{ u.pk }}" onchange="bulkUpdate()" aria-label="Sélectionner {{ u.full_name }}"></td>{% endif %}<td><a class="who" href="{% url 'backoffice:user' u.pk %}" style="color:inherit">{% avatar u 36 %}<span><b>{{ u.full_name }}</b>{% if u.is_diaspora %}<small>Diaspora{% if u.city %} · {{ u.city }}{% endif %}</small>{% endif %}</span></a></td><td class="tnum muted">{{ u.phone|phone }}</td><td>{% status u %}</td><td><span class="rbs">{% for a in roles %}{% role_badge a.role a.ends_on %}{% empty %}<span class="muted">—</span>{% endfor %}</span></td><td class="muted">{{ u.last_login|date:"d/m/Y H:i"|default:"jamais" }}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="6">Aucun utilisateur ne correspond.</td></tr>{% endfor %}
   </tbody></table></div>
-  <div class="tbl-f"><span>{{ page.start_index }}–{{ page.end_index }} sur {{ page.paginator.count }}</span><div class="pg">{% if page.has_previous %}<a class="iconbtn" aria-label="Précédent" href="?q={{ q|urlencode }}&statut={{ statut }}&page={{ page.previous_page_number }}">{% icon 'chevron-left' 22 %}</a>{% endif %}{% if page.has_next %}<a class="iconbtn" aria-label="Suivant" href="?q={{ q|urlencode }}&statut={{ statut }}&page={{ page.next_page_number }}">{% icon 'chevron-right' 22 %}</a>{% endif %}</div></div>
+  </form>
+  <div class="tbl-f"><span>{{ page.start_index }}–{{ page.end_index }} sur {{ page.paginator.count }}</span><div class="pg">{% if page.has_previous %}<a class="iconbtn" aria-label="Précédent" href="?q={{ q|urlencode }}&statut={{ statut }}&role={{ role }}&groupe={{ groupe }}&diaspora={{ diaspora }}&page={{ page.previous_page_number }}">{% icon 'chevron-left' 22 %}</a>{% endif %}{% if page.has_next %}<a class="iconbtn" aria-label="Suivant" href="?q={{ q|urlencode }}&statut={{ statut }}&role={{ role }}&groupe={{ groupe }}&diaspora={{ diaspora }}&page={{ page.next_page_number }}">{% icon 'chevron-right' 22 %}</a>{% endif %}</div></div>
 </section>
+<script>
+function bulkUpdate(){var n=document.querySelectorAll('.row-cb:checked').length,b=document.getElementById('bulk-bar');if(!b)return;b.hidden=n===0;document.getElementById('bulk-count').textContent=n+' sélectionné'+(n>1?'s':'');}
+</script>
 {% endblock %}

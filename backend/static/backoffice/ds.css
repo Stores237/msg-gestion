@@ -63,3 +63,8 @@
 .empty-row td{text-align:center;color:var(--text-secondary);padding:32px 12px}
 /* The movement's mark (DESIGN.md, 2026-10-20): "MSG" on the primary green. */
 .msg-logo{background:var(--msg-green-500);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em}
+/* Native <dialog> with the design's .dialog look: hidden until opened,
+   centred over a dimmed page. */
+dialog.dialog:not([open]){display:none}
+dialog.dialog{position:fixed;inset:0;margin:auto;height:fit-content;max-height:90vh;overflow:auto;width:calc(100% - 32px)}
+dialog.dialog::backdrop{background:var(--msg-backdrop)}

@@ -2,6 +2,7 @@
 {% block title %}Journal d’audit{% endblock %}
 {% block crumb %}<div class="crumb">Conservation : 5 ans</div>{% endblock %}
 {% block heading %}Journal d’audit{% endblock %}
+{% block acts %}<a class="btn btn-outline" href="{% url 'backoffice:audit_export' %}">{% icon 'file-down' %}CSV</a>{% endblock %}
 {% block body %}
 <section class="panel">
   <div class="filters"><a class="fsel{% if not only_sensitive %} on{% endif %}" href="{% url 'backoffice:audit' %}">Toutes les actions</a><a class="fsel{% if only_sensitive %} on{% endif %}" href="?sensibles=1">Actions sensibles</a></div>

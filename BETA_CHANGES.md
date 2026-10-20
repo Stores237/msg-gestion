@@ -16,6 +16,7 @@ whether it touches real data.
 | 7 | First beta APK (0.1.0 build 1) | No |
 | 8 | Bilingual app (FR/EN) | No |
 | 9 | Members, calendar, announcements (API + app); beta build 2 | New tables; staging demo content |
+| 10 | Everything else in the design (except SMS/push delivery); build 3 | New tables |
 
 ## 1. Backend skeleton
 
@@ -173,3 +174,37 @@ staging URL in `libapp.so`. APK SHA-256
 `750a67a966d2a2b87a26b2710d8cdc813ab6db6a1cec8c54ffda4d85f7c6871c`.
 
 **Verify.** `pytest` (103) and `flutter test` (26).
+
+## 10. The rest of the design — build 3
+
+**What.** Every screen in `design/` is now functional, except what needs an outside account
+(SMS through Twilio, push notifications to the phone).
+- **PIN**: change own PIN; forced change after a temporary PIN; secretary resets (temporary PIN
+  shown once); "Code oublié ?" by SMS (works as soon as Twilio is configured; until then it says
+  to ask the secretary). Trivial PINs (1111, 1234…) refused.
+- **Finances**: cash book with who entered / who validated, never one's own entry, validated lines
+  locked; solidarity collections in thirds with bulk payments; fines and "Mes contributions";
+  quarterly report blocked while lines are pending; PDF exports; registration fee at signup.
+- **Planning**: week grid (2–12 guards → posts × Pariso/Yapoma), alerts (short-staffed, double
+  service, on leave), fair candidates, group fill, publish + notify, "Mes services"
+  (confirm / swap / absence), requests inbox (colleague accepts → chef approves; replacement for
+  absences), alb-washing rotation with 12-month fairness.
+- **Announcements**: PDF/JPEG/PNG attachments (type checked on content, ≤ 10 MB), read receipts,
+  "Relancer les non-lecteurs".
+- **Notifications** (in-app): duties, convocations/announcements, validated payments, new members,
+  day-before and 2-hours-before reminders (`send_reminders`, `send_soon_reminders`, Render cron
+  jobs in production, `/internal/tasks/` on staging), per-member preferences.
+- **Offline**: cached reads + sync line + offline banner; entries, payments, roll call, absence,
+  confirmations and "read" queued and sent when back (idempotent on the server).
+- **Members**: photos, call/SMS buttons, last-4-assises attendance, "Proposer un rôle".
+- **Back-office**: account security (sessions you can close, **backup codes** — usable for login
+  without SMS), user detail (assign with mandate end, revoke with reason, reset PIN, suspend /
+  reactivate, give back-office access with a temporary password + backup codes, groups), new
+  user, spreadsheet import (.xlsx / CSV, error lines excluded, temporary PINs as CSV), bulk
+  actions, filters, assignments with mandate alerts + renew, role requests, role management
+  (new / rename / duplicate / archive), settings (amounts used by the app), CSV exports.
+
+**Data.** New tables: finances, planning, notifications, settings, role requests, backup codes,
+back-office sessions, attachments. Applied with `migrate` (Render runs it on start).
+
+**Verify.** `pytest` (166) and `flutter test` (52).

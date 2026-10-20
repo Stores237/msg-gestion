@@ -6,9 +6,11 @@
     <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}">{% icon 'layout-dashboard' %}Tableau de bord</a>
     <a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>
     <a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}">{% icon 'shield' %}Rôles et permissions</a>
+    <a class="bo-nav{% if nav == 'assign' %} on{% endif %}" href="{% url 'backoffice:assignments' %}">{% icon 'calendar-range' %}Affectations</a>
     <a class="bo-nav{% if nav == 'audit' %} on{% endif %}" href="{% url 'backoffice:audit' %}">{% icon 'scroll-text' %}Journal d’audit</a>
+    <a class="bo-nav{% if nav == 'settings' %} on{% endif %}" href="{% url 'backoffice:settings' %}">{% icon 'settings' %}Paramètres</a>
     <div class="sp"></div>
-    <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><b>{{ request.user.short_name }}</b>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% endif %}</div>
+    <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% endif %}</div>
       <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
   </aside>
   <main class="bo-main">

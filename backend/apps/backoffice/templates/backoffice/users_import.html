@@ -1,0 +1,27 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Importer des utilisateurs{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:users' %}">Utilisateurs</a> ›</div>{% endblock %}
+{% block heading %}Importer des utilisateurs{% endblock %}
+{% block body %}
+<section class="panel"><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+  <div class="steps3"><div class="on"><i></i>1. Fichier</div><div class="{% if data %}on{% endif %}"><i></i>2. Colonnes</div><div class="{% if data %}on{% endif %}"><i></i>3. Vérification</div></div>
+  {% if not data %}
+  <form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}
+    <p style="margin:0;color:var(--text-secondary);line-height:1.55">Un classeur <b>.xlsx</b> ou un <b>CSV</b> (séparateur « ; ») avec une ligne d’en-tête : <code>Nom ; Prénoms ; Téléphone ; Groupe ; Date de naissance ; Téléphone du parent ; Ville</code>. Seuls Nom, Prénoms et Téléphone sont obligatoires.</p>
+    <input type="file" name="file" accept=".xlsx,.csv" required>
+    <div><button class="btn btn-primary">Vérifier le fichier</button></div>
+  </form>
+  {% else %}
+  <div class="file">{% icon 'file-spreadsheet' 20 %}<div><b>{{ data.name }}</b>{{ data.rows|length }} lignes</div></div>
+  <div class="tbl-wrap" style="border-radius:12px;box-shadow:0 0 0 1px var(--border-subtle)"><table class="tbl"><thead><tr><th>Nom</th><th>Téléphone</th><th>Groupe</th><th>Contrôle</th></tr></thead><tbody>
+  {% for r in data.rows %}<tr class="{% if r.error %}err{% endif %}"><td><b>{{ r.last_name }} {{ r.first_name }}</b></td><td class="tnum">{{ r.phone|default:r.raw_phone }}</td><td>{{ r.group|default:"—" }}</td><td>{% if r.error %}<span class="status err"><i></i>{{ r.error }}</span>{% else %}<span class="status ok"><i></i>Valide</span>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p style="margin:0"><b>{{ valid }} ligne{{ valid|pluralize }} valide{{ valid|pluralize }}</b>, {{ invalid }} en erreur (exclue{{ invalid|pluralize }}). Rôle attribué : Membre. Après l’import, un fichier CSV des codes PIN provisoires est téléchargé — à remettre à chaque membre.</p>
+  <form method="post" style="display:flex;gap:8px;flex-wrap:wrap">{% csrf_token %}
+    <button class="btn btn-ghost" name="action" value="cancel">Recommencer</button>
+    {% if invalid %}<button class="btn btn-ghost" name="action" value="errors">Télécharger les erreurs</button>{% endif %}
+    {% if valid %}<button class="btn btn-primary" name="action" value="import">Importer {{ valid }} utilisateur{{ valid|pluralize }}</button>{% endif %}
+  </form>
+  {% endif %}
+</div></section>
+{% endblock %}

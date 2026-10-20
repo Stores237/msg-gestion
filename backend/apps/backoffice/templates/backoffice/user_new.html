@@ -1,0 +1,19 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Nouvel utilisateur{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:users' %}">Utilisateurs</a> ›</div>{% endblock %}
+{% block heading %}Nouvel utilisateur{% endblock %}
+{% block body %}
+<form class="panel" method="post" style="max-width:720px">{% csrf_token %}<div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+  {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
+  <div class="form-grid">
+    <label class="fld"><span class="fld-l">Nom<em> *</em></span><span class="fld-box"><input name="last_name" value="{{ form.last_name }}" required></span></label>
+    <label class="fld"><span class="fld-l">Prénoms<em> *</em></span><span class="fld-box"><input name="first_name" value="{{ form.first_name }}" required></span></label>
+    <label class="fld"><span class="fld-l">Téléphone<em> *</em></span><span class="fld-box"><input name="phone" type="tel" value="{{ form.phone }}" placeholder="6 XX XX XX XX" required></span></label>
+    <label class="fld"><span class="fld-l">Date de naissance</span><span class="fld-box"><input name="birth_date" type="date" value="{{ form.birth_date }}"></span></label>
+    <label class="fld"><span class="fld-l">Ville (diaspora)</span><span class="fld-box"><input name="city" value="{{ form.city }}"></span></label>
+    <label style="display:flex;align-items:center;gap:12px;font-weight:600"><input class="toggle" type="checkbox" name="is_diaspora" value="1"{% if form.is_diaspora %} checked{% endif %}> Membre de la diaspora</label>
+  </div>
+  <div class="notice">{% icon 'info' %}<span>Rôle attribué : Membre. Un code PIN provisoire s’affiche à l’enregistrement ; le membre en choisit un personnel à sa première connexion.</span></div>
+  <div><button class="btn btn-primary">Créer l’utilisateur</button></div>
+</div></form>
+{% endblock %}

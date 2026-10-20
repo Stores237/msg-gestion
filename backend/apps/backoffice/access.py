@@ -14,11 +14,13 @@ from django.conf import settings
 from django.core import signing
 from django.core.cache import cache
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from apps.core.audit import client_ip
 
 SESSION_OTP_OK = "bo_otp_ok"
 SESSION_PENDING = "bo_pending_user"
+SESSION_SMS_OK = "bo_sms_ok"
 TRUST_COOKIE = "bo_trust"
 TRUST_SALT = "backoffice.trusted-device"
 
@@ -63,6 +65,16 @@ def backoffice_view(resource="backoffice.users", action="view"):
             user = request.user
             if not user.is_authenticated or not request.session.get(SESSION_OTP_OK):
                 return redirect("backoffice:login")
+            # A session closed from "Sessions actives" ends here.
+            from .models import BackofficeSession
+
+            live = BackofficeSession.objects.filter(session_key=request.session.session_key)
+            if not live.exists():
+                from django.contrib.auth import logout
+
+                logout(request)
+                return redirect("backoffice:login")
+            live.update(last_seen=timezone.now())
             if not user.can(resource, action):
                 return render(request, "backoffice/forbidden.html", status=403)
             return view(request, *args, **kwargs)

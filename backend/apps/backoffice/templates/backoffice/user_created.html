@@ -1,0 +1,11 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Utilisateur créé{% endblock %}
+{% block heading %}Utilisateur créé{% endblock %}
+{% block body %}
+<section class="panel" style="max-width:640px"><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+  <div class="notice ok">{% icon 'circle-check' %}<span><b>{{ member.full_name }}</b> peut se connecter à l’application.</span></div>
+  <p style="margin:0">Code PIN provisoire : <b class="tnum" style="font:800 22px var(--font-mono)">{{ pin }}</b></p>
+  <p style="margin:0;color:var(--text-secondary)">Communiquez-le en personne ; il ne sera plus affiché.</p>
+  <div style="display:flex;gap:8px"><a class="btn btn-secondary" href="{% url 'backoffice:user' member.pk %}">Voir la fiche</a><a class="btn btn-ghost" href="{% url 'backoffice:user_new' %}">Créer un autre</a></div>
+</div></section>
+{% endblock %}

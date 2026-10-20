@@ -9,15 +9,18 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.accounts import registry
-from apps.accounts.models import Role, RoleAssignment, User
+from apps.accounts.models import Role, RoleAssignment, RoleRequest, User
 from apps.accounts.phone import InvalidPhone, mask_phone, normalize_phone
 from apps.accounts.services import RuleViolation, set_role_permissions
 from apps.core import audit, sms
+from apps.core.audit import client_ip
 from apps.core.models import AuditLog
+from apps.planning.models import ServiceGroup
 
 from .access import (
     SESSION_OTP_OK,
     SESSION_PENDING,
+    SESSION_SMS_OK,
     TRUST_COOKIE,
     backoffice_view,
     can_enter,
@@ -25,6 +28,7 @@ from .access import (
     rate_limited,
     trust_token,
 )
+from .models import BackofficeSession, BackupCode
 
 BAD_LOGIN = "Numéro ou mot de passe incorrect."
 
@@ -52,12 +56,16 @@ def login_view(request):
             return render(request, "backoffice/login.html", ctx, status=401)
         if is_trusted(request, user):
             return _complete_login(request, user, trusted=True)
+        sms_ok = True
         try:
             sms.send_code(user.phone)
         except sms.SmsUnavailable:
-            ctx["error"] = "Le code de vérification n’a pas pu être envoyé. Réessayez dans quelques minutes."
-            return render(request, "backoffice/login.html", ctx, status=503)
+            sms_ok = False
+            if not BackupCode.remaining(user):
+                ctx["error"] = "Le code de vérification n’a pas pu être envoyé. Réessayez dans quelques minutes."
+                return render(request, "backoffice/login.html", ctx, status=503)
         request.session[SESSION_PENDING] = user.pk
+        request.session[SESSION_SMS_OK] = sms_ok
         return redirect("backoffice:otp")
     return render(request, "backoffice/login.html", ctx)
 
@@ -67,7 +75,20 @@ def otp_view(request):
     user = User.objects.filter(pk=request.session.get(SESSION_PENDING)).first()
     if user is None:
         return redirect("backoffice:login")
-    ctx = {"masked": mask_phone(user.phone)}
+    sms_ok = request.session.get(SESSION_SMS_OK, True)
+    ctx = {"masked": mask_phone(user.phone), "sms_ok": sms_ok, "backup": request.GET.get("secours") == "1" or not sms_ok}
+    if request.method == "POST" and request.POST.get("backup_code") is not None:
+        if rate_limited(request, "otp", 20):
+            ctx["error"] = "Trop de tentatives. Réessayez dans une heure."
+            return render(request, "backoffice/otp.html", ctx, status=429)
+        if BackupCode.consume(user, request.POST.get("backup_code")):
+            audit.record("Connexion avec un code de secours", actor=user, obj=user, request=request,
+                         detail={"restants": BackupCode.remaining(user)})
+            return _complete_login(request, user)
+        audit.record("Code de secours refusé", obj=user, request=request)
+        ctx["error"] = "Code de secours incorrect ou déjà utilisé."
+        ctx["backup"] = True
+        return render(request, "backoffice/otp.html", ctx, status=401)
     if request.method == "POST":
         if rate_limited(request, "otp", 20):
             ctx["error"] = "Trop de tentatives. Réessayez dans une heure."
@@ -106,13 +127,20 @@ def otp_view(request):
 def _complete_login(request, user, trusted=False):
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session.pop(SESSION_PENDING, None)
+    request.session.pop(SESSION_SMS_OK, None)
     request.session[SESSION_OTP_OK] = True
+    request.session.save()
+    BackofficeSession.objects.update_or_create(
+        session_key=request.session.session_key,
+        defaults={"user": user, "device": request.META.get("HTTP_USER_AGENT", "")[:200], "ip": client_ip(request)},
+    )
     audit.record("Connexion back-office", actor=user, obj=user, request=request, detail={"appareil_de_confiance": trusted})
     return redirect("backoffice:dashboard")
 
 
 @require_POST
 def logout_view(request):
+    BackofficeSession.objects.filter(session_key=request.session.session_key).delete()
     logout(request)
     return redirect("backoffice:login")
 
@@ -136,6 +164,11 @@ def dashboard(request):
         "min_super_admins": registry.MIN_SUPER_ADMINS,
         "recent": AuditLog.objects.filter(sensitive=True).select_related("actor")[:6],
         "can_see_finances": request.user.can("finances.cashbook", "view"),
+        "requests": RoleRequest.objects.filter(status=RoleRequest.Status.PENDING).select_related("member", "role", "requested_by")[:10],
+        "expiring": soon.select_related("user", "role")[:5],
+        "users_total": User.objects.exclude(status=User.Status.ARCHIVED).count(),
+        "active_roles": Role.objects.filter(is_archived=False).count(),
+        "last_activity": AuditLog.objects.first(),
     }
     return render(request, "backoffice/dashboard.html", ctx)
 
@@ -149,6 +182,15 @@ def users(request):
         qs = qs.filter(Q(last_name__icontains=q) | Q(first_name__icontains=q) | Q(phone__icontains=q.replace(" ", "")))
     if status:
         qs = qs.filter(status=status)
+    role = request.GET.get("role", "")
+    if role:
+        qs = qs.filter(assignments__role__slug=role, assignments__revoked_at__isnull=True).distinct()
+    group = request.GET.get("groupe", "")
+    if group.isdigit():
+        qs = qs.filter(service_groups__pk=int(group))
+    diaspora = request.GET.get("diaspora", "")
+    if diaspora in ("1", "0"):
+        qs = qs.filter(is_diaspora=diaspora == "1")
     page = Paginator(qs, 25).get_page(request.GET.get("page"))
     today = timezone.localdate()
     rows = []
@@ -158,7 +200,10 @@ def users(request):
     return render(
         request,
         "backoffice/users.html",
-        {"nav": "users", "rows": rows, "page": page, "q": q, "statut": status, "statuses": User.Status.choices, "total": qs.count()},
+        {"nav": "users", "rows": rows, "page": page, "q": q, "statut": status, "statuses": User.Status.choices, "total": qs.count(),
+         "role": role, "groupe": group, "diaspora": diaspora, "roles": Role.objects.filter(is_archived=False),
+         "groups": ServiceGroup.objects.all(), "can_edit": request.user.can("backoffice.users", "change"),
+         "can_create": request.user.can("backoffice.users", "create")},
     )
 
 

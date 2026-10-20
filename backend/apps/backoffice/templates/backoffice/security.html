@@ -1,0 +1,23 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Sécurité du compte{% endblock %}
+{% block crumb %}<div class="crumb">Mon compte</div>{% endblock %}
+{% block heading %}Sécurité du compte{% endblock %}
+{% block acts %}<form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="close_others">Déconnecter les autres sessions</button></form>{% endblock %}
+{% block body %}
+{% if new_codes %}
+<section class="panel"><div class="panel-h"><h2>Vos nouveaux codes de secours</h2></div><div class="panel-b">
+  <div class="notice warn">{% icon 'triangle-alert' %}<span>Notez-les maintenant : ils ne seront plus affichés. Chaque code fonctionne une seule fois. Les anciens codes ne marchent plus.</span></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:12px;font:700 18px var(--font-mono)">{% for c in new_codes %}<span class="tnum">{{ c }}</span>{% endfor %}</div>
+</div></section>
+{% endif %}
+<section class="panel"><div class="panel-h"><h2>Sessions actives · {{ sessions|length }}</h2></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Appareil</th><th>Adresse IP</th><th>Connexion</th><th>Dernière activité</th><th></th></tr></thead><tbody>
+  {% for s in sessions %}<tr><td><span class="who"><span class="ichip green" style="width:36px;height:36px">{% icon 'laptop' %}</span><b>{{ s.device|truncatechars:60|default:"Appareil inconnu" }}</b></span></td><td class="muted tnum">{{ s.ip|default:"—" }}</td><td class="muted">{{ s.created_at|date:"d/m/Y H:i" }}</td><td>{{ s.last_seen|date:"d/m/Y H:i" }}</td>
+    <td style="text-align:right">{% if s.session_key == current %}<span class="badge green">Cette session</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="id" value="{{ s.pk }}"><button class="btn btn-ghost btn-sm" name="action" value="close">Déconnecter</button></form>{% endif %}</td></tr>
+  {% endfor %}</tbody></table></div></section>
+<div class="bo-cols half">
+  <section class="panel"><div class="panel-h"><h2>Double authentification</h2></div><div class="panel-b" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="status ok"><i></i>Activée · SMS au {{ phone }}</span><span class="muted" style="font-size:13px;color:var(--text-secondary)">ou code de secours</span></div></section>
+  <section class="panel"><div class="panel-h"><h2>Codes de secours</h2></div><div class="panel-b" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:14px">{{ codes_left }} codes restants sur {{ codes_total }}</span>
+    <form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="codes">Régénérer</button></form></div></section>
+</div>
+{% endblock %}

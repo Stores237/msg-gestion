@@ -2,12 +2,15 @@
 {% block title %}Rôles et permissions{% endblock %}
 {% block crumb %}<div class="crumb">{{ roles|length }} rôles actifs</div>{% endblock %}
 {% block heading %}Rôles et permissions{% endblock %}
+{% block acts %}{% if can_edit %}<button class="btn btn-primary" onclick="document.getElementById('dlg-new-role').showModal()">{% icon 'plus' %}Nouveau rôle</button>{% endif %}{% endblock %}
 {% block body %}
 <div class="bo-cols roles">
   <section class="panel"><div class="panel-h"><h2>Rôles</h2></div><div class="rolelist">{% for r, n in roles %}<a href="{% url 'backoffice:role' r.slug %}" class="{% if r == role %}on{% endif %}">{% role_badge r %}<small>{{ n }}</small></a>{% endfor %}</div></section>
   <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
     <form class="panel" method="post">{% csrf_token %}
-      <div class="panel-h"><h2 style="display:flex;gap:10px;align-items:center">{{ role.name }} {% if role.mandate_months %}<span class="rb bureau"><i></i>Bureau · mandat {{ role.mandate_months }} mois</span>{% endif %}</h2></div>
+      <div class="panel-h"><h2 style="display:flex;gap:10px;align-items:center">{{ role.name }} {% if role.mandate_months %}<span class="rb bureau"><i></i>Bureau · mandat {{ role.mandate_months }} mois</span>{% endif %}</h2>
+        {% if can_edit %}<div class="acts"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('dlg-rename').showModal()">Renommer</button>
+          <button type="submit" form="f-dup" class="btn btn-ghost btn-sm">Dupliquer</button><button type="submit" form="f-arch" class="btn btn-ghost btn-sm">Archiver</button></div>{% endif %}</div>
       <div class="tbl-wrap"><table class="pm"><thead><tr><th>Module · objet</th>{% for a in actions %}<th>{{ a }}</th>{% endfor %}</tr></thead><tbody>
         {% for line in matrix %}{% if line.module %}<tr class="mod"><td colspan="7">{{ line.module }}</td></tr>{% else %}<tr><td><b>{{ line.label }}</b>{% if line.sensitive %}<small>Données sensibles</small>{% endif %}</td>{% for c in line.cells %}<td>{% if c.state == 'na' %}<span class="pc na">—</span>{% elif c.state == 'lock' %}<span class="pc lock" title="Bloqué : séparation des tâches">{% icon 'lock' 14 %}</span>{% elif can_edit %}<label class="pc"><input type="checkbox" name="perm" value="{{ c.value }}"{% if c.state == 'on' %} checked{% endif %} aria-label="{{ line.label }}">{% icon 'check' 16 %}</label>{% else %}<span class="pc{% if c.state == 'on' %} on{% endif %}">{% if c.state == 'on' %}{% icon 'check' 16 %}{% endif %}</span>{% endif %}</td>{% endfor %}</tr>{% endif %}{% endfor %}
       </tbody></table>
@@ -18,4 +21,16 @@
     <section class="panel"><div class="panel-h"><h2>Personnes ayant ce rôle · {{ holders|length }}</h2></div><div class="list">{% for a in holders %}<div class="row">{% avatar a.user 36 %}<div class="row-main"><div class="row-t">{{ a.user.full_name }}</div><div class="row-s">depuis le {{ a.starts_on|date:"d/m/Y" }}{% if a.ends_on %} · jusqu’au {{ a.ends_on|date:"d/m/Y" }}{% endif %}</div></div></div>{% empty %}<div class="row"><div class="row-s">Personne n’a ce rôle actuellement.</div></div>{% endfor %}</div></section>
   </div>
 </div>
+{% if can_edit %}
+<form id="f-dup" method="post" action="{% url 'backoffice:role_manage' role.slug %}">{% csrf_token %}<input type="hidden" name="action" value="duplicate"></form>
+<form id="f-arch" method="post" action="{% url 'backoffice:role_manage' role.slug %}" onsubmit="return confirm('Archiver ce rôle ?')">{% csrf_token %}<input type="hidden" name="action" value="archive"></form>
+<dialog id="dlg-rename" class="dialog" style="border:none;padding:24px;max-width:440px"><form method="post" action="{% url 'backoffice:role_manage' role.slug %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="rename"><h3>Renommer le rôle</h3>
+  <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" value="{{ role.name }}" required></span></label>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div></form></dialog>
+<dialog id="dlg-new-role" class="dialog" style="border:none;padding:24px;max-width:440px"><form method="post" action="{% url 'backoffice:role_new' %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="new"><h3>Nouveau rôle</h3>
+  <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" required placeholder="Responsable matériel"></span></label>
+  <label class="fld"><span class="fld-l">Type</span><span class="fld-box"><select name="kind"><option value="standard">Standard</option><option value="temporaire">Temporaire</option><option value="bureau">Bureau (mandat)</option></select></span></label>
+  <p style="margin:0;font-size:13px;color:var(--text-secondary)">Le rôle est créé sans aucune permission ; cochez-les ensuite dans la matrice.</p>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Créer</button></div></form></dialog>
+{% endif %}
 {% endblock %}
