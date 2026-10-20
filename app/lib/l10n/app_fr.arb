@@ -97,5 +97,273 @@
   "roleGroupLeader": "Chef de groupe",
   "roleCensorOfTheDay": "Censeur du jour",
   "roleMember": "Membre",
-  "roleGuard": "Garde"
+  "roleGuard": "Garde",
+  "seeAll": "Tout voir",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "close": "Fermer",
+  "search": "Rechercher",
+  "required": "Ce champ est obligatoire.",
+  "restrictedTitle": "Accès réservé",
+  "pullToRefresh": "Tirez pour actualiser",
+  "loadError": "Chargement impossible",
+  "statusActive": "Actif",
+  "statusLeave": "En congé",
+  "statusRetired": "Classé",
+  "statusSuspended": "Suspendu",
+  "diaspora": "Diaspora",
+  "minor": "Mineur",
+  "membersSubtitle": "{n} gardes",
+  "@membersSubtitle": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "membersSearchHint": "Rechercher un nom, un numéro…",
+  "filterAll": "Tous {n}",
+  "@filterAll": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterActive": "Actifs {n}",
+  "@filterActive": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterLeave": "En congé {n}",
+  "@filterLeave": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterRetired": "Classés {n}",
+  "@filterRetired": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterDiaspora": "Diaspora {n}",
+  "@filterDiaspora": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "theBureau": "Le bureau",
+  "theBureauSub": "Rôles du bureau et mandats",
+  "mandateUntil": "Mandat jusqu’au {date}",
+  "@mandateUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "guardSince": "Garde · depuis {year}",
+  "@guardSince": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "noMembersFound": "Aucun membre ne correspond.",
+  "addMember": "Ajouter",
+  "profile": "Profil",
+  "information": "Informations",
+  "phone": "Téléphone",
+  "joinedOn": "Date d’adhésion",
+  "birthDate": "Date de naissance",
+  "parentOrGuardian": "Parent ou tuteur",
+  "contributions": "Contributions",
+  "restrictedMinorContacts": "Les contacts des membres mineurs sont visibles uniquement par le président et le secrétaire général.",
+  "restrictedContributions": "L’historique des contributions est réservé au trésorier, au commissaire aux comptes et au président.",
+  "call": "Appeler",
+  "newMember": "Nouveau membre",
+  "lastNameLabel": "Nom",
+  "firstNamesLabel": "Prénoms",
+  "birthDateHint": "Choisir une date",
+  "ageMinorHint": "{age} ans · contact du parent obligatoire",
+  "@ageMinorHint": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "diasporaMember": "Membre de la diaspora",
+  "cityCountry": "Ville, pays",
+  "parentName": "Nom du parent ou tuteur",
+  "parentRelation": "Lien (mère, père, tuteur…)",
+  "parentPhone": "Téléphone du parent ou tuteur",
+  "parentRequired": "Ce champ est obligatoire pour un mineur.",
+  "phoneTaken": "Ce numéro est déjà celui d’un membre.",
+  "saveMember": "Enregistrer le membre",
+  "memberSavedTitle": "Membre enregistré",
+  "memberSavedPin": "Code PIN provisoire de {name} : {pin}. Communiquez-le en personne ; il ne sera plus affiché.",
+  "@memberSavedPin": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "monthView": "Mois",
+  "agendaView": "Agenda",
+  "previousMonth": "Mois précédent",
+  "nextMonth": "Mois suivant",
+  "newEvent": "Nouvel événement",
+  "noEventsDay": "Rien de prévu ce jour.",
+  "noEventsUpcoming": "Aucun événement à venir.",
+  "kindAssise": "Assise du samedi",
+  "kindMass": "Messe",
+  "kindOutsideService": "Service extérieur",
+  "kindVigil": "Grande veillée",
+  "kindMeeting": "Réunion",
+  "kindOther": "Autre",
+  "dressInside": "Tenue intérieure",
+  "dressOutside": "Tenue extérieure",
+  "dressSport": "Tenue sportive",
+  "dressCivil": "Tenue civile",
+  "dressNone": "Pas de tenue imposée",
+  "myPresence": "Ma présence",
+  "presenceNotMarked": "Pas encore marquée",
+  "presenceNotMarkedSub": "Le censeur fait l’appel sur place",
+  "presencePresent": "Présent",
+  "presenceAbsent": "Absent",
+  "presenceExcused": "Excusé",
+  "warnAbsence": "Prévenir d’une absence",
+  "absenceReason": "Motif (facultatif)",
+  "absenceSent": "Absence signalée au censeur.",
+  "alreadyMarked": "La présence est déjà marquée par le censeur.",
+  "takeRollCall": "Faire l’appel",
+  "rollCallTitle": "Appel · {title}",
+  "@rollCallTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "statPresent": "Présents",
+  "statAbsent": "Absents",
+  "statExcused": "Excusés",
+  "statRemaining": "Restants",
+  "remote": "À distance",
+  "rollCallSaved": "Appel enregistré.",
+  "unsavedChanges": "{n, plural, =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}",
+  "@unsavedChanges": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "eventKind": "Type",
+  "eventTitle": "Titre",
+  "eventDate": "Date",
+  "eventStart": "Début",
+  "eventEnd": "Fin (facultatif)",
+  "eventPlace": "Lieu",
+  "eventDress": "Tenue",
+  "eventNotes": "Notes",
+  "eventEndBeforeStart": "La fin doit être après le début.",
+  "eventCreated": "Événement ajouté au calendrier.",
+  "nightUntil": "→ {time} · nuit",
+  "@nightUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "filterAnnAll": "Toutes",
+  "filterConvocations": "Convocations",
+  "filterUnread": "Non lues {n}",
+  "@filterUnread": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterSent": "Envoyées",
+  "kindAnnouncement": "Annonce",
+  "kindConvocation": "Convocation",
+  "pinned": "Épinglé",
+  "unreadDot": "Non lu",
+  "readBy": "Lu par {read} sur {total}",
+  "@readBy": {
+    "placeholders": {
+      "read": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "compose": "Rédiger",
+  "newAnnouncement": "Nouvelle annonce",
+  "message": "Message",
+  "linkedEvent": "Événement lié",
+  "chooseEvent": "Choisir un événement",
+  "eventRequired": "Une convocation doit être liée à un événement.",
+  "pinOnTop": "Épingler en tête du fil",
+  "recipientsAll": "Tous les membres",
+  "sendAnnouncement": "Publier l’annonce",
+  "sendConvocation": "Envoyer la convocation",
+  "announcementSent": "Publié.",
+  "allRead": "Tout est lu",
+  "allReadBody": "Les nouvelles annonces et convocations du bureau apparaîtront ici.",
+  "noAnnouncements": "Aucune annonce",
+  "readReceipts": "Accusés de lecture",
+  "notReadYet": "Non lu {n}",
+  "@notReadYet": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "readTab": "Lu {n}",
+  "@readTab": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "nextMeeting": "Prochain rendez-vous",
+  "lastAnnouncement": "Dernière annonce",
+  "nothingPlanned": "Rien de prévu pour l’instant.",
+  "calendarLink": "Calendrier",
+  "allAnnouncements": "Toutes",
+  "myAccount": "Mon compte",
+  "readStatus": "Lu",
+  "openAccount": "Ouvrir mon compte",
+  "unreadCount": "{n, plural, =1{1 annonce non lue} other{{n} annonces non lues}}",
+  "@unreadCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

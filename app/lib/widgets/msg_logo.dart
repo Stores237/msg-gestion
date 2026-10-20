@@ -19,11 +19,19 @@ class MsgLogo extends StatelessWidget {
         width: size,
         height: size,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: c.primary, borderRadius: BorderRadius.circular(size > 60 ? 24 : 12)),
+        decoration: BoxDecoration(
+          color: c.primary,
+          borderRadius: BorderRadius.circular(size > 60 ? 24 : 12),
+        ),
         child: ExcludeSemantics(
           child: Text(
             'MSG',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: size * 0.3, letterSpacing: size * 0.01),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: size * 0.3,
+              letterSpacing: size * 0.01,
+            ),
           ),
         ),
       ),

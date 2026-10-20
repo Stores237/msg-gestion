@@ -433,6 +433,822 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Garde'**
   String get roleGuard;
+
+  /// No description provided for @seeAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout voir'**
+  String get seeAll;
+
+  /// No description provided for @save.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer'**
+  String get save;
+
+  /// No description provided for @cancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get cancel;
+
+  /// No description provided for @close.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get close;
+
+  /// No description provided for @search.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher'**
+  String get search;
+
+  /// No description provided for @required.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est obligatoire.'**
+  String get required;
+
+  /// No description provided for @restrictedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès réservé'**
+  String get restrictedTitle;
+
+  /// No description provided for @pullToRefresh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tirez pour actualiser'**
+  String get pullToRefresh;
+
+  /// No description provided for @loadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chargement impossible'**
+  String get loadError;
+
+  /// No description provided for @statusActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actif'**
+  String get statusActive;
+
+  /// No description provided for @statusLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'En congé'**
+  String get statusLeave;
+
+  /// No description provided for @statusRetired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classé'**
+  String get statusRetired;
+
+  /// No description provided for @statusSuspended.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suspendu'**
+  String get statusSuspended;
+
+  /// No description provided for @diaspora.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diaspora'**
+  String get diaspora;
+
+  /// No description provided for @minor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mineur'**
+  String get minor;
+
+  /// No description provided for @membersSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} gardes'**
+  String membersSubtitle(int n);
+
+  /// No description provided for @membersSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un nom, un numéro…'**
+  String get membersSearchHint;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous {n}'**
+  String filterAll(int n);
+
+  /// No description provided for @filterActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Actifs {n}'**
+  String filterActive(int n);
+
+  /// No description provided for @filterLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'En congé {n}'**
+  String filterLeave(int n);
+
+  /// No description provided for @filterRetired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Classés {n}'**
+  String filterRetired(int n);
+
+  /// No description provided for @filterDiaspora.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diaspora {n}'**
+  String filterDiaspora(int n);
+
+  /// No description provided for @theBureau.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le bureau'**
+  String get theBureau;
+
+  /// No description provided for @theBureauSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôles du bureau et mandats'**
+  String get theBureauSub;
+
+  /// No description provided for @mandateUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mandat jusqu’au {date}'**
+  String mandateUntil(String date);
+
+  /// No description provided for @guardSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Garde · depuis {year}'**
+  String guardSince(int year);
+
+  /// No description provided for @noMembersFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun membre ne correspond.'**
+  String get noMembersFound;
+
+  /// No description provided for @addMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter'**
+  String get addMember;
+
+  /// No description provided for @profile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Profil'**
+  String get profile;
+
+  /// No description provided for @information.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations'**
+  String get information;
+
+  /// No description provided for @phone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get phone;
+
+  /// No description provided for @joinedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date d’adhésion'**
+  String get joinedOn;
+
+  /// No description provided for @birthDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de naissance'**
+  String get birthDate;
+
+  /// No description provided for @parentOrGuardian.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parent ou tuteur'**
+  String get parentOrGuardian;
+
+  /// No description provided for @contributions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contributions'**
+  String get contributions;
+
+  /// No description provided for @restrictedMinorContacts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les contacts des membres mineurs sont visibles uniquement par le président et le secrétaire général.'**
+  String get restrictedMinorContacts;
+
+  /// No description provided for @restrictedContributions.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’historique des contributions est réservé au trésorier, au commissaire aux comptes et au président.'**
+  String get restrictedContributions;
+
+  /// No description provided for @call.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler'**
+  String get call;
+
+  /// No description provided for @newMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau membre'**
+  String get newMember;
+
+  /// No description provided for @lastNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get lastNameLabel;
+
+  /// No description provided for @firstNamesLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénoms'**
+  String get firstNamesLabel;
+
+  /// No description provided for @birthDateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir une date'**
+  String get birthDateHint;
+
+  /// No description provided for @ageMinorHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{age} ans · contact du parent obligatoire'**
+  String ageMinorHint(int age);
+
+  /// No description provided for @diasporaMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre de la diaspora'**
+  String get diasporaMember;
+
+  /// No description provided for @cityCountry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ville, pays'**
+  String get cityCountry;
+
+  /// No description provided for @parentName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du parent ou tuteur'**
+  String get parentName;
+
+  /// No description provided for @parentRelation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien (mère, père, tuteur…)'**
+  String get parentRelation;
+
+  /// No description provided for @parentPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone du parent ou tuteur'**
+  String get parentPhone;
+
+  /// No description provided for @parentRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce champ est obligatoire pour un mineur.'**
+  String get parentRequired;
+
+  /// No description provided for @phoneTaken.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro est déjà celui d’un membre.'**
+  String get phoneTaken;
+
+  /// No description provided for @saveMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le membre'**
+  String get saveMember;
+
+  /// No description provided for @memberSavedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre enregistré'**
+  String get memberSavedTitle;
+
+  /// No description provided for @memberSavedPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN provisoire de {name} : {pin}. Communiquez-le en personne ; il ne sera plus affiché.'**
+  String memberSavedPin(String name, String pin);
+
+  /// No description provided for @monthView.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get monthView;
+
+  /// No description provided for @agendaView.
+  ///
+  /// In fr, this message translates to:
+  /// **'Agenda'**
+  String get agendaView;
+
+  /// No description provided for @previousMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois précédent'**
+  String get previousMonth;
+
+  /// No description provided for @nextMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois suivant'**
+  String get nextMonth;
+
+  /// No description provided for @newEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvel événement'**
+  String get newEvent;
+
+  /// No description provided for @noEventsDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de prévu ce jour.'**
+  String get noEventsDay;
+
+  /// No description provided for @noEventsUpcoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun événement à venir.'**
+  String get noEventsUpcoming;
+
+  /// No description provided for @kindAssise.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assise du samedi'**
+  String get kindAssise;
+
+  /// No description provided for @kindMass.
+  ///
+  /// In fr, this message translates to:
+  /// **'Messe'**
+  String get kindMass;
+
+  /// No description provided for @kindOutsideService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service extérieur'**
+  String get kindOutsideService;
+
+  /// No description provided for @kindVigil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grande veillée'**
+  String get kindVigil;
+
+  /// No description provided for @kindMeeting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réunion'**
+  String get kindMeeting;
+
+  /// No description provided for @kindOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get kindOther;
+
+  /// No description provided for @dressInside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenue intérieure'**
+  String get dressInside;
+
+  /// No description provided for @dressOutside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenue extérieure'**
+  String get dressOutside;
+
+  /// No description provided for @dressSport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenue sportive'**
+  String get dressSport;
+
+  /// No description provided for @dressCivil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenue civile'**
+  String get dressCivil;
+
+  /// No description provided for @dressNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de tenue imposée'**
+  String get dressNone;
+
+  /// No description provided for @myPresence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ma présence'**
+  String get myPresence;
+
+  /// No description provided for @presenceNotMarked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore marquée'**
+  String get presenceNotMarked;
+
+  /// No description provided for @presenceNotMarkedSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le censeur fait l’appel sur place'**
+  String get presenceNotMarkedSub;
+
+  /// No description provided for @presencePresent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Présent'**
+  String get presencePresent;
+
+  /// No description provided for @presenceAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Absent'**
+  String get presenceAbsent;
+
+  /// No description provided for @presenceExcused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excusé'**
+  String get presenceExcused;
+
+  /// No description provided for @warnAbsence.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévenir d’une absence'**
+  String get warnAbsence;
+
+  /// No description provided for @absenceReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (facultatif)'**
+  String get absenceReason;
+
+  /// No description provided for @absenceSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Absence signalée au censeur.'**
+  String get absenceSent;
+
+  /// No description provided for @alreadyMarked.
+  ///
+  /// In fr, this message translates to:
+  /// **'La présence est déjà marquée par le censeur.'**
+  String get alreadyMarked;
+
+  /// No description provided for @takeRollCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire l’appel'**
+  String get takeRollCall;
+
+  /// No description provided for @rollCallTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel · {title}'**
+  String rollCallTitle(String title);
+
+  /// No description provided for @statPresent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Présents'**
+  String get statPresent;
+
+  /// No description provided for @statAbsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Absents'**
+  String get statAbsent;
+
+  /// No description provided for @statExcused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Excusés'**
+  String get statExcused;
+
+  /// No description provided for @statRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restants'**
+  String get statRemaining;
+
+  /// No description provided for @remote.
+  ///
+  /// In fr, this message translates to:
+  /// **'À distance'**
+  String get remote;
+
+  /// No description provided for @rollCallSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appel enregistré.'**
+  String get rollCallSaved;
+
+  /// No description provided for @unsavedChanges.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}'**
+  String unsavedChanges(int n);
+
+  /// No description provided for @eventKind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get eventKind;
+
+  /// No description provided for @eventTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Titre'**
+  String get eventTitle;
+
+  /// No description provided for @eventDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date'**
+  String get eventDate;
+
+  /// No description provided for @eventStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Début'**
+  String get eventStart;
+
+  /// No description provided for @eventEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin (facultatif)'**
+  String get eventEnd;
+
+  /// No description provided for @eventPlace.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lieu'**
+  String get eventPlace;
+
+  /// No description provided for @eventDress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenue'**
+  String get eventDress;
+
+  /// No description provided for @eventNotes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notes'**
+  String get eventNotes;
+
+  /// No description provided for @eventEndBeforeStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'La fin doit être après le début.'**
+  String get eventEndBeforeStart;
+
+  /// No description provided for @eventCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement ajouté au calendrier.'**
+  String get eventCreated;
+
+  /// No description provided for @nightUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'→ {time} · nuit'**
+  String nightUntil(String time);
+
+  /// No description provided for @filterAnnAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get filterAnnAll;
+
+  /// No description provided for @filterConvocations.
+  ///
+  /// In fr, this message translates to:
+  /// **'Convocations'**
+  String get filterConvocations;
+
+  /// No description provided for @filterUnread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non lues {n}'**
+  String filterUnread(int n);
+
+  /// No description provided for @filterSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyées'**
+  String get filterSent;
+
+  /// No description provided for @kindAnnouncement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce'**
+  String get kindAnnouncement;
+
+  /// No description provided for @kindConvocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Convocation'**
+  String get kindConvocation;
+
+  /// No description provided for @pinned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épinglé'**
+  String get pinned;
+
+  /// No description provided for @unreadDot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non lu'**
+  String get unreadDot;
+
+  /// No description provided for @readBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu par {read} sur {total}'**
+  String readBy(int read, int total);
+
+  /// No description provided for @compose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rédiger'**
+  String get compose;
+
+  /// No description provided for @newAnnouncement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle annonce'**
+  String get newAnnouncement;
+
+  /// No description provided for @message.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @linkedEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement lié'**
+  String get linkedEvent;
+
+  /// No description provided for @chooseEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un événement'**
+  String get chooseEvent;
+
+  /// No description provided for @eventRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une convocation doit être liée à un événement.'**
+  String get eventRequired;
+
+  /// No description provided for @pinOnTop.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épingler en tête du fil'**
+  String get pinOnTop;
+
+  /// No description provided for @recipientsAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres'**
+  String get recipientsAll;
+
+  /// No description provided for @sendAnnouncement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publier l’annonce'**
+  String get sendAnnouncement;
+
+  /// No description provided for @sendConvocation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la convocation'**
+  String get sendConvocation;
+
+  /// No description provided for @announcementSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publié.'**
+  String get announcementSent;
+
+  /// No description provided for @allRead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout est lu'**
+  String get allRead;
+
+  /// No description provided for @allReadBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les nouvelles annonces et convocations du bureau apparaîtront ici.'**
+  String get allReadBody;
+
+  /// No description provided for @noAnnouncements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune annonce'**
+  String get noAnnouncements;
+
+  /// No description provided for @readReceipts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accusés de lecture'**
+  String get readReceipts;
+
+  /// No description provided for @notReadYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non lu {n}'**
+  String notReadYet(int n);
+
+  /// No description provided for @readTab.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu {n}'**
+  String readTab(int n);
+
+  /// No description provided for @nextMeeting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain rendez-vous'**
+  String get nextMeeting;
+
+  /// No description provided for @lastAnnouncement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière annonce'**
+  String get lastAnnouncement;
+
+  /// No description provided for @nothingPlanned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de prévu pour l’instant.'**
+  String get nothingPlanned;
+
+  /// No description provided for @calendarLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calendrier'**
+  String get calendarLink;
+
+  /// No description provided for @allAnnouncements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get allAnnouncements;
+
+  /// No description provided for @myAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon compte'**
+  String get myAccount;
+
+  /// No description provided for @readStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lu'**
+  String get readStatus;
+
+  /// No description provided for @openAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir mon compte'**
+  String get openAccount;
+
+  /// No description provided for @unreadCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 annonce non lue} other{{n} annonces non lues}}'**
+  String unreadCount(int n);
 }
 
 class _AppLocalizationsDelegate

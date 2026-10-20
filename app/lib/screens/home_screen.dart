@@ -2,83 +2,178 @@ import 'package:flutter/material.dart';
 
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
+import '../models/announcement.dart';
+import '../models/event.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
 import '../widgets/labels.dart';
-import '../widgets/language_switch.dart';
 import '../widgets/msg_logo.dart';
-import 'login_phone_screen.dart';
+import '../widgets/ui.dart';
+import 'account_screen.dart';
+import 'announcements/announcement_detail_screen.dart';
+import 'calendar/event_detail_screen.dart';
 
-/// Accueil. For now: greeting, the member's active roles, and sign-out.
-/// The design's cards (prochain service, contributions, annonces) arrive
-/// with their modules.
+class _HomeData {
+  const _HomeData({this.nextEvent, this.lastAnnouncement, this.unread = 0});
+  final CalendarEvent? nextEvent;
+  final Announcement? lastAnnouncement;
+  final int unread;
+}
+
+/// Accueil (design: "Accueil · membre"): greeting, next meeting, latest
+/// announcement. Contributions and duties arrive with their modules.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, required this.me});
+  const HomeScreen({super.key, required this.me, this.onOpenTab});
 
   final Me me;
+  final ValueChanged<AppTab>? onOpenTab;
 
-  Future<void> _logout(BuildContext context) async {
-    await RepositoryLocator.instance.auth.logout();
-    if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const LoginPhoneScreen()), (_) => false);
+  Future<_HomeData> _load() async {
+    final repos = RepositoryLocator.instance;
+    final now = DateTime.now();
+    final events = me.can('calendar.events', 'view')
+        ? repos.events.list(from: now, to: now.add(const Duration(days: 60)))
+        : Future.value(const <CalendarEvent>[]);
+    final feed = me.can('announcements.posts', 'view')
+        ? repos.announcements.feed()
+        : Future.value(const AnnouncementFeed(unread: 0, items: []));
+    final upcoming = (await events)
+        .where((e) => (e.endsAt ?? e.startsAt).isAfter(now))
+        .toList();
+    final f = await feed;
+    return _HomeData(
+      nextEvent: upcoming.isEmpty ? null : upcoming.first,
+      lastAnnouncement: f.items.isEmpty ? null : f.items.first,
+      unread: f.unread,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.msg;
-    final main = me.roles.where((r) => r.slug != 'membre').map((r) => roleLabel(l, r.slug, r.name)).toList();
-    final sub = [main.isEmpty ? l.roleGuard : main.first, if (me.age != null && me.age! < 18) l.ageYears(me.age!)].join(' · ');
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+    final main = me.roles
+        .where((r) => r.slug != 'membre')
+        .map((r) => roleLabel(l, r.slug, r.name))
+        .toList();
+    final sub = [
+      main.isEmpty ? l.roleGuard : main.first,
+      if (me.age != null && me.age! < 18) l.ageYears(me.age!),
+    ].join(' · ');
+    return Column(
       children: [
-        Row(children: [
-          const MsgLogo(size: 40),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l.helloName(me.firstName), maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.headlineSmall),
-              const SizedBox(height: 2),
-              Text(sub, style: TextStyle(fontSize: 13, color: c.textSecondary)),
-            ]),
-          ),
-        ]),
-        const SizedBox(height: 24),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(l.myRoles.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(color: c.surfaceCard, borderRadius: BorderRadius.circular(MsgRadius.lg)),
-          child: Column(children: [
-            if (me.roles.isEmpty)
-              Padding(padding: const EdgeInsets.symmetric(vertical: 18), child: Text(l.noRole, style: TextStyle(color: c.textSecondary))),
-            for (final (i, r) in me.roles.indexed)
-              Container(
-                constraints: const BoxConstraints(minHeight: 56),
-                decoration: BoxDecoration(border: i == 0 ? null : Border(top: BorderSide(color: c.borderSubtle))),
-                child: Row(children: [
-                  Expanded(child: Text(roleLabel(l, r.slug, r.name), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
-                  if (r.endsOn != null)
-                    Text(MaterialLocalizations.of(context).formatShortDate(r.endsOn!), style: TextStyle(fontSize: 13, color: c.textSecondary)),
-                ]),
+        ScreenHeader(
+          title: l.helloName(me.firstName),
+          subtitle: sub,
+          leading: const MsgLogo(size: 40),
+          actions: [
+            Semantics(
+              button: true,
+              label: l.openAccount,
+              child: InkWell(
+                key: const Key('open-account'),
+                customBorder: const CircleBorder(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => AccountScreen(me: me)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: MemberAvatar(name: me.fullName, size: 40),
+                ),
               ),
-          ]),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
-        const SizedBox(height: 24),
-        Row(children: [
-          Expanded(child: Text(l.language, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
-          const LanguageSwitch(),
-        ]),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          key: const Key('logout'),
-          onPressed: () => _logout(context),
-          icon: const Icon(Icons.logout),
-          label: Text(l.logout),
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(52), shape: const StadiumBorder(), foregroundColor: c.primaryText, side: BorderSide(color: c.primary, width: 1.5)),
+        Expanded(
+          child: AsyncView<_HomeData>(
+            load: _load,
+            builder: (context, data, reload) => RefreshIndicator(
+              onRefresh: reload,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                children: [
+                  if (me.can('calendar.events', 'view')) ...[
+                    SectionLabel(
+                      l.nextMeeting,
+                      action: l.calendarLink,
+                      onAction: () => onOpenTab?.call(AppTab.calendrier),
+                    ),
+                    const SizedBox(height: 8),
+                    if (data.nextEvent == null)
+                      GroupCard(
+                        children: [
+                          ListRow(
+                            title: Text(
+                              l.nothingPlanned,
+                              style: TextStyle(color: c.textSecondary),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      EventCard(
+                        event: data.nextEvent!,
+                        fullDate: true,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => EventDetailScreen(
+                                eventId: data.nextEvent!.id,
+                                me: me,
+                              ),
+                            ),
+                          );
+                          reload();
+                        },
+                      ),
+                    const SizedBox(height: 24),
+                  ],
+                  if (me.can('announcements.posts', 'view')) ...[
+                    SectionLabel(
+                      l.lastAnnouncement,
+                      action: l.allAnnouncements,
+                      onAction: () => onOpenTab?.call(AppTab.annonces),
+                    ),
+                    const SizedBox(height: 8),
+                    if (data.lastAnnouncement == null)
+                      GroupCard(
+                        children: [
+                          ListRow(
+                            title: Text(
+                              l.noAnnouncements,
+                              style: TextStyle(color: c.textSecondary),
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      AnnouncementCard(
+                        item: data.lastAnnouncement!,
+                        onTap: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => AnnouncementDetailScreen(
+                                item: data.lastAnnouncement!,
+                              ),
+                            ),
+                          );
+                          reload();
+                        },
+                      ),
+                    if (data.unread > 1) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        l.unreadCount(data.unread),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: c.textSecondary),
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );

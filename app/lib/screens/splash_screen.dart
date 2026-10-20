@@ -50,7 +50,9 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  void _go(Widget screen) => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => screen));
+  void _go(Widget screen) => Navigator.of(
+    context,
+  ).pushReplacement(MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +70,25 @@ class _SplashScreenState extends State<SplashScreen> {
                   children: [
                     const MsgLogo(size: 112),
                     const SizedBox(height: 24),
-                    Text(l.appTitle, style: Theme.of(context).textTheme.displaySmall),
+                    Text(
+                      l.appTitle,
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
                     const SizedBox(height: 16),
-                    Text('${l.movementName}\n${l.parishName}', textAlign: TextAlign.center, style: TextStyle(fontSize: 15, height: 1.5, color: c.textSecondary)),
+                    Text(
+                      '${l.movementName}\n${l.parishName}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.5,
+                        color: c.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: 24),
-                    Text(l.motto.toUpperCase(), style: Theme.of(context).textTheme.labelSmall),
+                    Text(
+                      l.motto.toUpperCase(),
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
                   ],
                 ),
               ),
@@ -80,16 +96,38 @@ class _SplashScreenState extends State<SplashScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(32, 0, 32, 40),
               child: _error == null
-                  ? Column(children: [
-                      SizedBox(width: 160, child: LinearProgressIndicator(minHeight: 8, borderRadius: BorderRadius.circular(999), color: c.primary, backgroundColor: c.surfaceSunken)),
-                      const SizedBox(height: 10),
-                      Text(l.splashPreparing, style: TextStyle(fontSize: 13, color: c.textSecondary)),
-                    ])
-                  : Column(children: [
-                      Text(describeError(context, _error!), textAlign: TextAlign.center, style: TextStyle(color: c.textSecondary)),
-                      const SizedBox(height: 12),
-                      FilledButton(onPressed: _start, child: Text(l.retry)),
-                    ]),
+                  ? Column(
+                      children: [
+                        SizedBox(
+                          width: 160,
+                          child: LinearProgressIndicator(
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(999),
+                            color: c.primary,
+                            backgroundColor: c.surfaceSunken,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          l.splashPreparing,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        Text(
+                          describeError(context, _error!),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: c.textSecondary),
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton(onPressed: _start, child: Text(l.retry)),
+                      ],
+                    ),
             ),
           ],
         ),

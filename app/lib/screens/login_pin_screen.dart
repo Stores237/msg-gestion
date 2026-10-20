@@ -54,7 +54,10 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
       await repos.auth.loginWithPin(phone: widget.lookup.phone, pin: _pin);
       final me = await repos.profile.fetchMe();
       if (!mounted) return;
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => ShellScreen(me: me)), (_) => false);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => ShellScreen(me: me)),
+        (_) => false,
+      );
     } on AccountLocked catch (e) {
       setState(() {
         _error = describeError(context, e);
@@ -80,34 +83,83 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
           children: [
-            Row(children: [
-              IconButton(icon: const Icon(Icons.arrow_back), tooltip: l.back, iconSize: 22, constraints: const BoxConstraints(minWidth: 48, minHeight: 48), onPressed: () => Navigator.of(context).pop()),
-              Text(widget.lookup.phone, style: TextStyle(fontSize: 14, color: c.textSecondary)),
-            ]),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: l.back,
+                  iconSize: 22,
+                  constraints: const BoxConstraints(
+                    minWidth: 48,
+                    minHeight: 48,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                Text(
+                  widget.lookup.phone,
+                  style: TextStyle(fontSize: 14, color: c.textSecondary),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
-            Text(l.pinTitle, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              l.pinTitle,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 6),
-            Text(l.pinGreeting(widget.lookup.firstName), textAlign: TextAlign.center, style: TextStyle(fontSize: 15, color: c.textSecondary)),
+            Text(
+              l.pinGreeting(widget.lookup.firstName),
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: c.textSecondary),
+            ),
             const SizedBox(height: 20),
             PinDots(filled: _pin.length, error: _error != null),
             const SizedBox(height: 20),
             SizedBox(
               height: 40,
               child: _error == null
-                  ? (_busy ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5))) : null)
+                  ? (_busy
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                              ),
+                            ),
+                          )
+                        : null)
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.error_outline, size: 14, color: c.alert),
                         const SizedBox(width: 6),
-                        Flexible(child: Text(_error!, key: const Key('pin-error'), textAlign: TextAlign.center, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c.alert))),
+                        Flexible(
+                          child: Text(
+                            _error!,
+                            key: const Key('pin-error'),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: c.alert,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
             ),
-            PinKeypad(onDigit: _digit, onDelete: _delete, enabled: !_busy && !_locked),
+            PinKeypad(
+              onDigit: _digit,
+              onDelete: _delete,
+              enabled: !_busy && !_locked,
+            ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l.pinForgotHelp))),
+              onPressed: () => ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l.pinForgotHelp))),
               child: Text(l.pinForgot),
             ),
           ],

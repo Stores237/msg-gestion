@@ -6,7 +6,8 @@ import 'token_storage.dart';
 /// Holds the JWT pair. The server rotates the refresh token on every use
 /// and blacklists the old one, so a new pair is always stored as a whole.
 class AuthSession extends ChangeNotifier {
-  AuthSession({TokenStorage? storage}) : _storage = storage ?? const SecureTokenStorage();
+  AuthSession({TokenStorage? storage})
+    : _storage = storage ?? const SecureTokenStorage();
 
   static AuthSession instance = AuthSession();
 
@@ -76,7 +77,10 @@ class AuthSession extends ChangeNotifier {
     }
     try {
       final data = await client.refresh(token);
-      await store(access: data['access'] as String, refresh: data['refresh'] as String);
+      await store(
+        access: data['access'] as String,
+        refresh: data['refresh'] as String,
+      );
       _lastRefreshOk = true;
     } on ApiException {
       // Refresh token expired or blacklisted: a real sign-out.

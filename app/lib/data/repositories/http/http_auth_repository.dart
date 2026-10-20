@@ -8,8 +8,18 @@ class HttpAuthRepository implements AuthRepository {
   @override
   Future<PhoneLookup> lookupPhone(String phone) async {
     try {
-      final data = await _api.post('/auth/phone/', body: {'phone': phone}, authenticated: false) as Map<String, dynamic>;
-      return PhoneLookup(phone: phone, firstName: data['first_name'] as String, hasPin: data['has_pin'] as bool);
+      final data =
+          await _api.post(
+                '/auth/phone/',
+                body: {'phone': phone},
+                authenticated: false,
+              )
+              as Map<String, dynamic>;
+      return PhoneLookup(
+        phone: phone,
+        firstName: data['first_name'] as String,
+        hasPin: data['has_pin'] as bool,
+      );
     } on ApiException catch (e) {
       if (e.statusCode == 404) throw const UnknownMember();
       rethrow;
@@ -17,10 +27,22 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> loginWithPin({required String phone, required String pin}) async {
+  Future<void> loginWithPin({
+    required String phone,
+    required String pin,
+  }) async {
     try {
-      final data = await _api.post('/auth/login/', body: {'phone': phone, 'pin': pin}, authenticated: false) as Map<String, dynamic>;
-      await _api.authSession.store(access: data['access'] as String, refresh: data['refresh'] as String);
+      final data =
+          await _api.post(
+                '/auth/login/',
+                body: {'phone': phone, 'pin': pin},
+                authenticated: false,
+              )
+              as Map<String, dynamic>;
+      await _api.authSession.store(
+        access: data['access'] as String,
+        refresh: data['refresh'] as String,
+      );
     } on ApiException catch (e) {
       switch (e.statusCode) {
         case 401:
@@ -40,7 +62,9 @@ class HttpAuthRepository implements AuthRepository {
   Future<void> logout() async {
     final refresh = _api.authSession.refreshToken;
     try {
-      if (refresh != null) await _api.post('/auth/logout/', body: {'refresh': refresh});
+      if (refresh != null) {
+        await _api.post('/auth/logout/', body: {'refresh': refresh});
+      }
     } on Exception {
       // Signing out locally must work offline; the token expires on its own.
     } finally {

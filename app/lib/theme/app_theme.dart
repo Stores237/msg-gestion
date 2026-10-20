@@ -20,18 +20,43 @@ ThemeData buildTheme(Brightness brightness) {
     ),
     extensions: [c],
   );
-  final text = GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(bodyColor: c.textPrimary, displayColor: c.textPrimary);
+  final text = GoogleFonts.plusJakartaSansTextTheme(
+    base.textTheme,
+  ).apply(bodyColor: c.textPrimary, displayColor: c.textPrimary);
   return base.copyWith(
     textTheme: text.copyWith(
       // Design type scale (design/docs.jsx → Typographie).
-      displaySmall: text.displaySmall?.copyWith(fontSize: 28, fontWeight: FontWeight.w800, height: 1.2),
-      headlineSmall: text.headlineSmall?.copyWith(fontSize: 22, fontWeight: FontWeight.w800, height: 1.2),
-      titleLarge: text.titleLarge?.copyWith(fontSize: 19, fontWeight: FontWeight.w800),
-      titleMedium: text.titleMedium?.copyWith(fontSize: 17, fontWeight: FontWeight.w800),
+      displaySmall: text.displaySmall?.copyWith(
+        fontSize: 28,
+        fontWeight: FontWeight.w800,
+        height: 1.2,
+      ),
+      headlineSmall: text.headlineSmall?.copyWith(
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        height: 1.2,
+      ),
+      titleLarge: text.titleLarge?.copyWith(
+        fontSize: 19,
+        fontWeight: FontWeight.w800,
+      ),
+      titleMedium: text.titleMedium?.copyWith(
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+      ),
       bodyLarge: text.bodyLarge?.copyWith(fontSize: 16, height: 1.5),
       bodyMedium: text.bodyMedium?.copyWith(fontSize: 15, height: 1.4),
-      bodySmall: text.bodySmall?.copyWith(fontSize: 13, color: c.textSecondary, height: 1.4),
-      labelSmall: text.labelSmall?.copyWith(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.72, color: c.textSecondary),
+      bodySmall: text.bodySmall?.copyWith(
+        fontSize: 13,
+        color: c.textSecondary,
+        height: 1.4,
+      ),
+      labelSmall: text.labelSmall?.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.72,
+        color: c.textSecondary,
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -39,21 +64,33 @@ ThemeData buildTheme(Brightness brightness) {
         foregroundColor: Colors.white,
         minimumSize: const Size(48, 52),
         shape: const StadiumBorder(),
-        textStyle: GoogleFonts.plusJakartaSans(fontSize: 15, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: c.primaryText,
         minimumSize: const Size(48, 48),
-        textStyle: GoogleFonts.plusJakartaSans(fontSize: 14, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: c.ink800,
-      contentTextStyle: GoogleFonts.plusJakartaSans(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+      contentTextStyle: GoogleFonts.plusJakartaSans(
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(MsgRadius.md)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(MsgRadius.md),
+      ),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: c.surfaceCard,
@@ -62,12 +99,20 @@ ThemeData buildTheme(Brightness brightness) {
       labelTextStyle: WidgetStateProperty.resolveWith(
         (s) => GoogleFonts.plusJakartaSans(
           fontSize: 12,
-          fontWeight: s.contains(WidgetState.selected) ? FontWeight.w700 : FontWeight.w600,
-          color: s.contains(WidgetState.selected) ? c.primaryText : c.textSecondary,
+          fontWeight: s.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w600,
+          color: s.contains(WidgetState.selected)
+              ? c.primaryText
+              : c.textSecondary,
         ),
       ),
       iconTheme: WidgetStateProperty.resolveWith(
-        (s) => IconThemeData(color: s.contains(WidgetState.selected) ? c.primaryText : c.textSecondary),
+        (s) => IconThemeData(
+          color: s.contains(WidgetState.selected)
+              ? c.primaryText
+              : c.textSecondary,
+        ),
       ),
     ),
   );

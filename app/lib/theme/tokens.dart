@@ -86,7 +86,8 @@ class MsgColors extends ThemeExtension<MsgColors> {
   MsgColors copyWith() => this;
 
   @override
-  MsgColors lerp(ThemeExtension<MsgColors>? other, double t) => t < 0.5 || other is! MsgColors ? this : other;
+  MsgColors lerp(ThemeExtension<MsgColors>? other, double t) =>
+      t < 0.5 || other is! MsgColors ? this : other;
 }
 
 /// Spacing (8-pt grid) and radii from design/docs.jsx.

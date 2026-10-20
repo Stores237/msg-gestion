@@ -28,7 +28,9 @@ class PinDots extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: i < filled ? (error ? c.alert : c.textPrimary) : null,
-                border: i < filled ? null : Border.all(color: c.borderStrong, width: 2),
+                border: i < filled
+                    ? null
+                    : Border.all(color: c.borderStrong, width: 2),
               ),
             ),
         ],
@@ -40,7 +42,12 @@ class PinDots extends StatelessWidget {
 /// 3×4 keypad, 60 dp keys. The fingerprint key is shown disabled until
 /// biometric unlock exists (TODOS.md), so the layout matches the design.
 class PinKeypad extends StatelessWidget {
-  const PinKeypad({super.key, required this.onDigit, required this.onDelete, this.enabled = true});
+  const PinKeypad({
+    super.key,
+    required this.onDigit,
+    required this.onDelete,
+    this.enabled = true,
+  });
 
   final ValueChanged<String> onDigit;
   final VoidCallback onDelete;
@@ -49,7 +56,8 @@ class PinKeypad extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    Widget key(String d) => _Key(label: d, onTap: enabled ? () => onDigit(d) : null);
+    Widget key(String d) =>
+        _Key(label: d, onTap: enabled ? () => onDigit(d) : null);
     return Column(
       children: [
         for (final row in const [
@@ -59,13 +67,29 @@ class PinKeypad extends StatelessWidget {
         ])
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Row(children: [for (final d in row) Expanded(child: key(d))]),
+            child: Row(
+              children: [for (final d in row) Expanded(child: key(d))],
+            ),
           ),
         Row(
           children: [
-            Expanded(child: _Key(icon: Icons.fingerprint, semantic: l.keypadFingerprint, ghost: true, onTap: null)),
+            Expanded(
+              child: _Key(
+                icon: Icons.fingerprint,
+                semantic: l.keypadFingerprint,
+                ghost: true,
+                onTap: null,
+              ),
+            ),
             Expanded(child: key('0')),
-            Expanded(child: _Key(icon: Icons.backspace_outlined, semantic: l.keypadDelete, ghost: true, onTap: enabled ? onDelete : null)),
+            Expanded(
+              child: _Key(
+                icon: Icons.backspace_outlined,
+                semantic: l.keypadDelete,
+                ghost: true,
+                onTap: enabled ? onDelete : null,
+              ),
+            ),
           ],
         ),
       ],
@@ -74,7 +98,13 @@ class PinKeypad extends StatelessWidget {
 }
 
 class _Key extends StatelessWidget {
-  const _Key({this.label, this.icon, this.semantic, this.ghost = false, required this.onTap});
+  const _Key({
+    this.label,
+    this.icon,
+    this.semantic,
+    this.ghost = false,
+    required this.onTap,
+  });
 
   final String? label;
   final IconData? icon;
@@ -101,8 +131,20 @@ class _Key extends StatelessWidget {
               height: 60,
               child: Center(
                 child: label != null
-                    ? Text(label!, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: c.textPrimary, fontFeatures: tabular))
-                    : Icon(icon, size: 24, color: onTap == null ? c.textTertiary : c.textPrimary),
+                    ? Text(
+                        label!,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: c.textPrimary,
+                          fontFeatures: tabular,
+                        ),
+                      )
+                    : Icon(
+                        icon,
+                        size: 24,
+                        color: onTap == null ? c.textTertiary : c.textPrimary,
+                      ),
               ),
             ),
           ),

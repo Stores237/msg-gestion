@@ -2,19 +2,38 @@ import 'package:flutter/foundation.dart';
 
 import 'api_client.dart';
 import 'auth_session.dart';
+import 'repositories/announcements_repository.dart';
 import 'repositories/auth_repository.dart';
+import 'repositories/events_repository.dart';
+import 'repositories/http/http_announcements_repository.dart';
 import 'repositories/http/http_auth_repository.dart';
+import 'repositories/http/http_events_repository.dart';
+import 'repositories/http/http_members_repository.dart';
 import 'repositories/http/http_profile_repository.dart';
+import 'repositories/members_repository.dart';
 import 'repositories/profile_repository.dart';
 
 /// Screens depend on repository interfaces, never on [ApiClient]; tests
 /// swap in fakes with [debugSetInstance].
 class RepositoryLocator {
-  RepositoryLocator({AuthSession? authSession, ApiClient? apiClient, AuthRepository? auth, ProfileRepository? profile})
-      : authSession = authSession ?? AuthSession.instance,
-        apiClient = apiClient ?? ApiClient(authSession: authSession ?? AuthSession.instance) {
+  RepositoryLocator({
+    AuthSession? authSession,
+    ApiClient? apiClient,
+    AuthRepository? auth,
+    ProfileRepository? profile,
+    MembersRepository? members,
+    EventsRepository? events,
+    AnnouncementsRepository? announcements,
+  }) : authSession = authSession ?? AuthSession.instance,
+       apiClient =
+           apiClient ??
+           ApiClient(authSession: authSession ?? AuthSession.instance) {
     this.auth = auth ?? HttpAuthRepository(this.apiClient);
     this.profile = profile ?? HttpProfileRepository(this.apiClient);
+    this.members = members ?? HttpMembersRepository(this.apiClient);
+    this.events = events ?? HttpEventsRepository(this.apiClient);
+    this.announcements =
+        announcements ?? HttpAnnouncementsRepository(this.apiClient);
   }
 
   static RepositoryLocator instance = RepositoryLocator();
@@ -27,4 +46,7 @@ class RepositoryLocator {
 
   late final AuthRepository auth;
   late final ProfileRepository profile;
+  late final MembersRepository members;
+  late final EventsRepository events;
+  late final AnnouncementsRepository announcements;
 }

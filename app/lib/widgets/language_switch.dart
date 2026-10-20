@@ -17,32 +17,55 @@ class LanguageSwitch extends StatelessWidget {
       label: l.language,
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(color: c.surfaceSunken, borderRadius: BorderRadius.circular(999)),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          for (final (code, label, full) in [('fr', 'FR', l.languageFrench), ('en', 'EN', l.languageEnglish)])
-            Semantics(
-              button: true,
-              selected: current == code,
-              label: full,
-              child: InkWell(
-                key: Key('lang-$code'),
-                borderRadius: BorderRadius.circular(999),
-                onTap: () => LocaleController.instance.setLanguage(code),
-                child: Container(
-                  constraints: const BoxConstraints(minWidth: 48, minHeight: 40),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: current == code ? c.surfaceCard : Colors.transparent,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: ExcludeSemantics(
-                    child: Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: current == code ? c.textPrimary : c.textSecondary)),
+        decoration: BoxDecoration(
+          color: c.surfaceSunken,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final (code, label, full) in [
+              ('fr', 'FR', l.languageFrench),
+              ('en', 'EN', l.languageEnglish),
+            ])
+              Semantics(
+                button: true,
+                selected: current == code,
+                label: full,
+                child: InkWell(
+                  key: Key('lang-$code'),
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () => LocaleController.instance.setLanguage(code),
+                  child: Container(
+                    constraints: const BoxConstraints(
+                      minWidth: 48,
+                      minHeight: 40,
+                    ),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: current == code
+                          ? c.surfaceCard
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: ExcludeSemantics(
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: current == code
+                              ? c.textPrimary
+                              : c.textSecondary,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-        ]),
+          ],
+        ),
       ),
     );
   }

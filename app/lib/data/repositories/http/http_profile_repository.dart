@@ -7,5 +7,6 @@ class HttpProfileRepository implements ProfileRepository {
   final ApiClient _api;
 
   @override
-  Future<Me> fetchMe() async => Me.fromJson(await _api.get('/me/') as Map<String, dynamic>);
+  Future<Me> fetchMe() async =>
+      Me.fromJson(await _api.get('/me/') as Map<String, dynamic>);
 }

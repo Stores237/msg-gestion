@@ -1,6 +1,10 @@
 /// Result of step 1 of the login: the number belongs to a member.
 class PhoneLookup {
-  const PhoneLookup({required this.phone, required this.firstName, required this.hasPin});
+  const PhoneLookup({
+    required this.phone,
+    required this.firstName,
+    required this.hasPin,
+  });
   final String phone;
   final String firstName;
   final bool hasPin;

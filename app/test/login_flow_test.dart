@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/auth_session.dart';
 import 'package:msg_gestion/data/locale_controller.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
-import 'package:msg_gestion/data/token_storage.dart';
 import 'package:msg_gestion/main.dart';
 import 'package:msg_gestion/screens/login_phone_screen.dart';
 
 import 'fakes.dart';
+import 'helpers.dart';
 
 void main() {
   late FakeAuthRepository auth;
@@ -18,13 +16,8 @@ void main() {
   });
 
   Future<void> pumpLogin(WidgetTester tester, {List<String> tabs = const ['accueil', 'calendrier', 'annonces']}) async {
-    tester.platformDispatcher.localesTestValue = const [Locale('fr', 'CM')];
-    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    auth = FakeAuthRepository();
-    final session = AuthSession(storage: InMemoryTokenStorage());
-    RepositoryLocator.debugSetInstance(
-      RepositoryLocator(authSession: session, auth: auth, profile: FakeProfileRepository(fakeMe(tabs: tabs))),
-    );
+    final fakes = await setUpApp(tester, me: fakeMe(tabs: tabs));
+    auth = fakes.auth;
     await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
     await tester.pumpAndSettle();
   }
@@ -99,12 +92,17 @@ void main() {
     await tester.tap(find.byKey(const Key('tab-finances')));
     await tester.pumpAndSettle();
     expect(find.text('Bientôt disponible'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('tab-membres')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ewane Brice'), findsOneWidget);
   });
 
   testWidgets('logout returns to the phone screen', (tester) async {
     await pumpLogin(tester);
     await enterPhone(tester, '677452108');
     await typePin(tester, '4821');
+    await tester.tap(find.byKey(const Key('open-account')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('logout')));
     await tester.pumpAndSettle();
     expect(auth.logouts, 1);

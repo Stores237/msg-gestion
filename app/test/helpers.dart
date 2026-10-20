@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:msg_gestion/data/auth_session.dart';
+import 'package:msg_gestion/data/locale_controller.dart';
+import 'package:msg_gestion/data/repository_locator.dart';
+import 'package:msg_gestion/data/token_storage.dart';
+import 'package:msg_gestion/main.dart';
+import 'package:msg_gestion/models/me.dart';
+import 'package:msg_gestion/screens/shell_screen.dart';
+
+import 'fakes.dart';
+
+class Fakes {
+  final auth = FakeAuthRepository();
+  final members = FakeMembersRepository();
+  final events = FakeEventsRepository();
+  final announcements = FakeAnnouncementsRepository();
+}
+
+/// French phone, fresh language choice, fake repositories, date symbols.
+Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
+  await initializeDateFormatting();
+  tester.platformDispatcher.localesTestValue = const [Locale('fr', 'CM')];
+  addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+  LocaleController.debugSetInstance(LocaleController());
+  final f = Fakes();
+  RepositoryLocator.debugSetInstance(RepositoryLocator(
+    authSession: AuthSession(storage: InMemoryTokenStorage()),
+    auth: f.auth,
+    profile: FakeProfileRepository(me ?? fakeMe()),
+    members: f.members,
+    events: f.events,
+    announcements: f.announcements,
+  ));
+  return f;
+}
+
+Future<void> pumpShell(WidgetTester tester, Me me) async {
+  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(MsgApp(home: ShellScreen(me: me)));
+  await tester.pumpAndSettle();
+}
