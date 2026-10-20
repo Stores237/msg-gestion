@@ -39,7 +39,22 @@ abstract class AuthRepository {
   Future<PhoneLookup> lookupPhone(String phone);
 
   /// Stores the tokens in the session on success; throws a [PinFailure].
-  Future<void> loginWithPin({required String phone, required String pin});
+  /// Returns true when the PIN was temporary and must be changed now.
+  Future<bool> loginWithPin({required String phone, required String pin});
+
+  /// Throws [WrongPin]/[AccountLocked] for a wrong current PIN, or an
+  /// ApiException with code `pin_too_simple`.
+  Future<void> changePin({required String currentPin, required String newPin});
+
+  /// Texts a code; ApiException code `sms_unavailable` until Twilio exists.
+  Future<void> forgotPin(String phone);
+
+  /// Sets the new PIN and logs in. ApiException code `bad_code`.
+  Future<void> forgotPinConfirm({
+    required String phone,
+    required String code,
+    required String newPin,
+  });
 
   Future<void> logout();
 }

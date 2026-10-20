@@ -7,6 +7,7 @@ import '../theme/tokens.dart';
 import '../widgets/errors.dart';
 import '../widgets/msg_logo.dart';
 import 'login_phone_screen.dart';
+import 'pin_screens.dart';
 import 'shell_screen.dart';
 
 /// Restores the stored session and routes to the shell or to login.
@@ -36,7 +37,13 @@ class _SplashScreenState extends State<SplashScreen> {
       return;
     }
     try {
-      final me = await repos.profile.fetchMe();
+      var me = await repos.profile.fetchMe();
+      if (me.pinMustChange && mounted) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const SetPinScreen(forced: true)),
+        );
+        me = await repos.profile.fetchMe();
+      }
       if (mounted) _go(ShellScreen(me: me));
     } on ApiException catch (e) {
       // Session no longer valid server-side (refresh failed and cleared).

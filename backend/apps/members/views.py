@@ -1,4 +1,4 @@
-import secrets
+
 
 from django.db import transaction
 from django.db.models import Count, Q
@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.permissions import require
-from apps.accounts.services import assign_role
+from apps.accounts.services import assign_role, reset_pin, temporary_pin
 from apps.core import audit
 
 from .serializers import BureauEntrySerializer, MemberCreateSerializer, MemberDetailSerializer, MemberListSerializer
@@ -62,11 +62,11 @@ class MemberListView(APIView):
     def post(self, request):
         s = MemberCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        pin = f"{secrets.randbelow(10**4):04d}"
+        pin = temporary_pin()
         with transaction.atomic():
             user = User(**s.validated_data)
             user.set_unusable_password()  # app only; back-office access is a separate step
-            user.set_pin(pin)
+            user.set_pin(pin, temporary=True)
             user.save()
             assign_role(user, Role.objects.get(slug="membre"), reason="Inscription", by=request.user, request=request)
         audit.record("Membre inscrit", actor=request.user, obj=user, request=request)
@@ -103,3 +103,13 @@ class BureauView(APIView):
         )
         data = [{"member": a.user, "role": a.role, "ends_on": a.ends_on} for a in rows]
         return Response(BureauEntrySerializer(data, many=True, context={"today": timezone.localdate()}).data)
+
+
+class ResetPinView(APIView):
+    """The secretary gives a member a new temporary PIN (shown once)."""
+
+    permission_classes = [require("members.profile", "change")]
+
+    def post(self, request, pk):
+        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        return Response({"temporary_pin": reset_pin(member, by=request.user, request=request)})

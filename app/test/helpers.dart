@@ -25,14 +25,16 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   LocaleController.debugSetInstance(LocaleController());
   final f = Fakes();
-  RepositoryLocator.debugSetInstance(RepositoryLocator(
-    authSession: AuthSession(storage: InMemoryTokenStorage()),
-    auth: f.auth,
-    profile: FakeProfileRepository(me ?? fakeMe()),
-    members: f.members,
-    events: f.events,
-    announcements: f.announcements,
-  ));
+  RepositoryLocator.debugSetInstance(
+    RepositoryLocator(
+      authSession: AuthSession(storage: InMemoryTokenStorage()),
+      auth: f.auth,
+      profile: FakeProfileRepository(me ?? fakeMe()),
+      members: f.members,
+      events: f.events,
+      announcements: f.announcements,
+    ),
+  );
   return f;
 }
 

@@ -6,7 +6,7 @@ from django.db import transaction
 
 from apps.accounts.models import Role, User
 from apps.accounts.phone import normalize_phone
-from apps.accounts.services import assign_role
+from apps.accounts.services import assign_role, temporary_pin
 
 
 class Command(BaseCommand):
@@ -35,9 +35,9 @@ class Command(BaseCommand):
             if created:
                 alphabet = string.ascii_letters + string.digits
                 password = "".join(secrets.choice(alphabet) for _ in range(16))
-                pin = f"{secrets.randbelow(10**4):04d}"
+                pin = temporary_pin()
                 user.set_password(password)
-                user.set_pin(pin)
+                user.set_pin(pin, temporary=True)
                 user.save()
             held = user.role_slugs()
             for slug in ("super-admin", "membre"):

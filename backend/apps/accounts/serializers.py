@@ -43,6 +43,7 @@ class MeSerializer(serializers.Serializer):
     status = serializers.CharField()
     is_diaspora = serializers.BooleanField()
     age = serializers.IntegerField(allow_null=True)
+    pin_must_change = serializers.BooleanField()
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
     tabs = serializers.SerializerMethodField()

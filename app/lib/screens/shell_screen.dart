@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/current_user.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import 'announcements/announcements_screen.dart';
@@ -22,6 +23,12 @@ class ShellScreen extends StatefulWidget {
 class _ShellScreenState extends State<ShellScreen> {
   int _index = 0;
   int _unread = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUser.value = widget.me;
+  }
 
   static (IconData, IconData, String Function(AppLocalizations)) _def(
     AppTab t,

@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/errors.dart';
 import '../widgets/pin_pad.dart';
+import 'pin_screens.dart';
 import 'shell_screen.dart';
 
 /// Login step 2 (design: "Connexion · code PIN"). Submits on the 4th digit.
@@ -51,7 +52,18 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
     setState(() => _busy = true);
     final repos = RepositoryLocator.instance;
     try {
-      await repos.auth.loginWithPin(phone: widget.lookup.phone, pin: _pin);
+      final mustChange = await repos.auth.loginWithPin(
+        phone: widget.lookup.phone,
+        pin: _pin,
+      );
+      if (mustChange && mounted) {
+        // Temporary PIN from the secretary: pick a personal one first.
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => SetPinScreen(forced: true, currentPin: _pin),
+          ),
+        );
+      }
       final me = await repos.profile.fetchMe();
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
@@ -157,9 +169,21 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(l.pinForgotHelp))),
+              key: const Key('forgot-pin'),
+              onPressed: () async {
+                final done = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => ForgotPinScreen(phone: widget.lookup.phone),
+                  ),
+                );
+                if (done != true || !context.mounted) return;
+                final me = await RepositoryLocator.instance.profile.fetchMe();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => ShellScreen(me: me)),
+                  (_) => false,
+                );
+              },
               child: Text(l.pinForgot),
             ),
           ],

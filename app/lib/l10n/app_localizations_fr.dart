@@ -661,4 +661,72 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get changePin => 'Changer mon code PIN';
+
+  @override
+  String get choosePinTitle => 'Choisissez votre code PIN';
+
+  @override
+  String get choosePinForced =>
+      'Votre code actuel est provisoire. Choisissez un code à 4 chiffres que vous seul connaissez.';
+
+  @override
+  String get currentPin => 'Code actuel';
+
+  @override
+  String get newPin => 'Nouveau code';
+
+  @override
+  String get confirmPin => 'Confirmer le nouveau code';
+
+  @override
+  String get pinMismatch => 'Les deux codes ne sont pas identiques.';
+
+  @override
+  String get pinFourDigits => '4 chiffres.';
+
+  @override
+  String get pinTooSimple =>
+      'Code trop simple (1111, 1234…). Choisissez-en un autre.';
+
+  @override
+  String get pinChanged => 'Code PIN modifié.';
+
+  @override
+  String get forgotTitle => 'Code PIN oublié';
+
+  @override
+  String get forgotIntro =>
+      'Nous envoyons un code par SMS au numéro du compte.';
+
+  @override
+  String get sendCode => 'Envoyer le code';
+
+  @override
+  String get smsCode => 'Code reçu par SMS';
+
+  @override
+  String get badCode => 'Code incorrect ou expiré.';
+
+  @override
+  String get smsUnavailable =>
+      'L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.';
+
+  @override
+  String get resetPin => 'Réinitialiser le code PIN';
+
+  @override
+  String resetPinConfirm(String name) {
+    return 'Un nouveau code provisoire sera créé pour $name. L’ancien ne fonctionnera plus.';
+  }
+
+  @override
+  String resetPinDone(String name, String pin) {
+    return 'Nouveau code provisoire de $name : $pin. Communiquez-le en personne ; il ne sera plus affiché.';
+  }
+
+  @override
+  String get confirm => 'Confirmer';
 }

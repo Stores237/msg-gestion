@@ -36,6 +36,7 @@ class Me {
     required this.roles,
     required this.permissions,
     required this.tabs,
+    this.pinMustChange = false,
   });
 
   final int id;
@@ -48,6 +49,7 @@ class Me {
   final List<RoleAssignment> roles;
   final Map<String, List<String>> permissions;
   final List<AppTab> tabs;
+  final bool pinMustChange;
 
   bool can(String resource, String action) =>
       permissions[resource]?.contains(action) ?? false;

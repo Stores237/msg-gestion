@@ -15,6 +15,40 @@ class RuleViolation(Exception):
     """A fixed rule refused the change. The message is shown to the user."""
 
 
+# --- PIN management ------------------------------------------------------------
+
+WEAK_PINS = {"1234", "4321", "0123", "3210", "1212", "2580", "0852"}
+
+
+def pin_problem(pin):
+    """Return an error code for a PIN members shouldn't pick, else None."""
+    if not (isinstance(pin, str) and len(pin) == 4 and pin.isdigit()):
+        return "pin_format"
+    if len(set(pin)) == 1 or pin in WEAK_PINS:
+        return "pin_too_simple"
+    return None
+
+
+def temporary_pin():
+    """A random PIN that passes pin_problem (so it's never 1234)."""
+    import secrets
+
+    while True:
+        pin = f"{secrets.randbelow(10**4):04d}"
+        if pin_problem(pin) is None:
+            return pin
+
+
+def reset_pin(member, *, by, request=None):
+    """The secretary gives the member a new temporary PIN (forgotten PIN,
+    locked account). Unlocks the account; the member must change it."""
+    pin = temporary_pin()
+    member.set_pin(pin, temporary=True)
+    member.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
+    audit.record("PIN réinitialisé", actor=by, obj=member, request=request, sensitive=True)
+    return pin
+
+
 # --- PIN login ---------------------------------------------------------------
 
 

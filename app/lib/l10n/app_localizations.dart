@@ -1249,6 +1249,126 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n, plural, =1{1 annonce non lue} other{{n} annonces non lues}}'**
   String unreadCount(int n);
+
+  /// No description provided for @changePin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon code PIN'**
+  String get changePin;
+
+  /// No description provided for @choosePinTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez votre code PIN'**
+  String get choosePinTitle;
+
+  /// No description provided for @choosePinForced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre code actuel est provisoire. Choisissez un code à 4 chiffres que vous seul connaissez.'**
+  String get choosePinForced;
+
+  /// No description provided for @currentPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code actuel'**
+  String get currentPin;
+
+  /// No description provided for @newPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau code'**
+  String get newPin;
+
+  /// No description provided for @confirmPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer le nouveau code'**
+  String get confirmPin;
+
+  /// No description provided for @pinMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux codes ne sont pas identiques.'**
+  String get pinMismatch;
+
+  /// No description provided for @pinFourDigits.
+  ///
+  /// In fr, this message translates to:
+  /// **'4 chiffres.'**
+  String get pinFourDigits;
+
+  /// No description provided for @pinTooSimple.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code trop simple (1111, 1234…). Choisissez-en un autre.'**
+  String get pinTooSimple;
+
+  /// No description provided for @pinChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN modifié.'**
+  String get pinChanged;
+
+  /// No description provided for @forgotTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code PIN oublié'**
+  String get forgotTitle;
+
+  /// No description provided for @forgotIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous envoyons un code par SMS au numéro du compte.'**
+  String get forgotIntro;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le code'**
+  String get sendCode;
+
+  /// No description provided for @smsCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code reçu par SMS'**
+  String get smsCode;
+
+  /// No description provided for @badCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code incorrect ou expiré.'**
+  String get badCode;
+
+  /// No description provided for @smsUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.'**
+  String get smsUnavailable;
+
+  /// No description provided for @resetPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser le code PIN'**
+  String get resetPin;
+
+  /// No description provided for @resetPinConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un nouveau code provisoire sera créé pour {name}. L’ancien ne fonctionnera plus.'**
+  String resetPinConfirm(String name);
+
+  /// No description provided for @resetPinDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau code provisoire de {name} : {pin}. Communiquez-le en personne ; il ne sera plus affiché.'**
+  String resetPinDone(String name, String pin);
+
+  /// No description provided for @confirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmer'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate

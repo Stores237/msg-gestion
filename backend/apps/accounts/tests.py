@@ -91,7 +91,7 @@ def test_pin_login_returns_tokens(api):
     UserFactory(phone="+237677452108", pin="4821")
     r = _login(api, "4821")
     assert r.status_code == 200
-    assert set(r.json()) == {"access", "refresh"}
+    assert set(r.json()) == {"access", "refresh", "pin_must_change"}
 
 
 def test_three_wrong_pins_lock_the_account(api):
@@ -373,3 +373,85 @@ def test_add_test_members_random_pins_no_passwords():
     again = StringIO()
     call_command("add_test_members", stdout=again)
     assert again.getvalue().count("skipped") == 10
+
+
+# --- PIN change / reset / forgot --------------------------------------------------------
+
+
+def test_change_pin_requires_current_and_rejects_simple_pins(api):
+    user = UserFactory(phone="+237677452108", pin="4821")
+    user.pin_must_change = True
+    user.save()
+    api.force_authenticate(user)
+    assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "1111"}, format="json").json()["code"] == "pin_too_simple"
+    assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "1234"}, format="json").json()["code"] == "pin_too_simple"
+    wrong = api.post("/api/auth/pin/change/", {"current_pin": "0000", "new_pin": "7391"}, format="json")
+    assert (wrong.status_code, wrong.json()["attempts_left"]) == (401, 2)
+    assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "7391"}, format="json").status_code == 204
+    user.refresh_from_db()
+    assert user.check_pin("7391") and not user.pin_must_change
+
+
+def test_login_reports_must_change(api):
+    user = UserFactory(phone="+237677452108")
+    user.set_pin("4821", temporary=True)
+    user.save()
+    body = _login(api, "4821").json()
+    assert body["pin_must_change"] is True
+    api.force_authenticate(user)
+    assert api.get("/api/me/").json()["pin_must_change"] is True
+
+
+def test_temporary_pins_are_never_simple():
+    from .services import pin_problem, temporary_pin
+
+    assert all(pin_problem(temporary_pin()) is None for _ in range(300))
+
+
+def test_secretary_resets_a_locked_members_pin():
+    sg = UserFactory()
+    give_role(sg, "secretaire-general")
+    member = UserFactory(phone="+237677452108", pin="4821")
+    member.pin_failed_attempts = 3
+    member.pin_locked_until = timezone.now() + timedelta(minutes=10)
+    member.save()
+    api = APIClient()
+    api.force_authenticate(sg)
+    pin = api.post(f"/api/members/{member.id}/reset-pin/").json()["temporary_pin"]
+    member.refresh_from_db()
+    assert member.check_pin(pin) and member.pin_must_change and not member.pin_locked(timezone.now())
+    assert AuditLog.objects.filter(action="PIN réinitialisé", actor=sg).exists()
+    other = UserFactory()
+    give_role(other, "tresorier")
+    api.force_authenticate(other)
+    assert api.post(f"/api/members/{member.id}/reset-pin/").status_code == 403
+
+
+def test_forgot_pin_without_sms_provider_says_so(api, settings):
+    settings.SMS_DEV_FALLBACK = False
+    settings.TWILIO_VERIFY_SERVICE_SID = None
+    UserFactory(phone="+237677452108")
+    r = api.post("/api/auth/pin/forgot/", {"phone": "677452108"}, format="json")
+    assert (r.status_code, r.json()["code"]) == (503, "sms_unavailable")
+
+
+def test_forgot_pin_full_flow_with_code(api, monkeypatch):
+    from apps.core import sms
+
+    sent = {}
+    original = sms.secrets.randbelow
+
+    def capture(n):
+        v = original(n)
+        sent["code"] = f"{v:06d}"
+        return v
+
+    monkeypatch.setattr(sms.secrets, "randbelow", capture)
+    user = UserFactory(phone="+237677452108", pin="4821")
+    assert api.post("/api/auth/pin/forgot/", {"phone": "677452108"}, format="json").status_code == 202
+    bad = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": "000000" if sent["code"] != "000000" else "111111", "new_pin": "7391"}, format="json")
+    assert bad.json()["code"] == "bad_code"
+    ok = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": sent["code"], "new_pin": "7391"}, format="json")
+    assert ok.status_code == 200 and "access" in ok.json()
+    user.refresh_from_db()
+    assert user.check_pin("7391")

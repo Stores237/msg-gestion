@@ -12,4 +12,7 @@ abstract class MembersRepository {
 
   /// Returns the new member, with [MemberDetail.temporaryPin] set.
   Future<MemberDetail> create(NewMember member);
+
+  /// New temporary PIN for a member (shown once to the secretary).
+  Future<String> resetPin(int id);
 }

@@ -660,4 +660,70 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get changePin => 'Change my PIN';
+
+  @override
+  String get choosePinTitle => 'Choose your PIN';
+
+  @override
+  String get choosePinForced =>
+      'Your current PIN is temporary. Choose a 4-digit PIN only you know.';
+
+  @override
+  String get currentPin => 'Current PIN';
+
+  @override
+  String get newPin => 'New PIN';
+
+  @override
+  String get confirmPin => 'Confirm the new PIN';
+
+  @override
+  String get pinMismatch => 'The two PINs don’t match.';
+
+  @override
+  String get pinFourDigits => '4 digits.';
+
+  @override
+  String get pinTooSimple => 'PIN too simple (1111, 1234…). Pick another one.';
+
+  @override
+  String get pinChanged => 'PIN changed.';
+
+  @override
+  String get forgotTitle => 'Forgotten PIN';
+
+  @override
+  String get forgotIntro => 'We’ll text a code to the account’s number.';
+
+  @override
+  String get sendCode => 'Send the code';
+
+  @override
+  String get smsCode => 'Code received by SMS';
+
+  @override
+  String get badCode => 'Wrong or expired code.';
+
+  @override
+  String get smsUnavailable =>
+      'Text messages aren’t available yet. Ask the general secretary to reset your PIN.';
+
+  @override
+  String get resetPin => 'Reset PIN';
+
+  @override
+  String resetPinConfirm(String name) {
+    return 'A new temporary PIN will be created for $name. The old one will stop working.';
+  }
+
+  @override
+  String resetPinDone(String name, String pin) {
+    return '$name’s new temporary PIN: $pin. Give it in person; it won’t be shown again.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
 }

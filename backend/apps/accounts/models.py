@@ -61,6 +61,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     pin = models.CharField(max_length=128, blank=True)
     pin_failed_attempts = models.PositiveSmallIntegerField(default=0)
     pin_locked_until = models.DateTimeField(null=True, blank=True)
+    # Set when someone else chose the PIN (registration, reset by the
+    # secretary): the app makes the member pick their own on next login.
+    pin_must_change = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, help_text="Accès à l’admin Django (équipe technique).")
@@ -100,10 +103,11 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # --- PIN -------------------------------------------------------------
 
-    def set_pin(self, raw_pin):
+    def set_pin(self, raw_pin, temporary=False):
         self.pin = make_password(raw_pin)
         self.pin_failed_attempts = 0
         self.pin_locked_until = None
+        self.pin_must_change = temporary
 
     def check_pin(self, raw_pin):
         return bool(self.pin) and check_password(raw_pin, self.pin)

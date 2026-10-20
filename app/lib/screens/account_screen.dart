@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/current_user.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
@@ -9,6 +10,7 @@ import '../widgets/labels.dart';
 import '../widgets/language_switch.dart';
 import '../widgets/ui.dart';
 import 'login_phone_screen.dart';
+import 'pin_screens.dart';
 
 /// "Mon compte" (opened from the avatar on Accueil): roles, language, sign-out.
 class AccountScreen extends StatelessWidget {
@@ -17,6 +19,7 @@ class AccountScreen extends StatelessWidget {
 
   Future<void> _logout(BuildContext context) async {
     await RepositoryLocator.instance.auth.logout();
+    currentUser.value = null;
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginPhoneScreen()),
@@ -85,6 +88,17 @@ class AccountScreen extends StatelessWidget {
                       ListRow(
                         title: Text(l.language),
                         trailing: const LanguageSwitch(),
+                      ),
+                      ListRow(
+                        key: const Key('change-pin'),
+                        lead: const Icon(Icons.pin_outlined),
+                        title: Text(l.changePin),
+                        chevron: true,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const SetPinScreen(),
+                          ),
+                        ),
                       ),
                     ],
                   ),

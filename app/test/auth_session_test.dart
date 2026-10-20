@@ -18,15 +18,26 @@ void main() {
       if (req.url.path.endsWith('/auth/refresh/')) {
         refreshCalls += 1;
         await Future<void>.delayed(const Duration(milliseconds: 50));
-        if (jsonDecode(req.body)['refresh'] != 'r1') return http.Response('{"detail":"blacklisted"}', 401);
-        return http.Response(jsonEncode({'access': 'a2', 'refresh': 'r2'}), 200);
+        if (jsonDecode(req.body)['refresh'] != 'r1') {
+          return http.Response('{"detail":"blacklisted"}', 401);
+        }
+        return http.Response(
+          jsonEncode({'access': 'a2', 'refresh': 'r2'}),
+          200,
+        );
       }
-      if (req.headers['Authorization'] == 'Bearer a2') return http.Response('{"ok":true}', 200);
+      if (req.headers['Authorization'] == 'Bearer a2') {
+        return http.Response('{"ok":true}', 200);
+      }
       return http.Response('{"detail":"expired"}', 401);
     });
     final session = AuthSession(storage: InMemoryTokenStorage());
     await session.store(access: 'a1', refresh: 'r1');
-    final api = ApiClient(authSession: session, httpClient: client, baseUrl: 'http://x/api');
+    final api = ApiClient(
+      authSession: session,
+      httpClient: client,
+      baseUrl: 'http://x/api',
+    );
 
     final results = await Future.wait([api.get('/me/'), api.get('/other/')]);
 
@@ -46,7 +57,11 @@ void main() {
     });
     final session = AuthSession(storage: InMemoryTokenStorage());
     await session.store(access: 'a1', refresh: 'r1');
-    final api = ApiClient(authSession: session, httpClient: client, baseUrl: 'http://x/api');
+    final api = ApiClient(
+      authSession: session,
+      httpClient: client,
+      baseUrl: 'http://x/api',
+    );
 
     await expectLater(api.get('/me/'), throwsA(isA<ApiException>()));
     expect(session.isLoggedIn, isTrue, reason: 'offline must keep the session');
@@ -56,9 +71,18 @@ void main() {
     expect(session.isLoggedIn, isFalse);
   });
 
-  test('no response at all is a NetworkException, not a server error', () async {
-    final client = MockClient((req) async => throw http.ClientException('offline'));
-    final api = ApiClient(authSession: AuthSession(storage: InMemoryTokenStorage()), httpClient: client, baseUrl: 'http://x/api');
-    await expectLater(api.get('/me/'), throwsA(isA<NetworkException>()));
-  });
+  test(
+    'no response at all is a NetworkException, not a server error',
+    () async {
+      final client = MockClient(
+        (req) async => throw http.ClientException('offline'),
+      );
+      final api = ApiClient(
+        authSession: AuthSession(storage: InMemoryTokenStorage()),
+        httpClient: client,
+        baseUrl: 'http://x/api',
+      );
+      await expectLater(api.get('/me/'), throwsA(isA<NetworkException>()));
+    },
+  );
 }

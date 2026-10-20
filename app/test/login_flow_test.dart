@@ -15,7 +15,10 @@ void main() {
     LocaleController.debugSetInstance(LocaleController());
   });
 
-  Future<void> pumpLogin(WidgetTester tester, {List<String> tabs = const ['accueil', 'calendrier', 'annonces']}) async {
+  Future<void> pumpLogin(
+    WidgetTester tester, {
+    List<String> tabs = const ['accueil', 'calendrier', 'annonces'],
+  }) async {
     final fakes = await setUpApp(tester, me: fakeMe(tabs: tabs));
     auth = fakes.auth;
     await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
@@ -36,14 +39,21 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('unknown number shows the server message, stays on the screen', (tester) async {
+  testWidgets('unknown number shows the server message, stays on the screen', (
+    tester,
+  ) async {
     await pumpLogin(tester);
     await enterPhone(tester, '699 99 99 99');
-    expect(find.textContaining('Ce numéro n’est pas enregistré.'), findsOneWidget);
+    expect(
+      find.textContaining('Ce numéro n’est pas enregistré.'),
+      findsOneWidget,
+    );
     expect(find.text('Votre code PIN'), findsNothing);
   });
 
-  testWidgets('implausible number is rejected before any request', (tester) async {
+  testWidgets('implausible number is rejected before any request', (
+    tester,
+  ) async {
     await pumpLogin(tester);
     await enterPhone(tester, '12');
     expect(find.textContaining('Format : 6 XX XX XX XX, ou'), findsOneWidget);
@@ -55,22 +65,33 @@ void main() {
     expect(find.text('Bonjour Ingrid, entrez vos 4 chiffres.'), findsOneWidget);
   });
 
-  testWidgets('wrong PIN shows attempts left, then the lock disables the keypad', (tester) async {
-    await pumpLogin(tester);
-    await enterPhone(tester, '677452108');
-    await typePin(tester, '0000');
-    expect(find.text('Code incorrect. Il vous reste 2 essais.'), findsOneWidget);
-    await typePin(tester, '0000');
-    expect(find.text('Code incorrect. Il vous reste 1 essai.'), findsOneWidget);
-    await typePin(tester, '0000');
-    expect(find.textContaining('Compte bloqué'), findsOneWidget);
-    // Keypad disabled: tapping the right PIN does nothing now.
-    await typePin(tester, '4821');
-    expect(find.textContaining('Compte bloqué'), findsOneWidget);
-    expect(find.byKey(const Key('tab-accueil')), findsNothing);
-  });
+  testWidgets(
+    'wrong PIN shows attempts left, then the lock disables the keypad',
+    (tester) async {
+      await pumpLogin(tester);
+      await enterPhone(tester, '677452108');
+      await typePin(tester, '0000');
+      expect(
+        find.text('Code incorrect. Il vous reste 2 essais.'),
+        findsOneWidget,
+      );
+      await typePin(tester, '0000');
+      expect(
+        find.text('Code incorrect. Il vous reste 1 essai.'),
+        findsOneWidget,
+      );
+      await typePin(tester, '0000');
+      expect(find.textContaining('Compte bloqué'), findsOneWidget);
+      // Keypad disabled: tapping the right PIN does nothing now.
+      await typePin(tester, '4821');
+      expect(find.textContaining('Compte bloqué'), findsOneWidget);
+      expect(find.byKey(const Key('tab-accueil')), findsNothing);
+    },
+  );
 
-  testWidgets('member logs in and sees only the three member tabs', (tester) async {
+  testWidgets('member logs in and sees only the three member tabs', (
+    tester,
+  ) async {
     await pumpLogin(tester);
     await enterPhone(tester, '677452108');
     await typePin(tester, '4821');
@@ -83,10 +104,19 @@ void main() {
   });
 
   testWidgets('treasurer gets all five tabs from the server', (tester) async {
-    await pumpLogin(tester, tabs: const ['accueil', 'membres', 'finances', 'calendrier', 'annonces']);
+    await pumpLogin(
+      tester,
+      tabs: const ['accueil', 'membres', 'finances', 'calendrier', 'annonces'],
+    );
     await enterPhone(tester, '677452108');
     await typePin(tester, '4821');
-    for (final t in ['accueil', 'membres', 'finances', 'calendrier', 'annonces']) {
+    for (final t in [
+      'accueil',
+      'membres',
+      'finances',
+      'calendrier',
+      'annonces',
+    ]) {
       expect(find.byKey(Key('tab-$t')), findsOneWidget);
     }
     await tester.tap(find.byKey(const Key('tab-finances')));
@@ -109,7 +139,9 @@ void main() {
     expect(find.text('Bienvenue'), findsOneWidget);
   });
 
-  testWidgets('the in-app switch changes the language on the spot', (tester) async {
+  testWidgets('the in-app switch changes the language on the spot', (
+    tester,
+  ) async {
     await pumpLogin(tester);
     expect(find.text('Bienvenue'), findsOneWidget);
     await tester.tap(find.byKey(const Key('lang-en')));

@@ -15,6 +15,9 @@ String describeError(BuildContext context, Object error) {
     NoPinSet() => l.errorNoPin,
     NetworkException() => l.networkError,
     ApiException(statusCode: 403) => l.errorForbidden,
+    ApiException(code: 'pin_too_simple') => l.pinTooSimple,
+    ApiException(code: 'bad_code') => l.badCode,
+    ApiException(code: 'sms_unavailable') => l.smsUnavailable,
     // Server-side validation messages are written for people; show them
     // when there is no code to translate.
     ApiException(:final detail?) => detail,

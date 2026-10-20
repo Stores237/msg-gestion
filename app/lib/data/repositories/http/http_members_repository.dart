@@ -46,4 +46,10 @@ class HttpMembersRepository implements MembersRepository {
   Future<MemberDetail> create(NewMember member) async => MemberDetail.fromJson(
     await _api.post('/members/', body: member.toJson()) as Map<String, dynamic>,
   );
+
+  @override
+  Future<String> resetPin(int id) async =>
+      (await _api.post('/members/$id/reset-pin/')
+              as Map<String, dynamic>)['temporary_pin']
+          as String;
 }

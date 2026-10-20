@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/member.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
+import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 
@@ -39,6 +41,55 @@ class MemberProfileScreen extends StatelessWidget {
 }
 
 class _ProfileBody extends StatelessWidget {
+  Future<void> _resetPin(BuildContext context) async {
+    final l = AppLocalizations.of(context);
+    final name = m.summary.fullName;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.resetPin),
+        content: Text(l.resetPinConfirm(name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            key: const Key('reset-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l.confirm),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      final pin = await RepositoryLocator.instance.members.resetPin(
+        m.summary.id,
+      );
+      if (!context.mounted) return;
+      await showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text(l.resetPin),
+          content: Text(
+            l.resetPinDone(name, pin),
+            key: const Key('reset-done'),
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l.close),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) showErrorSnack(context, e);
+    }
+  }
+
   const _ProfileBody({required this.m});
   final MemberDetail m;
 
@@ -146,6 +197,19 @@ class _ProfileBody extends StatelessWidget {
         if (m.restricted.contains('minor_contacts')) ...[
           const SizedBox(height: 20),
           RestrictedBlock(text: l.restrictedMinorContacts),
+        ],
+        if (currentUser.value?.can('members.profile', 'change') ?? false) ...[
+          const SizedBox(height: 20),
+          OutlinedButton.icon(
+            key: const Key('reset-pin'),
+            onPressed: () => _resetPin(context),
+            icon: const Icon(Icons.lock_reset),
+            label: Text(l.resetPin),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              shape: const StadiumBorder(),
+            ),
+          ),
         ],
         if (m.restricted.contains('contributions')) ...[
           const SizedBox(height: 20),

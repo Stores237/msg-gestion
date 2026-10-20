@@ -1,4 +1,4 @@
-import secrets
+
 from datetime import date
 
 from django.core.management.base import BaseCommand
@@ -6,6 +6,7 @@ from django.db import transaction
 
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.phone import normalize_phone
+from apps.accounts.services import temporary_pin
 
 from .seed_demo import PARENTS, TESTERS
 
@@ -32,8 +33,8 @@ class Command(BaseCommand):
                 if phone in PARENTS:
                     user.parent_name, user.parent_relation, user.parent_phone = PARENTS[phone]
                 user.set_unusable_password()  # app only, never the back-office
-                pin = f"{secrets.randbelow(10**4):04d}"
-                user.set_pin(pin)
+                pin = temporary_pin()
+                user.set_pin(pin, temporary=True)
                 user.save()
                 for slug in slugs:
                     RoleAssignment.objects.create(

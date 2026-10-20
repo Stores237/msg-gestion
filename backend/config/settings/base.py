@@ -193,6 +193,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "phone_lookup": "30/hour",
         "pin_login": "30/hour",
+        "pin_forgot": "10/hour",
         "token_refresh": "120/hour",
         "backoffice_login": "20/hour",
         "backoffice_otp": "20/hour",

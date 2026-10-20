@@ -365,5 +365,42 @@
         "type": "int"
       }
     }
-  }
+  },
+  "changePin": "Changer mon code PIN",
+  "choosePinTitle": "Choisissez votre code PIN",
+  "choosePinForced": "Votre code actuel est provisoire. Choisissez un code à 4 chiffres que vous seul connaissez.",
+  "currentPin": "Code actuel",
+  "newPin": "Nouveau code",
+  "confirmPin": "Confirmer le nouveau code",
+  "pinMismatch": "Les deux codes ne sont pas identiques.",
+  "pinFourDigits": "4 chiffres.",
+  "pinTooSimple": "Code trop simple (1111, 1234…). Choisissez-en un autre.",
+  "pinChanged": "Code PIN modifié.",
+  "forgotTitle": "Code PIN oublié",
+  "forgotIntro": "Nous envoyons un code par SMS au numéro du compte.",
+  "sendCode": "Envoyer le code",
+  "smsCode": "Code reçu par SMS",
+  "badCode": "Code incorrect ou expiré.",
+  "smsUnavailable": "L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.",
+  "resetPin": "Réinitialiser le code PIN",
+  "resetPinConfirm": "Un nouveau code provisoire sera créé pour {name}. L’ancien ne fonctionnera plus.",
+  "@resetPinConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "resetPinDone": "Nouveau code provisoire de {name} : {pin}. Communiquez-le en personne ; il ne sera plus affiché.",
+  "@resetPinDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pin": {
+        "type": "String"
+      }
+    }
+  },
+  "confirm": "Confirmer"
 }

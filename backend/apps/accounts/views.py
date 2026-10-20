@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
@@ -9,9 +10,11 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from apps.core import audit, sms
+
 from .models import User
 from .serializers import LogoutSerializer, MeSerializer, PhoneLookupSerializer, PinLoginSerializer
-from .services import check_pin_login
+from .services import check_pin_login, pin_problem
 
 # Every error carries a stable `code` (+ numbers) so the app can word it in
 # the member's chosen language (FR/EN); `detail` is the French fallback.
@@ -80,7 +83,7 @@ class PinLoginView(APIView):
 
         refresh = RefreshToken.for_user(result.user)
         User.objects.filter(pk=user.pk).update(last_login=timezone.now())
-        return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
+        return Response({"access": str(refresh.access_token), "refresh": str(refresh), "pin_must_change": result.user.pin_must_change})
 
 
 class ThrottledTokenRefreshView(TokenRefreshView):
@@ -106,3 +109,78 @@ class MeView(APIView):
     def get(self, request):
         return Response(MeSerializer(request.user).data)
 
+
+
+class ChangePinView(APIView):
+    """Member changes their own PIN (current PIN required; wrong current
+    PINs count towards the lockout like a login)."""
+
+    @extend_schema(request=None, responses={204: None})
+    def post(self, request):
+        current, new = request.data.get("current_pin", ""), request.data.get("new_pin", "")
+        problem = pin_problem(new)
+        if problem:
+            return Response({"detail": "Choisissez un code moins simple.", "code": problem}, status=400)
+        result = check_pin_login(request.user, str(current), request=request)
+        if not result.ok:
+            if result.locked_until is not None:
+                return Response({"detail": "Compte bloqué.", "code": "locked", "minutes": settings.PIN_LOCKOUT_MINUTES}, status=423)
+            return Response({"detail": "Code actuel incorrect.", "code": "wrong_pin", "attempts_left": result.attempts_left}, status=401)
+        user = result.user
+        user.set_pin(new)
+        user.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
+        audit.record("PIN modifié par le membre", actor=user, obj=user, request=request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ForgotPinView(APIView):
+    """Step 1 of "Code oublié ?": text a one-time code to the member."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_scope = "pin_forgot"
+
+    @extend_schema(request=PhoneLookupSerializer, responses={202: None})
+    def post(self, request):
+        s = PhoneLookupSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        user = User.objects.filter(phone=s.validated_data["phone"]).first()
+        if not _login_allowed(user):
+            return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            sms.send_code(user.phone)
+        except sms.SmsUnavailable:
+            # No SMS provider yet (Twilio): say so, the app points to the secretary.
+            return Response({"detail": "SMS indisponible. Demandez au secrétaire général.", "code": "sms_unavailable"}, status=503)
+        return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class ForgotPinConfirmView(APIView):
+    """Step 2: code + new PIN → new PIN set and the member is logged in."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_scope = "pin_forgot"
+
+    @extend_schema(request=None, responses=OpenApiTypes.OBJECT)
+    def post(self, request):
+        s = PhoneLookupSerializer(data={"phone": request.data.get("phone")})
+        s.is_valid(raise_exception=True)
+        new = str(request.data.get("new_pin", ""))
+        problem = pin_problem(new)
+        if problem:
+            return Response({"detail": "Choisissez un code moins simple.", "code": problem}, status=400)
+        user = User.objects.filter(phone=s.validated_data["phone"]).first()
+        if not _login_allowed(user):
+            return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            ok = sms.check_code(user.phone, str(request.data.get("code", "")))
+        except sms.SmsUnavailable:
+            return Response({"detail": "SMS indisponible.", "code": "sms_unavailable"}, status=503)
+        if not ok:
+            return Response({"detail": "Code incorrect ou expiré.", "code": "bad_code"}, status=400)
+        user.set_pin(new)
+        user.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
+        audit.record("PIN réinitialisé par SMS", actor=user, obj=user, request=request)
+        refresh = RefreshToken.for_user(user)
+        return Response({"access": str(refresh.access_token), "refresh": str(refresh)})

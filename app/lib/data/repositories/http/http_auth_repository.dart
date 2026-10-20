@@ -27,7 +27,7 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> loginWithPin({
+  Future<bool> loginWithPin({
     required String phone,
     required String pin,
   }) async {
@@ -43,6 +43,7 @@ class HttpAuthRepository implements AuthRepository {
         access: data['access'] as String,
         refresh: data['refresh'] as String,
       );
+      return data['pin_must_change'] == true;
     } on ApiException catch (e) {
       switch (e.statusCode) {
         case 401:
@@ -56,6 +57,60 @@ class HttpAuthRepository implements AuthRepository {
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<void> changePin({
+    required String currentPin,
+    required String newPin,
+  }) async {
+    try {
+      await _api.post(
+        '/auth/pin/change/',
+        body: {'current_pin': currentPin, 'new_pin': newPin},
+      );
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        throw WrongPin((e.json?['attempts_left'] as num?)?.toInt() ?? 0);
+      }
+      if (e.statusCode == 423) {
+        throw AccountLocked((e.json?['minutes'] as num?)?.toInt() ?? 15);
+      }
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> forgotPin(String phone) async {
+    try {
+      await _api.post(
+        '/auth/pin/forgot/',
+        body: {'phone': phone},
+        authenticated: false,
+      );
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) throw const UnknownMember();
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> forgotPinConfirm({
+    required String phone,
+    required String code,
+    required String newPin,
+  }) async {
+    final data =
+        await _api.post(
+              '/auth/pin/forgot/confirm/',
+              body: {'phone': phone, 'code': code, 'new_pin': newPin},
+              authenticated: false,
+            )
+            as Map<String, dynamic>;
+    await _api.authSession.store(
+      access: data['access'] as String,
+      refresh: data['refresh'] as String,
+    );
   }
 
   @override

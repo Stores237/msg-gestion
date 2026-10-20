@@ -94,7 +94,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         ),
       );
       if (!mounted) return;
-      setState(() => _busy = false); // saved: stop the spinner behind the dialog
+      setState(
+        () => _busy = false,
+      ); // saved: stop the spinner behind the dialog
       await showDialog<void>(
         context: context,
         barrierDismissible: false,
