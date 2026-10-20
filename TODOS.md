@@ -42,15 +42,18 @@ These need an account, a decision or a person — not code.
 - [x] Beta APK build/verify/host workflow rehearsed (0.1.0 build 1, 2026-10-20).
 
 ### P1 — the app's modules, one vertical slice each
-- [ ] Members: list, profile (with minors' contacts gated), add member.
+- [x] Members: list, profile (with minors' contacts gated), add member (2026-10-20).
 - [ ] Finances: cash book (entry → validation by the commissaire), solidarity contributions in
   thirds, quarterly report, PDF export.
-- [ ] Calendar: month/agenda, event detail, reminders, attendance call (works offline).
+- [x] Calendar: month/agenda, event detail, absence notice, roll call (2026-10-20). Still to do:
+  reminders, offline roll call, editing/deleting events in the app.
 - [ ] Planning: weekly grid, assign post/group, my duties, swaps, alb-washing rotation.
-- [ ] Announcements: feed, composer, convocation linked to an event, read receipts.
+- [x] Announcements: feed, composer, convocation linked to an event, read receipts (2026-10-20).
+  Still to do: PDF attachments, "relancer les non-lecteurs" (needs push notifications).
 - [ ] Offline: local store + "pending send" queue + sync line (design: États).
 
 ### P2
+- [ ] Back-office in English too (the app is bilingual; the back-office is French only for now).
 - [ ] Biometric unlock (fingerprint key is shown disabled).
 - [ ] Notifications (push).
 - [ ] Mandate-expiry reminder 30 days before the end (a scheduled job; see

@@ -14,6 +14,8 @@ whether it touches real data.
 | 5 | Flutter app: login and role-based tabs | No |
 | 6 | Staging database and storage on Supabase | Staging schema created |
 | 7 | First beta APK (0.1.0 build 1) | No |
+| 8 | Bilingual app (FR/EN) | No |
+| 9 | Members, calendar, announcements (API + app); beta build 2 | New tables; staging demo content |
 
 ## 1. Backend skeleton
 
@@ -132,3 +134,42 @@ label "MSG Gestion", INTERNET present. Not debuggable. `apksigner`: signer
 `python3 -m http.server 8790 --bind 127.0.0.1` behind `cloudflared tunnel --protocol http2`.
 The link lives only as long as both processes; re-host (don't rebuild) after a restart and
 re-check the SHA-256.
+
+## 8. Bilingual app (French / English)
+
+**What/why.** Owner requirement: the app is dual-language. FR/EN switch on the login screen and in
+"Mon compte", remembered on the phone (`LocaleController`, shared_preferences); default follows
+the phone, French unless the phone is in English. The app sends `Accept-Language`. API errors
+carry a stable `code` (+ numbers such as `attempts_left`, `minutes`) so the app words them in the
+chosen language; `detail` stays as the French fallback. Seeded role names are translated by slug.
+New UI strings go through `app/tool/add_strings.py`, which writes both ARB files at once.
+
+**Verify.** `flutter test` (language switch test); on a phone, switch FR ↔ EN on the login
+screen and enter a wrong PIN: the message follows the language.
+
+## 9. Members, calendar, announcements — beta build 2
+
+**What/why.** First real modules, following the design screens.
+- **API** (`apps/members`, `apps/events`, `apps/announcements`): member list with counts and
+  filters, bureau, profile (minors' phone and parent contact only for
+  `members.minor_contacts:view`; a `restricted` list says what was withheld), registration
+  (Membre role, audited, temporary PIN returned once until SMS exists); events by date range,
+  create/update/delete (audited), roll call (bulk PUT), member absence notice (can't override a
+  censor's mark); announcements and convocations (convocation requires an event), pinned first,
+  unread flags, read receipts for the author / `announcements.posts:change`.
+- **App**: Members (search, chips with counts, bureau, profile, add member), Calendar (month grid
+  with dots, agenda, event detail, report absence, roll call, new event), Announcements (filters,
+  unread dot + tab badge, compose, convocation event picker, read receipts), new Accueil (next
+  meeting, latest announcement) and Mon compte (roles, language, sign-out).
+- Fixes found by tests: Django drops `Meta.ordering` from `GROUP BY` queries (feed now ordered
+  explicitly); add-member spinner kept spinning behind the PIN dialog.
+
+**Data.** Migrations `events.0001`, `announcements.0001` (new tables; applied on staging).
+`manage.py add_demo_content` loads 11 demo events and 3 announcements tagged "[démo]";
+re-running replaces them, `--remove` deletes them. Loaded on staging 2026-10-20.
+
+**Build 2.** versionCode 2, same upload key (SHA-256 `5efeb9ea…f17194`), not debuggable,
+staging URL in `libapp.so`. APK SHA-256
+`750a67a966d2a2b87a26b2710d8cdc813ab6db6a1cec8c54ffda4d85f7c6871c`.
+
+**Verify.** `pytest` (103) and `flutter test` (26).
