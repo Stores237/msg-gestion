@@ -16,6 +16,7 @@ class Fakes {
   final members = FakeMembersRepository();
   final events = FakeEventsRepository();
   final announcements = FakeAnnouncementsRepository();
+  final finances = FakeFinancesRepository();
 }
 
 /// French phone, fresh language choice, fake repositories, date symbols.
@@ -33,6 +34,7 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
       members: f.members,
       events: f.events,
       announcements: f.announcements,
+      finances: f.finances,
     ),
   );
   return f;

@@ -762,4 +762,259 @@ class AppLocalizationsFr extends AppLocalizations {
   String sizeMb(String n) {
     return '$n Mo';
   }
+
+  @override
+  String get cashBalance => 'Solde de la caisse';
+
+  @override
+  String validatedUntil(String date) {
+    return 'Validé jusqu’au $date';
+  }
+
+  @override
+  String withPending(String amount) {
+    return '$amount en comptant les opérations à valider';
+  }
+
+  @override
+  String get cashBook => 'Livre de caisse';
+
+  @override
+  String get solidarity => 'Solidarité';
+
+  @override
+  String get report => 'Rapport';
+
+  @override
+  String get newEntry => 'Nouvelle opération';
+
+  @override
+  String get entryButton => 'Opération';
+
+  @override
+  String get directionIn => 'Entrée';
+
+  @override
+  String get directionOut => 'Sortie';
+
+  @override
+  String get amount => 'Montant';
+
+  @override
+  String get category => 'Catégorie';
+
+  @override
+  String get catRegistration => 'Inscriptions';
+
+  @override
+  String get catFine => 'Amendes';
+
+  @override
+  String get catDonation => 'Aides et dons';
+
+  @override
+  String get catSolidarity => 'Contributions de solidarité';
+
+  @override
+  String get catExpense => 'Dépenses';
+
+  @override
+  String get member => 'Membre';
+
+  @override
+  String get memberOptional => 'Membre (facultatif)';
+
+  @override
+  String get chooseMember => 'Choisir un membre';
+
+  @override
+  String get description => 'Libellé';
+
+  @override
+  String get amountRequired => 'Indiquez un montant.';
+
+  @override
+  String get willBeValidated => 'Sera validée par le commissaire aux comptes.';
+
+  @override
+  String enteredBy(String name, String when) {
+    return 'Saisi par $name · $when';
+  }
+
+  @override
+  String validatedBy(String name) {
+    return 'Validé par $name';
+  }
+
+  @override
+  String get toValidate => 'À valider';
+
+  @override
+  String get validated => 'Validé';
+
+  @override
+  String get notSentYet => 'Pas encore envoyé';
+
+  @override
+  String get validateEntryTitle => 'Valider cette opération ?';
+
+  @override
+  String get validateEntryBody =>
+      'Votre nom et l’heure seront enregistrés. Une opération validée ne peut plus être modifiée.';
+
+  @override
+  String get validate => 'Valider';
+
+  @override
+  String get entryValidated => 'Opération validée.';
+
+  @override
+  String get entrySaved => 'Opération enregistrée, en attente de validation.';
+
+  @override
+  String get ownEntry => 'On ne peut pas valider sa propre saisie.';
+
+  @override
+  String get noEntries => 'Aucune opération pour l’instant.';
+
+  @override
+  String get collections => 'Collectes';
+
+  @override
+  String get newCollection => 'Nouvelle collecte';
+
+  @override
+  String get collectionKind => 'Motif';
+
+  @override
+  String get kindDeath => 'Décès';
+
+  @override
+  String get kindIllness => 'Maladie';
+
+  @override
+  String get kindMedal => 'Médaille, diplôme, sacrement';
+
+  @override
+  String get amountPerMember => 'Montant par membre';
+
+  @override
+  String paidFullOf(int paid, int total) {
+    return '$paid sur $total ont tout payé';
+  }
+
+  @override
+  String tranchesInfo(String parts) {
+    return 'Tranches de $parts, une par semaine sur un mois.';
+  }
+
+  @override
+  String filterToPay(int n) {
+    return 'À payer $n';
+  }
+
+  @override
+  String filterPaid(int n) {
+    return 'Payé $n';
+  }
+
+  @override
+  String thirdsOf3(int n) {
+    return '$n/3 tranches';
+  }
+
+  @override
+  String get paidInFull => 'Payé';
+
+  @override
+  String savePayments(int n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Enregistrer $n paiements · $amount',
+      one: 'Enregistrer 1 paiement · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paymentsSaved => 'Paiements enregistrés.';
+
+  @override
+  String get closeCollection => 'Clôturer la collecte';
+
+  @override
+  String get closeCollectionBody =>
+      'Les membres restants seront notés « non payé ».';
+
+  @override
+  String get closed => 'Clôturée';
+
+  @override
+  String get noCollections => 'Aucune collecte.';
+
+  @override
+  String quarterReport(int q, int year) {
+    return 'Rapport T$q $year';
+  }
+
+  @override
+  String get summary => 'Synthèse';
+
+  @override
+  String get openingBalance => 'Solde d’ouverture';
+
+  @override
+  String get closingBalance => 'Solde de clôture';
+
+  @override
+  String get incomeLabel => 'Entrées';
+
+  @override
+  String get expenseLabel => 'Sorties';
+
+  @override
+  String get incomeByCategory => 'Entrées par catégorie';
+
+  @override
+  String pendingBlock(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n opérations restent à vérifier avant de valider.',
+      one: '1 opération reste à vérifier avant de valider.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get validateReport => 'Valider le rapport';
+
+  @override
+  String reportValidatedBy(String name, String date) {
+    return 'Validé par $name le $date';
+  }
+
+  @override
+  String get previousQuarter => 'Trimestre précédent';
+
+  @override
+  String get nextQuarter => 'Trimestre suivant';
+
+  @override
+  String get myContributions => 'Mes contributions';
+
+  @override
+  String get toPayLabel => 'À payer';
+
+  @override
+  String get nothingToPay => 'Rien à payer. Merci !';
+
+  @override
+  String remainingOf(String remaining, String total) {
+    return 'Reste $remaining sur $total';
+  }
+
+  @override
+  String get fine => 'Amende';
 }

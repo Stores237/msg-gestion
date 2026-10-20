@@ -121,7 +121,7 @@ void main() {
     }
     await tester.tap(find.byKey(const Key('tab-finances')));
     await tester.pumpAndSettle();
-    expect(find.text('Bientôt disponible'), findsOneWidget);
+    expect(find.text('SOLDE DE LA CAISSE'), findsOneWidget);
     await tester.tap(find.byKey(const Key('tab-membres')));
     await tester.pumpAndSettle();
     expect(find.text('Ewane Brice'), findsOneWidget);

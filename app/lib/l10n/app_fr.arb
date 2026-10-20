@@ -432,5 +432,192 @@
         "type": "String"
       }
     }
-  }
+  },
+  "cashBalance": "Solde de la caisse",
+  "validatedUntil": "Validé jusqu’au {date}",
+  "@validatedUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "withPending": "{amount} en comptant les opérations à valider",
+  "@withPending": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashBook": "Livre de caisse",
+  "solidarity": "Solidarité",
+  "report": "Rapport",
+  "newEntry": "Nouvelle opération",
+  "entryButton": "Opération",
+  "directionIn": "Entrée",
+  "directionOut": "Sortie",
+  "amount": "Montant",
+  "category": "Catégorie",
+  "catRegistration": "Inscriptions",
+  "catFine": "Amendes",
+  "catDonation": "Aides et dons",
+  "catSolidarity": "Contributions de solidarité",
+  "catExpense": "Dépenses",
+  "member": "Membre",
+  "memberOptional": "Membre (facultatif)",
+  "chooseMember": "Choisir un membre",
+  "description": "Libellé",
+  "amountRequired": "Indiquez un montant.",
+  "willBeValidated": "Sera validée par le commissaire aux comptes.",
+  "enteredBy": "Saisi par {name} · {when}",
+  "@enteredBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "validatedBy": "Validé par {name}",
+  "@validatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "toValidate": "À valider",
+  "validated": "Validé",
+  "notSentYet": "Pas encore envoyé",
+  "validateEntryTitle": "Valider cette opération ?",
+  "validateEntryBody": "Votre nom et l’heure seront enregistrés. Une opération validée ne peut plus être modifiée.",
+  "validate": "Valider",
+  "entryValidated": "Opération validée.",
+  "entrySaved": "Opération enregistrée, en attente de validation.",
+  "ownEntry": "On ne peut pas valider sa propre saisie.",
+  "noEntries": "Aucune opération pour l’instant.",
+  "collections": "Collectes",
+  "newCollection": "Nouvelle collecte",
+  "collectionKind": "Motif",
+  "kindDeath": "Décès",
+  "kindIllness": "Maladie",
+  "kindMedal": "Médaille, diplôme, sacrement",
+  "amountPerMember": "Montant par membre",
+  "paidFullOf": "{paid} sur {total} ont tout payé",
+  "@paidFullOf": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tranchesInfo": "Tranches de {parts}, une par semaine sur un mois.",
+  "@tranchesInfo": {
+    "placeholders": {
+      "parts": {
+        "type": "String"
+      }
+    }
+  },
+  "filterToPay": "À payer {n}",
+  "@filterToPay": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "filterPaid": "Payé {n}",
+  "@filterPaid": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "thirdsOf3": "{n}/3 tranches",
+  "@thirdsOf3": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "paidInFull": "Payé",
+  "savePayments": "{n, plural, =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}",
+  "@savePayments": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentsSaved": "Paiements enregistrés.",
+  "closeCollection": "Clôturer la collecte",
+  "closeCollectionBody": "Les membres restants seront notés « non payé ».",
+  "closed": "Clôturée",
+  "noCollections": "Aucune collecte.",
+  "quarterReport": "Rapport T{q} {year}",
+  "@quarterReport": {
+    "placeholders": {
+      "q": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "summary": "Synthèse",
+  "openingBalance": "Solde d’ouverture",
+  "closingBalance": "Solde de clôture",
+  "incomeLabel": "Entrées",
+  "expenseLabel": "Sorties",
+  "incomeByCategory": "Entrées par catégorie",
+  "pendingBlock": "{n, plural, =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}",
+  "@pendingBlock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "validateReport": "Valider le rapport",
+  "reportValidatedBy": "Validé par {name} le {date}",
+  "@reportValidatedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "previousQuarter": "Trimestre précédent",
+  "nextQuarter": "Trimestre suivant",
+  "myContributions": "Mes contributions",
+  "toPayLabel": "À payer",
+  "nothingToPay": "Rien à payer. Merci !",
+  "remainingOf": "Reste {remaining} sur {total}",
+  "@remainingOf": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "fine": "Amende"
 }

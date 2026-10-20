@@ -60,3 +60,23 @@ String presenceLabel(AppLocalizations l, String status) => switch (status) {
   'excuse' => l.presenceExcused,
   _ => l.presenceNotMarked,
 };
+
+const incomeCategories = ['solidarite', 'amende', 'inscription', 'aide_don'];
+
+String financeCategoryLabel(AppLocalizations l, String c) => switch (c) {
+  'inscription' => l.catRegistration,
+  'amende' => l.catFine,
+  'aide_don' => l.catDonation,
+  'solidarite' => l.catSolidarity,
+  'depense' => l.catExpense,
+  _ => c,
+};
+
+const collectionKinds = ['deces', 'maladie', 'medaille', 'autre'];
+
+String collectionKindLabel(AppLocalizations l, String k) => switch (k) {
+  'deces' => l.kindDeath,
+  'maladie' => l.kindIllness,
+  'medaille' => l.kindMedal,
+  _ => l.kindOther,
+};

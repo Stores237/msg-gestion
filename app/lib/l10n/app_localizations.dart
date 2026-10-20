@@ -1423,6 +1423,432 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n} Mo'**
   String sizeMb(String n);
+
+  /// No description provided for @cashBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde de la caisse'**
+  String get cashBalance;
+
+  /// No description provided for @validatedUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validé jusqu’au {date}'**
+  String validatedUntil(String date);
+
+  /// No description provided for @withPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{amount} en comptant les opérations à valider'**
+  String withPending(String amount);
+
+  /// No description provided for @cashBook.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre de caisse'**
+  String get cashBook;
+
+  /// No description provided for @solidarity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solidarité'**
+  String get solidarity;
+
+  /// No description provided for @report.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport'**
+  String get report;
+
+  /// No description provided for @newEntry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle opération'**
+  String get newEntry;
+
+  /// No description provided for @entryButton.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération'**
+  String get entryButton;
+
+  /// No description provided for @directionIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrée'**
+  String get directionIn;
+
+  /// No description provided for @directionOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie'**
+  String get directionOut;
+
+  /// No description provided for @amount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get amount;
+
+  /// No description provided for @category.
+  ///
+  /// In fr, this message translates to:
+  /// **'Catégorie'**
+  String get category;
+
+  /// No description provided for @catRegistration.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscriptions'**
+  String get catRegistration;
+
+  /// No description provided for @catFine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amendes'**
+  String get catFine;
+
+  /// No description provided for @catDonation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aides et dons'**
+  String get catDonation;
+
+  /// No description provided for @catSolidarity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contributions de solidarité'**
+  String get catSolidarity;
+
+  /// No description provided for @catExpense.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépenses'**
+  String get catExpense;
+
+  /// No description provided for @member.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre'**
+  String get member;
+
+  /// No description provided for @memberOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre (facultatif)'**
+  String get memberOptional;
+
+  /// No description provided for @chooseMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un membre'**
+  String get chooseMember;
+
+  /// No description provided for @description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Libellé'**
+  String get description;
+
+  /// No description provided for @amountRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez un montant.'**
+  String get amountRequired;
+
+  /// No description provided for @willBeValidated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sera validée par le commissaire aux comptes.'**
+  String get willBeValidated;
+
+  /// No description provided for @enteredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisi par {name} · {when}'**
+  String enteredBy(String name, String when);
+
+  /// No description provided for @validatedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validé par {name}'**
+  String validatedBy(String name);
+
+  /// No description provided for @toValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À valider'**
+  String get toValidate;
+
+  /// No description provided for @validated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validé'**
+  String get validated;
+
+  /// No description provided for @notSentYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore envoyé'**
+  String get notSentYet;
+
+  /// No description provided for @validateEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider cette opération ?'**
+  String get validateEntryTitle;
+
+  /// No description provided for @validateEntryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre nom et l’heure seront enregistrés. Une opération validée ne peut plus être modifiée.'**
+  String get validateEntryBody;
+
+  /// No description provided for @validate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider'**
+  String get validate;
+
+  /// No description provided for @entryValidated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération validée.'**
+  String get entryValidated;
+
+  /// No description provided for @entrySaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération enregistrée, en attente de validation.'**
+  String get entrySaved;
+
+  /// No description provided for @ownEntry.
+  ///
+  /// In fr, this message translates to:
+  /// **'On ne peut pas valider sa propre saisie.'**
+  String get ownEntry;
+
+  /// No description provided for @noEntries.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune opération pour l’instant.'**
+  String get noEntries;
+
+  /// No description provided for @collections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collectes'**
+  String get collections;
+
+  /// No description provided for @newCollection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle collecte'**
+  String get newCollection;
+
+  /// No description provided for @collectionKind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif'**
+  String get collectionKind;
+
+  /// No description provided for @kindDeath.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décès'**
+  String get kindDeath;
+
+  /// No description provided for @kindIllness.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maladie'**
+  String get kindIllness;
+
+  /// No description provided for @kindMedal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Médaille, diplôme, sacrement'**
+  String get kindMedal;
+
+  /// No description provided for @amountPerMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant par membre'**
+  String get amountPerMember;
+
+  /// No description provided for @paidFullOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'{paid} sur {total} ont tout payé'**
+  String paidFullOf(int paid, int total);
+
+  /// No description provided for @tranchesInfo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tranches de {parts}, une par semaine sur un mois.'**
+  String tranchesInfo(String parts);
+
+  /// No description provided for @filterToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer {n}'**
+  String filterToPay(int n);
+
+  /// No description provided for @filterPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé {n}'**
+  String filterPaid(int n);
+
+  /// No description provided for @thirdsOf3.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n}/3 tranches'**
+  String thirdsOf3(int n);
+
+  /// No description provided for @paidInFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get paidInFull;
+
+  /// No description provided for @savePayments.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}'**
+  String savePayments(int n, String amount);
+
+  /// No description provided for @paymentsSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiements enregistrés.'**
+  String get paymentsSaved;
+
+  /// No description provided for @closeCollection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturer la collecte'**
+  String get closeCollection;
+
+  /// No description provided for @closeCollectionBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les membres restants seront notés « non payé ».'**
+  String get closeCollectionBody;
+
+  /// No description provided for @closed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Clôturée'**
+  String get closed;
+
+  /// No description provided for @noCollections.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune collecte.'**
+  String get noCollections;
+
+  /// No description provided for @quarterReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport T{q} {year}'**
+  String quarterReport(int q, int year);
+
+  /// No description provided for @summary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synthèse'**
+  String get summary;
+
+  /// No description provided for @openingBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde d’ouverture'**
+  String get openingBalance;
+
+  /// No description provided for @closingBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde de clôture'**
+  String get closingBalance;
+
+  /// No description provided for @incomeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrées'**
+  String get incomeLabel;
+
+  /// No description provided for @expenseLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties'**
+  String get expenseLabel;
+
+  /// No description provided for @incomeByCategory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrées par catégorie'**
+  String get incomeByCategory;
+
+  /// No description provided for @pendingBlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}'**
+  String pendingBlock(int n);
+
+  /// No description provided for @validateReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider le rapport'**
+  String get validateReport;
+
+  /// No description provided for @reportValidatedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validé par {name} le {date}'**
+  String reportValidatedBy(String name, String date);
+
+  /// No description provided for @previousQuarter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trimestre précédent'**
+  String get previousQuarter;
+
+  /// No description provided for @nextQuarter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trimestre suivant'**
+  String get nextQuarter;
+
+  /// No description provided for @myContributions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes contributions'**
+  String get myContributions;
+
+  /// No description provided for @toPayLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer'**
+  String get toPayLabel;
+
+  /// No description provided for @nothingToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à payer. Merci !'**
+  String get nothingToPay;
+
+  /// No description provided for @remainingOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste {remaining} sur {total}'**
+  String remainingOf(String remaining, String total);
+
+  /// No description provided for @fine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Amende'**
+  String get fine;
 }
 
 class _AppLocalizationsDelegate

@@ -130,6 +130,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                   children: [
                     label(l.eventKind),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _kind,
                       decoration: deco(),
                       items: [
@@ -220,6 +221,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                     ),
                     label(l.eventDress),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _dress,
                       decoration: deco(
                         prefix: const Icon(Icons.checkroom_outlined),

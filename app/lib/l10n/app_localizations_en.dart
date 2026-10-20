@@ -759,4 +759,259 @@ class AppLocalizationsEn extends AppLocalizations {
   String sizeMb(String n) {
     return '$n MB';
   }
+
+  @override
+  String get cashBalance => 'Cash balance';
+
+  @override
+  String validatedUntil(String date) {
+    return 'Validated up to $date';
+  }
+
+  @override
+  String withPending(String amount) {
+    return '$amount including entries awaiting validation';
+  }
+
+  @override
+  String get cashBook => 'Cash book';
+
+  @override
+  String get solidarity => 'Solidarity';
+
+  @override
+  String get report => 'Report';
+
+  @override
+  String get newEntry => 'New entry';
+
+  @override
+  String get entryButton => 'Entry';
+
+  @override
+  String get directionIn => 'Income';
+
+  @override
+  String get directionOut => 'Expense';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get catRegistration => 'Registrations';
+
+  @override
+  String get catFine => 'Fines';
+
+  @override
+  String get catDonation => 'Aid and donations';
+
+  @override
+  String get catSolidarity => 'Solidarity contributions';
+
+  @override
+  String get catExpense => 'Expenses';
+
+  @override
+  String get member => 'Member';
+
+  @override
+  String get memberOptional => 'Member (optional)';
+
+  @override
+  String get chooseMember => 'Choose a member';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get amountRequired => 'Enter an amount.';
+
+  @override
+  String get willBeValidated => 'Will be validated by the auditor.';
+
+  @override
+  String enteredBy(String name, String when) {
+    return 'Entered by $name · $when';
+  }
+
+  @override
+  String validatedBy(String name) {
+    return 'Validated by $name';
+  }
+
+  @override
+  String get toValidate => 'To validate';
+
+  @override
+  String get validated => 'Validated';
+
+  @override
+  String get notSentYet => 'Not sent yet';
+
+  @override
+  String get validateEntryTitle => 'Validate this entry?';
+
+  @override
+  String get validateEntryBody =>
+      'Your name and the time will be recorded. A validated entry can no longer be changed.';
+
+  @override
+  String get validate => 'Validate';
+
+  @override
+  String get entryValidated => 'Entry validated.';
+
+  @override
+  String get entrySaved => 'Entry saved, awaiting validation.';
+
+  @override
+  String get ownEntry => 'You can’t validate your own entry.';
+
+  @override
+  String get noEntries => 'No entries yet.';
+
+  @override
+  String get collections => 'Collections';
+
+  @override
+  String get newCollection => 'New collection';
+
+  @override
+  String get collectionKind => 'Reason';
+
+  @override
+  String get kindDeath => 'Bereavement';
+
+  @override
+  String get kindIllness => 'Illness';
+
+  @override
+  String get kindMedal => 'Medal, diploma, sacrament';
+
+  @override
+  String get amountPerMember => 'Amount per member';
+
+  @override
+  String paidFullOf(int paid, int total) {
+    return '$paid of $total have paid in full';
+  }
+
+  @override
+  String tranchesInfo(String parts) {
+    return 'Instalments of $parts, one a week over a month.';
+  }
+
+  @override
+  String filterToPay(int n) {
+    return 'To pay $n';
+  }
+
+  @override
+  String filterPaid(int n) {
+    return 'Paid $n';
+  }
+
+  @override
+  String thirdsOf3(int n) {
+    return '$n/3 instalments';
+  }
+
+  @override
+  String get paidInFull => 'Paid';
+
+  @override
+  String savePayments(int n, String amount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Save $n payments · $amount',
+      one: 'Save 1 payment · $amount',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get paymentsSaved => 'Payments saved.';
+
+  @override
+  String get closeCollection => 'Close the collection';
+
+  @override
+  String get closeCollectionBody =>
+      'Remaining members will be marked “unpaid”.';
+
+  @override
+  String get closed => 'Closed';
+
+  @override
+  String get noCollections => 'No collections.';
+
+  @override
+  String quarterReport(int q, int year) {
+    return 'Q$q $year report';
+  }
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get openingBalance => 'Opening balance';
+
+  @override
+  String get closingBalance => 'Closing balance';
+
+  @override
+  String get incomeLabel => 'Income';
+
+  @override
+  String get expenseLabel => 'Expenses';
+
+  @override
+  String get incomeByCategory => 'Income by category';
+
+  @override
+  String pendingBlock(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n entries still need checking before validating.',
+      one: '1 entry still needs checking before validating.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get validateReport => 'Validate the report';
+
+  @override
+  String reportValidatedBy(String name, String date) {
+    return 'Validated by $name on $date';
+  }
+
+  @override
+  String get previousQuarter => 'Previous quarter';
+
+  @override
+  String get nextQuarter => 'Next quarter';
+
+  @override
+  String get myContributions => 'My contributions';
+
+  @override
+  String get toPayLabel => 'To pay';
+
+  @override
+  String get nothingToPay => 'Nothing to pay. Thank you!';
+
+  @override
+  String remainingOf(String remaining, String total) {
+    return '$remaining left of $total';
+  }
+
+  @override
+  String get fine => 'Fine';
 }

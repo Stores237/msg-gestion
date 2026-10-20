@@ -2,10 +2,12 @@ import 'package:msg_gestion/data/api_client.dart';
 import 'package:msg_gestion/data/repositories/announcements_repository.dart';
 import 'package:msg_gestion/data/repositories/auth_repository.dart';
 import 'package:msg_gestion/data/repositories/events_repository.dart';
+import 'package:msg_gestion/data/repositories/finances_repository.dart';
 import 'package:msg_gestion/data/repositories/members_repository.dart';
 import 'package:msg_gestion/data/repositories/profile_repository.dart';
 import 'package:msg_gestion/models/announcement.dart';
 import 'package:msg_gestion/models/event.dart';
+import 'package:msg_gestion/models/finance.dart';
 import 'package:msg_gestion/models/me.dart';
 import 'package:msg_gestion/models/member.dart';
 
@@ -306,7 +308,15 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       authorName: 'Din Y.',
       createdAt: DateTime(2026, 10, 19),
       unread: true,
-      attachments: const [AttachmentInfo(id: 9, name: 'Programme.pdf', size: 245760, contentType: 'application/pdf', url: 'https://example.test/p.pdf')],
+      attachments: const [
+        AttachmentInfo(
+          id: 9,
+          name: 'Programme.pdf',
+          size: 245760,
+          contentType: 'application/pdf',
+          url: 'https://example.test/p.pdf',
+        ),
+      ],
     ),
   ];
 
@@ -369,5 +379,202 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       contentType: 'application/pdf',
       url: 'https://example.test/f.pdf',
     );
+  }
+}
+
+class FakeFinancesRepository implements FinancesRepository {
+  final created = <NewEntry>[];
+  final validated = <int>[];
+  Map<int, int>? paid;
+  bool reportValidated = false;
+  late List<FinanceEntry> items = [
+    FinanceEntry(
+      id: 1,
+      direction: 'in',
+      amount: 2500,
+      category: 'solidarite',
+      label: 'Décès · Nkotto',
+      memberName: 'Essomba Kévin',
+      date: DateTime(2026, 10, 19),
+      status: 'pending',
+      createdByName: 'Fotso I.',
+      createdAt: DateTime(2026, 10, 19, 10, 12),
+    ),
+    FinanceEntry(
+      id: 2,
+      direction: 'out',
+      amount: 12000,
+      category: 'depense',
+      label: 'Cierges et fleurs',
+      date: DateTime(2026, 10, 17),
+      status: 'validated',
+      createdByName: 'Fotso I.',
+      createdAt: DateTime(2026, 10, 17, 18, 5),
+      validatedByName: 'Tchoumi A.',
+    ),
+  ];
+
+  @override
+  Future<FinanceSummary> summary() async => FinanceSummary(
+    balance: 186500,
+    balanceWithPending: 189000,
+    pending: items.where((e) => e.pending).length,
+    validatedUntil: DateTime(2026, 9, 30),
+  );
+
+  @override
+  Future<List<FinanceEntry>> entries() async => items;
+
+  @override
+  Future<FinanceEntry> createEntry(NewEntry entry) async {
+    created.add(entry);
+    final e = FinanceEntry(
+      id: 100 + created.length,
+      direction: entry.direction,
+      amount: entry.amount,
+      category: entry.category,
+      label: entry.label,
+      memberName: entry.memberName,
+      date: entry.date,
+      status: 'pending',
+      createdByName: 'Moi',
+      createdAt: DateTime.now(),
+      clientUuid: entry.clientUuid,
+    );
+    items = [e, ...items];
+    return e;
+  }
+
+  @override
+  Future<FinanceEntry> validate(int id) async {
+    validated.add(id);
+    items = [
+      for (final e in items)
+        e.id == id
+            ? FinanceEntry(
+                id: e.id,
+                direction: e.direction,
+                amount: e.amount,
+                category: e.category,
+                label: e.label,
+                date: e.date,
+                status: 'validated',
+                createdByName: e.createdByName,
+                createdAt: e.createdAt,
+                validatedByName: 'Moi',
+              )
+            : e,
+    ];
+    return items.firstWhere((e) => e.id == id);
+  }
+
+  Collection _collection({List<CollectionRow>? rows}) => Collection(
+    id: 7,
+    kind: 'deces',
+    title: 'Décès · famille Nkotto',
+    amountPerMember: 2500,
+    tranches: const [834, 1667, 2500],
+    paidFull: 1,
+    members: 3,
+    collected: 3334,
+    openedOn: DateTime(2026, 10, 12),
+    rows:
+        rows ??
+        const [
+          CollectionRow(
+            memberId: 21,
+            fullName: 'Ateba Sandrine',
+            isDiaspora: true,
+            paid: 2500,
+            thirds: 3,
+            nextAmount: 0,
+          ),
+          CollectionRow(
+            memberId: 22,
+            fullName: 'Essomba Kévin',
+            isDiaspora: false,
+            paid: 834,
+            thirds: 1,
+            nextAmount: 833,
+          ),
+          CollectionRow(
+            memberId: 23,
+            fullName: 'Mbella Grâce',
+            isDiaspora: false,
+            paid: 0,
+            thirds: 0,
+            nextAmount: 834,
+          ),
+        ],
+  );
+
+  @override
+  Future<List<Collection>> collections() async => [_collection()];
+
+  @override
+  Future<Collection> collection(int id) async => _collection();
+
+  @override
+  Future<Collection> openCollection({
+    required String kind,
+    required String title,
+    required int amountPerMember,
+  }) async => _collection();
+
+  @override
+  Future<void> pay(int collectionId, Map<int, int> payments) async =>
+      paid = payments;
+
+  @override
+  Future<void> closeCollection(int id) async {}
+
+  @override
+  Future<MyDues> mine() async => const MyDues(
+    toPay: 3000,
+    dues: [
+      Due(
+        id: 1,
+        kind: 'solidarite',
+        label: 'Décès · famille Nkotto',
+        amount: 2500,
+        paid: 0,
+        remaining: 2500,
+      ),
+      Due(
+        id: 2,
+        kind: 'amende',
+        label: 'Retard à l’assise',
+        amount: 500,
+        paid: 0,
+        remaining: 500,
+      ),
+    ],
+  );
+
+  QuarterReport _report(int pending) => QuarterReport(
+    year: 2026,
+    quarter: 3,
+    start: DateTime(2026, 7, 1),
+    end: DateTime(2026, 10, 1),
+    opening: 142000,
+    income: 118500,
+    expense: 74000,
+    closing: 186500,
+    incomeByCategory: const {'solidarite': 70000, 'aide_don': 35000},
+    pending: pending,
+    validatedBy: reportValidated ? 'Moi' : null,
+    validatedAt: reportValidated ? DateTime(2026, 10, 20) : null,
+  );
+
+  int reportPending = 3;
+
+  @override
+  Future<QuarterReport> report(int year, int quarter) async =>
+      _report(reportPending);
+
+  @override
+  Future<QuarterReport> validateReport(int year, int quarter) async {
+    reportValidated = true;
+    return _report(0);
   }
 }

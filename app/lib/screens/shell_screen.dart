@@ -5,6 +5,7 @@ import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import 'announcements/announcements_screen.dart';
 import 'calendar/calendar_screen.dart';
+import 'finances/finances_screen.dart';
 import 'home_screen.dart';
 import 'members/members_screen.dart';
 
@@ -68,7 +69,7 @@ class _ShellScreenState extends State<ShellScreen> {
       me: widget.me,
       onUnreadChanged: (n) => setState(() => _unread = n),
     ),
-    AppTab.finances => const _ComingSoon(),
+    AppTab.finances => FinancesScreen(me: widget.me),
   };
 
   @override
@@ -103,33 +104,6 @@ class _ShellScreenState extends State<ShellScreen> {
                   ),
               ],
             ),
-    );
-  }
-}
-
-class _ComingSoon extends StatelessWidget {
-  const _ComingSoon();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.hourglass_empty, size: 40),
-            const SizedBox(height: 12),
-            Text(
-              l.comingSoonTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(l.comingSoonBody, textAlign: TextAlign.center),
-          ],
-        ),
-      ),
     );
   }
 }

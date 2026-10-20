@@ -4,9 +4,11 @@ import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
+import '../models/finance.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
 import '../widgets/labels.dart';
+import '../widgets/money.dart';
 import '../widgets/msg_logo.dart';
 import '../widgets/ui.dart';
 import 'account_screen.dart';
@@ -14,10 +16,26 @@ import 'announcements/announcement_detail_screen.dart';
 import 'calendar/event_detail_screen.dart';
 
 class _HomeData {
-  const _HomeData({this.nextEvent, this.lastAnnouncement, this.unread = 0});
+  const _HomeData({
+    this.nextEvent,
+    this.lastAnnouncement,
+    this.unread = 0,
+    this.dues,
+    this.summary,
+  });
   final CalendarEvent? nextEvent;
   final Announcement? lastAnnouncement;
   final int unread;
+  final MyDues? dues;
+  final FinanceSummary? summary;
+}
+
+Future<T?> _orNull<T>(Future<T> f) async {
+  try {
+    return await f;
+  } catch (_) {
+    return null; // one card failing shouldn't blank the whole home screen
+  }
 }
 
 /// Accueil (design: "Accueil · membre"): greeting, next meeting, latest
@@ -40,11 +58,17 @@ class HomeScreen extends StatelessWidget {
     final upcoming = (await events)
         .where((e) => (e.endsAt ?? e.startsAt).isAfter(now))
         .toList();
+    final dues = _orNull(repos.finances.mine());
+    final summary = me.can('finances.cashbook', 'view')
+        ? _orNull(repos.finances.summary())
+        : Future<FinanceSummary?>.value();
     final f = await feed;
     return _HomeData(
       nextEvent: upcoming.isEmpty ? null : upcoming.first,
       lastAnnouncement: f.items.isEmpty ? null : f.items.first,
       unread: f.unread,
+      dues: await dues,
+      summary: await summary,
     );
   }
 
@@ -93,6 +117,51 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 children: [
+                  if (data.summary != null) ...[
+                    _Stats(
+                      summary: data.summary!,
+                      onOpen: () => onOpenTab?.call(AppTab.finances),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  if (data.dues != null && data.dues!.dues.isNotEmpty) ...[
+                    SectionLabel(l.myContributions),
+                    const SizedBox(height: 8),
+                    GroupCard(
+                      children: [
+                        for (final d in data.dues!.dues)
+                          ListRow(
+                            key: Key('due-${d.id}'),
+                            title: Text(
+                              d.kind == 'amende'
+                                  ? '${l.fine} · ${d.label}'
+                                  : d.label,
+                            ),
+                            subtitle: d.paid > 0 && d.remaining > 0
+                                ? Text(
+                                    l.remainingOf(
+                                      fcfa(d.remaining),
+                                      fcfa(d.amount),
+                                    ),
+                                  )
+                                : null,
+                            trailing: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Amount(
+                                  d.remaining > 0 ? d.remaining : d.amount,
+                                ),
+                                const SizedBox(height: 4),
+                                d.remaining > 0
+                                    ? Badge2(l.toPayLabel, tone: Tone.amber)
+                                    : Badge2(l.paidInFull, tone: Tone.green),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                   if (me.can('calendar.events', 'view')) ...[
                     SectionLabel(
                       l.nextMeeting,
@@ -172,6 +241,68 @@ class HomeScreen extends StatelessWidget {
                   ],
                 ],
               ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Bureau view (design: "Accueil · trésorière"): balance and what awaits validation.
+class _Stats extends StatelessWidget {
+  const _Stats({required this.summary, this.onOpen});
+  final FinanceSummary summary;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    return GroupCard(
+      padding: EdgeInsets.zero,
+      children: [
+        InkWell(
+          onTap: onOpen,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.cashBalance,
+                        style: TextStyle(fontSize: 12, color: c.textSecondary),
+                      ),
+                      const SizedBox(height: 4),
+                      Amount(
+                        summary.balance,
+                        size: 20,
+                        weight: FontWeight.w800,
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${summary.pending}',
+                      key: const Key('stat-pending'),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      l.toValidate,
+                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
