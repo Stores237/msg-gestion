@@ -13,7 +13,11 @@ Supabase project or a Redis instance with production (`RENDER_PRODUCTION.md`).
      5432 string: a direct connection piles up and exhausts the limit across Render restarts.
    - Storage → create a private bucket `msg-staging`; Storage → S3 Connection → create an
      access key. Note the endpoint and the **region code** shown there (e.g. `eu-central-1`).
-2. **Render Key Value (Redis)** instance, free plan, same region. Copy its internal URL.
+2. **Render** — done 2026-10-20, in the **MSGes** workspace of storefix237@gmail.com's account:
+   Key Value `msg-staging-redis` (free, Frankfurt, `red-dbbk0f7avr4c73e4hrig`) and web service
+   `msg-staging` (free, Frankfurt, `srv-dbbk3vou01pc73e2h24g`, https://msg-staging.onrender.com),
+   created through the Render API from repo `Stores237/msg-gestion`, deploying after CI passes.
+   Not yet set: Twilio, Sentry, superuser variables.
 3. **Twilio**: a Verify Service (no phone number purchase needed) and an API key.
 4. Render → New → Blueprint → this repo. Render reads `render.yaml` and asks for every
    `sync: false` value below.

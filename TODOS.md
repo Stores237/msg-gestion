@@ -7,7 +7,7 @@ These need an account, a decision or a person — not code.
 - [x] **Logo** — "MSG" monogram for now (2026-10-20). A drawn version later only replaces
   `MsgLogo` / `.msg-logo`. Still to do: the Android/iOS launcher icon.
 - [x] **Supabase staging project** (2026-10-20, "MSGes Project", eu-west-1).
-- [ ] **Render account** + Render Key Value — see
+- [x] **Render** staging service + Key Value (2026-10-20) — see
   `RENDER_STAGING.md` §1. Blocks: any deploy.
 - [ ] **Twilio** account, Verify Service and API key. Blocks: back-office login on staging
   (codes can't be sent without it) and SMS PIN reset.
@@ -16,7 +16,10 @@ These need an account, a decision or a person — not code.
   Still needed for each: full name and mobile number (back-office login is phone + SMS code).
 - [ ] **Real member list** to import (spreadsheet: name, phone, group, date of birth, parent
   contact for minors). For now `seed_demo` has 21 made-up members (10 added 2026-10-20).
-- [ ] **Revoke the Supabase access token** pasted in chat on 2026-10-20, once setup is done.
+- [ ] **Revoke the tokens pasted in chat on 2026-10-20**, once setup is done: the Supabase access
+  token (supabase.com/dashboard/account/tokens), the Render API key (dashboard → Account
+  Settings → API Keys) and the GitHub personal token (github.com/settings/tokens — revoke this
+  one now; it was never needed).
 - [ ] **Beta window**: start date, length, and who the testers are.
 - [ ] Confirm the default role permissions (migration `accounts.0002`), taken from the design's
   "Navigation par rôle" table — e.g. should the président be able to *validate* the quarterly

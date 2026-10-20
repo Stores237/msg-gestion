@@ -1,4 +1,10 @@
-# Render Blueprint — staging and production in one file. RENDER_STAGING.md
+# Render Blueprint — staging and production in one file.
+#
+# NOTE (2026-10-20): msg-staging and its Redis were created through the Render
+# API, not by applying this Blueprint (see RENDER_STAGING.md). Keep this file
+# describing them accurately; don't apply the Blueprint over them without
+# first linking the existing services, or Render will try to create duplicates.
+# RENDER_STAGING.md
 # and RENDER_PRODUCTION.md list every `sync: false` value and where it comes
 # from. The two services never share a secret, a Supabase project or a
 # Redis instance.
@@ -17,8 +23,8 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    # Every push to main that passes CI is on staging within minutes.
-    autoDeploy: true
+    # Every push to main is on staging within minutes, once CI passes.
+    autoDeployTrigger: checksPass
     healthCheckPath: /healthz/
     envVars:
       - key: DJANGO_SETTINGS_MODULE
