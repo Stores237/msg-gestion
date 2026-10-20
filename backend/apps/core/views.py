@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 # Management commands that cron-job.org may trigger on staging. Each one
 # is also a Render Cron Job service for production (render.yaml).
-TASKS = {"reminders": "send_reminders"}
+TASKS = {"reminders": "send_reminders", "soon-reminders": "send_soon_reminders"}
 
 
 def healthz(request):

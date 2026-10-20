@@ -4,6 +4,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
@@ -13,7 +14,10 @@ from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.permissions import require
 from apps.accounts.services import assign_role, reset_pin, temporary_pin
 from apps.core import audit
+from apps.core.models import Settings
 from apps.core.notify import notify
+from apps.finances.models import Due, Entry
+from apps.finances.services import record_entry
 
 from .serializers import BureauEntrySerializer, MemberCreateSerializer, MemberDetailSerializer, MemberListSerializer
 
@@ -64,12 +68,21 @@ class MemberListView(APIView):
         s = MemberCreateSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         pin = temporary_pin()
+        data = dict(s.validated_data)
+        registration_paid = data.pop("registration_paid", False)
         with transaction.atomic():
-            user = User(**s.validated_data)
+            user = User(**data)
             user.set_unusable_password()  # app only; back-office access is a separate step
             user.set_pin(pin, temporary=True)
             user.save()
             assign_role(user, Role.objects.get(slug="membre"), reason="Inscription", by=request.user, request=request)
+            fee = Settings.get().fee_registration
+            due = Due.objects.create(member=user, kind=Due.Kind.REGISTRATION, label="Inscription", amount=fee, created_by=request.user)
+            if registration_paid:
+                # Into the cash book, waiting for the commissaire's validation.
+                record_entry(by=request.user, request=request, direction=Entry.Direction.IN, amount=fee,
+                             category=Entry.Category.REGISTRATION, label=f"Inscription · {user.full_name}", member=user,
+                             due=due, date=timezone.localdate())
         audit.record("Membre inscrit", actor=request.user, obj=user, request=request)
         bureau = [a.user for a in RoleAssignment.objects.active().filter(role__slug__in=["president", "secretaire-general"]).select_related("user")]
         notify([u for u in bureau if u.pk != request.user.pk], "member", "Nouveau membre",
@@ -117,3 +130,36 @@ class ResetPinView(APIView):
     def post(self, request, pk):
         member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
         return Response({"temporary_pin": reset_pin(member, by=request.user, request=request)})
+
+
+REQUESTABLE_KINDS = ["temporaire", "standard"]
+
+
+class RoleRequestView(APIView):
+    """A bureau member proposes a role for someone; the super admin decides
+    in the back-office (design: dashboard → "Demandes de rôle")."""
+
+    def post(self, request, pk):
+        from apps.accounts.models import RoleRequest
+
+        u = request.user
+        if not (u.can("members.profile", "change") or u.can("calendar.planning", "change")):
+            return Response({"detail": "Votre rôle ne donne pas accès à cette action.", "code": "forbidden"}, status=403)
+        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        role = Role.objects.filter(slug=request.data.get("role"), kind__in=REQUESTABLE_KINDS, is_archived=False).first()
+        if role is None or role.slug == "membre":
+            return Response({"detail": "Ce rôle ne se demande pas ainsi.", "code": "bad_role"}, status=400)
+        reason = (request.data.get("reason") or "").strip()
+        if not reason:
+            return Response({"detail": "Le motif est obligatoire.", "code": "reason_required"}, status=400)
+        starts = parse_date(str(request.data.get("starts_on") or "")) or timezone.localdate()
+        ends = parse_date(str(request.data.get("ends_on") or "")) if request.data.get("ends_on") else None
+        rr = RoleRequest.objects.create(member=member, role=role, starts_on=starts, ends_on=ends, reason=reason, requested_by=u)
+        audit.record("Demande de rôle", actor=u, obj=member, request=request, detail={"role": role.name, "motif": reason})
+        return Response({"id": rr.pk, "status": rr.status}, status=201)
+
+
+class RequestableRolesView(APIView):
+    def get(self, request):
+        return Response([{"slug": r.slug, "name": r.name, "kind": r.kind}
+                         for r in Role.objects.filter(kind__in=REQUESTABLE_KINDS, is_archived=False).exclude(slug="membre")])

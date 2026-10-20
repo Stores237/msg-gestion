@@ -65,6 +65,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     # secretary): the app makes the member pick their own on next login.
     pin_must_change = models.BooleanField(default=False)
 
+    # Reminder preferences (design: event detail → "Rappels").
+    remind_eve = models.BooleanField(default=True, help_text="La veille à 20:00")
+    remind_2h = models.BooleanField(default=False, help_text="2 heures avant")
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, help_text="Accès à l’admin Django (équipe technique).")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -224,3 +228,26 @@ class RoleAssignment(models.Model):
 
     def __str__(self):
         return f"{self.user} · {self.role}"
+
+
+class RoleRequest(models.Model):
+    """A bureau member proposes a role for someone (design: dashboard →
+    "Demandes de rôle"); a super admin approves it in the back-office."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        APPROVED = "approved", "Approuvée"
+        REFUSED = "refused", "Refusée"
+
+    member = models.ForeignKey(User, on_delete=models.CASCADE, related_name="role_requests")
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="+")
+    starts_on = models.DateField()
+    ends_on = models.DateField(null=True, blank=True)
+    reason = models.CharField(max_length=240)
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="+")
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING)
+    decided_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

@@ -44,6 +44,8 @@ class MeSerializer(serializers.Serializer):
     is_diaspora = serializers.BooleanField()
     age = serializers.IntegerField(allow_null=True)
     pin_must_change = serializers.BooleanField()
+    remind_eve = serializers.BooleanField()
+    remind_2h = serializers.BooleanField()
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
     tabs = serializers.SerializerMethodField()

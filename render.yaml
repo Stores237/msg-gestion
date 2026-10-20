@@ -171,3 +171,22 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+
+  - type: cron
+    name: msg-production-soon-reminders
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    dockerCommand: python manage.py send_soon_reminders
+    rootDir: backend
+    plan: starter
+    region: frankfurt
+    branch: main
+    schedule: "*/30 * * * *"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false

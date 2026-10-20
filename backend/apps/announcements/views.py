@@ -150,3 +150,19 @@ class AttachmentDeleteView(APIView):
         att.file.delete(save=False)
         att.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RemindUnreadView(APIView):
+    """"Relancer les non-lecteurs" (design: read receipts sheet)."""
+
+    permission_classes = [require("announcements.posts", "view")]
+
+    def post(self, request, pk):
+        item = get_object_or_404(Announcement, pk=pk)
+        if not _may_edit(request.user, item):
+            return Response({"detail": "Réservé à l’expéditeur.", "code": "author_only"}, status=403)
+        read_ids = item.reads.values_list("member_id", flat=True)
+        n = notify(_audience().exclude(pk__in=read_ids), "announcement", f"Rappel : {item.title}", "Merci de lire cette annonce.",
+                   {"type": "announcement", "id": item.pk})
+        audit.record("Relance des non-lecteurs", actor=request.user, obj=item, request=request, detail={"relancés": n})
+        return Response({"reminded": n})

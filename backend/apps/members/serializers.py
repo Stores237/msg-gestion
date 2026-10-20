@@ -45,9 +45,23 @@ class MemberDetailSerializer(MemberListSerializer):
     phone = serializers.SerializerMethodField()
     parent = serializers.SerializerMethodField()
     restricted = serializers.SerializerMethodField()
+    attendance = serializers.SerializerMethodField()
 
     class Meta(MemberListSerializer.Meta):
-        fields = MemberListSerializer.Meta.fields + ["phone", "joined_on", "birth_date", "parent", "restricted"]
+        fields = MemberListSerializer.Meta.fields + ["phone", "joined_on", "birth_date", "parent", "restricted", "attendance"]
+
+    def get_attendance(self, user) -> dict:
+        """Last 4 past assises (design: "Présences · 4 dernières assises")."""
+        from django.utils import timezone
+
+        from apps.events.models import Attendance, Event
+
+        events = list(Event.objects.filter(kind="assise", starts_at__lt=timezone.now()).order_by("-starts_at")[:4])
+        marks = dict(Attendance.objects.filter(member=user, event__in=events).values_list("event_id", "status"))
+        counts = {"present": 0, "absent": 0, "excuse": 0}
+        for st in marks.values():
+            counts[st] += 1
+        return {**counts, "of": len(events), "last": events[0].starts_at if events else None}
 
     def _hide_minor_contacts(self, user):
         return user.is_minor and not self.context["viewer"].can("members.minor_contacts", "view")
@@ -84,6 +98,8 @@ class MemberCreateSerializer(serializers.Serializer):
     parent_name = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
     parent_relation = serializers.CharField(max_length=40, required=False, allow_blank=True, default="")
     parent_phone = PhoneField(required=False, allow_blank=True, default="")
+    # Design: "Les 500 FCFA d’inscription sont saisis à la création."
+    registration_paid = serializers.BooleanField(default=False)
 
     def validate_phone(self, value):
         if User.objects.filter(phone=value).exists():

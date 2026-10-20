@@ -285,3 +285,31 @@ class ReportValidateView(APIView):
         except services.FinanceRule as e:
             return _rule_error(e)
         return Response(services.report(*yq))
+
+
+def _pdf_response(request, url):
+    return Response({"url": request.build_absolute_uri(url) if url.startswith("/") else url})
+
+
+class ReportPdfView(APIView):
+    permission_classes = [require("finances.report", "export")]
+
+    def get(self, request):
+        from .pdf import publish, report_pdf
+
+        yq = _year_quarter(request)
+        if yq is None:
+            return Response({"detail": "Trimestre invalide.", "code": "bad_quarter"}, status=400)
+        audit.record("Export PDF du rapport", actor=request.user, request=request, detail={"annee": yq[0], "trimestre": yq[1]})
+        return _pdf_response(request, publish(report_pdf(services.report(*yq)), f"rapport-T{yq[1]}-{yq[0]}"))
+
+
+class CashbookPdfView(APIView):
+    permission_classes = [require("finances.cashbook", "export")]
+
+    def get(self, request):
+        from .pdf import cashbook_pdf, publish
+
+        entries = list(Entry.objects.select_related("member", "created_by", "validated_by")[:1000])
+        audit.record("Export PDF du livre de caisse", actor=request.user, request=request, detail={"lignes": len(entries)})
+        return _pdf_response(request, publish(cashbook_pdf(entries), "livre-de-caisse"))

@@ -53,3 +53,32 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class Settings(models.Model):
+    """The movement's settings (back-office → Paramètres). One row."""
+
+    name = models.CharField(max_length=120, default="Mouvement Garde Suisse")
+    parish = models.CharField(max_length=160, default="Notre-Dame de Lourdes de Yapoma, Douala")
+    motto = models.CharField(max_length=120, default="Service – Ordre – Accueil")
+    fee_registration = models.PositiveIntegerField(default=500)
+    fee_medal = models.PositiveIntegerField(default=2000)
+    fee_illness = models.PositiveIntegerField(default=1000)
+    fee_death = models.PositiveIntegerField(default=2500)
+    installments = models.PositiveSmallIntegerField(default=3)
+    assise_weekday = models.PositiveSmallIntegerField(default=5, help_text="0 = lundi … 5 = samedi")
+    assise_time = models.TimeField(default="15:00")
+    vigil_time = models.TimeField(default="22:00")
+    reminder_time = models.TimeField(default="20:00")
+    duty_template = models.CharField(
+        max_length=300,
+        default="Bonjour {prénom}, tu es de service {date} à {heure} : {poste} ({côté}). Confirme dans l’app.",
+    )
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def quick_amounts(self):
+        return sorted({self.fee_registration, self.fee_illness, self.fee_medal, self.fee_death})

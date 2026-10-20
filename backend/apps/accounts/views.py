@@ -184,3 +184,18 @@ class ForgotPinConfirmView(APIView):
         audit.record("PIN réinitialisé par SMS", actor=user, obj=user, request=request)
         refresh = RefreshToken.for_user(user)
         return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
+
+
+class PreferencesView(APIView):
+    """PATCH {remind_eve, remind_2h} (design: event → "Rappels")."""
+
+    def patch(self, request):
+        user = request.user
+        fields = []
+        for f in ("remind_eve", "remind_2h"):
+            if f in request.data:
+                setattr(user, f, bool(request.data[f]))
+                fields.append(f)
+        if fields:
+            user.save(update_fields=fields)
+        return Response({"remind_eve": user.remind_eve, "remind_2h": user.remind_2h})

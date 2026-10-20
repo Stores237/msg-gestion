@@ -16,4 +16,6 @@ urlpatterns = [
     path("mine/", views.MineView.as_view(), name="fin-mine"),
     path("report/", views.ReportView.as_view(), name="fin-report"),
     path("report/validate/", views.ReportValidateView.as_view(), name="fin-report-validate"),
+    path("report/pdf/", views.ReportPdfView.as_view(), name="fin-report-pdf"),
+    path("entries/pdf/", views.CashbookPdfView.as_view(), name="fin-entries-pdf"),
 ]
