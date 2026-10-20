@@ -13,6 +13,7 @@ whether it touches real data.
 | 4 | Back-office: 2FA login, dashboard, users, roles, audit | No |
 | 5 | Flutter app: login and role-based tabs | No |
 | 6 | Staging database and storage on Supabase | Staging schema created |
+| 7 | First beta APK (0.1.0 build 1) | No |
 
 ## 1. Backend skeleton
 
@@ -105,3 +106,29 @@ saving a file through `default_storage` returns a URL containing
 `X-Amz-Algorithm=AWS4-HMAC-SHA256` that downloads with status 200.
 
 **Data.** Staging schema created and 11 roles seeded. No members yet.
+
+## 7. First beta APK — 0.1.0 (build 1)
+
+**What/why.** Release APK for testers, pointed at staging. Fixes found while building: the
+release manifest had no `INTERNET` permission (Flutter adds it to debug/profile only, so the
+release app could never have reached the API); app label is now "MSG Gestion"; launcher icon is
+the MSG monogram. Release builds are signed with a real upload key when
+`app/android/key.properties` exists (git-ignored), else the debug key.
+
+**Where.** `app/android/app/build.gradle.kts`, `app/android/app/src/main/AndroidManifest.xml`,
+`app/android/app/src/main/res/mipmap-*/ic_launcher.png`.
+
+**Build.**
+`flutter build apk --release --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api --build-number=1`
+
+**Verified (2026-10-20).** `aapt2 dump badging`: package `cm.msgyapoma.msg_gestion`, versionCode 1,
+label "MSG Gestion", INTERNET present. Not debuggable. `apksigner`: signer
+`CN=MSG Gestion, O=Mouvement Garde Suisse` with SHA-256
+`5efeb9ea…f17194`, matching the keystore. `libapp.so` contains
+`https://msg-staging.onrender.com/api` and not `10.0.2.2`. APK SHA-256
+`4c75324dfdc883c027c780b3c7036a2d9cc5c2b0a5d968f0883dd18576489c89`.
+
+**Hosting.** `~/msg-beta/` (only the APK and a download page) served by
+`python3 -m http.server 8790 --bind 127.0.0.1` behind `cloudflared tunnel --protocol http2`.
+The link lives only as long as both processes; re-host (don't rebuild) after a restart and
+re-check the SHA-256.

@@ -22,6 +22,9 @@ These need an account, a decision or a person — not code.
   token (supabase.com/dashboard/account/tokens), the Render API key (dashboard → Account
   Settings → API Keys) and the GitHub personal token (github.com/settings/tokens — revoke this
   one now; it was never needed).
+- [ ] **Back up the Android upload key**: `app/android/keystore/upload-keystore.jks` and
+  `app/android/key.properties` (git-ignored, only on this machine). Losing them means the app
+  can never be updated on Google Play under the same listing.
 - [ ] **Beta window**: start date, length, and who the testers are.
 - [ ] Confirm the default role permissions (migration `accounts.0002`), taken from the design's
   "Navigation par rôle" table — e.g. should the président be able to *validate* the quarterly
@@ -36,7 +39,7 @@ These need an account, a decision or a person — not code.
   `apps/accounts/services.py`, with tests), suspend, reset PIN.
 - [ ] Back-office: bulk import from a spreadsheet (design: BImport).
 - [ ] Back-office: active sessions page and sign-out of other sessions (design: BSessions).
-- [ ] Beta APK build/verify/host workflow (playbook §9) rehearsed once.
+- [x] Beta APK build/verify/host workflow rehearsed (0.1.0 build 1, 2026-10-20).
 
 ### P1 — the app's modules, one vertical slice each
 - [ ] Members: list, profile (with minors' contacts gated), add member.
