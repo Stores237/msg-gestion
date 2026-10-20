@@ -2401,6 +2401,150 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'jamais'**
   String get never;
+
+  /// No description provided for @addPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une photo'**
+  String get addPhoto;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer la photo'**
+  String get changePhoto;
+
+  /// No description provided for @photoSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo enregistrée.'**
+  String get photoSaved;
+
+  /// No description provided for @registrationFee.
+  ///
+  /// In fr, this message translates to:
+  /// **'Frais d’inscription payés'**
+  String get registrationFee;
+
+  /// No description provided for @registrationFeeSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté au livre de caisse, en attente de validation'**
+  String get registrationFeeSub;
+
+  /// No description provided for @presenceLast4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Présences · 4 dernières assises'**
+  String get presenceLast4;
+
+  /// No description provided for @presenceSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'{present} présent · {absent} absent · {excused} excusé'**
+  String presenceSummary(int present, int absent, int excused);
+
+  /// No description provided for @lastOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière : {date}'**
+  String lastOn(String date);
+
+  /// No description provided for @proposeRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer un rôle'**
+  String get proposeRole;
+
+  /// No description provided for @roleRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée au super admin.'**
+  String get roleRequestSent;
+
+  /// No description provided for @fromDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Du'**
+  String get fromDate;
+
+  /// No description provided for @toDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au (facultatif)'**
+  String get toDate;
+
+  /// No description provided for @reasonRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (journalisé)'**
+  String get reasonRequired;
+
+  /// No description provided for @reminders.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rappels'**
+  String get reminders;
+
+  /// No description provided for @remindEve.
+  ///
+  /// In fr, this message translates to:
+  /// **'La veille à 20:00'**
+  String get remindEve;
+
+  /// No description provided for @remind2h.
+  ///
+  /// In fr, this message translates to:
+  /// **'2 heures avant'**
+  String get remind2h;
+
+  /// No description provided for @remindUnread.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}'**
+  String remindUnread(int n);
+
+  /// No description provided for @remindedDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 membre relancé.} other{{n} membres relancés.}}'**
+  String remindedDone(int n);
+
+  /// No description provided for @exportPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter en PDF'**
+  String get exportPdf;
+
+  /// No description provided for @toFollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À suivre'**
+  String get toFollow;
+
+  /// No description provided for @activeMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres actifs'**
+  String get activeMembers;
+
+  /// No description provided for @entriesToValidate.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 opération à valider} other{{n} opérations à valider}}'**
+  String entriesToValidate(int n);
+
+  /// No description provided for @awaitingAuditor.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente du commissaire aux comptes'**
+  String get awaitingAuditor;
+
+  /// No description provided for @unfilledSlots.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}'**
+  String unfilledSlots(int n, String title);
 }
 
 class _AppLocalizationsDelegate

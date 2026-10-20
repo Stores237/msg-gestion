@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/api_client.dart';
+import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/event.dart';
@@ -233,6 +234,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 20),
+                      SectionLabel(l.reminders),
+                      const SizedBox(height: 8),
+                      const _Reminders(),
                       if (canRoll) ...[
                         const SizedBox(height: 20),
                         FilledButton.icon(
@@ -257,6 +262,66 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Rappels" (design): the member's own reminder preferences, applied to
+/// every event (the server sends them).
+class _Reminders extends StatefulWidget {
+  const _Reminders();
+
+  @override
+  State<_Reminders> createState() => _RemindersState();
+}
+
+class _RemindersState extends State<_Reminders> {
+  late bool _eve = currentUser.value?.remindEve ?? true;
+  late bool _twoHours = currentUser.value?.remind2h ?? false;
+
+  Future<void> _set({bool? eve, bool? twoHours}) async {
+    final before = (_eve, _twoHours);
+    setState(() {
+      _eve = eve ?? _eve;
+      _twoHours = twoHours ?? _twoHours;
+    });
+    try {
+      await RepositoryLocator.instance.profile.setReminders(
+        eve: eve,
+        twoHours: twoHours,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _eve = before.$1;
+        _twoHours = before.$2;
+      });
+      showErrorSnack(context, e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return GroupCard(
+      children: [
+        ListRow(
+          title: Text(l.remindEve),
+          trailing: Switch(
+            key: const Key('remind-eve'),
+            value: _eve,
+            onChanged: (v) => _set(eve: v),
+          ),
+        ),
+        ListRow(
+          title: Text(l.remind2h),
+          trailing: Switch(
+            key: const Key('remind-2h'),
+            value: _twoHours,
+            onChanged: (v) => _set(twoHours: v),
+          ),
+        ),
+      ],
     );
   }
 }

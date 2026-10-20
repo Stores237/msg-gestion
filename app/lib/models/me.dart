@@ -37,7 +37,12 @@ class Me {
     required this.permissions,
     required this.tabs,
     this.pinMustChange = false,
+    this.remindEve = true,
+    this.remind2h = false,
   });
+
+  final bool remindEve;
+  final bool remind2h;
 
   final int id;
   final String firstName;

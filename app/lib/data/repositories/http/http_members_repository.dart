@@ -52,4 +52,45 @@ class HttpMembersRepository implements MembersRepository {
       (await _api.post('/members/$id/reset-pin/')
               as Map<String, dynamic>)['temporary_pin']
           as String;
+
+  @override
+  Future<String?> uploadPhoto(
+    int id, {
+    required List<int> bytes,
+    required String filename,
+  }) async =>
+      ((await _api.postFile(
+                '/members/$id/photo/',
+                field: 'photo',
+                bytes: bytes,
+                filename: filename,
+              ))
+              as Map<String, dynamic>)['photo']
+          as String?;
+
+  @override
+  Future<List<(String, String)>> requestableRoles() async => [
+    for (final r in await _api.get('/members/requestable-roles/') as List)
+      (r['slug'] as String, r['name'] as String),
+  ];
+
+  @override
+  Future<void> requestRole(
+    int id, {
+    required String role,
+    required String reason,
+    required DateTime startsOn,
+    DateTime? endsOn,
+  }) {
+    String day(DateTime d) => d.toIso8601String().substring(0, 10);
+    return _api.post(
+      '/members/$id/role-requests/',
+      body: {
+        'role': role,
+        'reason': reason,
+        'starts_on': day(startsOn),
+        if (endsOn != null) 'ends_on': day(endsOn),
+      },
+    );
+  }
 }

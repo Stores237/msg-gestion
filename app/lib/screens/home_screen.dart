@@ -5,9 +5,11 @@ import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
 import '../models/finance.dart';
+import '../data/repositories/profile_repository.dart';
 import '../models/planning.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
+import '../widgets/dates.dart';
 import '../widgets/labels.dart';
 import '../widgets/money.dart';
 import '../widgets/msg_logo.dart';
@@ -26,8 +28,10 @@ class _HomeData {
     this.dues,
     this.summary,
     this.nextDuty,
+    this.bureau,
   });
   final DutyAssignment? nextDuty;
+  final BureauHome? bureau;
   final CalendarEvent? nextEvent;
   final Announcement? lastAnnouncement;
   final int unread;
@@ -65,6 +69,7 @@ class HomeScreen extends StatelessWidget {
         .toList();
     final dues = _orNull(repos.finances.mine());
     final duties = _orNull(repos.planning.mine());
+    final bureau = _orNull(repos.profile.bureauHome());
     final summary = me.can('finances.cashbook', 'view')
         ? _orNull(repos.finances.summary())
         : Future<FinanceSummary?>.value();
@@ -76,6 +81,7 @@ class HomeScreen extends StatelessWidget {
       dues: await dues,
       summary: await summary,
       nextDuty: ((await duties) ?? const []).firstOrNull,
+      bureau: await bureau,
     );
   }
 
@@ -130,6 +136,10 @@ class HomeScreen extends StatelessWidget {
                     SectionLabel(l.myNextDuty),
                     const SizedBox(height: 8),
                     DutyCard(duty: data.nextDuty!, onChanged: reload),
+                    const SizedBox(height: 24),
+                  ],
+                  if (data.bureau != null && !data.bureau!.isEmpty) ...[
+                    _ToFollow(b: data.bureau!, onOpen: onOpenTab),
                     const SizedBox(height: 24),
                   ],
                   if (data.summary != null) ...[
@@ -321,6 +331,77 @@ class _Stats extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// "À suivre" (design: "Accueil · trésorière"): open collections, entries
+/// awaiting the auditor, unfilled duty posts this week.
+class _ToFollow extends StatelessWidget {
+  const _ToFollow({required this.b, this.onOpen});
+  final BureauHome b;
+  final ValueChanged<AppTab>? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final d = Dates(context);
+    final rows = <Widget>[
+      if (b.membersActive != null)
+        ListRow(
+          key: const Key('follow-members'),
+          lead: const IconChip(Icons.people_outline, tone: Tone.neutral),
+          title: Text('${b.membersActive} · ${l.activeMembers}'),
+          chevron: true,
+          onTap: () => onOpen?.call(AppTab.membres),
+        ),
+      for (final (_, title, paid, members) in b.collections)
+        ListRow(
+          lead: const IconChip(Icons.volunteer_activism_outlined),
+          title: Text(title),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.paidFullOf(paid, members)),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: members == 0 ? 0 : paid / members,
+                  minHeight: 8,
+                ),
+              ),
+            ],
+          ),
+          chevron: true,
+          onTap: () => onOpen?.call(AppTab.finances),
+        ),
+      if ((b.toValidate ?? 0) > 0)
+        ListRow(
+          key: const Key('follow-validate'),
+          lead: const IconChip(Icons.hourglass_empty, tone: Tone.amber),
+          title: Text(l.entriesToValidate(b.toValidate!)),
+          subtitle: Text(l.awaitingAuditor),
+          chevron: true,
+          onTap: () => onOpen?.call(AppTab.finances),
+        ),
+      for (final (title, at, missing) in b.unfilled)
+        ListRow(
+          lead: const IconChip(Icons.event_busy_outlined, tone: Tone.red),
+          title: Text(l.unfilledSlots(missing, title)),
+          subtitle: Text(d.fullDateTime(at)),
+          chevron: true,
+          onTap: () => onOpen?.call(AppTab.calendrier),
+        ),
+    ];
+    if (rows.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionLabel(l.toFollow),
+        const SizedBox(height: 8),
+        GroupCard(children: rows),
       ],
     );
   }

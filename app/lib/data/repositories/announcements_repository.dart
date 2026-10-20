@@ -19,4 +19,7 @@ abstract class AnnouncementsRepository {
     required List<int> bytes,
     required String filename,
   });
+
+  /// Notify everyone who hasn't read it yet; returns how many.
+  Future<int> remindUnread(int id);
 }

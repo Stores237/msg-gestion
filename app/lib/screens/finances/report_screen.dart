@@ -7,6 +7,7 @@ import '../../models/me.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/launch.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/money.dart';
 import '../../widgets/notice.dart';
@@ -103,6 +104,23 @@ class _ReportViewState extends State<ReportView> {
                   icon: const Icon(Icons.chevron_right),
                   onPressed: () => _shift(1),
                 ),
+                if (widget.me.can('finances.report', 'export'))
+                  IconButton(
+                    key: const Key('export-report'),
+                    tooltip: l.exportPdf,
+                    icon: const Icon(Icons.picture_as_pdf_outlined),
+                    onPressed: () async {
+                      try {
+                        final url = await RepositoryLocator.instance.finances
+                            .reportPdf(_year, _quarter);
+                        if (context.mounted) {
+                          await openUri(context, Uri.parse(url));
+                        }
+                      } catch (e) {
+                        if (context.mounted) showErrorSnack(context, e);
+                      }
+                    },
+                  ),
               ],
             ),
             const SizedBox(height: 8),

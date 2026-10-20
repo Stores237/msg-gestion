@@ -15,4 +15,20 @@ abstract class MembersRepository {
 
   /// New temporary PIN for a member (shown once to the secretary).
   Future<String> resetPin(int id);
+
+  Future<String?> uploadPhoto(
+    int id, {
+    required List<int> bytes,
+    required String filename,
+  });
+
+  /// (slug, name) of roles a bureau member may propose.
+  Future<List<(String, String)>> requestableRoles();
+  Future<void> requestRole(
+    int id, {
+    required String role,
+    required String reason,
+    required DateTime startsOn,
+    DateTime? endsOn,
+  });
 }

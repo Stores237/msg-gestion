@@ -1366,4 +1366,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get never => 'never';
+
+  @override
+  String get addPhoto => 'Add a photo';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get photoSaved => 'Photo saved.';
+
+  @override
+  String get registrationFee => 'Registration fee paid';
+
+  @override
+  String get registrationFeeSub =>
+      'Added to the cash book, awaiting validation';
+
+  @override
+  String get presenceLast4 => 'Attendance · last 4 meetings';
+
+  @override
+  String presenceSummary(int present, int absent, int excused) {
+    return '$present present · $absent absent · $excused excused';
+  }
+
+  @override
+  String lastOn(String date) {
+    return 'Last: $date';
+  }
+
+  @override
+  String get proposeRole => 'Propose a role';
+
+  @override
+  String get roleRequestSent => 'Request sent to the super admin.';
+
+  @override
+  String get fromDate => 'From';
+
+  @override
+  String get toDate => 'To (optional)';
+
+  @override
+  String get reasonRequired => 'Reason (logged)';
+
+  @override
+  String get reminders => 'Reminders';
+
+  @override
+  String get remindEve => 'The day before at 20:00';
+
+  @override
+  String get remind2h => '2 hours before';
+
+  @override
+  String remindUnread(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Remind the $n unread members',
+      one: 'Remind the unread member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String remindedDone(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n members reminded.',
+      one: '1 member reminded.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportPdf => 'Export as PDF';
+
+  @override
+  String get toFollow => 'To follow up';
+
+  @override
+  String get activeMembers => 'Active members';
+
+  @override
+  String entriesToValidate(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n entries to validate',
+      one: '1 entry to validate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get awaitingAuditor => 'Waiting for the auditor';
+
+  @override
+  String unfilledSlots(int n, String title) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n unfilled posts',
+      one: '1 unfilled post',
+    );
+    return '$_temp0 · $title';
+  }
 }

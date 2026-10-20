@@ -217,6 +217,7 @@ class MemberRow extends StatelessWidget {
         name: m.fullName,
         status: m.status,
         diaspora: m.isDiaspora,
+        photo: m.photo,
       ),
       title: Text(m.fullName),
       subtitle: Text(sub),

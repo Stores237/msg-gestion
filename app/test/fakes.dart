@@ -112,6 +112,22 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<Me> fetchMe() async => me;
+
+  final reminders = <String>[];
+  BureauHome bureau = const BureauHome();
+
+  @override
+  Future<AppSettings> settings() async => const AppSettings(
+    quickAmounts: [500, 1000, 3000],
+    fees: {'inscription': 500},
+  );
+
+  @override
+  Future<void> setReminders({bool? eve, bool? twoHours}) async =>
+      reminders.add('eve=$eve 2h=$twoHours');
+
+  @override
+  Future<BureauHome> bureauHome() async => bureau;
 }
 
 class FakeMembersRepository implements MembersRepository {
@@ -208,6 +224,34 @@ class FakeMembersRepository implements MembersRepository {
       temporaryPin: '4821',
     );
   }
+
+  final photos = <int>[];
+  final roleRequests = <String>[];
+
+  @override
+  Future<String?> uploadPhoto(
+    int id, {
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    photos.add(id);
+    return 'https://example.test/p.png';
+  }
+
+  @override
+  Future<List<(String, String)>> requestableRoles() async => const [
+    ('censeur-du-jour', 'Censeur du jour'),
+    ('chef-de-groupe', 'Chef de groupe'),
+  ];
+
+  @override
+  Future<void> requestRole(
+    int id, {
+    required String role,
+    required String reason,
+    required DateTime startsOn,
+    DateTime? endsOn,
+  }) async => roleRequests.add('$id:$role:$reason');
 }
 
 class FakeEventsRepository implements EventsRepository {
@@ -382,6 +426,11 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       url: 'https://example.test/f.pdf',
     );
   }
+
+  int reminded = 0;
+
+  @override
+  Future<int> remindUnread(int id) async => ++reminded;
 }
 
 class FakeFinancesRepository implements FinancesRepository {
@@ -578,6 +627,20 @@ class FakeFinancesRepository implements FinancesRepository {
   Future<QuarterReport> validateReport(int year, int quarter) async {
     reportValidated = true;
     return _report(0);
+  }
+
+  final exports = <String>[];
+
+  @override
+  Future<String> reportPdf(int year, int quarter) async {
+    exports.add('report:$year:$quarter');
+    return 'https://example.test/r.pdf';
+  }
+
+  @override
+  Future<String> cashbookPdf() async {
+    exports.add('cashbook');
+    return 'https://example.test/c.pdf';
   }
 }
 

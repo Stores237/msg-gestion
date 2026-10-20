@@ -7,6 +7,7 @@ import '../../models/me.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/launch.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/money.dart';
 import '../../widgets/ui.dart';
@@ -31,6 +32,15 @@ class _FinancesScreenState extends State<FinancesScreen> {
   bool get _canReport => widget.me.can('finances.report', 'view');
 
   void _refresh() => setState(() => _reload = UniqueKey());
+
+  Future<void> _export(Future<String> Function() link) async {
+    try {
+      final url = await link();
+      if (mounted) await openUri(context, Uri.parse(url));
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    }
+  }
 
   Future<void> _newEntry() async {
     final saved = await Navigator.of(
@@ -82,7 +92,20 @@ class _FinancesScreenState extends State<FinancesScreen> {
           : null,
       body: Column(
         children: [
-          ScreenHeader(title: l.tabFinances, sync: true),
+          ScreenHeader(
+            title: l.tabFinances,
+            sync: true,
+            actions: [
+              if (_tab == 0 && widget.me.can('finances.cashbook', 'export'))
+                IconButton(
+                  key: const Key('export-cashbook'),
+                  tooltip: l.exportPdf,
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  onPressed: () =>
+                      _export(RepositoryLocator.instance.finances.cashbookPdf),
+                ),
+            ],
+          ),
           Expanded(
             child: KeyedSubtree(
               key: _reload,

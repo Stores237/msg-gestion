@@ -45,7 +45,7 @@ void main() {
       await tester.tap(find.byKey(const Key('e-save')));
       await tester.pumpAndSettle();
       expect(find.text('Indiquez un montant.'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('quick-2500')));
+      await tester.tap(find.byKey(const Key('quick-3000')));
       await tester.pump();
       await tester.tap(find.byKey(const Key('e-member')));
       await tester.pumpAndSettle();
@@ -56,7 +56,7 @@ void main() {
       final e = f.finances.created.single;
       expect(
         (e.direction, e.amount, e.category, e.memberId),
-        ('in', 2500, 'solidarite', 4),
+        ('in', 3000, 'solidarite', 4),
       );
       expect(
         e.clientUuid,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../data/api_client.dart';
 import '../../data/repository_locator.dart';
@@ -30,6 +31,8 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   final _parentPhone = TextEditingController();
   DateTime? _birth;
   bool _diaspora = false;
+  bool _feePaid = true;
+  XFile? _photo;
   bool _busy = false;
   String? _phoneServerError;
 
@@ -91,8 +94,20 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           parentName: _isMinor ? _parentName.text.trim() : '',
           parentRelation: _isMinor ? _parentRelation.text.trim() : '',
           parentPhone: _isMinor ? _parentPhone.text.trim() : '',
+          registrationPaid: _feePaid,
         ),
       );
+      if (_photo != null) {
+        try {
+          await RepositoryLocator.instance.members.uploadPhoto(
+            m.summary.id,
+            bytes: await _photo!.readAsBytes(),
+            filename: _photo!.name,
+          );
+        } catch (_) {
+          // The member exists; the photo can be added from the profile.
+        }
+      }
       if (!mounted) return;
       setState(
         () => _busy = false,
@@ -197,6 +212,52 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        InkWell(
+                          key: const Key('f-photo'),
+                          customBorder: const CircleBorder(),
+                          onTap: () async {
+                            final p = await ImagePicker().pickImage(
+                              source: ImageSource.gallery,
+                              maxWidth: 1024,
+                              imageQuality: 85,
+                            );
+                            if (p != null) setState(() => _photo = p);
+                          },
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: c.surfaceCard,
+                              border: Border.all(
+                                color: c.borderStrong,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              _photo == null
+                                  ? Icons.photo_camera_outlined
+                                  : Icons.check,
+                              color: c.textSecondary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _photo == null ? l.addPhoto : _photo!.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: c.primaryText,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     label(l.lastNameLabel, req: true),
                     TextFormField(
                       key: const Key('f-last'),
@@ -278,6 +339,20 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                       ),
                     ],
                     const SizedBox(height: 16),
+                    SwitchListTile(
+                      key: const Key('f-fee'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        l.registrationFee,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(l.registrationFeeSub),
+                      value: _feePaid,
+                      onChanged: (v) => setState(() => _feePaid = v),
+                    ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(

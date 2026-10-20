@@ -25,8 +25,10 @@ class MemberSummary {
     required this.isMinor,
     required this.joinedYear,
     required this.roles,
+    this.photo,
   });
 
+  final String? photo;
   final int id;
   final String lastName;
   final String firstName;
@@ -68,6 +70,21 @@ class ParentContact {
   final String phone;
 }
 
+class AttendanceSummary {
+  const AttendanceSummary({
+    required this.present,
+    required this.absent,
+    required this.excused,
+    required this.of,
+    this.last,
+  });
+  final int present;
+  final int absent;
+  final int excused;
+  final int of;
+  final DateTime? last;
+}
+
 class MemberDetail {
   const MemberDetail({
     required this.summary,
@@ -77,7 +94,10 @@ class MemberDetail {
     this.parent,
     required this.restricted,
     this.temporaryPin,
+    this.attendance,
   });
+
+  final AttendanceSummary? attendance;
 
   final MemberSummary summary;
   final String? phone;
@@ -109,6 +129,17 @@ class MemberDetail {
             ),
       restricted: List<String>.from(j['restricted'] as List),
       temporaryPin: j['temporary_pin'] as String?,
+      attendance: j['attendance'] == null
+          ? null
+          : AttendanceSummary(
+              present: j['attendance']['present'] as int,
+              absent: j['attendance']['absent'] as int,
+              excused: j['attendance']['excuse'] as int,
+              of: j['attendance']['of'] as int,
+              last: j['attendance']['last'] == null
+                  ? null
+                  : DateTime.parse(j['attendance']['last'] as String).toLocal(),
+            ),
     );
   }
 }
@@ -169,7 +200,10 @@ class NewMember {
     this.parentName = '',
     this.parentRelation = '',
     this.parentPhone = '',
+    this.registrationPaid = false,
   });
+
+  final bool registrationPaid;
 
   final String lastName;
   final String firstName;

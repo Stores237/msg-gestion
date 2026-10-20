@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/announcement.dart';
+import '../../widgets/errors.dart';
 import '../../widgets/ui.dart';
 
 /// Who has / hasn't read an announcement (design: "Accusés de lecture").
@@ -56,6 +57,31 @@ class _ReceiptsState extends State<_Receipts> {
               onChanged: (i) => setState(() => _tab = i),
             ),
             const SizedBox(height: 12),
+            if (unread.isNotEmpty) ...[
+              FilledButton.tonalIcon(
+                key: const Key('remind-unread'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: const StadiumBorder(),
+                ),
+                onPressed: () async {
+                  try {
+                    final n = await RepositoryLocator.instance.announcements
+                        .remindUnread(widget.item.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l.remindedDone(n))),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) showErrorSnack(context, e);
+                  }
+                },
+                icon: const Icon(Icons.notifications_active_outlined, size: 18),
+                label: Text(l.remindUnread(unread.length)),
+              ),
+              const SizedBox(height: 12),
+            ],
             GroupCard(
               children: [
                 for (final r in shown)

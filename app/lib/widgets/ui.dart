@@ -293,7 +293,11 @@ class MemberAvatar extends StatelessWidget {
     this.status,
     this.diaspora = false,
     this.size = 44,
+    this.photo,
   });
+
+  /// Signed URL of the member's photo; initials when absent or failing.
+  final String? photo;
   final String name;
   final String? status;
   final bool diaspora;
@@ -330,14 +334,31 @@ class MemberAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: c.surfaceCard, width: 2),
             ),
-            child: Text(
-              initials,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: size * 0.36,
-              ),
-            ),
+            child: photo == null
+                ? Text(
+                    initials,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: size * 0.36,
+                    ),
+                  )
+                : ClipOval(
+                    child: Image.network(
+                      photo!,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Text(
+                        initials,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: size * 0.36,
+                        ),
+                      ),
+                    ),
+                  ),
           ),
           if (dot != null)
             Positioned(

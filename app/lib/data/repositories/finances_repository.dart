@@ -21,4 +21,8 @@ abstract class FinancesRepository {
   Future<MyDues> mine();
   Future<QuarterReport> report(int year, int quarter);
   Future<QuarterReport> validateReport(int year, int quarter);
+
+  /// Signed download links for the PDF exports.
+  Future<String> reportPdf(int year, int quarter);
+  Future<String> cashbookPdf();
 }

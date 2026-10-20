@@ -140,4 +140,19 @@ class HttpFinancesRepository implements FinancesRepository {
             )
             as Map<String, dynamic>,
       );
+
+  @override
+  Future<String> reportPdf(int year, int quarter) async =>
+      ((await _api.get(
+                '/finances/report/pdf/',
+                query: {'year': '$year', 'quarter': '$quarter'},
+              ))
+              as Map<String, dynamic>)['url']
+          as String;
+
+  @override
+  Future<String> cashbookPdf() async =>
+      ((await _api.get('/finances/entries/pdf/'))
+              as Map<String, dynamic>)['url']
+          as String;
 }

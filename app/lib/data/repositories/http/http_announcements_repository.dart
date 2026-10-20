@@ -79,4 +79,10 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
         )
         as Map<String, dynamic>,
   );
+
+  @override
+  Future<int> remindUnread(int id) async =>
+      ((await _api.post('/announcements/$id/remind/'))
+              as Map<String, dynamic>)['reminded']
+          as int;
 }

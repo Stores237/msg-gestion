@@ -886,5 +886,80 @@
       }
     }
   },
-  "never": "jamais"
+  "never": "jamais",
+  "addPhoto": "Ajouter une photo",
+  "changePhoto": "Changer la photo",
+  "photoSaved": "Photo enregistrée.",
+  "registrationFee": "Frais d’inscription payés",
+  "registrationFeeSub": "Ajouté au livre de caisse, en attente de validation",
+  "presenceLast4": "Présences · 4 dernières assises",
+  "presenceSummary": "{present} présent · {absent} absent · {excused} excusé",
+  "@presenceSummary": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "absent": {
+        "type": "int"
+      },
+      "excused": {
+        "type": "int"
+      }
+    }
+  },
+  "lastOn": "Dernière : {date}",
+  "@lastOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "proposeRole": "Proposer un rôle",
+  "roleRequestSent": "Demande envoyée au super admin.",
+  "fromDate": "Du",
+  "toDate": "Au (facultatif)",
+  "reasonRequired": "Motif (journalisé)",
+  "reminders": "Rappels",
+  "remindEve": "La veille à 20:00",
+  "remind2h": "2 heures avant",
+  "remindUnread": "{n, plural, =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}",
+  "@remindUnread": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "remindedDone": "{n, plural, =1{1 membre relancé.} other{{n} membres relancés.}}",
+  "@remindedDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "exportPdf": "Exporter en PDF",
+  "toFollow": "À suivre",
+  "activeMembers": "Membres actifs",
+  "entriesToValidate": "{n, plural, =1{1 opération à valider} other{{n} opérations à valider}}",
+  "@entriesToValidate": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "awaitingAuditor": "En attente du commissaire aux comptes",
+  "unfilledSlots": "{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}",
+  "@unfilledSlots": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  }
 }

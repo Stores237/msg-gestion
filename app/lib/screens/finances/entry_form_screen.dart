@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../data/repositories/profile_repository.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/finance.dart';
@@ -24,7 +25,7 @@ class EntryFormScreen extends StatefulWidget {
 }
 
 class _EntryFormScreenState extends State<EntryFormScreen> {
-  static const _quick = [500, 1000, 2000, 2500];
+  List<int> _quick = AppSettings.fallback.quickAmounts;
   final _amount = TextEditingController();
   final _label = TextEditingController();
   int _direction = 0; // 0 in, 1 out
@@ -35,6 +36,17 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
   String? _amountError;
   // One key per form: a retry after a timeout is the same entry.
   final _draftUuid = uuidV4();
+
+  @override
+  void initState() {
+    super.initState();
+    RepositoryLocator.instance.profile
+        .settings()
+        .then((st) {
+          if (mounted) setState(() => _quick = st.quickAmounts);
+        })
+        .catchError((_) {});
+  }
 
   @override
   void dispose() {
