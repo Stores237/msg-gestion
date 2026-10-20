@@ -18,6 +18,10 @@ Supabase project or a Redis instance with production (`RENDER_PRODUCTION.md`).
    `msg-staging` (free, Frankfurt, `srv-dbbk3vou01pc73e2h24g`, https://msg-staging.onrender.com),
    created through the Render API from repo `Stores237/msg-gestion`, deploying after CI passes.
    Not yet set: Twilio, Sentry, superuser variables.
+   **Known issue (2026-10-20):** with Auto-Deploy "after CI checks pass", Render never deployed
+   any push even though both GitHub checks were green; the first update needed Manual Deploy.
+   Set Auto-Deploy to "On Commit" (CI still runs on GitHub) and keep the Deploy Hook URL in
+   `backend/.env.staging` as `RENDER_DEPLOY_HOOK` so a deploy can be triggered without an API key.
 3. **Twilio**: a Verify Service (no phone number purchase needed) and an API key.
 4. Render → New → Blueprint → this repo. Render reads `render.yaml` and asks for every
    `sync: false` value below.
