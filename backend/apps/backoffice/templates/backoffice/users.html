@@ -1,0 +1,18 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Utilisateurs{% endblock %}
+{% block crumb %}<div class="crumb">{{ total }} compte{{ total|pluralize }}</div>{% endblock %}
+{% block heading %}Utilisateurs{% endblock %}
+{% block body %}
+<section class="panel">
+  <form class="filters" method="get">
+    <div class="search">{% icon 'search' 16 %}<input name="q" value="{{ q }}" placeholder="Nom, téléphone…" aria-label="Rechercher"></div>
+    <label class="fsel{% if statut %} on{% endif %}"><select name="statut" onchange="this.form.submit()" style="border:none;background:transparent;font:inherit;color:inherit" aria-label="Statut"><option value="">Statut : tous sauf archivés</option>{% for v, l in statuses %}{% if v != 'archive' %}<option value="{{ v }}"{% if v == statut %} selected{% endif %}>{{ l }}</option>{% endif %}{% endfor %}</select></label>
+    {% if q or statut %}<a style="font-size:13px;margin-left:auto" href="{% url 'backoffice:users' %}">Réinitialiser</a>{% endif %}
+  </form>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Téléphone</th><th>Statut</th><th>Rôles</th><th>Dernière connexion</th></tr></thead><tbody>
+    {% for u, roles in rows %}<tr><td><span class="who">{% avatar u 36 %}<span><b>{{ u.full_name }}</b>{% if u.is_diaspora %}<small>Diaspora{% if u.city %} · {{ u.city }}{% endif %}</small>{% endif %}</span></span></td><td class="tnum muted">{{ u.phone|phone }}</td><td>{% status u %}</td><td><span class="rbs">{% for a in roles %}{% role_badge a.role a.ends_on %}{% empty %}<span class="muted">—</span>{% endfor %}</span></td><td class="muted">{{ u.last_login|date:"d/m/Y H:i"|default:"jamais" }}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="5">Aucun utilisateur ne correspond.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="tbl-f"><span>{{ page.start_index }}–{{ page.end_index }} sur {{ page.paginator.count }}</span><div class="pg">{% if page.has_previous %}<a class="iconbtn" aria-label="Précédent" href="?q={{ q|urlencode }}&statut={{ statut }}&page={{ page.previous_page_number }}">{% icon 'chevron-left' 22 %}</a>{% endif %}{% if page.has_next %}<a class="iconbtn" aria-label="Suivant" href="?q={{ q|urlencode }}&statut={{ statut }}&page={{ page.next_page_number }}">{% icon 'chevron-right' 22 %}</a>{% endif %}</div></div>
+</section>
+{% endblock %}

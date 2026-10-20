@@ -1,0 +1,13 @@
+{% extends "backoffice/base.html" %}{% load bo %}
+{% block title %}Connexion{% endblock %}
+{% block frame %}
+<div class="bo-center">{% include "backoffice/_login_side.html" %}
+  <div class="r"><form class="bo-card" method="post" novalidate>{% csrf_token %}
+    <span class="caps">Étape 1 sur 2</span><div style="font-size:24px;font-weight:800">Connexion</div>
+    {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
+    <label class="fld"><span class="fld-l">Numéro de téléphone</span><span class="fld-box">{% icon 'phone' %}<input name="phone" type="tel" inputmode="tel" autocomplete="username" value="{{ phone }}" placeholder="6 XX XX XX XX" required autofocus></span></label>
+    <label class="fld"><span class="fld-l">Mot de passe</span><span class="fld-box">{% icon 'lock' %}<input name="password" type="password" autocomplete="current-password" required></span></label>
+    <button class="btn btn-primary btn-full">Continuer</button>
+    <p style="margin:0;font-size:13px;color:var(--text-secondary);line-height:1.5">Un code à 6 chiffres sera envoyé par SMS au numéro du compte.</p>
+  </form></div></div>
+{% endblock %}

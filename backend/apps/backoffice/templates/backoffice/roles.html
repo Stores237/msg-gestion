@@ -1,0 +1,21 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Rôles et permissions{% endblock %}
+{% block crumb %}<div class="crumb">{{ roles|length }} rôles actifs</div>{% endblock %}
+{% block heading %}Rôles et permissions{% endblock %}
+{% block body %}
+<div class="bo-cols roles">
+  <section class="panel"><div class="panel-h"><h2>Rôles</h2></div><div class="rolelist">{% for r, n in roles %}<a href="{% url 'backoffice:role' r.slug %}" class="{% if r == role %}on{% endif %}">{% role_badge r %}<small>{{ n }}</small></a>{% endfor %}</div></section>
+  <div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+    <form class="panel" method="post">{% csrf_token %}
+      <div class="panel-h"><h2 style="display:flex;gap:10px;align-items:center">{{ role.name }} {% if role.mandate_months %}<span class="rb bureau"><i></i>Bureau · mandat {{ role.mandate_months }} mois</span>{% endif %}</h2></div>
+      <div class="tbl-wrap"><table class="pm"><thead><tr><th>Module · objet</th>{% for a in actions %}<th>{{ a }}</th>{% endfor %}</tr></thead><tbody>
+        {% for line in matrix %}{% if line.module %}<tr class="mod"><td colspan="7">{{ line.module }}</td></tr>{% else %}<tr><td><b>{{ line.label }}</b>{% if line.sensitive %}<small>Données sensibles</small>{% endif %}</td>{% for c in line.cells %}<td>{% if c.state == 'na' %}<span class="pc na">—</span>{% elif c.state == 'lock' %}<span class="pc lock" title="Bloqué : séparation des tâches">{% icon 'lock' 14 %}</span>{% elif can_edit %}<label class="pc"><input type="checkbox" name="perm" value="{{ c.value }}"{% if c.state == 'on' %} checked{% endif %} aria-label="{{ line.label }}">{% icon 'check' 16 %}</label>{% else %}<span class="pc{% if c.state == 'on' %} on{% endif %}">{% if c.state == 'on' %}{% icon 'check' 16 %}{% endif %}</span>{% endif %}</td>{% endfor %}</tr>{% endif %}{% endfor %}
+      </tbody></table>
+      <div class="legend"><span><span class="pc on" style="display:inline-flex"></span>Autorisé</span><span><span class="pc" style="display:inline-flex;box-shadow:inset 0 0 0 1.5px var(--border-subtle)"></span>Non autorisé</span><span><span class="pc lock" style="display:inline-flex;background:var(--surface-sunken)"></span>Bloqué (séparation des tâches)</span></div></div>
+      {% if can_edit %}<div class="panel-b" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;border-top:1px solid var(--border-subtle)"><label class="fld" style="flex:1;min-width:260px"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required placeholder="Pourquoi cette modification ?"></span></label><button class="btn btn-primary">Enregistrer les modifications</button></div>{% endif %}
+      <div class="notice" style="margin:0 20px 20px">{% icon 'lock' %}<span>Règles fixes : le trésorier saisit, le commissaire aux comptes valide. Le super admin gère les accès sans voir les montants.</span></div>
+    </form>
+    <section class="panel"><div class="panel-h"><h2>Personnes ayant ce rôle · {{ holders|length }}</h2></div><div class="list">{% for a in holders %}<div class="row">{% avatar a.user 36 %}<div class="row-main"><div class="row-t">{{ a.user.full_name }}</div><div class="row-s">depuis le {{ a.starts_on|date:"d/m/Y" }}{% if a.ends_on %} · jusqu’au {{ a.ends_on|date:"d/m/Y" }}{% endif %}</div></div></div>{% empty %}<div class="row"><div class="row-s">Personne n’a ce rôle actuellement.</div></div>{% endfor %}</div></section>
+  </div>
+</div>
+{% endblock %}

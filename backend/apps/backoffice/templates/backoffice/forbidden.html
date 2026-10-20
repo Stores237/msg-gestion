@@ -1,0 +1,5 @@
+{% extends "backoffice/base.html" %}{% load bo %}
+{% block title %}Accès réservé{% endblock %}
+{% block frame %}
+<div class="bo-center" style="grid-template-columns:1fr"><div class="r"><div class="state" style="max-width:420px"><div class="ico">{% icon 'lock' 28 %}</div><h3>Accès réservé</h3><p>Votre rôle ne donne pas accès à cette page du back-office. Le super admin règle les permissions dans « Rôles et permissions ».</p><a class="btn btn-secondary" href="{% url 'backoffice:dashboard' %}">Retour au tableau de bord</a></div></div></div>
+{% endblock %}

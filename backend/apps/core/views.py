@@ -1,0 +1,36 @@
+import hmac
+
+from django.conf import settings
+from django.core.management import call_command
+from django.db import connection
+from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+# Management commands that cron-job.org may trigger on staging. Empty for
+# now; each scheduled job is added here *and* as a Render Cron Job service
+# for production (render.yaml) in the same change.
+TASKS = {}
+
+
+def healthz(request):
+    """Render's health check. Touches the database so a broken
+    DATABASE_URL shows up as an unhealthy deploy, not a healthy-looking
+    service that 500s on every real request."""
+    with connection.cursor() as cur:
+        cur.execute("SELECT 1")
+    return JsonResponse({"status": "ok"})
+
+
+@csrf_exempt
+@require_POST
+def run_task(request, name):
+    """Staging-only scheduler stand-in (playbook §4). 404 unless a token
+    is configured, so production — which never sets one — has no such
+    endpoint at all."""
+    token = settings.TASK_TRIGGER_TOKEN
+    supplied = request.headers.get("X-Task-Token", "")
+    if not token or name not in TASKS or not hmac.compare_digest(token, supplied):
+        raise Http404
+    call_command(TASKS[name])
+    return JsonResponse({"status": "done", "task": name})

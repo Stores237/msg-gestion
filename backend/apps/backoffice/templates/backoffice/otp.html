@@ -1,0 +1,16 @@
+{% extends "backoffice/base.html" %}{% load bo %}
+{% block title %}Code de vérification{% endblock %}
+{% block frame %}
+<div class="bo-center">{% include "backoffice/_login_side.html" %}
+  <div class="r"><form class="bo-card" method="post" autocomplete="off">{% csrf_token %}
+    <span class="caps">Étape 2 sur 2</span><div style="font-size:24px;font-weight:800">Code de vérification</div>
+    <p style="margin:0;color:var(--text-secondary);font-size:15px;line-height:1.5">Envoyé par SMS au {{ masked }}. Valable 5 minutes.</p>
+    {% if error %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ error }}</span></div>{% endif %}
+    {% if info %}<div class="notice ok">{% icon 'circle-check' %}<span>{{ info }}</span></div>{% endif %}
+    <label class="fld"><span class="fld-l">Code à 6 chiffres</span><span class="fld-box"><input name="code" inputmode="numeric" pattern="\d{6}" maxlength="6" autocomplete="one-time-code" style="font-size:24px;font-weight:800;letter-spacing:.4em" autofocus></span></label>
+    <label style="display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;gap:12px">Faire confiance à cet ordinateur 30 jours<input class="toggle" type="checkbox" name="trust" value="1"></label>
+    <button class="btn btn-primary btn-full">Vérifier</button>
+  </form>
+  </div></div>
+<form method="post" style="position:absolute;bottom:24px;right:24px">{% csrf_token %}<button class="btn btn-ghost btn-sm" name="resend" value="1">Renvoyer le code</button></form>
+{% endblock %}

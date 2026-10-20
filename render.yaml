@@ -1,0 +1,144 @@
+# Render Blueprint — staging and production in one file. RENDER_STAGING.md
+# and RENDER_PRODUCTION.md list every `sync: false` value and where it comes
+# from. The two services never share a secret, a Supabase project or a
+# Redis instance.
+#
+# Monorepo: with rootDir: backend, dockerfilePath/dockerContext are
+# resolved relative to rootDir, not the repo root — despite Render's docs.
+# Setting them to "backend/..." produced a nonexistent .../backend/backend
+# path on Spekooh's first deploy (playbook §4).
+services:
+  - type: web
+    name: msg-staging
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    rootDir: backend
+    plan: free
+    region: frankfurt
+    branch: main
+    # Every push to main that passes CI is on staging within minutes.
+    autoDeploy: true
+    healthCheckPath: /healthz/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: SENTRY_ENVIRONMENT
+        value: staging
+      - key: WEB_CONCURRENCY
+        value: 2
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.console.EmailBackend
+      # Staging Supabase project's *pooler* string (port 6543).
+      - key: DATABASE_URL
+        sync: false
+      # Required: login is rate-limited, and a throttle with no reachable
+      # Redis 500s instead of returning 429 (playbook §7).
+      - key: REDIS_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      # An AWS-style region code from Supabase → Storage → S3 Connection
+      # (e.g. eu-west-1), not the bucket name; a wrong value breaks SigV4.
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      # Without these, the back-office second factor cannot be sent and
+      # back-office login is refused (apps.core.sms fails loudly).
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_API_KEY_SID
+        sync: false
+      - key: TWILIO_API_KEY_SECRET
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: DJANGO_ADMIN_EMAILS
+        sync: false
+      # Staging-only scheduler stand-in (cron-job.org → /internal/tasks/).
+      - key: TASK_TRIGGER_TOKEN
+        sync: false
+      # Free tier has no Shell tab: ensure_superuser creates the Django
+      # admin account on container start from these.
+      - key: DJANGO_SUPERUSER_PHONE
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false
+
+  - type: web
+    name: msg-production
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    rootDir: backend
+    # Always-on: free-tier spin-down (~1 min cold start) is fine for
+    # testers, not for a garde opening the app at the church door.
+    plan: starter
+    region: frankfurt
+    branch: main
+    # Promoted by hand: Render dashboard → Manual Deploy → Deploy latest
+    # commit, on a commit already checked on staging.
+    autoDeploy: false
+    healthCheckPath: /healthz/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: SENTRY_ENVIRONMENT
+        value: production
+      - key: WEB_CONCURRENCY
+        value: 3
+      # Never staging's values for anything below.
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_API_KEY_SID
+        sync: false
+      - key: TWILIO_API_KEY_SECRET
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: DJANGO_ADMIN_EMAILS
+        sync: false
+      - key: EMAIL_BACKEND
+        sync: false
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      # No TASK_TRIGGER_TOKEN here, on purpose: production's scheduled jobs
+      # are Render Cron Job services (none exist yet), never a public
+      # endpoint that mutates state for anyone holding a token.
+      - key: DJANGO_SUPERUSER_PHONE
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false

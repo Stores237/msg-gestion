@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MSG Gestion — système et écrans</title>
+<link rel="stylesheet" href="_ds/kawlo-spekooh-design-system-10ffa8e5-270c-41a3-a284-38ad2d71690f/styles.css">
+<link rel="stylesheet" href="msg-theme.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="_ds/kawlo-spekooh-design-system-10ffa8e5-270c-41a3-a284-38ad2d71690f/_ds_bundle.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="kit.jsx"></script>
+<script type="text/babel" src="screens-a.jsx"></script>
+<script type="text/babel" src="screens-b.jsx"></script>
+<script type="text/babel" src="states.jsx"></script>
+<script type="text/babel" src="docs.jsx"></script>
+<script type="text/babel" src="planning.jsx"></script>
+<script type="text/babel">
+function Shots({ id, title, children }) { return <><h3 className="doc-sub" id={id}>{title}</h3><div className="shots">{children}</div></>; }
+function App() {
+  const [theme, setTheme] = React.useState('light');
+  React.useEffect(() => { document.body.className = 'theme-' + theme; }, [theme]);
+  return <div className={'doc theme-' + theme}>
+    <div className="doc-top"><div className="doc-top-in"><LogoSlot size={36} /><b style={{ fontSize: 15 }}>MSG Gestion</b>
+      <nav><a href="#tokens">Tokens</a><a href="#composants">Composants</a><a href="#roles">Rôles</a><a href="#ecrans">Écrans</a><a href="#planning">Planning</a><a href="#etats">États</a><a href="#a11y">Accessibilité</a><a href="MSG Back-office.html">Back-office ↗</a></nav>
+      <div className="toggle-theme"><button className={theme === 'light' ? 'on' : ''} onClick={() => setTheme('light')}><I name="sun" size={16} />Clair</button><button className={theme === 'dark' ? 'on' : ''} onClick={() => setTheme('dark')}><I name="moon" size={16} />Sombre</button></div></div></div>
+    <main className="doc-main">
+      <div className="doc-hero"><span className="caps">Mouvement Garde Suisse · Notre-Dame de Lourdes de Yapoma</span><h1>MSG Gestion — système de design et écrans clés, v1</h1>
+        <p>Application Android (compatible iOS) pour l’administration du mouvement : membres, caisse, calendrier, annonces. Écrans en 360 × 760 dp. Le logo sera fourni : ses emplacements sont marqués en pointillés.</p></div>
+      <Tokens /><Components /><Roles />
+      <section className="doc-sec" id="ecrans"><h2>5. Écrans clés</h2><p className="lead">Données d’exemple. Les écrans s’affichent tels qu’un rôle précis les voit ; la barre d’onglets change avec le rôle.</p>
+        <Shots title="Entrée"><SSplash /><SLogin /><SLoginPin /></Shots>
+        <Shots title="Accueil"><SHomeMember /><SHomeTreso /><SNotifs /></Shots>
+        <Shots title="Membres"><SMembers /><SProfile /><SProfileRestricted /><SAddMember /></Shots>
+        <Shots title="Finances"><SFinances /><SEntry /><SEntrySheet /><SSolidarity /><SReport /></Shots>
+        <Shots title="Calendrier"><SCalendar /><SEvent /><SAttendance /></Shots>
+        <Shots title="Annonces"><SFeed /><SComposer /><SReads /></Shots>
+      </section>
+      <section className="doc-sec" id="planning"><h2>6. Planning des services</h2><p className="lead">Vue « Planning » de l’onglet Calendrier. Modèle : Group (chef), Event, Assignment (événement, poste, côté, membre, statut), AlbRotation (semaine, responsable, statut), SwapRequest.</p>
+        <PlanningSpecs />
+        <Shots title="Écrans planning"><SPlanningWeek /><SAssign /><SAssignGroup /><SMesServices /><SSwap /><SRequests /><SAubes /></Shots></section>
+      <section className="doc-sec" id="etats"><h2>7. États</h2><p className="lead">Hors ligne, synchronisation, erreur, vide, accès réservé et confirmation.</p>
+        <div className="shots"><SOffline /><SSyncError /><SError /><SEmpty /><SRestricted /><SDialog /></div></section>
+      <A11y />
+    </main></div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

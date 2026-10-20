@@ -1,0 +1,14 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Journal d’audit{% endblock %}
+{% block crumb %}<div class="crumb">Conservation : 5 ans</div>{% endblock %}
+{% block heading %}Journal d’audit{% endblock %}
+{% block body %}
+<section class="panel">
+  <div class="filters"><a class="fsel{% if not only_sensitive %} on{% endif %}" href="{% url 'backoffice:audit' %}">Toutes les actions</a><a class="fsel{% if only_sensitive %} on{% endif %}" href="?sensibles=1">Actions sensibles</a></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date et heure</th><th>Auteur</th><th>Action</th><th>Objet</th><th>Détail</th><th>Appareil</th></tr></thead><tbody>
+    {% for e in page %}<tr><td class="tnum" style="white-space:nowrap">{{ e.created_at|date:"d/m/Y H:i" }}</td><td><b>{{ e.actor.short_name|default:"Système" }}</b></td><td>{% if e.refused %}<span class="status err"><i></i>{{ e.action }}</span>{% else %}{{ e.action }}{% endif %}</td><td>{{ e.object_repr }}</td><td class="muted">{% for k, v in e.detail.items %}{{ k }} : {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</td><td class="muted">{{ e.device|truncatechars:40 }}{% if e.ip %} · {{ e.ip }}{% endif %}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="6">Aucune entrée.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="tbl-f"><span>{{ page.start_index }}–{{ page.end_index }} sur {{ total }} entrées</span><div class="pg">{% if page.has_previous %}<a class="iconbtn" aria-label="Précédent" href="?{% if only_sensitive %}sensibles=1&{% endif %}page={{ page.previous_page_number }}">{% icon 'chevron-left' 22 %}</a>{% endif %}{% if page.has_next %}<a class="iconbtn" aria-label="Suivant" href="?{% if only_sensitive %}sensibles=1&{% endif %}page={{ page.next_page_number }}">{% icon 'chevron-right' 22 %}</a>{% endif %}</div></div>
+</section>
+{% endblock %}

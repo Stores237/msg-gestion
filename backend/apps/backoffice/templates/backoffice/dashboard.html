@@ -1,0 +1,20 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Tableau de bord{% endblock %}
+{% block crumb %}<div class="crumb">{% now "l j F Y" %}</div>{% endblock %}
+{% block heading %}Tableau de bord{% endblock %}
+{% block body %}
+<div class="kpis">
+  <div class="kpi"><span>Utilisateurs actifs</span><b>{{ kpi_active }}</b><small>dont {{ kpi_diaspora }} diaspora · {{ kpi_suspended }} suspendu{{ kpi_suspended|pluralize }}</small></div>
+  <div class="kpi"><span>Demandes de rôle</span><b>—</b><small>pas encore disponible</small></div>
+  <div class="kpi{% if kpi_expiring %} alert{% endif %}"><span>Mandats à échéance</span><b>{{ kpi_expiring }}</b><small>dans les 30 prochains jours</small></div>
+  <div class="kpi{% if kpi_super_admins < min_super_admins %} alert{% endif %}"><span>Super admins</span><b>{{ kpi_super_admins }}</b><small>minimum requis : {{ min_super_admins }}</small></div>
+</div>
+<div class="bo-cols">
+  <section class="panel"><div class="panel-h"><h2>Actions sensibles récentes</h2><div class="acts"><a href="{% url 'backoffice:audit' %}?sensibles=1">Journal d’audit</a></div></div>
+    <div class="list">{% for e in recent %}<div class="row"><span class="ichip purple" style="width:36px;height:36px">{% icon 'shield' %}</span><div class="row-main"><div class="row-t">{{ e.action }}{% if e.object_repr %} · {{ e.object_repr }}{% endif %}</div><div class="row-s">{{ e.actor.short_name|default:"Système" }}</div></div><div class="row-end"><span style="font-size:13px;color:var(--text-secondary)">{{ e.created_at|date:"d/m H:i" }}</span></div></div>{% empty %}<div class="row"><div class="row-main"><div class="row-s">Aucune action sensible pour l’instant.</div></div></div>{% endfor %}</div></section>
+  <div style="display:flex;flex-direction:column;gap:24px">
+    <section class="panel"><div class="panel-h"><h2>Finances</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:var(--text-secondary)">Solde de la caisse</span>
+      {% if can_see_finances %}<span style="color:var(--text-secondary)">Module Finances pas encore disponible.</span>{% else %}<span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600">{% icon 'eye-off' 14 %}Montant masqué</span><span style="font-size:13px;color:var(--text-secondary);line-height:1.45">Visible par le trésorier, le commissaire aux comptes et le président.</span>{% endif %}</div></section>
+  </div>
+</div>
+{% endblock %}

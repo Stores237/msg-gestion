@@ -1,0 +1,61 @@
+name: Django CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: backend
+    runs-on: ubuntu-latest
+    # Real Postgres and Redis, the same kinds production uses (playbook §3/§5).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: msg
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/msg
+      REDIS_URL: rediscache://localhost:6379/0
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install the locked requirements (what Docker deploys)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip check
+      - name: Missing migrations
+        run: python manage.py makemigrations --check --dry-run
+      - name: Lint
+        run: ruff check .
+      - name: Production settings import and deploy checks
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_SECRET_KEY: ci-only-not-a-real-secret-ci-only-not-a-real-secret
+          RENDER_EXTERNAL_HOSTNAME: ci.example.com
+        run: python manage.py check --deploy --fail-level ERROR
+      - name: Tests
+        run: pytest

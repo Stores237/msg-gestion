@@ -1,0 +1,28 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Back-office{% endblock %} · MSG Gestion</title>
+<link rel="stylesheet" href="{% static 'backoffice/tokens.css' %}">
+<link rel="stylesheet" href="{% static 'backoffice/msg-theme.css' %}">
+<link rel="stylesheet" href="{% static 'backoffice/bo.css' %}">
+<link rel="stylesheet" href="{% static 'backoffice/ds.css' %}">
+<style>
+  /* Full-page back-office: the frame (.bo) fills the window instead of
+     sitting in a mock browser, as it does in the design document. */
+  body{min-height:100vh}
+  .bo{border-radius:0;box-shadow:none;min-height:100vh}
+  .bo-shell,.bo-center{min-height:100vh}
+  .bo-side{position:sticky;top:0;height:100vh}
+</style>
+</head>
+<body class="theme-light">
+<script>
+  try { if (matchMedia('(prefers-color-scheme: dark)').matches) document.body.className = 'theme-dark'; } catch (e) {}
+</script>
+<div class="bo">{% block frame %}{% endblock %}</div>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>window.lucide && lucide.createIcons();</script>
+</body>
+</html>

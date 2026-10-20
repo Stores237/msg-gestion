@@ -1,0 +1,65 @@
+/* Server-rendered equivalents of the Spekooh design-system React
+   components the designs use (design/_ds/.../_ds_bundle.js): Button,
+   Badge, Avatar, IconChip, SearchInput, Toggle. Same values, as classes. */
+
+.btn{font-family:var(--font-sans);font-weight:700;border-radius:var(--radius-pill);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;font-size:15px;min-height:48px;text-decoration:none;transition:transform .12s ease,opacity .12s ease;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn:hover{text-decoration:none}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn-sm{padding:8px 16px;font-size:13px;min-height:40px}
+.btn-full{width:100%;min-height:52px}
+.btn-primary{background:var(--gradient-primary);color:#fff;box-shadow:var(--shadow-button)}
+.btn-primary:hover{color:#fff}
+.btn-secondary{background:var(--blue-100);color:var(--blue-600)}
+.btn-outline{background:transparent;color:var(--blue-600);box-shadow:inset 0 0 0 1.5px var(--blue-500)}
+.btn-ghost{background:transparent;color:var(--blue-600);padding:0 16px;box-shadow:none}
+.btn-danger{background:transparent;color:var(--red-500);box-shadow:inset 0 0 0 1.5px var(--red-500)}
+
+.badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;border-radius:var(--radius-pill);display:inline-block;background:var(--blue-100);color:var(--blue-600)}
+.badge.amber{background:var(--amber-100);color:var(--amber-600)}
+.badge.green{background:var(--green-100);color:var(--green-600)}
+.badge.neutral{background:var(--surface-sunken);color:var(--text-secondary)}
+.badge.dark{background:var(--navy-900);color:#fff}
+
+.avatar{border-radius:50%;background:var(--blue-400);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;overflow:hidden;flex-shrink:0;border:2px solid var(--surface-card)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.ichip{border-radius:var(--radius-chip);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--blue-100);color:var(--blue-600)}
+.ichip.amber{background:var(--amber-100);color:var(--amber-600)}
+.ichip.green{background:var(--green-100);color:var(--green-600)}
+.ichip.purple{background:var(--purple-100);color:var(--purple-500)}
+.ichip.red{background:var(--red-100);color:var(--red-500)}
+
+.search{display:flex;align-items:center;gap:10px;background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:var(--radius-pill);padding:0 18px;min-height:44px}
+.search svg{color:var(--text-tertiary)}
+.search input{border:none;outline:none;flex:1;font-family:var(--font-sans);font-size:14px;color:var(--text-primary);background:transparent;min-height:42px}
+
+.toggle{width:44px;height:26px;border-radius:var(--radius-pill);border:none;background:var(--msg-toggle-off);position:relative;padding:0;cursor:pointer;flex-shrink:0;appearance:none;-webkit-appearance:none;transition:background .15s ease}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s ease}
+.toggle:checked{background:var(--green-500)}
+.toggle:checked::after{left:21px}
+
+/* Real form controls inside the design's .fld-box look. */
+.fld-box input,.fld-box select,.fld-box textarea{border:none;outline:none;background:transparent;flex:1;font:400 16px var(--font-sans);color:var(--text-primary);min-height:48px;width:100%}
+.fld-box textarea{min-height:80px;resize:vertical;padding:0}
+.fld:focus-within .fld-box{box-shadow:inset 0 0 0 2px var(--msg-green-500)}
+.otp input{width:48px;height:56px;border-radius:12px;background:var(--surface-card);border:none;box-shadow:inset 0 0 0 1.5px var(--border-subtle);text-align:center;font:800 24px var(--font-sans);font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.otp input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--msg-green-500)}
+.bo-nav{text-decoration:none}
+.bo-nav:hover{text-decoration:none;background:var(--surface-sunken);color:var(--text-primary)}
+.bo-nav.on:hover{background:var(--msg-green-100);color:var(--msg-green-700)}
+.msgs{display:flex;flex-direction:column;gap:8px}
+.pm button.pc{border:none;cursor:pointer;padding:0}
+.pm input[type=checkbox]{position:absolute;opacity:0;pointer-events:none}
+.pm label.pc{cursor:pointer;position:relative}
+.pm label.pc:has(input:focus-visible){outline:2px solid var(--msg-green-500);outline-offset:2px}
+.pm label.pc svg{display:none}
+.pm label.pc:has(input:checked){background:var(--msg-green-500);color:#fff;box-shadow:none}
+.pm label.pc:has(input:checked) svg{display:block}
+.rolelist a{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:12px;font-size:14px;font-weight:600;color:var(--text-primary);text-decoration:none}
+.rolelist a:hover{background:var(--surface-sunken);text-decoration:none}
+.rolelist a.on{background:var(--msg-green-100)}
+.rolelist a small{margin-left:auto;font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.empty-row td{text-align:center;color:var(--text-secondary);padding:32px 12px}
+/* The movement's mark (DESIGN.md, 2026-10-20): "MSG" on the primary green. */
+.msg-logo{background:var(--msg-green-500);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em}

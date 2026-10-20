@@ -1,0 +1,37 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: app
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.44.9"
+          cache: true
+      - run: flutter pub get
+      - name: Both locales have every key
+        run: |
+          python3 - <<'PY'
+          import json
+          fr = {k for k in json.load(open("lib/l10n/app_fr.arb")) if not k.startswith("@")}
+          en = {k for k in json.load(open("lib/l10n/app_en.arb")) if not k.startswith("@")}
+          missing = (fr - en) | (en - fr)
+          assert not missing, f"keys missing from one locale: {sorted(missing)}"
+          PY
+      - run: flutter analyze
+      - run: flutter test

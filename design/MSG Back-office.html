@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MSG Gestion — back-office</title>
+<link rel="stylesheet" href="_ds/kawlo-spekooh-design-system-10ffa8e5-270c-41a3-a284-38ad2d71690f/styles.css">
+<link rel="stylesheet" href="msg-theme.css">
+<link rel="stylesheet" href="bo.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="_ds/kawlo-spekooh-design-system-10ffa8e5-270c-41a3-a284-38ad2d71690f/_ds_bundle.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="kit.jsx"></script>
+<script type="text/babel" src="docs.jsx"></script>
+<script type="text/babel" src="bo-kit.jsx"></script>
+<script type="text/babel" src="bo-screens-1.jsx"></script>
+<script type="text/babel" src="bo-screens-2.jsx"></script>
+<script type="text/babel">
+function BoApp() {
+  const [theme, setTheme] = React.useState('light');
+  React.useEffect(() => { document.body.className = 'theme-' + theme; }, [theme]);
+  return <div className={'doc theme-' + theme}>
+    <div className="doc-top"><div className="doc-top-in"><LogoSlot size={36} /><b style={{ fontSize: 15 }}>MSG Gestion · back-office</b>
+      <nav><a href="MSG Gestion.html">← App mobile</a><a href="#bo-comp">Composants</a><a href="#bo-ecrans">Écrans</a><a href="#bo-model">Modèle de données</a></nav>
+      <div className="toggle-theme"><button className={theme === 'light' ? 'on' : ''} onClick={() => setTheme('light')}><I name="sun" size={16} />Clair</button><button className={theme === 'dark' ? 'on' : ''} onClick={() => setTheme('dark')}><I name="moon" size={16} />Sombre</button></div></div></div>
+    <main className="doc-main">
+      <div className="doc-hero"><span className="caps">Web · ordinateur d’abord, adaptatif</span><h1>Back-office et super admin</h1>
+        <p>Les rôles ne sont pas figés dans le code : le super admin les crée et règle leurs permissions. Les écrans s’adaptent à la largeur : sous 820 px, la barre latérale disparaît et les colonnes s’empilent.</p></div>
+      <section className="doc-sec" id="bo-comp"><h2>Composants</h2><p className="lead">S’ajoutent aux composants mobiles (boutons, champs, lignes, puces, dialogues) qui sont réutilisés tels quels.</p><BoComponents /></section>
+      <section className="doc-sec" id="bo-ecrans"><h2>Écrans</h2><p className="lead">Session de Tchakounté Alain, super admin. Données d’exemple.</p>
+        <div className="bo-frames"><BLogin /><BSessions /><BDash /><BUsers /><BUserDetail /><BImport /><BRoles /><BRoles modal /><BUserDetail modal={<AssignDialog />} /><BAssignments /><BSafeguard /><BAudit /><BSettings /></div></section>
+      <section className="doc-sec" id="bo-model"><h2>Modèle de données</h2><p className="lead">Entités reflétées dans l’interface, et où elles apparaissent.</p><DataModel /></section>
+    </main></div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<BoApp />);
+</script>
+</body>
+</html>
