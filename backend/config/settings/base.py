@@ -78,6 +78,9 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.backoffice",
+    "apps.members",
+    "apps.events",
+    "apps.announcements",
 ]
 
 MIDDLEWARE = [
