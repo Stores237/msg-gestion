@@ -17,3 +17,4 @@ app/build/
 *.apk
 *.log
 backend/.staging-admins.txt
+backend/.staging-testers.txt

@@ -353,3 +353,22 @@ def test_bootstrap_admin_creates_super_admin_once():
     call_command("bootstrap_admin", "659802679", "Alpha", "Suisse Japoma", stdout=again)
     assert "already existed" in again.getvalue()
     assert user.assignments.count() == 2
+
+
+def test_add_test_members_random_pins_no_passwords():
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    out = StringIO()
+    call_command("add_test_members", stdout=out)
+    created = User.objects.all()
+    assert created.count() == 10
+    assert not any(u.has_usable_password() for u in created)
+    for u in created:
+        pin = out.getvalue().split(u.phone + "\tpin=")[1][:4]
+        assert u.check_pin(pin)
+    assert User.objects.get(phone="+237674583902").parent_phone == "+237699120044"
+    again = StringIO()
+    call_command("add_test_members", stdout=again)
+    assert again.getvalue().count("skipped") == 10

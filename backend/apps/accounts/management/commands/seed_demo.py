@@ -21,7 +21,10 @@ PEOPLE = [
     ("677630219", "Moukouri", "Danielle", "suspendu", False, "", date(2002, 3, 9), ["membre"]),
     ("691347702", "Essomba", "Kévin", "actif", False, "", date(2011, 3, 3), ["membre"]),
     ("677000001", "Tchakounté", "Alain", "actif", False, "", date(1985, 10, 1), ["super-admin", "membre"]),
-    # Ten more ordinary members, made up for the demo (owner request, 2026-10-20).
+]
+# Ten more ordinary members, made up for the demo (owner request, 2026-10-20).
+# Also loaded on staging by `add_test_members`, with random PINs.
+TESTERS = [
     ("650214387", "Nkoulou", "Paule", "actif", False, "", date(1998, 8, 21), ["membre"]),
     ("672905114", "Bilong", "Steve", "actif", False, "", date(2004, 12, 2), ["membre"]),
     ("695338720", "Manga", "Yves", "actif", False, "", date(1996, 4, 11), ["membre"]),
@@ -33,6 +36,7 @@ PEOPLE = [
     ("690712463", "Mvondo", "Estelle", "conge", False, "", date(2005, 5, 14), ["membre"]),
     ("656281709", "Owona", "Franck", "classe", False, "", date(1983, 2, 26), ["membre"]),
 ]
+PEOPLE = PEOPLE + TESTERS
 # Minors in the list above get a parent contact, as the design requires.
 PARENTS = {
     "674583902": ("Mme Ndjock Hélène", "Mère", "+237699120044"),
