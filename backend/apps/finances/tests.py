@@ -39,15 +39,14 @@ def pending_entry(**kw):
     return Entry.objects.create(created_by=UserFactory(), **fields)
 
 
-def test_treasurer_reads_and_downloads_only():
-    tre_api, _ = client_for("tresorier")
+def test_treasurer_validates_but_never_enters():
+    tre_api, tre = client_for("tresorier")
     e = pending_entry()
     assert entry(tre_api).status_code == 403
-    assert tre_api.post(f"/api/finances/entries/{e.id}/validate/").status_code == 403
     assert tre_api.delete(f"/api/finances/entries/{e.id}/").status_code == 403
     assert tre_api.post("/api/finances/collections/", {"kind": "deces", "title": "x", "amount_per_member": 100}, format="json").status_code == 403
-    assert tre_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 4}, format="json").status_code == 403
-    assert tre_api.get("/api/finances/entries/").status_code == 200
+    v = tre_api.post(f"/api/finances/entries/{e.id}/validate/")
+    assert v.status_code == 200 and v.json()["validated_by_name"] == tre.short_name
     assert tre_api.get("/api/finances/summary/").status_code == 200
     assert tre_api.get("/api/finances/statement/").status_code == 200
 
@@ -60,26 +59,30 @@ def test_treasurer_write_rights_are_locked():
     assert entry(tre_api).status_code == 403
 
 
-def test_auditor_has_every_finance_right_and_own_entries_are_validated():
+def test_auditor_enters_and_treasurer_validates():
+    """Owner, 2026-10-23: the commissaire enters the figures; the trésorier,
+    who holds the money, checks and validates them."""
     cac_api, cac = client_for("commissaire-aux-comptes")
+    tre_api, tre = client_for("tresorier")
     r = entry(cac_api)
-    assert r.status_code == 201 and r.json()["status"] == "validated" and r.json()["validated_by_name"] == cac.short_name
-    assert AuditLog.objects.filter(action="Opération saisie et validée").exists()
-    other = pending_entry()
-    v = cac_api.post(f"/api/finances/entries/{other.id}/validate/")
-    assert v.status_code == 200 and v.json()["validated_by_name"] == cac.short_name
+    assert r.status_code == 201 and r.json()["status"] == "pending"
+    eid = r.json()["id"]
+    assert cac_api.post(f"/api/finances/entries/{eid}/validate/").status_code == 403
+    v = tre_api.post(f"/api/finances/entries/{eid}/validate/")
+    assert v.json()["status"] == "validated" and v.json()["validated_by_name"] == tre.short_name
     assert cac_api.delete(f"/api/finances/entries/{pending_entry().id}/").status_code == 204
-    # A pending line of their own (entered before they held the role) still
-    # can't be validated by them.
-    own = Entry.objects.create(created_by=cac, direction="in", amount=100, category="amende", label="x", date=date(2026, 10, 1))
-    r = cac_api.post(f"/api/finances/entries/{own.id}/validate/")
+    # Nobody validates a line they entered themselves, whatever their roles.
+    own = Entry.objects.create(created_by=tre, direction="in", amount=100, category="amende", label="x", date=date(2026, 10, 1))
+    r = tre_api.post(f"/api/finances/entries/{own.id}/validate/")
     assert (r.status_code, r.json()["code"]) == (400, "own_entry")
     assert AuditLog.objects.filter(action="Refus · validation de sa propre saisie").exists()
 
 
 def test_validated_entry_cannot_be_deleted():
     cac_api, _ = client_for("commissaire-aux-comptes")
+    tre_api, _ = client_for("tresorier")
     eid = entry(cac_api).json()["id"]
+    tre_api.post(f"/api/finances/entries/{eid}/validate/")
     r = cac_api.delete(f"/api/finances/entries/{eid}/")
     assert (r.status_code, r.json()["code"]) == (400, "validated_locked")
 
@@ -96,8 +99,9 @@ def test_offline_retry_does_not_double_count():
 def test_summary_balance_only_counts_validated():
     tre_api, _ = client_for("tresorier")
     cac_api, _ = client_for("commissaire-aux-comptes")
-    entry(cac_api, amount=10000)
-    pending_entry(direction="out", amount=3000, category="depense", label="Cierges")
+    a = entry(cac_api, amount=10000).json()["id"]
+    entry(cac_api, direction="out", amount=3000, category="depense", label="Cierges")
+    tre_api.post(f"/api/finances/entries/{a}/validate/")
     s = tre_api.get("/api/finances/summary/").json()
     assert (s["balance"], s["balance_with_pending"], s["pending"]) == (10000, 7000, 1)
 
@@ -155,16 +159,18 @@ def test_paying_a_fine():
 def test_quarter_report_blocked_by_pending_then_validated():
     tre_api, _ = client_for("tresorier")
     cac_api, _ = client_for("commissaire-aux-comptes")
-    entry(cac_api, amount=142000, category="aide_don", date="2026-06-15")
-    entry(cac_api, amount=118500, category="aide_don", date="2026-08-01")
-    b = pending_entry(direction="out", amount=74000, category="depense", label="Dépenses", date=date(2026, 9, 10))
-    r = cac_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json")
+    old = entry(cac_api, amount=142000, category="aide_don", date="2026-06-15").json()["id"]
+    a = entry(cac_api, amount=118500, category="aide_don", date="2026-08-01").json()["id"]
+    b = entry(cac_api, direction="out", amount=74000, category="depense", label="Dépenses", date="2026-09-10").json()["id"]
+    for eid in (old, a):
+        tre_api.post(f"/api/finances/entries/{eid}/validate/")
+    r = tre_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json")
     assert (r.status_code, r.json()["code"]) == (400, "pending_entries")
-    cac_api.post(f"/api/finances/entries/{b.id}/validate/")
-    rep = cac_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json").json()
+    tre_api.post(f"/api/finances/entries/{b}/validate/")
+    rep = tre_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json").json()
     assert (rep["opening"], rep["in"], rep["out"], rep["closing"]) == (142000, 118500, 74000, 186500)
     assert rep["validated_by"] is not None
-    assert tre_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json").status_code == 403
+    assert cac_api.post("/api/finances/report/validate/", {"year": 2026, "quarter": 3}, format="json").status_code == 403
 
 
 def test_statement_general_and_per_member():
@@ -174,6 +180,8 @@ def test_statement_general_and_per_member():
     cid = cac_api.post("/api/finances/collections/", {"kind": "deces", "title": "Décès · Nkotto", "amount_per_member": 2500}, format="json").json()["id"]
     cac_api.post("/api/finances/fines/", {"member": a.id, "amount": 500, "reason": "Tenue"}, format="json")
     cac_api.post(f"/api/finances/collections/{cid}/payments/", {"payments": [{"member": a.id, "amount": 834}, {"member": b.id, "amount": 2500}]}, format="json")
+    for e in Entry.objects.all():
+        tre_api.post(f"/api/finances/entries/{e.id}/validate/")
     pending_entry(member=a, amount=300, label="Don")  # waiting for validation, not tied to a debt
     body = tre_api.get("/api/finances/statement/").json()
     rows = {r["member"]: r for r in body["rows"]}

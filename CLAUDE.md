@@ -1,8 +1,12 @@
 # MSG Gestion
 
-Administration app for the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de
-Yapoma (Douala): members, cash book, calendar and duty planning, announcements.
-Android first (iOS-compatible), plus a web back-office for the super admin.
+A group management platform: members, cash book, calendar and duty planning, announcements.
+Its first group is the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de Yapoma
+(Douala), and it is meant to serve other groups later, so group-specific facts (name, place,
+amounts, times) live in `core.Settings`, not in code or copy.
+Two surfaces: the Android app (iOS-compatible) for the group's members and officers, and a web
+back-office that is the platform's administration console, for super admins only. A super
+admin account works only in the back-office.
 
 Built on the Spekooh architecture playbook (`app-architecture-playbook` skill). Read its
 "Lessons learned" table before debugging anything that only fails when deployed.
@@ -19,6 +23,8 @@ Built on the Spekooh architecture playbook (`app-architecture-playbook` skill). 
 
 ## Conventions
 
+- **Group-neutral wording.** Copy that names this group's people or habits ("le secrétaire
+  général", "l'assise du samedi") belongs in settings or role names, not in fixed strings.
 - **French first.** UI copy, server error messages and the back-office are in French. Every
   user-visible app string goes in both `app/lib/l10n/app_fr.arb` (template) and `app_en.arb`
   before `flutter gen-l10n`; CI fails on a key missing from either.

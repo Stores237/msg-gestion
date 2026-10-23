@@ -40,7 +40,7 @@ def _deny(request):
 # --- Account security ------------------------------------------------------------
 
 
-@backoffice_view(None)  # one's own account: every back-office user
+@backoffice_view("backoffice.users", "view")
 def security(request):
     """"Sécurité du compte" (design: BSessions): sessions, 2FA, backup codes."""
     me = request.user
@@ -122,6 +122,8 @@ def user_detail(request, pk):
                              request=request, sensitive=True, detail={"motif": reason})
                 messages.success(request, "Statut mis à jour.")
             elif action == "password":
+                if not member.is_super_admin:
+                    raise RuleViolation("Le back-office est réservé aux super admins : affectez d’abord le rôle Super admin.")
                 pw = _random_password()
                 member.set_password(pw)
                 member.save(update_fields=["password"])

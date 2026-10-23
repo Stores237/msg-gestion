@@ -35,9 +35,10 @@
       <dt>PIN</dt><dd>{% if member.pin_locked_until and member.pin_locked_until > now %}Bloqué{% elif member.pin_must_change %}Provisoire{% else %}Personnel{% endif %}</dd>
     </dl></div></section>
     <section class="panel"><div class="panel-h"><h2>Accès au back-office</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:10px">
-      {% if backoffice %}<span class="status ok"><i></i>Mot de passe défini · {{ codes_left }} codes de secours</span>{% else %}<span class="status off"><i></i>Pas d’accès (application seulement)</span>{% endif %}
-      <span style="font-size:13px;color:var(--text-secondary)">L’accès dépend aussi des permissions de ses rôles (Utilisateurs et rôles, Journal).</span>
-      {% if can_edit %}<form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="password">{% if backoffice %}Nouveau mot de passe provisoire{% else %}Donner un accès (mot de passe provisoire){% endif %}</button></form>{% endif %}
+      {% if not member.is_super_admin %}<span class="status off"><i></i>Application seulement</span>
+      <span style="font-size:13px;color:var(--text-secondary)">Le back-office est réservé aux super admins. Pour donner un accès, affectez d’abord le rôle Super admin ; ce compte ne pourra alors plus utiliser l’application.</span>
+      {% else %}{% if backoffice %}<span class="status ok"><i></i>Mot de passe défini · {{ codes_left }} codes de secours</span>{% else %}<span class="status off"><i></i>Pas encore de mot de passe</span>{% endif %}
+      {% if can_edit %}<form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="password">{% if backoffice %}Nouveau mot de passe provisoire{% else %}Donner un accès (mot de passe provisoire){% endif %}</button></form>{% endif %}{% endif %}
     </div></section>
   </div>
 </div>

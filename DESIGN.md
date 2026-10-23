@@ -58,4 +58,7 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Back-office opens to finance roles, showing only "Bilan financier" | Owner: "add it on back office". The menu follows the permissions; the super admin still sees no amounts |
 | 2026-10-23 | Super admin: every right and every figure (finances on the dashboard) | Owner: "should be able to do everything and see everything". Replaces the design's masked amounts |
 | 2026-10-23 | Super admin accounts work only in the back-office, never in the mobile app | Owner rule. Refused after a correct PIN so the refusal doesn't reveal who is super admin |
+| 2026-10-23 | Finances in two hands: commissaire aux comptes enters, trésorier validates (and signs off the quarter) | Owner: the trésorier holds the money, so he confirms the figures match it. Replaces the commissaire-validates rule of the same day |
+| 2026-10-23 | Back-office for super admins only; group officers work in the app | Owner: the platform will serve other groups; the back-office administers the platform, not one group |
+| 2026-10-23 | Group-neutral wording in login help, errors and the back-office | Same reasoning. Group facts come from Paramètres |
 

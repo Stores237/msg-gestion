@@ -162,14 +162,8 @@ def _finances():
     }
 
 
-@backoffice_view(None)
+@backoffice_view("backoffice.users", "view")
 def dashboard(request):
-    if not request.user.can("backoffice.users", "view"):
-        # A finance-only account (commissaire aux comptes, trésorier) lands
-        # on the page it can use.
-        if request.user.can("finances.cashbook", "view"):
-            return redirect("backoffice:finances")
-        return render(request, "backoffice/forbidden.html", status=403)
     today = timezone.localdate()
     active = User.objects.filter(status=User.Status.ACTIVE, is_active=True)
     soon = (

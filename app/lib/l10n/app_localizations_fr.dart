@@ -28,7 +28,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginIntro =>
-      'Connectez-vous avec le numéro de téléphone enregistré au mouvement.';
+      'Connectez-vous avec le numéro de téléphone enregistré dans votre groupe.';
 
   @override
   String get phoneLabel => 'Numéro de téléphone';
@@ -45,7 +45,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noAccountNotice =>
-      'Pas encore de compte ? Le secrétaire général vous inscrit lors de l’assise du samedi.';
+      'Pas encore de compte ? Demandez au responsable de votre groupe de vous inscrire.';
 
   @override
   String get pinTitle => 'Votre code PIN';
@@ -60,7 +60,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get pinForgotHelp =>
-      'Demandez au secrétaire général de réinitialiser votre code lors de l’assise.';
+      'Demandez au responsable de votre groupe de réinitialiser votre code.';
 
   @override
   String get keypadFingerprint => 'Empreinte';
@@ -133,7 +133,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorUnknownMember =>
-      'Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.';
+      'Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire.';
 
   @override
   String errorWrongPin(int n) {
@@ -153,7 +153,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorNoPin =>
-      'Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.';
+      'Aucun code PIN pour ce compte. Demandez au responsable de votre groupe de l’initialiser.';
 
   @override
   String get errorForbidden => 'Votre rôle ne donne pas accès à cette action.';
@@ -712,7 +712,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get smsUnavailable =>
-      'L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.';
+      'L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.';
 
   @override
   String get resetPin => 'Réinitialiser le code PIN';

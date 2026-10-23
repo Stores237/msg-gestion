@@ -222,22 +222,27 @@ def test_future_role_not_active_yet():
 # --- Separation of duties ---------------------------------------------------------------
 
 
-def test_treasurer_only_reads_finances_even_if_db_says_otherwise():
-    user = UserFactory()
-    give_role(user, "tresorier")
-    role = Role.objects.get(slug="tresorier")
-    for act in ("create", "change", "validate", "delete"):
-        RolePermission.objects.get_or_create(role=role, resource="finances.cashbook", action=act)
-    assert user.can("finances.cashbook", "view") and user.can("finances.cashbook", "export")
-    assert not any(user.can("finances.cashbook", a) for a in ("create", "change", "validate", "delete"))
+def test_finances_two_hands_even_if_db_says_otherwise():
+    """The commissaire enters, the trésorier validates — whatever the matrix
+    says (owner, 2026-10-23)."""
+    tre, cac = UserFactory(), UserFactory()
+    give_role(tre, "tresorier")
+    give_role(cac, "commissaire-aux-comptes")
+    for slug, act in (("tresorier", "create"), ("tresorier", "delete"), ("commissaire-aux-comptes", "validate")):
+        RolePermission.objects.get_or_create(role=Role.objects.get(slug=slug), resource="finances.cashbook", action=act)
+    assert {a for a in registry.ACTIONS if tre.can("finances.cashbook", a)} == {"view", "validate", "export"}
+    assert {a for a in registry.ACTIONS if cac.can("finances.cashbook", a)} == {"view", "create", "change", "delete", "export"}
+    assert tre.can("finances.report", "validate") and not cac.can("finances.report", "validate")
 
 
-def test_auditor_holds_every_finance_right():
+def test_only_the_super_admin_holds_backoffice_rights():
+    role = Role.objects.get(slug="president")
+    RolePermission.objects.get_or_create(role=role, resource="backoffice.users", action="view")
     user = UserFactory()
-    give_role(user, "commissaire-aux-comptes")
-    for res, spec in registry.RESOURCES.items():
-        if spec[0] == "finances":
-            assert all(user.can(res, a) for a in spec[2]), res
+    give_role(user, "president")
+    assert not user.can("backoffice.users", "view")
+    with pytest.raises(RuleViolation, match="séparation"):
+        set_role_permissions(role, {("backoffice.audit", "view"): True}, by=UserFactory(), reason="x")
 
 
 def test_super_admin_can_do_everything_even_with_a_locked_role():
@@ -275,7 +280,7 @@ def test_treasurer_cannot_also_be_auditor():
     with pytest.raises(RuleViolation, match="cumulé"):
         assign_role(user, Role.objects.get(slug="commissaire-aux-comptes"), reason="AG", by=admin)
     assert AuditLog.objects.filter(action="Refus · séparation des tâches", refused=True).exists()
-    assert not user.can("finances.cashbook", "validate")
+    assert not user.can("finances.cashbook", "create")
 
 
 def test_assign_role_requires_reason_and_logs():
@@ -350,7 +355,7 @@ def test_set_role_permissions_refuses_locked_and_inapplicable():
     admin = UserFactory()
     role = Role.objects.get(slug="tresorier")
     with pytest.raises(RuleViolation, match="séparation"):
-        set_role_permissions(role, {("finances.cashbook", "validate"): True}, by=admin, reason="x")
+        set_role_permissions(role, {("finances.cashbook", "create"): True}, by=admin, reason="x")
     with pytest.raises(RuleViolation, match="sans objet"):
         set_role_permissions(role, {("announcements.posts", "validate"): True}, by=admin, reason="x")
 

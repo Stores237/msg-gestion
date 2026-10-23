@@ -1,6 +1,6 @@
 """Finances in the back-office: the members' balance statement ("bilan"),
-for whoever's role reads the cash book — the super admin, the commissaire
-aux comptes, the trésorier, the président."""
+for the super admin. The group's officers (commissaire aux comptes,
+trésorier, président) download the same statements from the app."""
 
 import csv
 import io

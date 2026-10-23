@@ -52,24 +52,25 @@ void main() {
     },
   );
 
-  testWidgets('forgot PIN without SMS tells the member to ask the secretary', (
-    tester,
-  ) async {
-    await setUpApp(tester);
-    await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('phone-field')), '677452108');
-    await tester.tap(find.byKey(const Key('phone-continue')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('forgot-pin')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('forgot-submit')));
-    await tester.pumpAndSettle();
-    expect(
-      find.textContaining('Demandez au secrétaire général'),
-      findsOneWidget,
-    );
-  });
+  testWidgets(
+    'forgot PIN without SMS tells the member to ask the group organiser',
+    (tester) async {
+      await setUpApp(tester);
+      await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byKey(const Key('phone-field')), '677452108');
+      await tester.tap(find.byKey(const Key('phone-continue')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('forgot-pin')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('forgot-submit')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Demandez au responsable de votre groupe'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('forgot PIN with SMS: code + new PIN logs the member in', (
     tester,

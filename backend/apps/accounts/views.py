@@ -21,7 +21,7 @@ from .services import check_pin_login, pin_problem
 # the member's chosen language (FR/EN); `detail` is the French fallback.
 # One message for "no such number" and "account disabled" so the lookup
 # can't be used to tell a suspended member from a stranger.
-UNKNOWN_PHONE = "Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi."
+UNKNOWN_PHONE = "Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire."
 
 
 def _login_allowed(user):
@@ -64,7 +64,7 @@ class PinLoginView(APIView):
             return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
         if not user.has_pin:
             return Response(
-                {"detail": "Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.", "code": "no_pin"},
+                {"detail": "Aucun code PIN pour ce compte. Demandez au responsable de votre groupe de l’initialiser.", "code": "no_pin"},
                 status=status.HTTP_409_CONFLICT,
             )
 
@@ -157,7 +157,7 @@ class ForgotPinView(APIView):
             sms.send_code(user.phone)
         except sms.SmsUnavailable:
             # No SMS provider yet (Twilio): say so, the app points to the secretary.
-            return Response({"detail": "SMS indisponible. Demandez au secrétaire général.", "code": "sms_unavailable"}, status=503)
+            return Response({"detail": "SMS indisponible. Demandez au responsable de votre groupe.", "code": "sms_unavailable"}, status=503)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 

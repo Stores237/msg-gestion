@@ -6,12 +6,12 @@
   "motto": "Service · Ordre · Accueil",
   "splashPreparing": "Préparation des données…",
   "welcome": "Bienvenue",
-  "loginIntro": "Connectez-vous avec le numéro de téléphone enregistré au mouvement.",
+  "loginIntro": "Connectez-vous avec le numéro de téléphone enregistré dans votre groupe.",
   "phoneLabel": "Numéro de téléphone",
   "phoneHint": "Format : 6 XX XX XX XX (+237)",
   "phoneInvalid": "Format : 6 XX XX XX XX, ou le numéro international complet.",
   "continueButton": "Continuer",
-  "noAccountNotice": "Pas encore de compte ? Le secrétaire général vous inscrit lors de l’assise du samedi.",
+  "noAccountNotice": "Pas encore de compte ? Demandez au responsable de votre groupe de vous inscrire.",
   "pinTitle": "Votre code PIN",
   "pinGreeting": "Bonjour {firstName}, entrez vos 4 chiffres.",
   "@pinGreeting": {
@@ -22,7 +22,7 @@
     }
   },
   "pinForgot": "Code oublié ?",
-  "pinForgotHelp": "Demandez au secrétaire général de réinitialiser votre code lors de l’assise.",
+  "pinForgotHelp": "Demandez au responsable de votre groupe de réinitialiser votre code.",
   "keypadFingerprint": "Empreinte",
   "keypadDelete": "Effacer",
   "back": "Retour",
@@ -64,7 +64,7 @@
     }
   },
   "noRole": "Aucun rôle actif",
-  "errorUnknownMember": "Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.",
+  "errorUnknownMember": "Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire.",
   "errorWrongPin": "{n, plural, =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}",
   "@errorWrongPin": {
     "placeholders": {
@@ -81,7 +81,7 @@
       }
     }
   },
-  "errorNoPin": "Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.",
+  "errorNoPin": "Aucun code PIN pour ce compte. Demandez au responsable de votre groupe de l’initialiser.",
   "errorForbidden": "Votre rôle ne donne pas accès à cette action.",
   "language": "Langue",
   "languageFrench": "Français",
@@ -381,7 +381,7 @@
   "sendCode": "Envoyer le code",
   "smsCode": "Code reçu par SMS",
   "badCode": "Code incorrect ou expiré.",
-  "smsUnavailable": "L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.",
+  "smsUnavailable": "L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.",
   "resetPin": "Réinitialiser le code PIN",
   "resetPinConfirm": "Un nouveau code provisoire sera créé pour {name}. L’ancien ne fonctionnera plus.",
   "@resetPinConfirm": {

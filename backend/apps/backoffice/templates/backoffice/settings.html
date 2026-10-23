@@ -5,10 +5,10 @@
 <form method="post">{% csrf_token %}
 <div class="bo-cols half">
   <div style="display:flex;flex-direction:column;gap:24px">
-    <section class="panel"><div class="panel-h"><h2>Mouvement</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+    <section class="panel"><div class="panel-h"><h2>Groupe</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
       <div style="display:flex;gap:16px;align-items:center"><div class="msg-logo" style="width:80px;height:80px;border-radius:24px;font-size:24px">MSG</div><div style="font-size:13px;color:var(--text-secondary);line-height:1.5">Logo actuel : le monogramme MSG.<br>Un logo dessiné le remplacera (PNG ou SVG, 512 px).</div></div>
       <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" value="{{ s.name }}"></span></label>
-      <label class="fld"><span class="fld-l">Paroisse</span><span class="fld-box"><input name="parish" value="{{ s.parish }}"></span></label>
+      <label class="fld"><span class="fld-l">Lieu ou rattachement</span><span class="fld-box"><input name="parish" value="{{ s.parish }}"></span></label>
       <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" value="{{ s.motto }}"></span></label>
     </div></section>
     <section class="panel"><div class="panel-h"><h2>Montants</h2></div><div class="panel-b"><div class="list" style="padding:0">

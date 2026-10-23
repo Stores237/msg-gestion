@@ -56,7 +56,8 @@ class Notification(models.Model):
 
 
 class Settings(models.Model):
-    """The movement's settings (back-office → Paramètres). One row."""
+    """The group's settings (back-office → Paramètres): its name, place and
+    motto, amounts and times. One row. The defaults are the first group's."""
 
     name = models.CharField(max_length=120, default="Mouvement Garde Suisse")
     parish = models.CharField(max_length=160, default="Notre-Dame de Lourdes de Yapoma, Douala")

@@ -21,8 +21,11 @@
 ## Back-office login
 
 - Phone + password (Django's hasher, minimum 10 characters), then a 6-digit SMS code via Twilio
-  Verify. Only people whose roles grant `backoffice.users:view` or `backoffice.audit:view` can
-  pass the first step; everyone else gets the same "wrong number or password" message.
+  Verify. Only super admins can pass the first step (`access.can_enter`); everyone else, a group
+  officer included, gets the same "wrong number or password" message. A session whose holder
+  stops being super admin ends on its next request.
+- Super admin accounts are refused in the mobile app (`backoffice_only`, after a correct PIN so a
+  stranger learns nothing; existing app tokens are rejected by `AppJWTAuthentication`).
 - "Trust this computer for 30 days" sets a signed, HTTP-only cookie tied to the password hash:
   changing the password revokes every trusted device.
 - Without Twilio configured, codes are only logged, and only when `SMS_DEV_FALLBACK` is on
@@ -33,9 +36,12 @@
 
 Defined in `apps/accounts/registry.py`:
 
-- The trésorier can never *validate* finances; the commissaire aux comptes validates.
+- Finances take two hands: the commissaire aux comptes enters (never validates); the trésorier,
+  who holds the money, validates (never enters, changes or deletes). Nobody validates a line they
+  entered.
 - One person can't be both trésorier and commissaire aux comptes.
-- The super admin role can never see finances, whatever other role the same person holds.
+- Back-office permissions belong to the super admin role only.
+- The super admin holds every permission, finances included, but only in the back-office.
 - There must always be at least 2 active super admins; removing one below that is refused.
 
 Each refusal is written to the audit log.

@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Connectez-vous avec le numéro de téléphone enregistré au mouvement.'**
+  /// **'Connectez-vous avec le numéro de téléphone enregistré dans votre groupe.'**
   String get loginIntro;
 
   /// No description provided for @phoneLabel.
@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @noAccountNotice.
   ///
   /// In fr, this message translates to:
-  /// **'Pas encore de compte ? Le secrétaire général vous inscrit lors de l’assise du samedi.'**
+  /// **'Pas encore de compte ? Demandez au responsable de votre groupe de vous inscrire.'**
   String get noAccountNotice;
 
   /// No description provided for @pinTitle.
@@ -191,7 +191,7 @@ abstract class AppLocalizations {
   /// No description provided for @pinForgotHelp.
   ///
   /// In fr, this message translates to:
-  /// **'Demandez au secrétaire général de réinitialiser votre code lors de l’assise.'**
+  /// **'Demandez au responsable de votre groupe de réinitialiser votre code.'**
   String get pinForgotHelp;
 
   /// No description provided for @keypadFingerprint.
@@ -317,7 +317,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorUnknownMember.
   ///
   /// In fr, this message translates to:
-  /// **'Ce numéro n’est pas enregistré. Le secrétaire général vous inscrit lors de l’assise du samedi.'**
+  /// **'Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire.'**
   String get errorUnknownMember;
 
   /// No description provided for @errorWrongPin.
@@ -335,7 +335,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorNoPin.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun code PIN pour ce compte. Demandez au secrétaire général de l’initialiser.'**
+  /// **'Aucun code PIN pour ce compte. Demandez au responsable de votre groupe de l’initialiser.'**
   String get errorNoPin;
 
   /// No description provided for @errorForbidden.
@@ -1343,7 +1343,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsUnavailable.
   ///
   /// In fr, this message translates to:
-  /// **'L’envoi de SMS n’est pas encore disponible. Demandez au secrétaire général de réinitialiser votre code.'**
+  /// **'L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.'**
   String get smsUnavailable;
 
   /// No description provided for @resetPin.

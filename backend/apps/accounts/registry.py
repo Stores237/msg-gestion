@@ -42,16 +42,23 @@ RESOURCES = {
 }
 
 # Fixed rules. A locked cell can never be granted, whatever the database says.
-# - The commissaire aux comptes holds every finance right; the trésorier only
-#   reads and downloads (owner, 2026-10-23 — replaces the design's "le
-#   trésorier saisit, le commissaire valide").
+# - Finances, two hands (owner, 2026-10-23): the commissaire aux comptes
+#   enters the figures; the trésorier, who collects and keeps the money,
+#   validates them against what he actually holds. Neither can do the
+#   other's part.
 # - The super admin can do and see everything, finances included (owner,
-#   2026-10-23 — replaces the design's "sans voir les montants"); see
-#   all_cells() and User.permission_set().
-FINANCE_WRITE = {CREATE, CHANGE, VALIDATE, DELETE}
+#   2026-10-23); see all_cells() and User.permission_set().
+FINANCE_CELLS = {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2]}
 LOCKED = {
-    "tresorier": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2] if act in FINANCE_WRITE},
+    "tresorier": {(res, act) for res, act in FINANCE_CELLS if act in {CREATE, CHANGE, DELETE}},
+    "commissaire-aux-comptes": {(res, act) for res, act in FINANCE_CELLS if act == VALIDATE},
 }
+
+# The back-office is the platform's administration console, used only by the
+# super admin (owner, 2026-10-23): the app serves any group, and whoever runs
+# the platform is not one of a group's officers. No other role can hold a
+# back-office permission.
+BACKOFFICE_CELLS = {(res, act) for res, spec in RESOURCES.items() if spec[0] == "backoffice" for act in spec[2]}
 
 # The service lineup (who serves where, who is chef de groupe that day) is
 # made by the formateur or the formateur adjoint, and on exceptional occasions
@@ -84,6 +91,8 @@ SUPER_ADMIN_SLUG = "super-admin"
 
 def is_locked(role_slug, resource, action):
     if (resource, action) in LINEUP_ACTIONS and role_slug not in LINEUP_ROLES:
+        return True
+    if (resource, action) in BACKOFFICE_CELLS and role_slug != SUPER_ADMIN_SLUG:
         return True
     return (resource, action) in LOCKED.get(role_slug, set())
 

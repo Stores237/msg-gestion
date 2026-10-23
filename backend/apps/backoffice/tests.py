@@ -1,5 +1,6 @@
 import pytest
 from django.test import Client
+from django.utils import timezone
 
 from apps.accounts.factories import UserFactory, give_role
 from apps.accounts.models import Role
@@ -148,18 +149,23 @@ def test_roles_matrix_edit_requires_reason_and_logs(logged_in):
 def test_locked_cell_cannot_be_posted_on(logged_in):
     """A forged POST ticking a locked cell is ignored, not applied."""
     role = Role.objects.get(slug="tresorier")
-    wanted = [f"{r}:{a}" for r, a in role.permissions.values_list("resource", "action")] + ["finances.cashbook:validate"]
+    wanted = [f"{r}:{a}" for r, a in role.permissions.values_list("resource", "action")] + ["finances.cashbook:create"]
     logged_in.post("/bo/roles/tresorier/", {"perm": wanted, "reason": "test"})
-    assert not role.permissions.filter(resource="finances.cashbook", action="validate").exists()
+    assert not role.permissions.filter(resource="finances.cashbook", action="create").exists()
 
 
-def test_view_only_admin_cannot_edit_roles(client, codes):
-    """A role with backoffice.users:view but not :change sees the matrix read-only."""
-    reader = Role.objects.create(slug="lecteur", name="Lecteur")
-    reader.permissions.create(resource="backoffice.users", action="view")
-    user = UserFactory(phone="+237677000002", password=PASSWORD)
-    give_role(user, "lecteur")
-    _password_step(client, phone="677000002")
-    client.post("/bo/connexion/code/", {"code": codes["code"]})
-    assert client.get("/bo/roles/tresorier/").status_code == 200
-    assert client.post("/bo/roles/tresorier/", {"perm": [], "reason": "x"}).status_code == 403
+def test_only_a_super_admin_gets_into_the_backoffice(client, codes):
+    """Owner, 2026-10-23: the back-office administers the platform. A group
+    officer is refused even with a valid password, whatever their roles."""
+    for phone, slug in (("677000002", "president"), ("677000003", "tresorier"), ("677000004", "commissaire-aux-comptes")):
+        user = UserFactory(phone=f"+237{phone}", password=PASSWORD)
+        give_role(user, slug)
+        assert _password_step(client, phone=phone).status_code == 401
+
+
+def test_session_ends_when_super_admin_role_is_revoked(logged_in, admin_user):
+    from apps.accounts.models import RoleAssignment
+
+    RoleAssignment.objects.filter(user=admin_user, role__slug="super-admin").update(revoked_at=timezone.now())
+    r = logged_in.get("/bo/utilisateurs/")
+    assert r.status_code == 302 and r["Location"].endswith("/bo/connexion/")

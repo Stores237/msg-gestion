@@ -15,6 +15,13 @@ ROLE_BADGE_CLASS = {"bureau": "bureau", "systeme": "sys", "temporaire": "temp", 
 STATUS_DOT = {"actif": "ok", "conge": "warn", "classe": "off", "suspendu": "off", "archive": "off"}
 
 
+@register.simple_tag
+def group_settings():
+    from apps.core.models import Settings
+
+    return Settings.get()
+
+
 @register.filter
 def fcfa(n):
     return f"{n or 0:,}".replace(",", "\u00a0") + "\u00a0FCFA"

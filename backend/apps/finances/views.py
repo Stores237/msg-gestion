@@ -70,7 +70,7 @@ class EntryDetailView(APIView):
 
 
 class EntryValidateView(APIView):
-    """The commissaire aux comptes validates a line (design: "Valider cette
+    """The trésorier validates a line the commissaire entered (design: "Valider cette
     opération ?"). Name and time are recorded; never one's own entry."""
 
     permission_classes = [require("finances.cashbook", "validate")]

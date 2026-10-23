@@ -3,9 +3,8 @@ Back-office session rules.
 
 A back-office session is a Django session that has passed *both* factors:
 password, then an SMS code (or a trusted-device cookie less than 30 days
-old). Each page also needs its own permission from the role matrix — a
-member with no back-office permission can't get in even with the right
-password.
+old). Only a super admin can open one (can_enter): the back-office
+administers the platform, it isn't a tool for a group's officers.
 """
 
 from functools import wraps
@@ -24,14 +23,11 @@ SESSION_SMS_OK = "bo_sms_ok"
 TRUST_COOKIE = "bo_trust"
 TRUST_SALT = "backoffice.trusted-device"
 
-# Reading the cash book opens the back-office too: the commissaire aux
-# comptes and the trésorier download the members' balance there.
-BACKOFFICE_PERMS = [("backoffice.users", "view"), ("backoffice.audit", "view"), ("finances.cashbook", "view")]
-
-
 def can_enter(user):
-    perms = user.permission_set()
-    return any(p in perms for p in BACKOFFICE_PERMS)
+    """The back-office is the platform's administration console: the super
+    admin alone gets in (owner, 2026-10-23). A group's officers — président,
+    trésorier, secrétaire… — work in the app."""
+    return user.is_active and user.is_super_admin
 
 
 def trust_token(user):
@@ -80,6 +76,13 @@ def backoffice_view(resource="backoffice.users", action="view"):
                 logout(request)
                 return redirect("backoffice:login")
             live.update(last_seen=timezone.now())
+            if not can_enter(user):
+                # No longer a super admin: the session ends here.
+                from django.contrib.auth import logout
+
+                live.delete()
+                logout(request)
+                return redirect("backoffice:login")
             if resource and not user.can(resource, action):
                 return render(request, "backoffice/forbidden.html", status=403)
             return view(request, *args, **kwargs)

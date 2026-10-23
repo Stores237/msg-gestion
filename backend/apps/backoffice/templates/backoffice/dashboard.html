@@ -35,7 +35,7 @@
         <dt>Reste à payer</dt><dd class="tnum">{% if fin.remaining %}<b style="color:var(--red-500)">{{ fin.remaining|fcfa }}</b>{% else %}0 FCFA{% endif %}</dd>
         <dt>Opérations à valider</dt><dd class="tnum">{% if fin.pending %}<span class="status warn"><i></i>{{ fin.pending }}</span>{% else %}0{% endif %}</dd>
         <dt>Collectes ouvertes</dt><dd class="tnum">{{ fin.open_collections }}</dd></dl>
-      {% else %}<span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600">{% icon 'eye-off' 14 %}Montant masqué</span><span style="font-size:13px;color:var(--text-secondary);line-height:1.45">Visible par le super admin, le commissaire aux comptes, le trésorier et le président.</span>{% endif %}</div></section>
+      {% else %}<span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600">{% icon 'eye-off' 14 %}Montant masqué</span><span style="font-size:13px;color:var(--text-secondary);line-height:1.45">Visible par le super admin.</span>{% endif %}</div></section>
   </div>
 </div>
 {% endblock %}

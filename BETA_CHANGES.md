@@ -20,6 +20,7 @@ whether it touches real data.
 | 11 | Who makes the lineup; chef de groupe per service; roles of the day; back-office on phones | Roles and permissions changed; one column moved |
 | 12 | Finance rights (commissaire: all; trésorier: read); members' balance statement in the app and back-office | Permissions changed |
 | 13 | Super admin: every right and every figure, in the back-office only | Permissions changed |
+| 14 | Finances in two hands (commissaire enters, trésorier validates); back-office for super admins only; group-neutral wording | Permissions changed |
 
 ## 1. Backend skeleton
 
@@ -291,3 +292,28 @@ keeps view + export). Runs on deploy. A trésorier or commissaire needs a back-o
 **Data.** `accounts.0008_super_admin_everything`. Runs on deploy.
 
 **Verify.** `pytest` (190) and `flutter test` (57).
+
+## 14. Two hands on the money; back-office for super admins only; group-neutral wording
+
+Owner decisions, 2026-10-23. They replace part of §12.
+
+- **The commissaire aux comptes enters, the trésorier validates.** The trésorier collects and
+  keeps the money, so he checks that the figures entered match what he holds before validating
+  them. `registry.LOCKED`: the commissaire can never validate; the trésorier can never create,
+  change or delete. The trésorier also validates the quarterly report. Nobody validates a line
+  they entered. Every line now starts "à valider" (no more validation on entry).
+- **Only super admins get into the back-office.** It is the platform's administration console;
+  the group's officers work in the app. `access.can_enter` checks the super admin role; back-
+  office permissions are locked for every other role; a session ends as soon as its holder
+  stops being super admin. A back-office password can only be given to a super admin. The
+  commissaire and the trésorier download the balance statements from the app.
+- **Group-neutral wording**: login help and errors no longer name "le secrétaire général" or
+  "l'assise du samedi" ("Demandez au responsable de votre groupe…"); the back-office presents
+  itself as the platform's console and shows the group's name from Paramètres ("Groupe",
+  "Lieu ou rattachement").
+
+**Data.** `accounts.0009_two_hands_backoffice_super_admin_only` (commissaire: view, create,
+change, delete, export; trésorier: view, validate, export; back-office permissions removed from
+every role but super admin). Runs on deploy.
+
+**Verify.** `pytest` (189) and `flutter test` (57).

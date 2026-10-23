@@ -35,17 +35,9 @@ def record_entry(*, by, request=None, **fields):
         existing = Entry.objects.filter(client_uuid=uuid).first()
         if existing:
             return existing, False
-    # The commissaire aux comptes holds every finance right (owner,
-    # 2026-10-23): what they enter is validated at once, under their name.
-    # Anyone else's line waits for the commissaire.
-    if by.can("finances.cashbook", "validate"):
-        fields.update(status=Entry.Status.VALIDATED, validated_by=by, validated_at=timezone.now())
     entry = Entry.objects.create(created_by=by, **fields)
-    validated = entry.status == Entry.Status.VALIDATED
-    audit.record("Opération saisie et validée" if validated else "Opération saisie", actor=by, obj=entry, request=request,
+    audit.record("Opération saisie", actor=by, obj=entry, request=request,
                  detail={"sens": entry.direction, "montant": entry.amount, "categorie": entry.category})
-    if validated and entry.member_id and entry.direction == Entry.Direction.IN:
-        notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} FCFA", {"type": "dues"})
     return entry, True
 
 

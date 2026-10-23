@@ -28,7 +28,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginIntro =>
-      'Sign in with the phone number registered with the movement.';
+      'Sign in with the phone number registered with your group.';
 
   @override
   String get phoneLabel => 'Phone number';
@@ -45,7 +45,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAccountNotice =>
-      'No account yet? The general secretary registers you at the Saturday meeting.';
+      'No account yet? Ask your group’s organiser to register you.';
 
   @override
   String get pinTitle => 'Your PIN';
@@ -59,8 +59,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinForgot => 'Forgot your PIN?';
 
   @override
-  String get pinForgotHelp =>
-      'Ask the general secretary to reset your PIN at the meeting.';
+  String get pinForgotHelp => 'Ask your group’s organiser to reset your PIN.';
 
   @override
   String get keypadFingerprint => 'Fingerprint';
@@ -132,7 +131,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUnknownMember =>
-      'This number isn’t registered. The general secretary registers you at the Saturday meeting.';
+      'This number isn’t registered. Ask your group’s organiser to register you.';
 
   @override
   String errorWrongPin(int n) {
@@ -152,7 +151,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorNoPin =>
-      'This account has no PIN yet. Ask the general secretary to set one.';
+      'This account has no PIN yet. Ask your group’s organiser to set one.';
 
   @override
   String get errorForbidden => 'Your role doesn’t allow this action.';
@@ -709,7 +708,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get smsUnavailable =>
-      'Text messages aren’t available yet. Ask the general secretary to reset your PIN.';
+      'Text messages aren’t available yet. Ask your group’s organiser to reset your PIN.';
 
   @override
   String get resetPin => 'Reset PIN';
