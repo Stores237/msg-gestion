@@ -7,6 +7,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.core.groups import current_group_id, default_group_id, scoped
+
 from . import registry
 from .phone import normalize_phone
 
@@ -19,6 +21,15 @@ class UserManager(BaseUserManager):
         user.set_password(password)  # None -> unusable: no back-office login
         user.save(using=self._db)
         return user
+
+    def members(self):
+        """People of the current group (everyone when no group is set: jobs
+        and the platform's own views). Accounts are platform-wide; a
+        Membership puts one in a group."""
+        gid = current_group_id()
+        if gid is None:
+            return self.all()
+        return self.filter(memberships__group_id=gid, memberships__is_active=True)
 
     def create_superuser(self, phone, password, **extra):
         extra.setdefault("is_staff", True)
@@ -154,7 +165,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_super_admin(self):
-        return registry.SUPER_ADMIN_SLUG in self.role_slugs()
+        # Platform role: looked up across groups, whatever group is current.
+        return RoleAssignment.all_groups.active().filter(
+            user=self, role__slug=registry.SUPER_ADMIN_SLUG, role__group__isnull=True
+        ).exists()
+
+    def groups_joined(self):
+        from apps.core.models import Group
+
+        return Group.objects.filter(memberships__user=self, memberships__is_active=True, is_active=True).order_by("memberships__created_at")
 
     def tabs(self):
         perms = self.permission_set()
@@ -168,7 +187,10 @@ class Role(models.Model):
         TEMPORARY = "temporaire", "Temporaire"
         STANDARD = "standard", "Standard"
 
-    slug = models.SlugField(unique=True)
+    # Each group has its own roles, started from the default set; platform
+    # roles (super admin) belong to no group.
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, null=True, blank=True, default=default_group_id, related_name="roles")
+    slug = models.SlugField()
     name = models.CharField(max_length=80)
     kind = models.CharField(max_length=12, choices=Kind.choices, default=Kind.STANDARD)
     mandate_months = models.PositiveSmallIntegerField(
@@ -177,9 +199,13 @@ class Role(models.Model):
     is_archived = models.BooleanField(default=False)
     sort_order = models.PositiveSmallIntegerField(default=100)
 
+    objects = scoped(with_platform=True)
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["sort_order", "name"]
         verbose_name = "rôle"
+        constraints = [models.UniqueConstraint(fields=["group", "slug"], name="role_slug_per_group")]
 
     def __str__(self):
         return self.name
@@ -220,7 +246,8 @@ class RoleAssignment(models.Model):
     revoked_at = models.DateTimeField(null=True, blank=True)
     revoked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
 
-    objects = AssignmentQuerySet.as_manager()
+    objects = scoped("role__group", with_platform=True, queryset=AssignmentQuerySet)
+    all_groups = AssignmentQuerySet.as_manager()
 
     class Meta:
         ordering = ["-starts_on"]
@@ -259,6 +286,9 @@ class RoleRequest(models.Model):
     status = models.CharField(max_length=9, choices=Status.choices, default=Status.PENDING)
     decided_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = scoped("role__group")
+    all_groups = models.Manager()
 
     class Meta:
         ordering = ["-created_at"]

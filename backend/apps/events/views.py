@@ -92,7 +92,7 @@ class AttendanceView(APIView):
 
     def _sheet(self, event):
         marks = {a.member_id: a for a in event.attendance.all()}
-        members = User.objects.filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
+        members = User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
         rows = [
             {
                 "member": m.pk,
@@ -115,7 +115,7 @@ class AttendanceView(APIView):
         event = get_object_or_404(Event, pk=pk)
         s = AttendanceSheetSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        known = set(User.objects.filter(pk__in=[m["member"] for m in s.validated_data["marks"]]).values_list("pk", flat=True))
+        known = set(User.objects.members().filter(pk__in=[m["member"] for m in s.validated_data["marks"]]).values_list("pk", flat=True))
         with transaction.atomic():
             for mark in s.validated_data["marks"]:
                 if mark["member"] not in known:

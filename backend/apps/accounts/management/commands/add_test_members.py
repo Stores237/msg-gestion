@@ -7,6 +7,7 @@ from django.db import transaction
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.phone import normalize_phone
 from apps.accounts.services import temporary_pin
+from apps.core.models import Membership
 
 from .seed_demo import PARENTS, TESTERS
 
@@ -40,4 +41,6 @@ class Command(BaseCommand):
                     RoleAssignment.objects.create(
                         user=user, role=roles[slug], starts_on=date.today(), reason="Membre de test (staging)"
                     )
+                    if roles[slug].group_id:
+                        Membership.join(user, roles[slug].group_id)
                 self.stdout.write(f"{user.full_name}\t{user.phone}\tpin={pin}\t{', '.join(roles[s].name for s in slugs)}")

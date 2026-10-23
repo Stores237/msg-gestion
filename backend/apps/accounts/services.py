@@ -127,6 +127,11 @@ def assign_role(user, role, *, reason, by, starts_on=None, ends_on=None, request
     assignment = RoleAssignment.objects.create(
         user=user, role=role, starts_on=starts_on, ends_on=ends_on, reason=reason.strip(), assigned_by=by
     )
+    if role.group_id:
+        # A role in a group makes you one of its members.
+        from apps.core.models import Membership
+
+        Membership.join(user, role.group_id)
     audit.record(
         "Rôle affecté",
         actor=by,

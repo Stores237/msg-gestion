@@ -17,11 +17,27 @@ from django.utils import timezone
 
 from apps.core.audit import client_ip
 
+SESSION_GROUP = "bo_group"
 SESSION_OTP_OK = "bo_otp_ok"
 SESSION_PENDING = "bo_pending_user"
 SESSION_SMS_OK = "bo_sms_ok"
 TRUST_COOKIE = "bo_trust"
 TRUST_SALT = "backoffice.trusted-device"
+
+def _enter_group(request):
+    """The group the super admin is working on (chosen in the menu, kept in
+    the session; the first group otherwise). Every page below works inside
+    it — see apps.core.groups."""
+    from apps.core.groups import set_current_group
+    from apps.core.models import Group
+
+    groups = Group.objects.filter(is_active=True)
+    group = groups.filter(pk=request.session.get(SESSION_GROUP)).first() or groups.first()
+    if group is not None:
+        request.session[SESSION_GROUP] = group.pk
+        set_current_group(group.pk)
+    request.group = group
+
 
 def can_enter(user):
     """The back-office is the platform's administration console: the super
@@ -83,6 +99,7 @@ def backoffice_view(resource="backoffice.users", action="view"):
                 live.delete()
                 logout(request)
                 return redirect("backoffice:login")
+            _enter_group(request)
             if resource and not user.can(resource, action):
                 return render(request, "backoffice/forbidden.html", status=403)
             return view(request, *args, **kwargs)

@@ -25,6 +25,17 @@ class UserFactory(factory.django.DjangoModelFactory):
             obj.save()
 
     @factory.post_generation
+    def membership(obj, create, extracted, **kwargs):
+        """In the (only) group unless told otherwise: membership=False for
+        an account in no group, or a Group."""
+        if create and extracted is not False:
+            from apps.core.groups import default_group_id
+            from apps.core.models import Membership
+
+            gid = extracted.pk if extracted not in (None, True) else default_group_id()
+            Membership.all_groups.get_or_create(user=obj, group_id=gid)
+
+    @factory.post_generation
     def password(obj, create, extracted, **kwargs):
         if extracted:
             obj.set_password(extracted)

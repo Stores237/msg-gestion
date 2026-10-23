@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q, Sum
 
+from apps.core.groups import default_group_id, scoped
+
 
 class Collection(models.Model):
     """A solidarity collection (décès, maladie, médaille): every member owes
@@ -22,6 +24,10 @@ class Collection(models.Model):
     closed_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
 
     class Meta:
         ordering = ["-opened_on", "-id"]
@@ -61,6 +67,10 @@ class Due(models.Model):
     cancelled = models.BooleanField(default=False)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
 
     class Meta:
         ordering = ["-created_at"]
@@ -107,6 +117,10 @@ class Entry(models.Model):
     validated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+")
     validated_at = models.DateTimeField(null=True, blank=True)
 
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["-date", "-created_at"]
         constraints = [models.CheckConstraint(condition=Q(amount__gt=0), name="entry_amount_positive")]
@@ -125,5 +139,9 @@ class QuarterReport(models.Model):
     validated_at = models.DateTimeField(auto_now_add=True)
     closing_balance = models.IntegerField()
 
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
+
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["year", "quarter"], name="one_report_per_quarter")]
+        constraints = [models.UniqueConstraint(fields=["group", "year", "quarter"], name="one_report_per_quarter")]

@@ -18,8 +18,15 @@ class AttachmentSerializer(serializers.ModelSerializer):
         return request.build_absolute_uri(url) if request and url.startswith("/") else url
 
 
+class EventField(serializers.PrimaryKeyRelatedField):
+    """An event of the current group (looked up per request, not at import)."""
+
+    def get_queryset(self):
+        return Event.objects.all()
+
+
 class AnnouncementSerializer(serializers.ModelSerializer):
-    event = serializers.PrimaryKeyRelatedField(queryset=Event.objects.all(), required=False, allow_null=True)
+    event = EventField(required=False, allow_null=True)
     event_title = serializers.CharField(source="event.title", read_only=True, default=None)
     event_starts_at = serializers.DateTimeField(source="event.starts_at", read_only=True, default=None)
     author_name = serializers.SerializerMethodField()

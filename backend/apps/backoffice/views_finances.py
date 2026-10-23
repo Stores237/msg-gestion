@@ -21,7 +21,7 @@ from .access import backoffice_view
 
 def _members(request):
     q = request.GET.get("q", "").strip()
-    qs = User.objects.exclude(status=User.Status.ARCHIVED)
+    qs = User.objects.members().exclude(status=User.Status.ARCHIVED)
     if q:
         qs = qs.filter(Q(last_name__icontains=q) | Q(first_name__icontains=q) | Q(phone__icontains=q.replace(" ", "")))
     return q, qs
@@ -44,7 +44,7 @@ def statement(request):
 
 @backoffice_view("finances.cashbook", "view")
 def member_statement(request, pk):
-    member = get_object_or_404(User, pk=pk)
+    member = get_object_or_404(User.objects.members(), pk=pk)
     return render(request, "backoffice/finance_member.html", {
         "nav": "finances", "member": member, "st": services.member_statement(member),
         "can_export": request.user.can("finances.cashbook", "export"),
@@ -81,7 +81,7 @@ def statement_csv(request):
 
 @backoffice_view("finances.cashbook", "export")
 def member_statement_pdf_view(request, pk):
-    member = get_object_or_404(User, pk=pk)
+    member = get_object_or_404(User.objects.members(), pk=pk)
     audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
     slug = f"{member.last_name}-{member.first_name}".lower().replace(" ", "-")
     return _file(member_statement_pdf(services.member_statement(member)), f"bilan-{slug}-{timezone.localdate():%Y-%m-%d}.pdf", "application/pdf")

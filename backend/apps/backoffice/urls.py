@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, views_admin, views_finances
+from . import views, views_admin, views_finances, views_groups
 
 app_name = "backoffice"
 
@@ -10,6 +10,8 @@ urlpatterns = [
     path("connexion/code/", views.otp_view, name="otp"),
     path("deconnexion/", views.logout_view, name="logout"),
     path("securite/", views_admin.security, name="security"),
+    path("groupes/", views_groups.groups, name="groups"),
+    path("groupes/choisir/", views_groups.group_switch, name="group_switch"),
     path("utilisateurs/", views.users, name="users"),
     path("utilisateurs/nouveau/", views_admin.user_new, name="user_new"),
     path("utilisateurs/import/", views_admin.users_import, name="users_import"),

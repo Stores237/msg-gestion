@@ -63,7 +63,7 @@ def open_collection(*, by, kind, title, amount_per_member, installments=3, opene
     with transaction.atomic():
         c = Collection.objects.create(kind=kind, title=title, amount_per_member=amount_per_member, installments=installments,
                                       opened_on=opened_on or timezone.localdate(), created_by=by)
-        members = User.objects.filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
+        members = User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
         Due.objects.bulk_create([
             Due(member=m, kind=Due.Kind.SOLIDARITY, label=title, amount=amount_per_member, collection=c, created_by=by) for m in members
         ])
@@ -151,7 +151,7 @@ def statement_rows(members=None):
     what they paid (validated, and still waiting for validation) and what is
     left to pay. Members with nothing at all are listed too, at zero."""
     if members is None:
-        members = User.objects.exclude(status=User.Status.ARCHIVED)
+        members = User.objects.members().exclude(status=User.Status.ARCHIVED)
     members = list(members.order_by("last_name", "first_name"))
     ids = [m.pk for m in members]
     dues = Due.objects.filter(member_id__in=ids, cancelled=False).annotate(p=Sum("entries__amount"))

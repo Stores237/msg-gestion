@@ -1,0 +1,24 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Groupes{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme MSG · {{ rows|length }} groupe{{ rows|length|pluralize }}</div>{% endblock %}
+{% block heading %}Groupes{% endblock %}
+{% block acts %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-group').showModal()">{% icon 'plus' %}Nouveau groupe</button>{% endblock %}
+{% block body %}
+<section class="panel">
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupe</th><th class="amt">Membres</th><th>Statut</th><th></th></tr></thead><tbody>
+    {% for g in rows %}<tr><td><b>{{ g.name }}</b>{% if g.pk == request.group.pk %} <span class="rb sys"><i></i>Groupe en cours</span>{% endif %}<br><small class="muted">{{ g.settings.parish|default:"" }}</small></td>
+      <td class="tnum amt">{{ g.n }}</td><td>{% if g.is_active %}<span class="status ok"><i></i>Actif</span>{% else %}<span class="status off"><i></i>Inactif</span>{% endif %}</td>
+      <td class="amt">{% if g.pk != request.group.pk and g.is_active %}<form method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">Travailler sur ce groupe</button></form>{% endif %}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="4">Aucun groupe.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="tbl-f"><span>Un nouveau groupe démarre avec les rôles et permissions par défaut ; ajustez-les ensuite dans « Rôles et permissions ». Le nom, le lieu et le message de bienvenue se modifient dans « Paramètres ».</span></div>
+</section>
+<dialog id="dlg-group" class="dialog" style="border:none;padding:24px;max-width:560px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}
+  <h3>Nouveau groupe</h3>
+  <label class="fld"><span class="fld-l">Nom du groupe<em> *</em></span><span class="fld-box"><input name="name" required maxlength="120" placeholder="Ex. Chorale Sainte-Cécile"></span></label>
+  <label class="fld"><span class="fld-l">Lieu ou rattachement</span><span class="fld-box"><input name="place" maxlength="160"></span></label>
+  <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" maxlength="120"></span></label>
+  <label class="fld"><span class="fld-l">Message de bienvenue</span><span class="fld-box" style="align-items:flex-start;padding-top:10px;padding-bottom:10px"><textarea name="welcome_message" rows="4" maxlength="600" style="width:100%;border:none;background:transparent;font:inherit;color:inherit;resize:vertical" placeholder="Affiché aux membres à l’ouverture de l’application."></textarea></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Créer le groupe</button></div>
+</form></dialog>
+{% endblock %}

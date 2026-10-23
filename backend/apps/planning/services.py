@@ -45,7 +45,7 @@ def is_exceptional(user):
 
 def lineup_makers():
     ids = RoleAssignment.objects.active().filter(role__slug__in=REGULAR_LINEUP_ROLES).values("user")
-    return list(User.objects.filter(pk__in=ids, is_active=True))
+    return list(User.objects.members().filter(pk__in=ids, is_active=True))
 
 
 def note_exceptional(by, what, service=None, request=None, **detail):
@@ -58,7 +58,7 @@ def note_exceptional(by, what, service=None, request=None, **detail):
 
 
 def _available_members():
-    return User.objects.filter(status=User.Status.ACTIVE, is_active=True)
+    return User.objects.members().filter(status=User.Status.ACTIVE, is_active=True)
 
 
 def service_counts(month_of):
@@ -93,7 +93,7 @@ def candidates(service):
     counts = service_counts(timezone.localtime(service.event.starts_at).date())
     taken = set(service.assignments.values_list("member_id", flat=True))
     out = []
-    for m in User.objects.filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True):
+    for m in User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True):
         if m.pk in taken:
             continue
         flag = None

@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.groups import default_group_id, scoped
+
 # Posts in the order they open as the service grows (design: "Taille du
 # service → postes"). Every post has a Pariso side and a Yapoma side.
 POSTS = ["premiere_centrale", "deuxieme_centrale", "controle", "petites_portes", "mesanie"]
@@ -24,11 +26,16 @@ class ServiceGroup(models.Model):
     """A standing team (Saint-Michel, Sainte-Agnès…). It has no fixed chef:
     the chef de groupe is designated for each service (Service.chef)."""
 
-    name = models.CharField(max_length=80, unique=True)
+    name = models.CharField(max_length=80)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="service_groups", blank=True)
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
 
     class Meta:
         ordering = ["name"]
+        constraints = [models.UniqueConstraint(fields=["group", "name"], name="service_group_name_per_group")]
 
     def __str__(self):
         return self.name
@@ -50,6 +57,9 @@ class Service(models.Model):
     def __str__(self):
         return f"{self.event} · {self.size}"
 
+    objects = scoped("event__group")
+    all_groups = models.Manager()
+
 
 class Assignment(models.Model):
     class Status(models.TextChoices):
@@ -67,6 +77,9 @@ class Assignment(models.Model):
     status = models.CharField(max_length=6, choices=Status.choices, default=Status.PENDING)
     assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = scoped("service__event__group")
+    all_groups = models.Manager()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["service", "post", "side", "index"], name="one_member_per_slot")]
@@ -95,6 +108,9 @@ class Request(models.Model):
     decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = scoped("assignment__service__event__group")
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["-created_at"]
 
@@ -107,11 +123,17 @@ class AlbRotation(models.Model):
         WASHED = "lavees", "Lavées"
         RETURNED = "rendues", "Rendues"
 
-    week_start = models.DateField(unique=True)
+    week_start = models.DateField()
     group = models.ForeignKey(ServiceGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     responsible = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
     albs = models.PositiveSmallIntegerField(default=12)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.TO_WASH)
 
+    # The platform group (its `group` above is the service team).
+    owner_group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped("owner_group")
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["week_start"]
+        constraints = [models.UniqueConstraint(fields=["owner_group", "week_start"], name="one_alb_week_per_group")]

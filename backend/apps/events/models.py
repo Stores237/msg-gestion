@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.groups import default_group_id, scoped
+
 
 class Event(models.Model):
     """Anything on the movement's calendar: assises, masses, services,
@@ -32,6 +34,10 @@ class Event(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["starts_at"]
         constraints = [
@@ -57,6 +63,9 @@ class Attendance(models.Model):
     reason = models.CharField(max_length=240, blank=True, help_text="Motif donné par le membre pour une absence prévenue.")
     marked_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     marked_at = models.DateTimeField(auto_now=True)
+
+    objects = scoped("event__group")
+    all_groups = models.Manager()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["event", "member"], name="one_mark_per_member")]

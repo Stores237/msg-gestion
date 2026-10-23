@@ -21,7 +21,15 @@ def _rule_error(e):
     return Response({"detail": str(e), "code": e.code}, status=400)
 
 
+class MemberField(serializers.PrimaryKeyRelatedField):
+    """A member of the current group (looked up per request, not at import)."""
+
+    def get_queryset(self):
+        return User.objects.members()
+
+
 class EntrySerializer(serializers.ModelSerializer):
+    member = MemberField(required=False, allow_null=True)
     member_name = serializers.CharField(source="member.full_name", default=None, read_only=True)
     created_by_name = serializers.CharField(source="created_by.short_name", read_only=True)
     validated_by_name = serializers.CharField(source="validated_by.short_name", default=None, read_only=True)
@@ -199,7 +207,7 @@ class CollectionCloseView(APIView):
 
 
 class FineSerializer(serializers.Serializer):
-    member = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    member = MemberField()
     amount = serializers.IntegerField(min_value=1)
     reason = serializers.CharField(max_length=160)
 
@@ -334,7 +342,7 @@ class MemberStatementView(APIView):
 
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request, pk):
-        return Response(services.member_statement(get_object_or_404(User, pk=pk)))
+        return Response(services.member_statement(get_object_or_404(User.objects.members(), pk=pk)))
 
 
 class StatementPdfView(APIView):
@@ -354,6 +362,6 @@ class MemberStatementPdfView(APIView):
     def get(self, request, pk):
         from .pdf import member_statement_pdf, publish
 
-        member = get_object_or_404(User, pk=pk)
+        member = get_object_or_404(User.objects.members(), pk=pk)
         audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
         return _pdf_response(request, publish(member_statement_pdf(services.member_statement(member)), "bilan-membre"))

@@ -4,7 +4,8 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from apps.accounts.models import User
-from apps.core.models import Notification
+from apps.core.groups import in_group
+from apps.core.models import Group, Notification
 from apps.core.notify import notify
 from apps.events.models import Event
 
@@ -18,10 +19,16 @@ class Command(BaseCommand):
     help = "Create reminder notifications for tomorrow's events."
 
     def handle(self, *args, **options):
+        # Once per group: each group's events go to its own members.
+        for group in Group.objects.filter(is_active=True):
+            with in_group(group):
+                self.run_for_group()
+
+    def run_for_group(self):
         tomorrow = timezone.localdate() + timedelta(days=1)
         lo = timezone.make_aware(datetime.combine(tomorrow, time.min))
         events = Event.objects.filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1))
-        members = list(User.objects.filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
+        members = list(User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
         today_start = timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
         sent = 0
         for e in events:

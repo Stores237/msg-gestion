@@ -49,6 +49,21 @@ class MeSerializer(serializers.Serializer):
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
     tabs = serializers.SerializerMethodField()
+    group = serializers.SerializerMethodField()
+    groups = serializers.SerializerMethodField()
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_group(self, user) -> dict:
+        """The group this request works in, with its welcome message."""
+        from apps.core.models import Settings
+
+        st = Settings.get()
+        return {"id": st.group_id, "name": st.group.name, "place": st.parish, "motto": st.motto,
+                "welcome_message": st.welcome_message}
+
+    @extend_schema_field(OpenApiTypes.OBJECT)
+    def get_groups(self, user) -> list:
+        return [{"id": g.pk, "name": g.name} for g in user.groups_joined()]
 
     @extend_schema_field(AssignmentSerializer(many=True))
     def get_roles(self, user):

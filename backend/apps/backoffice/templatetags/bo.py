@@ -16,6 +16,13 @@ STATUS_DOT = {"actif": "ok", "conge": "warn", "classe": "off", "suspendu": "off"
 
 
 @register.simple_tag
+def platform_groups():
+    from apps.core.models import Group
+
+    return Group.objects.filter(is_active=True).order_by("name")
+
+
+@register.simple_tag
 def group_settings():
     from apps.core.models import Settings
 

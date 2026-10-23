@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.contrib.sessions.models import Session
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -25,7 +25,7 @@ from apps.accounts.models import Role, RoleAssignment, RolePermission, RoleReque
 from apps.accounts.phone import InvalidPhone, format_phone, normalize_phone
 from apps.accounts.services import RuleViolation, assign_role, default_end, reset_pin, revoke_assignment, temporary_pin
 from apps.core import audit
-from apps.core.models import AuditLog, Settings
+from apps.core.models import AuditLog, Membership, Settings
 from apps.core.notify import notify
 from apps.planning.models import ServiceGroup
 
@@ -195,7 +195,7 @@ def user_new(request):
 @backoffice_view("backoffice.users", "change")
 def users_bulk(request):
     ids = [int(x) for x in request.POST.getlist("ids") if x.isdigit()]
-    qs = User.objects.filter(pk__in=ids)
+    qs = User.objects.members().filter(pk__in=ids)
     action = request.POST.get("action")
     if action == "export":
         return _users_csv(qs, "selection")
@@ -235,7 +235,7 @@ def _pins_csv(pins):
 
 @backoffice_view("backoffice.users", "export")
 def users_export(request):
-    return _users_csv(User.objects.exclude(status=User.Status.ARCHIVED), "tous")
+    return _users_csv(User.objects.members().exclude(status=User.Status.ARCHIVED), "tous")
 
 
 # --- Import -----------------------------------------------------------------------------
@@ -348,6 +348,7 @@ def users_import(request):
                 u.set_pin(pin, temporary=True)
                 u.save()
                 RoleAssignment.objects.create(user=u, role=membre, reason=f"Import {data['name']}", assigned_by=request.user)
+                Membership.join(u, membre.group_id)
                 g = groups.get(r["group"].lower()) if r["group"] else None
                 if g:
                     g.members.add(u)
@@ -402,7 +403,7 @@ def assignments(request):
         "nav": "assign", "rows": rows, "soon": soon, "horizon": horizon, "upcoming": upcoming, "today": today,
         "can_edit": request.user.can("backoffice.users", "change"),
         "day_roles": Role.objects.filter(is_archived=False).exclude(slug__in=["membre", registry.SUPER_ADMIN_SLUG]),
-        "members": User.objects.filter(status=User.Status.ACTIVE, is_active=True),
+        "members": User.objects.members().filter(status=User.Status.ACTIVE, is_active=True),
     })
 
 
@@ -421,7 +422,7 @@ def _assign_for_the_day(member, role, day, *, reason, by, request=None):
 @require_POST
 @backoffice_view("backoffice.users", "change")
 def assignment_day(request):
-    member = get_object_or_404(User, pk=request.POST.get("member"), status=User.Status.ACTIVE)
+    member = get_object_or_404(User.objects.members(), pk=request.POST.get("member"), status=User.Status.ACTIVE)
     role = get_object_or_404(Role, slug=request.POST.get("role"), is_archived=False)
     day = parse_date(request.POST.get("day") or "") or timezone.localdate()
     if day < timezone.localdate():
@@ -526,7 +527,7 @@ def role_manage(request, slug=None):
 # --- Settings ----------------------------------------------------------------------------
 
 
-SETTING_FIELDS = ["name", "parish", "motto", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
+SETTING_FIELDS = ["parish", "welcome_message", "motto", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
                   "assise_time", "vigil_time", "reminder_time", "duty_template"]
 
 
@@ -537,6 +538,11 @@ def settings_view(request):
         if not request.user.can("backoffice.users", "change"):
             return _deny(request)
         changed = {}
+        name = request.POST.get("name", "").strip()
+        if name and name != st.group.name:
+            changed["name"] = name
+            st.group.name = name
+            st.group.save(update_fields=["name"])
         for f in SETTING_FIELDS:
             if f not in request.POST:
                 continue
@@ -563,7 +569,7 @@ def audit_export(request):
     buf = io.StringIO()
     w = csv.writer(buf, delimiter=";")
     w.writerow(["Date", "Auteur", "Action", "Objet", "Détail", "Refusé", "IP", "Appareil"])
-    for e in AuditLog.objects.select_related("actor")[:20000]:
+    for e in AuditLog.objects.filter(Q(group=request.group) | Q(group__isnull=True)).select_related("actor")[:20000]:
         w.writerow([timezone.localtime(e.created_at).strftime("%d/%m/%Y %H:%M"), e.actor.short_name if e.actor else "Système", e.action,
                     e.object_repr, " · ".join(f"{k}: {v}" for k, v in e.detail.items()), "oui" if e.refused else "", e.ip or "", e.device])
     audit.record("Export du journal d’audit", actor=request.user, request=request)

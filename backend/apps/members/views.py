@@ -27,7 +27,7 @@ STATUS_FILTERS = {"actif", "conge", "classe", "suspendu"}
 
 
 def _members():
-    return User.objects.filter(VISIBLE).prefetch_related("assignments__role")
+    return User.objects.members().filter(VISIBLE).prefetch_related("assignments__role")
 
 
 class MemberListView(APIView):
@@ -40,7 +40,7 @@ class MemberListView(APIView):
 
     @extend_schema(responses=MemberListSerializer(many=True))
     def get(self, request):
-        base = User.objects.filter(VISIBLE)
+        base = User.objects.members().filter(VISIBLE)
         counts = base.aggregate(
             all=Count("id"),
             actif=Count("id", filter=Q(status=User.Status.ACTIVE)),
@@ -130,7 +130,7 @@ class ResetPinView(APIView):
     permission_classes = [require("members.profile", "change")]
 
     def post(self, request, pk):
-        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        member = get_object_or_404(User.objects.members().filter(VISIBLE), pk=pk)
         return Response({"temporary_pin": reset_pin(member, by=request.user, request=request)})
 
 
@@ -147,7 +147,7 @@ class RoleRequestView(APIView):
         u = request.user
         if not (u.can("members.profile", "change") or u.can("calendar.planning", "change")):
             return Response({"detail": "Votre rôle ne donne pas accès à cette action.", "code": "forbidden"}, status=403)
-        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        member = get_object_or_404(User.objects.members().filter(VISIBLE), pk=pk)
         role = Role.objects.filter(slug=request.data.get("role"), kind__in=REQUESTABLE_KINDS, is_archived=False).first()
         if role is None or role.slug == "membre":
             return Response({"detail": "Ce rôle ne se demande pas ainsi.", "code": "bad_role"}, status=400)
@@ -176,7 +176,7 @@ class PhotoView(APIView):
     def post(self, request, pk):
         from apps.announcements.files import sniff
 
-        member = get_object_or_404(User.objects.filter(VISIBLE), pk=pk)
+        member = get_object_or_404(User.objects.members().filter(VISIBLE), pk=pk)
         upload = request.FILES.get("photo")
         if upload is None:
             return Response({"detail": "Aucune photo.", "code": "no_file"}, status=400)

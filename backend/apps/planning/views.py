@@ -109,7 +109,7 @@ class SlotView(APIView):
         if member_id is None:
             services.clear(s, post, side, index, by=request.user, request=request)
             return Response(status=status.HTTP_204_NO_CONTENT)
-        member = get_object_or_404(User, pk=member_id)
+        member = get_object_or_404(User.objects.members(), pk=member_id)
         try:
             a = services.assign(s, post, side, index, member, by=request.user, force=bool(request.data.get("force")), request=request)
         except services.PlanningRule as e:
@@ -142,7 +142,7 @@ class ChefView(APIView):
 
     def put(self, request, pk):
         s = get_object_or_404(Service.objects.select_related("event", "group", "chef"), pk=pk)
-        member = get_object_or_404(User, pk=request.data["member"]) if request.data.get("member") else None
+        member = get_object_or_404(User.objects.members(), pk=request.data["member"]) if request.data.get("member") else None
         try:
             services.set_chef(s, member, by=request.user, request=request)
         except services.PlanningRule as e:
@@ -183,7 +183,7 @@ class GroupsView(APIView):
             return Response({"detail": "Nom requis.", "code": "required"}, status=400)
         g, _ = ServiceGroup.objects.get_or_create(name=name)
         if "members" in request.data:
-            g.members.set(User.objects.filter(pk__in=request.data["members"]))
+            g.members.set(User.objects.members().filter(pk__in=request.data["members"]))
         return Response({"id": g.pk}, status=201)
 
 
@@ -223,7 +223,7 @@ class SwapView(APIView):
             if request.data.get("absence"):
                 r = services.declare_absence(a, by=request.user, reason=request.data.get("reason", ""))
             else:
-                target = get_object_or_404(User, pk=request.data.get("target"))
+                target = get_object_or_404(User.objects.members(), pk=request.data.get("target"))
                 r = services.request_swap(a, by=request.user, target=target, reason=request.data.get("reason", ""))
         except services.PlanningRule as e:
             return _rule(e)
@@ -268,7 +268,7 @@ class DecideView(APIView):
 
     def post(self, request, pk):
         r = get_object_or_404(Request.objects.select_related("assignment__service__event", "requester", "target"), pk=pk)
-        replacement = get_object_or_404(User, pk=request.data["replacement"]) if request.data.get("replacement") else None
+        replacement = get_object_or_404(User.objects.members(), pk=request.data["replacement"]) if request.data.get("replacement") else None
         try:
             services.decide(r, by=request.user, approve=bool(request.data.get("approve")), replacement=replacement, request=request)
         except services.PlanningRule as e:
@@ -309,7 +309,7 @@ class AlbsView(APIView):
             return Response({"detail": "Semaine requise.", "code": "required"}, status=400)
         week, _ = services.week_bounds(week)
         group = ServiceGroup.objects.filter(pk=request.data.get("group")).first()
-        responsible = User.objects.filter(pk=request.data.get("responsible")).first()
+        responsible = User.objects.members().filter(pk=request.data.get("responsible")).first()
         r, _ = AlbRotation.objects.update_or_create(week_start=week, defaults={"group": group, "responsible": responsible,
                                                                               "albs": int(request.data.get("albs") or 12)})
         return Response(_alb_json(r, request.user), status=201)

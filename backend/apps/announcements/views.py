@@ -18,7 +18,7 @@ from .serializers import AnnouncementSerializer, AttachmentSerializer
 
 def _audience():
     """Everyone an announcement goes to: active and on-leave members."""
-    return User.objects.filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
+    return User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
 
 
 def _context(request, items):

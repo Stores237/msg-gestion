@@ -165,7 +165,7 @@ def _finances():
 @backoffice_view("backoffice.users", "view")
 def dashboard(request):
     today = timezone.localdate()
-    active = User.objects.filter(status=User.Status.ACTIVE, is_active=True)
+    active = User.objects.members().filter(status=User.Status.ACTIVE, is_active=True)
     soon = (
         RoleAssignment.objects.active()
         .filter(ends_on__isnull=False, ends_on__lte=today + timedelta(days=30), role__kind=Role.Kind.BUREAU)
@@ -176,7 +176,7 @@ def dashboard(request):
         "nav": "dash",
         "kpi_active": active.count(),
         "kpi_diaspora": active.filter(is_diaspora=True).count(),
-        "kpi_suspended": User.objects.filter(status=User.Status.SUSPENDED).count(),
+        "kpi_suspended": User.objects.members().filter(status=User.Status.SUSPENDED).count(),
         "kpi_expiring": soon.count(),
         "kpi_super_admins": super_admins,
         "min_super_admins": registry.MIN_SUPER_ADMINS,
@@ -185,7 +185,7 @@ def dashboard(request):
         "fin": _finances() if request.user.can("finances.cashbook", "view") else None,
         "requests": RoleRequest.objects.filter(status=RoleRequest.Status.PENDING).select_related("member", "role", "requested_by")[:10],
         "expiring": soon.select_related("user", "role")[:5],
-        "users_total": User.objects.exclude(status=User.Status.ARCHIVED).count(),
+        "users_total": User.objects.members().exclude(status=User.Status.ARCHIVED).count(),
         "active_roles": Role.objects.filter(is_archived=False).count(),
         "last_activity": AuditLog.objects.first(),
     }
@@ -196,13 +196,17 @@ def dashboard(request):
 def users(request):
     q = request.GET.get("q", "").strip()
     status = request.GET.get("statut", "")
-    qs = User.objects.exclude(status=User.Status.ARCHIVED).prefetch_related("assignments__role")
+    qs = User.objects.members().exclude(status=User.Status.ARCHIVED).prefetch_related("assignments__role")
     if q:
         qs = qs.filter(Q(last_name__icontains=q) | Q(first_name__icontains=q) | Q(phone__icontains=q.replace(" ", "")))
     if status:
         qs = qs.filter(status=status)
     role = request.GET.get("role", "")
-    if role:
+    if role == registry.SUPER_ADMIN_SLUG:
+        # Super admins run the platform: they belong to no group.
+        qs = User.objects.filter(assignments__role__slug=role, assignments__role__group__isnull=True,
+                                 assignments__revoked_at__isnull=True).distinct().prefetch_related("assignments__role")
+    elif role:
         qs = qs.filter(assignments__role__slug=role, assignments__revoked_at__isnull=True).distinct()
     group = request.GET.get("groupe", "")
     if group.isdigit():
@@ -286,7 +290,8 @@ def roles(request, slug=None):
 
 @backoffice_view("backoffice.audit", "view")
 def audit_log(request):
-    qs = AuditLog.objects.select_related("actor")
+    # This group's entries plus the platform's own (logins, groups, super admins).
+    qs = AuditLog.objects.filter(Q(group=request.group) | Q(group__isnull=True)).select_related("actor")
     if request.GET.get("sensibles"):
         qs = qs.filter(Q(sensitive=True) | Q(refused=True))
     page = Paginator(qs, 50).get_page(request.GET.get("page"))

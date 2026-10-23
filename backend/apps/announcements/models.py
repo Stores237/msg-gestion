@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 
+from apps.core.groups import default_group_id, scoped
+
 
 class Announcement(models.Model):
     """An announcement or a convocation to every member. A convocation is
@@ -19,6 +21,10 @@ class Announcement(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    objects = scoped()
+    all_groups = models.Manager()
+
     class Meta:
         ordering = ["-pinned", "-created_at"]
 
@@ -30,6 +36,9 @@ class Read(models.Model):
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="reads")
     member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     read_at = models.DateTimeField(auto_now_add=True)
+
+    objects = scoped("announcement__group")
+    all_groups = models.Manager()
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["announcement", "member"], name="one_read_per_member")]
@@ -46,6 +55,9 @@ class Attachment(models.Model):
     content_type = models.CharField(max_length=60)
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = scoped("announcement__group")
+    all_groups = models.Manager()
 
     class Meta:
         ordering = ["created_at"]

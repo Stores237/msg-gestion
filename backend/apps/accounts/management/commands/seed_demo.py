@@ -6,6 +6,7 @@ from django.db import transaction
 
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.phone import normalize_phone
+from apps.core.models import Membership
 
 # The sample people from the designs (design/screens-a.jsx, bo-screens-1.jsx).
 PEOPLE = [
@@ -73,6 +74,8 @@ class Command(BaseCommand):
                     start = mandate_start if role.kind == "bureau" else date.today() - timedelta(days=30)
                     end = date(2027, 9, 30) if role.kind == "bureau" else None
                     RoleAssignment.objects.create(user=user, role=role, starts_on=start, ends_on=end, reason="Données de démonstration")
+                    if role.group_id:
+                        Membership.join(user, role.group_id)
             kotto = User.objects.get(last_name="Kotto")
             if not kotto.assignments.filter(role__slug="censeur-du-jour").exists():
                 RoleAssignment.objects.create(

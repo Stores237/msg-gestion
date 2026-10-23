@@ -232,3 +232,26 @@ def test_super_admin_sees_and_downloads_the_statement(admin, client):
     one = client.get(f"/bo/finances/membres/{m.id}/bilan.pdf")
     assert one.status_code == 200 and one.content.startswith(b"%PDF")
     assert AuditLog.objects.filter(action="Export PDF du bilan individuel", object_id=str(m.id)).exists()
+
+
+def test_groups_create_switch_and_scope(admin, client):
+    from apps.core.models import Group, Membership
+
+    first = Group.objects.order_by("pk").first()
+    old = UserFactory(last_name="Ancien", first_name="Membre")
+    Membership.join(old, first.pk)
+    r = client.post("/bo/groupes/", {"name": "Chorale Sainte-Cécile", "place": "Bonapriso", "welcome_message": "Bienvenue !"}, follow=True)
+    assert "Chorale Sainte-Cécile" in r.content.decode()
+    choir = Group.objects.get(name="Chorale Sainte-Cécile")
+    assert AuditLog.objects.filter(action="Groupe créé", group__isnull=True).exists()
+    # Now working on the choir: its member list is empty, its roles exist.
+    assert "Ancien Membre" not in client.get("/bo/utilisateurs/").content.decode()
+    assert "Trésorier" in client.get("/bo/roles/").content.decode()
+    r = client.post("/bo/utilisateurs/nouveau/", {"last_name": "Choriste", "first_name": "Anne", "phone": "690000077"})
+    assert r.status_code == 200
+    assert Membership.all_groups.filter(user__last_name="Choriste", group=choir).exists()
+    assert not Membership.all_groups.filter(user__last_name="Choriste", group=first).exists()
+    client.post("/bo/groupes/choisir/", {"group": first.pk})
+    page = client.get("/bo/utilisateurs/").content.decode()
+    assert "Ancien Membre" in page and "Choriste Anne" not in page
+    assert "Paramètres" in page and 'selected>Mouvement' in page.replace('"', "")
