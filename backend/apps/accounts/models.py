@@ -224,6 +224,10 @@ class Role(models.Model):
     )
     is_archived = models.BooleanField(default=False)
     sort_order = models.PositiveSmallIntegerField(default=100)
+    # Can be requested in the app for one day, for an active member with no
+    # role (owner, 2026-10-23: président, censeur, secrétaire, formateur,
+    # commissaire aux comptes, trésorier "du jour").
+    daily = models.BooleanField("peut être donné pour une journée", default=False)
 
     objects = scoped(with_platform=True)
     all_groups = models.Manager()

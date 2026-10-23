@@ -2809,6 +2809,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Photo retirée.'**
   String get photoRemoved;
+
+  /// No description provided for @requestDayRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un rôle du jour'**
+  String get requestDayRole;
+
+  /// No description provided for @dayRoleHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour un membre actif sans rôle, le temps d’une journée. Le partenaire valide ; le rôle s’arrête le soir même.'**
+  String get dayRoleHint;
+
+  /// No description provided for @onDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le {date}'**
+  String onDay(String date);
+
+  /// No description provided for @dayRoleRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée au partenaire.'**
+  String get dayRoleRequestSent;
 }
 
 class _AppLocalizationsDelegate

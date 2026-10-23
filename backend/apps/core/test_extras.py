@@ -115,3 +115,34 @@ def test_bureau_home_blocks_follow_permissions():
     member_api, _ = client_for("membre")
     assert set(tre_api.get("/api/home/bureau/").json()) == {"members_active", "to_validate", "collections", "unfilled"}
     assert member_api.get("/api/home/bureau/").json() == {}
+
+
+def test_role_of_the_day_requested_for_an_active_member_without_role():
+    """Owner, 2026-10-23: président, censeur, secrétaire, formateur,
+    commissaire aux comptes or trésorier "du jour", for an active member
+    with no role."""
+    from datetime import date
+
+    api, _ = client_for("formateur")
+    daily = {r["slug"] for r in api.get("/api/members/requestable-roles/?daily=1").json()}
+    assert daily == {"president", "censeur-du-jour", "secretaire-general", "formateur", "commissaire-aux-comptes", "tresorier"}
+    target = UserFactory()
+    give_role(target, "membre")
+    tomorrow = (timezone.localdate() + timedelta(days=1)).isoformat()
+    body = {"role": "tresorier", "reason": "Kermesse", "daily": True, "day": tomorrow}
+    r = api.post(f"/api/members/{target.id}/role-requests/", body, format="json")
+    assert r.status_code == 201
+    rr = RoleRequest.objects.get()
+    assert (rr.role.slug, str(rr.starts_on), str(rr.ends_on)) == ("tresorier", tomorrow, tomorrow)
+    # Same member, same day again: refused; a past day too.
+    assert api.post(f"/api/members/{target.id}/role-requests/", body, format="json").json()["code"] == "already_requested"
+    past = {**body, "day": "2020-01-01"}
+    assert api.post(f"/api/members/{target.id}/role-requests/", past, format="json").json()["code"] == "past_day"
+    # A role that isn't a day role, a member who already has a role, one on leave.
+    assert api.post(f"/api/members/{target.id}/role-requests/", {**body, "role": "vice-president"}, format="json").json()["code"] == "bad_role"
+    holder = UserFactory()
+    give_role(holder, "secretaire-general-adjoint")
+    assert api.post(f"/api/members/{holder.id}/role-requests/", body, format="json").json()["code"] == "has_role"
+    on_leave = UserFactory(status="conge")
+    assert api.post(f"/api/members/{on_leave.id}/role-requests/", body, format="json").json()["code"] == "not_active"
+    assert isinstance(date.fromisoformat(tomorrow), date)

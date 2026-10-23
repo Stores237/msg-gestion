@@ -72,4 +72,5 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Screen header actions pinned right, round tonal buttons | Owner: top buttons drawn mid-screen |
 | 2026-10-23 | Group edit in a dialog on Groupes; deletion by two super admins (ask + confirm by another, name typed back, 3-day window); the group is hidden with its data kept and can be restored | Owner: "double validation by the 2 admin", then "hide the group and keep its data" |
 | 2026-10-23 | Every member sets or removes their own profile picture (Mon compte), shown on Accueil; officers keep setting others' | Owner |
+| 2026-10-23 | Roles of the day requested in the app for an active member with no role (président, censeur, secrétaire, formateur, commissaire, trésorier du jour), approved by the partner; per-role switch `daily` | Owner |
 

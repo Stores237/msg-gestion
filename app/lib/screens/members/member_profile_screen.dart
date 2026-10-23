@@ -73,11 +73,18 @@ class _ProfileBody extends StatelessWidget {
     }
   }
 
-  Future<void> _proposeRole(BuildContext context) async {
+  /// Active, and no role but "membre": can be given a role of the day.
+  bool get canHaveDayRole =>
+      m.summary.status == 'actif' &&
+      m.summary.roles.every((r) => r.slug == 'membre');
+
+  Future<void> _proposeRole(BuildContext context, {bool daily = false}) async {
     final l = AppLocalizations.of(context);
     final List<(String, String)> roles;
     try {
-      roles = await RepositoryLocator.instance.members.requestableRoles();
+      roles = await RepositoryLocator.instance.members.requestableRoles(
+        daily: daily,
+      );
     } catch (e) {
       if (context.mounted) showErrorSnack(context, e);
       return;
@@ -88,12 +95,14 @@ class _ProfileBody extends StatelessWidget {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (context) =>
-          _ProposeRoleSheet(memberId: m.summary.id, roles: roles),
+          _ProposeRoleSheet(memberId: m.summary.id, roles: roles, daily: daily),
     );
     if (sent == true && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.roleRequestSent)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(daily ? l.dayRoleRequestSent : l.roleRequestSent),
+        ),
+      );
     }
   }
 
@@ -372,6 +381,19 @@ class _ProfileBody extends StatelessWidget {
               shape: const StadiumBorder(),
             ),
           ),
+          if (canHaveDayRole) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              key: const Key('request-day-role'),
+              onPressed: () => _proposeRole(context, daily: true),
+              icon: const Icon(Icons.today_outlined),
+              label: Text(l.requestDayRole),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+                shape: const StadiumBorder(),
+              ),
+            ),
+          ],
         ],
         if (m.restricted.contains('contributions')) ...[
           const SizedBox(height: 20),
@@ -385,9 +407,16 @@ class _ProfileBody extends StatelessWidget {
 }
 
 class _ProposeRoleSheet extends StatefulWidget {
-  const _ProposeRoleSheet({required this.memberId, required this.roles});
+  const _ProposeRoleSheet({
+    required this.memberId,
+    required this.roles,
+    this.daily = false,
+  });
   final int memberId;
   final List<(String, String)> roles;
+
+  /// A role of the day: one date, no end.
+  final bool daily;
 
   @override
   State<_ProposeRoleSheet> createState() => _ProposeRoleSheetState();
@@ -421,7 +450,8 @@ class _ProposeRoleSheetState extends State<_ProposeRoleSheet> {
         role: _role!,
         reason: _reason.text.trim(),
         startsOn: _from,
-        endsOn: _to,
+        endsOn: widget.daily ? null : _to,
+        daily: widget.daily,
       );
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
@@ -446,7 +476,17 @@ class _ProposeRoleSheetState extends State<_ProposeRoleSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.proposeRole, style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            widget.daily ? l.requestDayRole : l.proposeRole,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          if (widget.daily) ...[
+            const SizedBox(height: 4),
+            Text(
+              l.dayRoleHint,
+              style: TextStyle(fontSize: 13, color: context.msg.textSecondary),
+            ),
+          ],
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             key: const Key('propose-role-select'),
@@ -471,35 +511,42 @@ class _ProposeRoleSheetState extends State<_ProposeRoleSheet> {
                     final p = await showDatePicker(
                       context: context,
                       initialDate: _from,
-                      firstDate: DateTime.now().subtract(
-                        const Duration(days: 1),
-                      ),
+                      // A role of the day starts today at the earliest.
+                      firstDate: widget.daily
+                          ? DateUtils.dateOnly(DateTime.now())
+                          : DateTime.now().subtract(const Duration(days: 1)),
                       lastDate: DateTime(2100),
                     );
                     if (p != null) setState(() => _from = p);
                   },
-                  child: FitText('${l.fromDate} ${d.shortDate(_from)}'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () async {
-                    final p = await showDatePicker(
-                      context: context,
-                      initialDate: _to ?? _from,
-                      firstDate: _from,
-                      lastDate: DateTime(2100),
-                    );
-                    setState(() => _to = p);
-                  },
                   child: FitText(
-                    _to == null
-                        ? l.toDate
-                        : '${l.toDate.split(' ').first} ${d.shortDate(_to!)}',
+                    widget.daily
+                        ? l.onDay(d.shortDate(_from))
+                        : '${l.fromDate} ${d.shortDate(_from)}',
                   ),
                 ),
               ),
+              if (!widget.daily) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      final p = await showDatePicker(
+                        context: context,
+                        initialDate: _to ?? _from,
+                        firstDate: _from,
+                        lastDate: DateTime(2100),
+                      );
+                      setState(() => _to = p);
+                    },
+                    child: FitText(
+                      _to == null
+                          ? l.toDate
+                          : '${l.toDate.split(' ').first} ${d.shortDate(_to!)}',
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 12),

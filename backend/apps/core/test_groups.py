@@ -45,7 +45,7 @@ def give(user, group, slug):
 
 def test_new_group_gets_its_own_roles_and_settings(two_groups):
     first, second = two_groups
-    assert Role.all_groups.filter(group=second, slug="tresorier").exists()
+    assert Role.all_groups.get(group=second, slug="tresorier").daily  # role of the day too
     assert Role.all_groups.filter(group=second).count() == Role.all_groups.filter(group=first, is_archived=False).count()
     assert Settings.get(second).welcome_message == "Bienvenue à la chorale !"
     with in_group(second):

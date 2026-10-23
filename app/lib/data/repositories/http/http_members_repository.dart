@@ -90,10 +90,15 @@ class HttpMembersRepository implements MembersRepository {
           as String?;
 
   @override
-  Future<List<(String, String)>> requestableRoles() async => [
-    for (final r in await _api.get('/members/requestable-roles/') as List)
-      (r['slug'] as String, r['name'] as String),
-  ];
+  Future<List<(String, String)>> requestableRoles({bool daily = false}) async =>
+      [
+        for (final r
+            in await _api.get(
+                  '/members/requestable-roles/${daily ? '?daily=1' : ''}',
+                )
+                as List)
+          (r['slug'] as String, r['name'] as String),
+      ];
 
   @override
   Future<void> requestRole(
@@ -102,6 +107,7 @@ class HttpMembersRepository implements MembersRepository {
     required String reason,
     required DateTime startsOn,
     DateTime? endsOn,
+    bool daily = false,
   }) {
     String day(DateTime d) => d.toIso8601String().substring(0, 10);
     return _api.post(
@@ -109,8 +115,9 @@ class HttpMembersRepository implements MembersRepository {
       body: {
         'role': role,
         'reason': reason,
-        'starts_on': day(startsOn),
-        if (endsOn != null) 'ends_on': day(endsOn),
+        if (daily) ...{'daily': true, 'day': day(startsOn)},
+        if (!daily) 'starts_on': day(startsOn),
+        if (!daily && endsOn != null) 'ends_on': day(endsOn),
       },
     );
   }

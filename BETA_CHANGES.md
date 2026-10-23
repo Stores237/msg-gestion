@@ -421,3 +421,23 @@ Owner, 2026-10-23.
 
 **Verify.** `pytest apps/members/tests.py::test_every_member_changes_their_own_photo`;
 `flutter test test/my_photo_test.dart`.
+
+## 20. Roles of the day requested in the app
+
+Owner, 2026-10-23: an active member with no role can be given, for one session, the role of
+président, censeur, secrétaire, formateur, commissaire aux comptes or trésorier "du jour".
+
+- Roles have a "peut être donné pour une journée" switch (`Role.daily`, `accounts.0011_daily_roles`),
+  on for président, censeur du jour, secrétaire général, formateur, commissaire aux comptes and
+  trésorier in every group; new groups copy it; the back-office role page toggles it
+  ("Autoriser comme rôle du jour").
+- **App**: on a member's profile, officers who can propose roles get **Demander un rôle du jour**
+  when the member is active and holds no role: pick the role, one date (today or later), a reason.
+- **Server**: `POST /api/members/<id>/role-requests/` with `daily: true, day`; refused for a past
+  day, a member not active or already holding a role that day, a role not marked daily, or a
+  second pending request for the same day. `GET /api/members/requestable-roles/?daily=1`.
+- **Back-office**: the request appears in "Demandes de rôle" as "rôle du jour, le …". Approving
+  gives the role for that day only (it ends that night) and notifies the member. The separation of
+  duties still applies (one person can't be trésorier and commissaire the same day).
+
+**Verify.** `pytest -k "role_of_the_day or daily"`; `flutter test test/modules_test.dart`.

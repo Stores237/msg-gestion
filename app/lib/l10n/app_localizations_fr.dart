@@ -1622,4 +1622,19 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get photoRemoved => 'Photo retirée.';
+
+  @override
+  String get requestDayRole => 'Demander un rôle du jour';
+
+  @override
+  String get dayRoleHint =>
+      'Pour un membre actif sans rôle, le temps d’une journée. Le partenaire valide ; le rôle s’arrête le soir même.';
+
+  @override
+  String onDay(String date) {
+    return 'Le $date';
+  }
+
+  @override
+  String get dayRoleRequestSent => 'Demande envoyée au partenaire.';
 }

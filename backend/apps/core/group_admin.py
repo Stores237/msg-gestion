@@ -33,7 +33,8 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
         for role in Role.all_groups.filter(group=template, is_archived=False):
             perms = list(role.permissions.values_list("resource", "action"))
             copy = Role.all_groups.create(group=group, slug=role.slug, name=role.name, kind=role.kind,
-                                          mandate_months=role.mandate_months, sort_order=role.sort_order)
+                                          mandate_months=role.mandate_months, sort_order=role.sort_order,
+                                          daily=role.daily)
             RolePermission.objects.bulk_create([RolePermission(role=copy, resource=r, action=a) for r, a in perms])
             roles += 1
     if template is not None:

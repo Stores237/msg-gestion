@@ -10,7 +10,7 @@
     <form class="panel" method="post">{% csrf_token %}
       <div class="panel-h"><h2 style="display:flex;gap:10px;align-items:center">{{ role.name }} {% if role.mandate_months %}<span class="rb bureau"><i></i>Bureau · mandat {{ role.mandate_months }} mois</span>{% endif %}</h2>
         {% if can_edit %}<div class="acts"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('dlg-rename').showModal()">Renommer</button>
-          <button type="submit" form="f-dup" class="btn btn-ghost btn-sm">Dupliquer</button><button type="submit" form="f-arch" class="btn btn-ghost btn-sm">Archiver</button></div>{% endif %}</div>
+          {% if role.slug != 'membre' and role.slug != 'super-admin' %}<button type="submit" form="f-daily" class="btn btn-ghost btn-sm" title="Peut être demandé dans l’application pour une journée, pour un membre actif sans rôle">{% if role.daily %}{% icon 'check' 14 %}Rôle du jour possible{% else %}Autoriser comme rôle du jour{% endif %}</button>{% endif %}<button type="submit" form="f-dup" class="btn btn-ghost btn-sm">Dupliquer</button><button type="submit" form="f-arch" class="btn btn-ghost btn-sm">Archiver</button></div>{% endif %}</div>
       <div class="tbl-wrap"><table class="pm"><thead><tr><th>Module · objet</th>{% for a in actions %}<th>{{ a }}</th>{% endfor %}</tr></thead><tbody>
         {% for line in matrix %}{% if line.module %}<tr class="mod"><td colspan="7">{{ line.module }}</td></tr>{% else %}<tr><td><b>{{ line.label }}</b>{% if line.sensitive %}<small>Données sensibles</small>{% endif %}</td>{% for c in line.cells %}<td>{% if c.state == 'na' %}<span class="pc na">—</span>{% elif c.state == 'lock' %}<span class="pc lock" title="Bloqué : séparation des tâches">{% icon 'lock' 14 %}</span>{% elif can_edit %}<label class="pc"><input type="checkbox" name="perm" value="{{ c.value }}"{% if c.state == 'on' %} checked{% endif %} aria-label="{{ line.label }}">{% icon 'check' 16 %}</label>{% else %}<span class="pc{% if c.state == 'on' %} on{% endif %}">{% if c.state == 'on' %}{% icon 'check' 16 %}{% endif %}</span>{% endif %}</td>{% endfor %}</tr>{% endif %}{% endfor %}
       </tbody></table>
@@ -23,6 +23,7 @@
 </div>
 {% if can_edit %}
 <form id="f-dup" method="post" action="{% url 'backoffice:role_manage' role.slug %}">{% csrf_token %}<input type="hidden" name="action" value="duplicate"></form>
+<form id="f-daily" method="post" action="{% url 'backoffice:role_manage' role.slug %}">{% csrf_token %}<input type="hidden" name="action" value="daily"></form>
 <form id="f-arch" method="post" action="{% url 'backoffice:role_manage' role.slug %}" onsubmit="return confirm('Archiver ce rôle ?')">{% csrf_token %}<input type="hidden" name="action" value="archive"></form>
 <dialog id="dlg-rename" class="dialog" style="border:none;padding:24px;max-width:440px"><form method="post" action="{% url 'backoffice:role_manage' role.slug %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="rename"><h3>Renommer le rôle</h3>
   <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" value="{{ role.name }}" required></span></label>

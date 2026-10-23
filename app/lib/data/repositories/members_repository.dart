@@ -33,12 +33,16 @@ abstract class MembersRepository {
   });
 
   /// (slug, name) of roles a bureau member may propose.
-  Future<List<(String, String)>> requestableRoles();
+  /// [daily]: the roles that can be asked for one day (rôle du jour).
+  Future<List<(String, String)>> requestableRoles({bool daily = false});
+
+  /// [daily]: a role of the day on [startsOn] (an active member with no role).
   Future<void> requestRole(
     int id, {
     required String role,
     required String reason,
     required DateTime startsOn,
     DateTime? endsOn,
+    bool daily = false,
   });
 }

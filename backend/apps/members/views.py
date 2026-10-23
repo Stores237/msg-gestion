@@ -118,7 +118,12 @@ REQUESTABLE_KINDS = ["temporaire", "standard"]
 
 class RoleRequestView(APIView):
     """A bureau member proposes a role for someone; the super admin decides
-    in the back-office (design: dashboard → "Demandes de rôle")."""
+    in the back-office (design: dashboard → "Demandes de rôle").
+
+    With `daily: true`, a role of the day (owner, 2026-10-23): one of the
+    roles marked "peut être donné pour une journée" (président, censeur,
+    secrétaire, formateur, commissaire aux comptes, trésorier du jour), for
+    `day`, for an active member who holds no role."""
 
     def post(self, request, pk):
         from apps.accounts.models import RoleRequest
@@ -127,23 +132,50 @@ class RoleRequestView(APIView):
         if not (u.can("members.profile", "change") or u.can("calendar.planning", "change")):
             return Response({"detail": "Votre rôle ne donne pas accès à cette action.", "code": "forbidden"}, status=403)
         member = get_object_or_404(User.objects.members().filter(VISIBLE), pk=pk)
-        role = Role.objects.filter(slug=request.data.get("role"), kind__in=REQUESTABLE_KINDS, is_archived=False).first()
-        if role is None or role.slug == "membre":
+        daily = request.data.get("daily") in (True, "true", "1", 1)
+        roles = Role.objects.filter(is_archived=False).exclude(slug__in=["membre", "super-admin"])
+        role = (roles.filter(daily=True) if daily else roles.filter(kind__in=REQUESTABLE_KINDS)).filter(
+            slug=request.data.get("role")).first()
+        if role is None:
             return Response({"detail": "Ce rôle ne se demande pas ainsi.", "code": "bad_role"}, status=400)
         reason = (request.data.get("reason") or "").strip()
         if not reason:
             return Response({"detail": "Le motif est obligatoire.", "code": "reason_required"}, status=400)
-        starts = parse_date(str(request.data.get("starts_on") or "")) or timezone.localdate()
+        starts = parse_date(str(request.data.get("day" if daily else "starts_on") or "")) or timezone.localdate()
         ends = parse_date(str(request.data.get("ends_on") or "")) if request.data.get("ends_on") else None
+        if daily:
+            problem = _day_role_problem(member, starts)
+            if problem:
+                return Response(problem, status=400)
+            ends = starts
         rr = RoleRequest.objects.create(member=member, role=role, starts_on=starts, ends_on=ends, reason=reason, requested_by=u)
-        audit.record("Demande de rôle", actor=u, obj=member, request=request, detail={"role": role.name, "motif": reason})
+        audit.record("Demande de rôle du jour" if daily else "Demande de rôle", actor=u, obj=member, request=request,
+                     detail={"role": role.name, "motif": reason, **({"jour": str(starts)} if daily else {})})
         return Response({"id": rr.pk, "status": rr.status}, status=201)
 
 
+def _day_role_problem(member, day):
+    """Why a role of the day can't be asked for this member on this day."""
+    from apps.accounts.models import RoleRequest
+
+    if day < timezone.localdate():
+        return {"detail": "Choisissez aujourd’hui ou une date à venir.", "code": "past_day"}
+    if member.group_status != User.Status.ACTIVE:
+        return {"detail": "Seul un membre actif peut recevoir un rôle du jour.", "code": "not_active"}
+    if RoleAssignment.objects.active(day).filter(user=member).exclude(role__slug="membre").exists():
+        return {"detail": "Ce membre a déjà un rôle : le rôle du jour est pour un membre sans rôle.", "code": "has_role"}
+    if RoleRequest.objects.filter(member=member, starts_on=day, ends_on=day, status=RoleRequest.Status.PENDING).exists():
+        return {"detail": "Une demande est déjà en attente pour ce membre ce jour-là.", "code": "already_requested"}
+    return None
+
+
 class RequestableRolesView(APIView):
+    """?daily=1: the roles that can be asked for one day."""
+
     def get(self, request):
-        return Response([{"slug": r.slug, "name": r.name, "kind": r.kind}
-                         for r in Role.objects.filter(kind__in=REQUESTABLE_KINDS, is_archived=False).exclude(slug="membre")])
+        roles = Role.objects.filter(is_archived=False).exclude(slug__in=["membre", "super-admin"])
+        roles = roles.filter(daily=True) if request.query_params.get("daily") in ("1", "true") else roles.filter(kind__in=REQUESTABLE_KINDS)
+        return Response([{"slug": r.slug, "name": r.name, "kind": r.kind} for r in roles])
 
 
 def _save_photo(request, member, action):

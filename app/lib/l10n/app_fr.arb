@@ -1022,5 +1022,16 @@
   "photoFromGallery": "Choisir dans la galerie",
   "photoFromCamera": "Prendre une photo",
   "removePhoto": "Retirer la photo",
-  "photoRemoved": "Photo retirée."
+  "photoRemoved": "Photo retirée.",
+  "requestDayRole": "Demander un rôle du jour",
+  "dayRoleHint": "Pour un membre actif sans rôle, le temps d’une journée. Le partenaire valide ; le rôle s’arrête le soir même.",
+  "onDay": "Le {date}",
+  "@onDay": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dayRoleRequestSent": "Demande envoyée au partenaire."
 }

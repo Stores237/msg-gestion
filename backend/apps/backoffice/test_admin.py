@@ -149,6 +149,30 @@ def test_role_request_approved_from_dashboard(admin, client):
     assert rr.status == "approved" and RoleAssignment.objects.filter(user=m, role__slug="censeur-du-jour").exists()
 
 
+def test_role_of_the_day_request_approved_ends_that_night(admin, client):
+    from datetime import date, timedelta
+
+    from apps.core.models import Notification
+
+    m = UserFactory()
+    day = date.today() + timedelta(days=2)
+    rr = RoleRequest.objects.create(member=m, role=Role.objects.get(slug="president"), starts_on=day, ends_on=day, reason="Messe des jeunes")
+    assert "rôle du jour" in client.get("/bo/").content.decode()
+    client.post(f"/bo/demandes/{rr.id}/", {"approve": "1"})
+    a = RoleAssignment.objects.get(user=m, role__slug="president")
+    assert a.starts_on == a.ends_on == day
+    assert Notification.objects.filter(user=m, title="Rôle du jour").exists()
+
+
+def test_role_daily_switch(admin, client):
+    role = Role.objects.get(slug="vice-president")
+    assert not role.daily
+    client.post("/bo/roles/vice-president/gerer/", {"action": "daily"})
+    role.refresh_from_db()
+    assert role.daily
+    assert "Rôle du jour possible" in client.get("/bo/roles/vice-president/").content.decode()
+
+
 def test_assignments_page_and_renew(admin, client):
     from datetime import timedelta
 

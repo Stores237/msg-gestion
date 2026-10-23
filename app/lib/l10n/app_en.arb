@@ -451,5 +451,9 @@
   "photoFromGallery": "Choose from gallery",
   "photoFromCamera": "Take a photo",
   "removePhoto": "Remove photo",
-  "photoRemoved": "Photo removed."
+  "photoRemoved": "Photo removed.",
+  "requestDayRole": "Request a role of the day",
+  "dayRoleHint": "For an active member with no role, for one day. The partner approves; the role ends that night.",
+  "onDay": "On {date}",
+  "dayRoleRequestSent": "Request sent to the partner."
 }

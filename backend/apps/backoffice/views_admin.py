@@ -460,8 +460,13 @@ def role_request_decide(request, pk):
     rr = get_object_or_404(RoleRequest.objects.select_related("member", "role"), pk=pk, status=RoleRequest.Status.PENDING)
     if request.POST.get("approve"):
         try:
-            assign_role(rr.member, rr.role, reason=f"Demande approuvée : {rr.reason}", by=request.user,
-                        starts_on=rr.starts_on, ends_on=rr.ends_on, request=request)
+            if rr.role.daily and rr.ends_on == rr.starts_on:
+                # A role of the day: ends that night; the member is told.
+                _assign_for_the_day(rr.member, rr.role, rr.starts_on, reason=f"Demande approuvée : {rr.reason}",
+                                    by=request.user, request=request)
+            else:
+                assign_role(rr.member, rr.role, reason=f"Demande approuvée : {rr.reason}", by=request.user,
+                            starts_on=rr.starts_on, ends_on=rr.ends_on, request=request)
         except RuleViolation as e:
             messages.error(request, str(e))
             return redirect("backoffice:dashboard")
@@ -504,6 +509,10 @@ def role_manage(request, slug=None):
         role.name = name
         role.save(update_fields=["name"])
         audit.record("Rôle renommé", actor=request.user, obj=role, request=request, detail={"avant": old, "après": name})
+    elif action == "daily" and role.slug not in ("membre", registry.SUPER_ADMIN_SLUG):
+        role.daily = not role.daily
+        role.save(update_fields=["daily"])
+        audit.record("Rôle du jour autorisé" if role.daily else "Rôle du jour retiré", actor=request.user, obj=role, request=request)
     elif action == "duplicate":
         base = f"{role.slug}-copie"
         s, i = base, 2

@@ -303,10 +303,17 @@ class FakeMembersRepository implements MembersRepository {
   }
 
   @override
-  Future<List<(String, String)>> requestableRoles() async => const [
-    ('censeur-du-jour', 'Censeur du jour'),
-    ('chef-de-groupe', 'Chef de groupe'),
-  ];
+  Future<List<(String, String)>> requestableRoles({bool daily = false}) async =>
+      daily
+      ? const [
+          ('president', 'Président'),
+          ('censeur-du-jour', 'Censeur du jour'),
+          ('tresorier', 'Trésorier'),
+        ]
+      : const [
+          ('censeur-du-jour', 'Censeur du jour'),
+          ('chef-de-groupe', 'Chef de groupe'),
+        ];
 
   @override
   Future<void> requestRole(
@@ -315,7 +322,12 @@ class FakeMembersRepository implements MembersRepository {
     required String reason,
     required DateTime startsOn,
     DateTime? endsOn,
-  }) async => roleRequests.add('$id:$role:$reason');
+    bool daily = false,
+  }) async => roleRequests.add(
+    daily
+        ? '$id:$role:$reason:day:${startsOn.toIso8601String().substring(0, 10)}'
+        : '$id:$role:$reason',
+  );
 }
 
 class FakeEventsRepository implements EventsRepository {

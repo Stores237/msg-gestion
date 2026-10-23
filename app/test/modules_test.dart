@@ -146,6 +146,61 @@ void main() {
       expect(f.members.revealed, [7]);
     });
 
+    testWidgets(
+      'role of the day: only for an active member with no role, one date',
+      (tester) async {
+        final f = await setUpApp(tester);
+        await pumpShell(
+          tester,
+          fakeMe(
+            tabs: const ['accueil', 'membres'],
+            permissions: {
+              ..._secretary,
+              'members.profile': ['view', 'create', 'change'],
+            },
+          ),
+        );
+        await tester.tap(find.byKey(const Key('tab-membres')));
+        await tester.pumpAndSettle();
+        // The président already has a role: no role of the day.
+        await tester.tap(find.text('Ewane Brice'));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('propose-role')),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.byKey(const Key('request-day-role')), findsNothing);
+        await tester.tap(find.byTooltip('Retour'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Ateba Sandrine'));
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('request-day-role')),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(find.byKey(const Key('request-day-role')));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('le temps d’une journée'), findsOneWidget);
+        expect(find.text('Au (facultatif)'), findsNothing); // one date only
+        await tester.tap(find.byKey(const Key('propose-role-select')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Trésorier').last);
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('propose-reason')),
+          'Kermesse',
+        );
+        await tester.tap(find.byKey(const Key('propose-send')));
+        await tester.pumpAndSettle();
+        final today = DateTime.now().toIso8601String().substring(0, 10);
+        expect(f.members.roleRequests, ['3:tresorier:Kermesse:day:$today']);
+        expect(find.text('Demande envoyée au partenaire.'), findsOneWidget);
+      },
+    );
+
     testWidgets('a plain member gets no add button', (tester) async {
       await setUpApp(tester);
       await pumpShell(
