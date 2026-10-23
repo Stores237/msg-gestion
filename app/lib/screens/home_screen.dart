@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
@@ -19,6 +20,7 @@ import 'account_screen.dart';
 import 'planning/my_duties_view.dart';
 import 'announcements/announcement_detail_screen.dart';
 import 'calendar/event_detail_screen.dart';
+import 'splash_screen.dart';
 
 class _HomeData {
   const _HomeData({
@@ -132,6 +134,14 @@ class HomeScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 children: [
+                  if (me.groups.length > 1) ...[
+                    _GroupSwitch(me: me),
+                    const SizedBox(height: 12),
+                  ],
+                  if ((me.group?.welcomeMessage ?? '').isNotEmpty) ...[
+                    _Welcome(group: me.group!),
+                    const SizedBox(height: 24),
+                  ],
                   if (data.nextDuty != null) ...[
                     SectionLabel(l.myNextDuty),
                     const SizedBox(height: 8),
@@ -403,6 +413,124 @@ class _ToFollow extends StatelessWidget {
         const SizedBox(height: 8),
         GroupCard(children: rows),
       ],
+    );
+  }
+}
+
+/// The group's welcome message, written by the MSG partner (owner,
+/// 2026-10-23).
+class _Welcome extends StatelessWidget {
+  const _Welcome({required this.group});
+  final GroupInfo group;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    return Container(
+      key: const Key('welcome-card'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: c.primaryTint,
+        borderRadius: BorderRadius.circular(MsgRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            group.name,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              color: c.primaryText,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            group.welcomeMessage,
+            style: const TextStyle(fontSize: 15, height: 1.45),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One account in several groups: which group the app shows.
+class _GroupSwitch extends StatelessWidget {
+  const _GroupSwitch({required this.me});
+  final Me me;
+
+  Future<void> _choose(BuildContext context) async {
+    final l = AppLocalizations.of(context);
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            Text(l.chooseGroup, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            for (final g in me.groups)
+              ListTile(
+                key: Key('group-${g.id}'),
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  g.id == me.group?.id
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                ),
+                title: Text(g.name),
+                onTap: () => Navigator.of(context).pop(g.id),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked == null || picked == me.group?.id || !context.mounted) return;
+    await GroupController.instance.select(picked);
+    if (!context.mounted) return;
+    // Start again in the chosen group: its roles, tabs and data.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const SplashScreen()),
+      (_) => false,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    return Material(
+      color: c.surfaceCard,
+      borderRadius: BorderRadius.circular(MsgRadius.md),
+      child: InkWell(
+        key: const Key('switch-group'),
+        borderRadius: BorderRadius.circular(MsgRadius.md),
+        onTap: () => _choose(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          child: Row(
+            children: [
+              Icon(Icons.groups_outlined, color: c.primaryText),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  me.group?.name ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.swap_horiz,
+                color: c.primaryText,
+                semanticLabel: l.switchGroup,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,8 +1,6 @@
 {
   "@@locale": "fr",
-  "appTitle": "MSG Gestion",
-  "movementName": "Mouvement Garde Suisse",
-  "parishName": "Paroisse Notre-Dame de Lourdes de Yapoma",
+  "appTitle": "MSG",
   "motto": "Service · Ordre · Accueil",
   "splashPreparing": "Préparation des données…",
   "welcome": "Bienvenue",
@@ -973,5 +971,36 @@
   "chefNeedsGuards": "Affectez d’abord des gardes à ce service.",
   "statementPdf": "Bilan général des membres (PDF)",
   "memberStatementPdf": "Bilan financier (PDF)",
-  "errorBackofficeOnly": "Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application."
+  "errorBackofficeOnly": "Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.",
+  "requestAccess": "Demander un accès",
+  "accessRequestsTitle": "Demandes d’accès",
+  "accessRole": "Rôle demandé",
+  "accessNote": "Message pour le partenaire (facultatif)",
+  "sendAccessRequest": "Envoyer la demande",
+  "accessSentTitle": "Demande envoyée",
+  "accessSentBody": "Le partenaire MSG crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.",
+  "accessIntro": "Le partenaire MSG ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.",
+  "accessPending": "En attente",
+  "accessApproved": "Accès créé",
+  "accessRefused": "Refusée",
+  "showTempPin": "Voir le code provisoire",
+  "tempPinTitle": "Code provisoire",
+  "tempPinBody": "Remettez ce code à {name} ({phone}). Il ne sera plus affiché. À sa première connexion, il choisira son propre code et verra son rôle.",
+  "@tempPinBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "accessExistingAccount": "Compte existant : il se connecte avec son code habituel.",
+  "pinGone": "Code déjà remis ou expiré. Demandez une réinitialisation au partenaire.",
+  "noAccessRequests": "Aucune demande pour l’instant.",
+  "switchGroup": "Changer de groupe",
+  "chooseGroup": "Choisir un groupe",
+  "errorNoGroup": "Ce compte n’appartient encore à aucun groupe. Demandez au responsable de votre groupe.",
+  "platformTagline": "La gestion de votre groupe : membres, caisse, calendrier, services, annonces."
 }

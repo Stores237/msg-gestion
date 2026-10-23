@@ -16,6 +16,8 @@ String describeError(BuildContext context, Object error) {
     NoPinSet() => l.errorNoPin,
     BackofficeOnly() => l.errorBackofficeOnly,
     ApiException(code: 'backoffice_only') => l.errorBackofficeOnly,
+    ApiException(code: 'no_group') => l.errorNoGroup,
+    ApiException(code: 'pin_gone') => l.pinGone,
     QueuedOffline() => l.savedOnPhone,
     NetworkException() => l.networkError,
     ApiException(statusCode: 403) => l.errorForbidden,

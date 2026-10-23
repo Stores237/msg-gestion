@@ -10,6 +10,7 @@ import 'package:msg_gestion/models/announcement.dart';
 import 'package:msg_gestion/models/event.dart';
 import 'package:msg_gestion/models/finance.dart';
 import 'package:msg_gestion/models/me.dart';
+import 'package:msg_gestion/models/access_request.dart';
 import 'package:msg_gestion/models/member.dart';
 import 'package:msg_gestion/models/planning.dart';
 
@@ -21,6 +22,10 @@ Me fakeMe({
     'calendar.events': ['view'],
     'announcements.posts': ['view'],
   },
+  String welcome = '',
+  List<Map<String, dynamic>> groups = const [
+    {'id': 1, 'name': 'Mouvement Garde Suisse'},
+  ],
 }) => Me.fromJson({
   'id': 1,
   'first_name': firstName,
@@ -42,6 +47,12 @@ Me fakeMe({
       ],
   'permissions': permissions,
   'tabs': tabs,
+  'group': {
+    ...groups.first,
+    'place': 'Yapoma, Douala',
+    'welcome_message': welcome,
+  },
+  'groups': groups,
 });
 
 class FakeAuthRepository implements AuthRepository {
@@ -214,14 +225,53 @@ class FakeMembersRepository implements MembersRepository {
     ),
   ];
 
+  final requestedRoles = <String>[];
+  late List<AccessRequestItem> requests = [
+    AccessRequestItem(
+      id: 7,
+      fullName: 'Mbarga Rose',
+      phone: '+237690112233',
+      role: 'tresorier',
+      roleName: 'Trésorier',
+      status: 'approved',
+      createdAt: DateTime(2026, 10, 22),
+      decidedAt: DateTime(2026, 10, 23),
+      pinReady: true,
+    ),
+  ];
+  final revealed = <int>[];
+
   @override
-  Future<MemberDetail> create(NewMember member) async {
+  Future<AccessRequestItem> requestAccess(
+    NewMember member, {
+    required String role,
+    String note = '',
+  }) async {
     created.add(member);
-    return MemberDetail(
-      summary: summary(99, member.lastName, member.firstName),
-      joinedOn: DateTime.now(),
-      restricted: const [],
-      temporaryPin: '4821',
+    requestedRoles.add(role);
+    final item = AccessRequestItem(
+      id: 100 + created.length,
+      fullName: '${member.lastName} ${member.firstName}',
+      phone: member.phone,
+      role: role,
+      roleName: role,
+      status: 'pending',
+      createdAt: DateTime.now(),
+    );
+    requests = [item, ...requests];
+    return item;
+  }
+
+  @override
+  Future<List<AccessRequestItem>> accessRequests() async => requests;
+
+  @override
+  Future<AccessPin> revealAccessPin(int requestId) async {
+    revealed.add(requestId);
+    return const AccessPin(
+      fullName: 'Mbarga Rose',
+      phone: '+237690112233',
+      pin: '4821',
     );
   }
 

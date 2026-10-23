@@ -1,3 +1,4 @@
+import '../../../models/access_request.dart';
 import '../../../models/member.dart';
 import '../../api_client.dart';
 import '../members_repository.dart';
@@ -43,8 +44,28 @@ class HttpMembersRepository implements MembersRepository {
   ];
 
   @override
-  Future<MemberDetail> create(NewMember member) async => MemberDetail.fromJson(
-    await _api.post('/members/', body: member.toJson()) as Map<String, dynamic>,
+  Future<AccessRequestItem> requestAccess(
+    NewMember member, {
+    required String role,
+    String note = '',
+  }) async => AccessRequestItem.fromJson(
+    await _api.post(
+          '/members/access-requests/',
+          body: {...member.toJson(), 'role': role, 'note': note},
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<List<AccessRequestItem>> accessRequests() async => [
+    for (final r in await _api.get('/members/access-requests/') as List)
+      AccessRequestItem.fromJson(r as Map<String, dynamic>),
+  ];
+
+  @override
+  Future<AccessPin> revealAccessPin(int requestId) async => AccessPin.fromJson(
+    await _api.post('/members/access-requests/$requestId/pin/')
+        as Map<String, dynamic>,
   );
 
   @override

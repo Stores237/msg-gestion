@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'auth_session.dart';
+import 'group_controller.dart';
 import 'locale_controller.dart';
 import 'offline.dart';
 
@@ -73,7 +74,10 @@ class ApiClient {
   /// the last remembered answer is returned and the app shows "Hors ligne".
   Future<dynamic> get(String path, {Map<String, String>? query}) async {
     final uri = _uri(path, query);
-    final key = uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path;
+    // Per group: one group's cached answers never show in another.
+    final key =
+        'g${GroupController.instance.id ?? 0}:'
+        '${uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path}';
     final offline = OfflineState.instance;
     try {
       final data = await _send('GET', uri);
@@ -107,6 +111,7 @@ class ApiClient {
         path: path,
         body: body,
         kind: kind,
+        groupId: GroupController.instance.id,
       );
       await OfflineState.instance.enqueue(item);
       throw QueuedOffline(item);
@@ -115,7 +120,12 @@ class ApiClient {
 
   /// Send whatever waited for the network.
   Future<void> flushOutbox() => OfflineState.instance.flush(
-    (item) => _send(item.method, _uri(item.path), body: item.body),
+    (item) => _send(
+      item.method,
+      _uri(item.path),
+      body: item.body,
+      groupId: item.groupId,
+    ),
     isNetworkError: (e) => e is NetworkException,
   );
 
@@ -153,6 +163,8 @@ class ApiClient {
     final access = authSession.accessToken;
     if (access != null) request.headers['Authorization'] = 'Bearer $access';
     request.headers['Accept-Language'] = LocaleController.instance.languageCode;
+    final group = GroupController.instance.id;
+    if (group != null) request.headers['X-Group'] = '$group';
     final http.Response response;
     try {
       response = await http.Response.fromStream(
@@ -191,12 +203,15 @@ class ApiClient {
     Object? body,
     bool authenticated = true,
     bool isRetry = false,
+    int? groupId,
   }) async {
     final headers = <String, String>{
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Accept-Language': LocaleController.instance.languageCode,
     };
+    final group = groupId ?? GroupController.instance.id;
+    if (group != null) headers['X-Group'] = '$group';
     final access = authenticated ? authSession.accessToken : null;
     if (access != null) headers['Authorization'] = 'Bearer $access';
 
@@ -222,6 +237,7 @@ class ApiClient {
           body: body,
           authenticated: authenticated,
           isRetry: true,
+          groupId: groupId,
         );
       }
     }

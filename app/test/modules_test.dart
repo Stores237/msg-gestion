@@ -60,7 +60,7 @@ void main() {
     });
 
     testWidgets(
-      'a minor needs a parent phone; the temporary PIN is shown once',
+      'access request: a minor needs a parent phone; sent with the role',
       (tester) async {
         final f = await setUpApp(tester);
         await pumpShell(
@@ -81,13 +81,37 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('f-parent-phone')), findsOneWidget);
 
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('f-role')),
+          100,
+          scrollable: find
+              .descendant(
+                of: find.byType(Form),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        await tester.tap(find.byKey(const Key('f-role')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Censeur du jour').last);
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('save-member')));
         await tester.pumpAndSettle();
+        expect(f.members.created, isEmpty);
+        await tester.scrollUntilVisible(
+          find.byKey(const Key('f-parent-phone')),
+          -100,
+          scrollable: find
+              .descendant(
+                of: find.byType(Form),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
         expect(
           find.text('Ce champ est obligatoire pour un mineur.'),
           findsOneWidget,
         );
-        expect(f.members.created, isEmpty);
 
         await tester.enterText(
           find.byKey(const Key('f-parent-phone')),
@@ -96,9 +120,31 @@ void main() {
         await tester.tap(find.byKey(const Key('save-member')));
         await tester.pumpAndSettle();
         expect(f.members.created.single.parentPhone, '699120044');
-        expect(find.textContaining('4821'), findsOneWidget);
+        expect(f.members.requestedRoles, ['censeur-du-jour']);
+        expect(find.byKey(const Key('access-sent')), findsOneWidget);
       },
     );
+
+    testWidgets('access requests: the temporary PIN is shown once', (
+      tester,
+    ) async {
+      final f = await setUpApp(tester);
+      await pumpShell(
+        tester,
+        fakeMe(tabs: const ['accueil', 'membres'], permissions: _secretary),
+      );
+      await tester.tap(find.byKey(const Key('tab-membres')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('open-access-requests')));
+      await tester.pumpAndSettle();
+      expect(find.text('Mbarga Rose'), findsOneWidget);
+      expect(find.text('Accès créé'.toUpperCase()), findsOneWidget);
+      await tester.tap(find.byKey(const Key('reveal-7')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('temp-pin')), findsOneWidget);
+      expect(find.text('4821'), findsOneWidget);
+      expect(f.members.revealed, [7]);
+    });
 
     testWidgets('a plain member gets no add button', (tester) async {
       await setUpApp(tester);

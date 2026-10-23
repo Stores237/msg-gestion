@@ -101,20 +101,8 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In fr, this message translates to:
-  /// **'MSG Gestion'**
+  /// **'MSG'**
   String get appTitle;
-
-  /// No description provided for @movementName.
-  ///
-  /// In fr, this message translates to:
-  /// **'Mouvement Garde Suisse'**
-  String get movementName;
-
-  /// No description provided for @parishName.
-  ///
-  /// In fr, this message translates to:
-  /// **'Paroisse Notre-Dame de Lourdes de Yapoma'**
-  String get parishName;
 
   /// No description provided for @motto.
   ///
@@ -2617,6 +2605,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.'**
   String get errorBackofficeOnly;
+
+  /// No description provided for @requestAccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un accès'**
+  String get requestAccess;
+
+  /// No description provided for @accessRequestsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes d’accès'**
+  String get accessRequestsTitle;
+
+  /// No description provided for @accessRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rôle demandé'**
+  String get accessRole;
+
+  /// No description provided for @accessNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message pour le partenaire (facultatif)'**
+  String get accessNote;
+
+  /// No description provided for @sendAccessRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get sendAccessRequest;
+
+  /// No description provided for @accessSentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée'**
+  String get accessSentTitle;
+
+  /// No description provided for @accessSentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le partenaire MSG crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.'**
+  String get accessSentBody;
+
+  /// No description provided for @accessIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le partenaire MSG ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.'**
+  String get accessIntro;
+
+  /// No description provided for @accessPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get accessPending;
+
+  /// No description provided for @accessApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accès créé'**
+  String get accessApproved;
+
+  /// No description provided for @accessRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get accessRefused;
+
+  /// No description provided for @showTempPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir le code provisoire'**
+  String get showTempPin;
+
+  /// No description provided for @tempPinTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code provisoire'**
+  String get tempPinTitle;
+
+  /// No description provided for @tempPinBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettez ce code à {name} ({phone}). Il ne sera plus affiché. À sa première connexion, il choisira son propre code et verra son rôle.'**
+  String tempPinBody(String name, String phone);
+
+  /// No description provided for @accessExistingAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte existant : il se connecte avec son code habituel.'**
+  String get accessExistingAccount;
+
+  /// No description provided for @pinGone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code déjà remis ou expiré. Demandez une réinitialisation au partenaire.'**
+  String get pinGone;
+
+  /// No description provided for @noAccessRequests.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande pour l’instant.'**
+  String get noAccessRequests;
+
+  /// No description provided for @switchGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer de groupe'**
+  String get switchGroup;
+
+  /// No description provided for @chooseGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir un groupe'**
+  String get chooseGroup;
+
+  /// No description provided for @errorNoGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce compte n’appartient encore à aucun groupe. Demandez au responsable de votre groupe.'**
+  String get errorNoGroup;
+
+  /// No description provided for @platformTagline.
+  ///
+  /// In fr, this message translates to:
+  /// **'La gestion de votre groupe : membres, caisse, calendrier, services, annonces.'**
+  String get platformTagline;
 }
 
 class _AppLocalizationsDelegate

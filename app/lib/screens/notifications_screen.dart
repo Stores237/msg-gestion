@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/dates.dart';
 import '../widgets/errors.dart';
 import '../widgets/ui.dart';
+import 'members/access_requests_screen.dart';
 import 'calendar/event_detail_screen.dart';
 import 'planning/my_duties_view.dart';
 import 'planning/requests_screen.dart';
@@ -58,6 +59,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     } else if (type == 'request' && me != null) {
       page = RequestsScreen(me: me);
+    } else if (type == 'access_request') {
+      page = const AccessRequestsScreen();
     }
     if (page != null) {
       await Navigator.of(

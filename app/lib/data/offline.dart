@@ -55,6 +55,7 @@ class OutboxItem {
     required this.path,
     this.body,
     required this.kind,
+    this.groupId,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -64,6 +65,10 @@ class OutboxItem {
 
   /// entry | attendance | excuse | read | confirm | notifications
   final String kind;
+
+  /// The group it was made in: sent there even if the member switched
+  /// group before the network came back.
+  final int? groupId;
   final DateTime createdAt;
 
   Map<String, dynamic> toJson() => {
@@ -71,6 +76,7 @@ class OutboxItem {
     'path': path,
     'body': body,
     'kind': kind,
+    'group': groupId,
     'created_at': createdAt.toIso8601String(),
   };
 
@@ -79,6 +85,7 @@ class OutboxItem {
     path: j['path'] as String,
     body: j['body'],
     kind: j['kind'] as String,
+    groupId: j['group'] as int?,
     createdAt: DateTime.parse(j['created_at'] as String),
   );
 }

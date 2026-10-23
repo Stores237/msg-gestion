@@ -24,6 +24,33 @@ class RoleAssignment {
   );
 }
 
+/// A group of the MSG platform, as the app sees it.
+class GroupInfo {
+  const GroupInfo({
+    required this.id,
+    required this.name,
+    this.place = '',
+    this.motto = '',
+    this.welcomeMessage = '',
+  });
+
+  final int id;
+  final String name;
+  final String place;
+  final String motto;
+
+  /// Written by the partner for this group; shown on Accueil.
+  final String welcomeMessage;
+
+  factory GroupInfo.fromJson(Map<String, dynamic> j) => GroupInfo(
+    id: j['id'] as int,
+    name: j['name'] as String,
+    place: (j['place'] as String?) ?? '',
+    motto: (j['motto'] as String?) ?? '',
+    welcomeMessage: (j['welcome_message'] as String?) ?? '',
+  );
+}
+
 class Me {
   const Me({
     required this.id,
@@ -39,7 +66,13 @@ class Me {
     this.pinMustChange = false,
     this.remindEve = true,
     this.remind2h = false,
+    this.group,
+    this.groups = const [],
   });
+
+  /// The group this session works in, and every group the member is in.
+  final GroupInfo? group;
+  final List<GroupInfo> groups;
 
   final bool remindEve;
   final bool remind2h;
@@ -75,6 +108,13 @@ class Me {
       for (final e in (json['permissions'] as Map<String, dynamic>).entries)
         e.key: List<String>.from(e.value as List),
     },
+    group: json['group'] == null
+        ? null
+        : GroupInfo.fromJson(json['group'] as Map<String, dynamic>),
+    groups: [
+      for (final g in (json['groups'] as List?) ?? const [])
+        GroupInfo.fromJson(g as Map<String, dynamic>),
+    ],
     // Unknown tab names (a newer server) are skipped, not a crash.
     tabs: [
       for (final t in json['tabs'] as List)

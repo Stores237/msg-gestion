@@ -1,3 +1,4 @@
+import '../../models/access_request.dart';
 import '../../models/member.dart';
 
 abstract class MembersRepository {
@@ -10,8 +11,17 @@ abstract class MembersRepository {
   Future<MemberDetail> get(int id);
   Future<List<BureauEntry>> bureau();
 
-  /// Returns the new member, with [MemberDetail.temporaryPin] set.
-  Future<MemberDetail> create(NewMember member);
+  /// Asks the platform's partner to open an access for [member] with
+  /// [role] (the group leader's side of the access process).
+  Future<AccessRequestItem> requestAccess(
+    NewMember member, {
+    required String role,
+    String note = '',
+  });
+  Future<List<AccessRequestItem>> accessRequests();
+
+  /// The temporary PIN of an approved request, shown once.
+  Future<AccessPin> revealAccessPin(int requestId);
 
   /// New temporary PIN for a member (shown once to the secretary).
   Future<String> resetPin(int id);

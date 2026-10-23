@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:msg_gestion/data/group_controller.dart';
 import 'package:msg_gestion/data/repositories/profile_repository.dart';
 import 'package:msg_gestion/data/repository_locator.dart';
 
@@ -135,6 +136,35 @@ void main() {
     await tester.tap(find.byKey(const Key('export-statement')));
     await tester.pumpAndSettle();
     expect(f.finances.exports, ['statement']);
+  });
+
+  testWidgets('Accueil: the group\'s welcome message', (tester) async {
+    await setUpApp(tester);
+    await pumpShell(tester, fakeMe(welcome: 'Bienvenue au mouvement !'));
+    expect(find.byKey(const Key('welcome-card')), findsOneWidget);
+    expect(find.text('Bienvenue au mouvement !'), findsOneWidget);
+    expect(find.byKey(const Key('switch-group')), findsNothing);
+  });
+
+  testWidgets('Accueil: one account in two groups can switch', (tester) async {
+    await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        groups: const [
+          {'id': 1, 'name': 'Mouvement Garde Suisse'},
+          {'id': 2, 'name': 'Chorale Sainte-Cécile'},
+        ],
+      ),
+    );
+    await tester.tap(find.byKey(const Key('switch-group')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('group-2')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('group-2')));
+    await tester.pumpAndSettle();
+    expect(GroupController.instance.id, 2);
+    // The app starts again in the chosen group (here: signed out → login).
+    expect(find.byKey(const Key('switch-group')), findsNothing);
   });
 
   testWidgets('Accueil: À suivre for the bureau', (tester) async {

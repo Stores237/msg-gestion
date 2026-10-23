@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../data/api_client.dart';
 import '../../data/repository_locator.dart';
@@ -9,18 +8,21 @@ import '../../models/member.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 
-/// "Ajouter un membre". Under 18 → the parent block becomes required.
-/// On success, the temporary PIN is shown once to hand over in person.
-class AddMemberScreen extends StatefulWidget {
-  const AddMemberScreen({super.key});
+/// "Demander un accès" (owner, 2026-10-23): the group leader asks the MSG
+/// partner to open an account, with the role. Under 18 → the parent block
+/// becomes required. The temporary PIN comes back later, in "Demandes
+/// d'accès", once the partner has created the access.
+class RequestAccessScreen extends StatefulWidget {
+  const RequestAccessScreen({super.key});
 
   @override
-  State<AddMemberScreen> createState() => _AddMemberScreenState();
+  State<RequestAccessScreen> createState() => _RequestAccessScreenState();
 }
 
-class _AddMemberScreenState extends State<AddMemberScreen> {
+class _RequestAccessScreenState extends State<RequestAccessScreen> {
   final _form = GlobalKey<FormState>();
   final _last = TextEditingController();
   final _first = TextEditingController();
@@ -29,10 +31,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   final _parentName = TextEditingController();
   final _parentRelation = TextEditingController();
   final _parentPhone = TextEditingController();
+  final _note = TextEditingController();
+  String _role = 'membre';
+  List<(String, String)> _roles = const [];
   DateTime? _birth;
   bool _diaspora = false;
   bool _feePaid = true;
-  XFile? _photo;
   bool _busy = false;
   String? _phoneServerError;
 
@@ -46,10 +50,22 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       _parentName,
       _parentRelation,
       _parentPhone,
+      _note,
     ]) {
       c.dispose();
     }
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    RepositoryLocator.instance.members
+        .requestableRoles()
+        .then((r) {
+          if (mounted) setState(() => _roles = r);
+        })
+        .catchError((_) {});
   }
 
   int? get _age {
@@ -83,7 +99,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     setState(() => _busy = true);
     final l = AppLocalizations.of(context);
     try {
-      final m = await RepositoryLocator.instance.members.create(
+      await RepositoryLocator.instance.members.requestAccess(
         NewMember(
           lastName: _last.text.trim(),
           firstName: _first.text.trim(),
@@ -96,31 +112,16 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           parentPhone: _isMinor ? _parentPhone.text.trim() : '',
           registrationPaid: _feePaid,
         ),
+        role: _role,
+        note: _note.text.trim(),
       );
-      if (_photo != null) {
-        try {
-          await RepositoryLocator.instance.members.uploadPhoto(
-            m.summary.id,
-            bytes: await _photo!.readAsBytes(),
-            filename: _photo!.name,
-          );
-        } catch (_) {
-          // The member exists; the photo can be added from the profile.
-        }
-      }
       if (!mounted) return;
-      setState(
-        () => _busy = false,
-      ); // saved: stop the spinner behind the dialog
+      setState(() => _busy = false);
       await showDialog<void>(
         context: context,
-        barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: Text(l.memberSavedTitle),
-          content: Text(
-            l.memberSavedPin(m.summary.fullName, m.temporaryPin ?? '—'),
-            key: const Key('temp-pin'),
-          ),
+          title: Text(l.accessSentTitle),
+          content: Text(l.accessSentBody, key: const Key('access-sent')),
           actions: [
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -205,7 +206,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            ScreenHeader(title: l.newMember, back: true, small: true),
+            ScreenHeader(title: l.requestAccess, back: true, small: true),
             Expanded(
               child: Form(
                 key: _form,
@@ -213,50 +214,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                   children: [
                     const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        InkWell(
-                          key: const Key('f-photo'),
-                          customBorder: const CircleBorder(),
-                          onTap: () async {
-                            final p = await ImagePicker().pickImage(
-                              source: ImageSource.gallery,
-                              maxWidth: 1024,
-                              imageQuality: 85,
-                            );
-                            if (p != null) setState(() => _photo = p);
-                          },
-                          child: Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: c.surfaceCard,
-                              border: Border.all(
-                                color: c.borderStrong,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Icon(
-                              _photo == null
-                                  ? Icons.photo_camera_outlined
-                                  : Icons.check,
-                              color: c.textSecondary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _photo == null ? l.addPhoto : _photo!.name,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: c.primaryText,
-                            ),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      l.accessIntro,
+                      style: TextStyle(color: c.textSecondary, height: 1.4),
                     ),
                     label(l.lastNameLabel, req: true),
                     TextFormField(
@@ -372,6 +332,33 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                         decoration: deco(hint: 'Lyon, France'),
                       ),
                     ],
+                    label(l.accessRole, req: true),
+                    DropdownButtonFormField<String>(
+                      key: const Key('f-role'),
+                      initialValue: _role,
+                      isExpanded: true,
+                      decoration: deco(),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'membre',
+                          child: Text(roleLabel(l, 'membre', 'Membre')),
+                        ),
+                        for (final (slug, name) in _roles)
+                          DropdownMenuItem(
+                            value: slug,
+                            child: Text(roleLabel(l, slug, name)),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _role = v ?? 'membre'),
+                    ),
+                    label(l.accessNote),
+                    TextFormField(
+                      key: const Key('f-note'),
+                      controller: _note,
+                      maxLength: 300,
+                      maxLines: 2,
+                      decoration: deco(),
+                    ),
                   ],
                 ),
               ),
@@ -396,7 +383,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : Text(l.saveMember),
+                      : Text(l.sendAccessRequest),
                 ),
               ),
             ),

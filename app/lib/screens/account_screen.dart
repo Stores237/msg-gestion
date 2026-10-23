@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/current_user.dart';
+import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
@@ -19,6 +20,7 @@ class AccountScreen extends StatelessWidget {
 
   Future<void> _logout(BuildContext context) async {
     await RepositoryLocator.instance.auth.logout();
+    await GroupController.instance.select(null);
     currentUser.value = null;
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(

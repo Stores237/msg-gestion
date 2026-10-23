@@ -9,7 +9,8 @@ import '../../models/member.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
-import 'add_member_screen.dart';
+import 'access_requests_screen.dart';
+import 'request_access_screen.dart';
 import 'bureau_screen.dart';
 import 'member_profile_screen.dart';
 
@@ -68,10 +69,15 @@ class _MembersScreenState extends State<MembersScreen> {
   }
 
   Future<void> _add() async {
-    final created = await Navigator.of(
-      context,
-    ).push<bool>(MaterialPageRoute(builder: (_) => const AddMemberScreen()));
-    if (created == true) _load();
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const RequestAccessScreen()),
+    );
+    if (created == true && mounted) {
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const AccessRequestsScreen()));
+      _load();
+    }
   }
 
   @override
@@ -87,7 +93,7 @@ class _MembersScreenState extends State<MembersScreen> {
               key: const Key('add-member'),
               onPressed: _add,
               icon: const Icon(Icons.person_add_alt),
-              label: Text(l.addMember),
+              label: Text(l.requestAccess),
               backgroundColor: c.primary,
               foregroundColor: Colors.white,
             )
@@ -98,6 +104,19 @@ class _MembersScreenState extends State<MembersScreen> {
             title: l.tabMembers,
             sync: true,
             subtitle: _page == null ? null : l.membersSubtitle(counts.all),
+            actions: [
+              if (canAdd)
+                IconButton(
+                  key: const Key('open-access-requests'),
+                  tooltip: l.accessRequestsTitle,
+                  icon: const Icon(Icons.how_to_reg_outlined),
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const AccessRequestsScreen(),
+                    ),
+                  ),
+                ),
+            ],
           ),
           Expanded(
             child: RefreshIndicator(

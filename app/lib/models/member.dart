@@ -226,5 +226,6 @@ class NewMember {
     'parent_name': parentName,
     'parent_relation': parentRelation,
     'parent_phone': parentPhone,
+    'registration_paid': registrationPaid,
   };
 }

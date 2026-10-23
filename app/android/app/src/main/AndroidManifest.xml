@@ -2,7 +2,7 @@
     <!-- Release builds talk to the API; Flutter only adds this to debug/profile. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="MSG Gestion"
+        android:label="MSG"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

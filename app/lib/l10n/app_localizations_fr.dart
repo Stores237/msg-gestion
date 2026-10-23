@@ -9,13 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'MSG Gestion';
-
-  @override
-  String get movementName => 'Mouvement Garde Suisse';
-
-  @override
-  String get parishName => 'Paroisse Notre-Dame de Lourdes de Yapoma';
+  String get appTitle => 'MSG';
 
   @override
   String get motto => 'Service · Ordre · Accueil';
@@ -1515,4 +1509,75 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get errorBackofficeOnly =>
       'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.';
+
+  @override
+  String get requestAccess => 'Demander un accès';
+
+  @override
+  String get accessRequestsTitle => 'Demandes d’accès';
+
+  @override
+  String get accessRole => 'Rôle demandé';
+
+  @override
+  String get accessNote => 'Message pour le partenaire (facultatif)';
+
+  @override
+  String get sendAccessRequest => 'Envoyer la demande';
+
+  @override
+  String get accessSentTitle => 'Demande envoyée';
+
+  @override
+  String get accessSentBody =>
+      'Le partenaire MSG crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.';
+
+  @override
+  String get accessIntro =>
+      'Le partenaire MSG ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.';
+
+  @override
+  String get accessPending => 'En attente';
+
+  @override
+  String get accessApproved => 'Accès créé';
+
+  @override
+  String get accessRefused => 'Refusée';
+
+  @override
+  String get showTempPin => 'Voir le code provisoire';
+
+  @override
+  String get tempPinTitle => 'Code provisoire';
+
+  @override
+  String tempPinBody(String name, String phone) {
+    return 'Remettez ce code à $name ($phone). Il ne sera plus affiché. À sa première connexion, il choisira son propre code et verra son rôle.';
+  }
+
+  @override
+  String get accessExistingAccount =>
+      'Compte existant : il se connecte avec son code habituel.';
+
+  @override
+  String get pinGone =>
+      'Code déjà remis ou expiré. Demandez une réinitialisation au partenaire.';
+
+  @override
+  String get noAccessRequests => 'Aucune demande pour l’instant.';
+
+  @override
+  String get switchGroup => 'Changer de groupe';
+
+  @override
+  String get chooseGroup => 'Choisir un groupe';
+
+  @override
+  String get errorNoGroup =>
+      'Ce compte n’appartient encore à aucun groupe. Demandez au responsable de votre groupe.';
+
+  @override
+  String get platformTagline =>
+      'La gestion de votre groupe : membres, caisse, calendrier, services, annonces.';
 }

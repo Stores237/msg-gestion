@@ -9,13 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'MSG Gestion';
-
-  @override
-  String get movementName => 'Swiss Guard Movement';
-
-  @override
-  String get parishName => 'Our Lady of Lourdes Parish, Yapoma';
+  String get appTitle => 'MSG';
 
   @override
   String get motto => 'Service · Order · Welcome';
@@ -1511,4 +1505,75 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorBackofficeOnly =>
       'Super admin accounts work only in the back-office (web browser), not in the app.';
+
+  @override
+  String get requestAccess => 'Request access';
+
+  @override
+  String get accessRequestsTitle => 'Access requests';
+
+  @override
+  String get accessRole => 'Requested role';
+
+  @override
+  String get accessNote => 'Note for the partner (optional)';
+
+  @override
+  String get sendAccessRequest => 'Send the request';
+
+  @override
+  String get accessSentTitle => 'Request sent';
+
+  @override
+  String get accessSentBody =>
+      'The MSG partner will create the access. You’ll be told here, with the temporary PIN to hand over.';
+
+  @override
+  String get accessIntro =>
+      'The MSG partner opens the account. You’ll then receive the temporary PIN to hand over to the member.';
+
+  @override
+  String get accessPending => 'Pending';
+
+  @override
+  String get accessApproved => 'Access created';
+
+  @override
+  String get accessRefused => 'Refused';
+
+  @override
+  String get showTempPin => 'Show the temporary PIN';
+
+  @override
+  String get tempPinTitle => 'Temporary PIN';
+
+  @override
+  String tempPinBody(String name, String phone) {
+    return 'Hand this PIN to $name ($phone). It won’t be shown again. At first sign-in they choose their own PIN and see their role.';
+  }
+
+  @override
+  String get accessExistingAccount =>
+      'Existing account: they sign in with their usual PIN.';
+
+  @override
+  String get pinGone =>
+      'PIN already handed over or expired. Ask the partner for a reset.';
+
+  @override
+  String get noAccessRequests => 'No requests yet.';
+
+  @override
+  String get switchGroup => 'Switch group';
+
+  @override
+  String get chooseGroup => 'Choose a group';
+
+  @override
+  String get errorNoGroup =>
+      'This account isn’t in any group yet. Ask your group’s organiser.';
+
+  @override
+  String get platformTagline =>
+      'Your group, managed: members, cash book, calendar, duties, announcements.';
 }
