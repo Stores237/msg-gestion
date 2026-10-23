@@ -48,3 +48,4 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-20 | Fingerprint key on the PIN pad shown but disabled | Matches the design layout; biometric unlock not built yet (TODOS.md) |
 | 2026-10-20 | App defaults to French; English only when the phone is set to English | The movement works in French; the playbook requires every string in both locale files |
 | 2026-10-20 | Logo = the letters "MSG" in white on the primary green, rounded square (`app/lib/widgets/msg_logo.dart`, `.msg-logo` in `ds.css`); replaces the design's dashed placeholders | Owner's choice. One widget/class, so a drawn logo later is a one-file swap |
+| 2026-10-23 | Added roles Vice-président (président's rights minus validating the quarterly report) and Secrétaire général adjoint (same as the SG), bureau, 2-year mandate | Owner request; the design mentions the SG adjoint but had no vice-president. Editable in the back-office |

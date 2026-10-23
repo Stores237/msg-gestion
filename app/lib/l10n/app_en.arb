@@ -407,5 +407,7 @@
   "activeMembers": "Active members",
   "entriesToValidate": "{n, plural, =1{1 entry to validate} other{{n} entries to validate}}",
   "awaitingAuditor": "Waiting for the auditor",
-  "unfilledSlots": "{n, plural, =1{1 unfilled post} other{{n} unfilled posts}} · {title}"
+  "unfilledSlots": "{n, plural, =1{1 unfilled post} other{{n} unfilled posts}} · {title}",
+  "roleVicePresident": "Vice-president",
+  "roleSecretaryGeneralDeputy": "Deputy general secretary"
 }

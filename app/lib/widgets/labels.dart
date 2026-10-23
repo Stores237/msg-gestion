@@ -7,6 +7,8 @@ String roleLabel(AppLocalizations l, String slug, String serverName) =>
     switch (slug) {
       'super-admin' => l.roleSuperAdmin,
       'president' => l.rolePresident,
+      'vice-president' => l.roleVicePresident,
+      'secretaire-general-adjoint' => l.roleSecretaryGeneralDeputy,
       'secretaire-general' => l.roleSecretaryGeneral,
       'tresorier' => l.roleTreasurer,
       'commissaire-aux-comptes' => l.roleAuditor,

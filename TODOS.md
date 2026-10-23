@@ -18,6 +18,8 @@ These need an account, a decision or a person — not code.
   Back-office login still needs Twilio.
 - [ ] **Real member list** to import (spreadsheet: name, phone, group, date of birth, parent
   contact for minors). For now `seed_demo` has 21 made-up members (10 added 2026-10-20).
+  Staging also has one test account per staff role (`add_role_testers`, 2026-10-23); PINs in
+  `backend/.staging-testers.txt`.
 - [ ] **Revoke the tokens pasted in chat on 2026-10-20**, once setup is done: the Supabase access
   token (supabase.com/dashboard/account/tokens), the Render API key (dashboard → Account
   Settings → API Keys) and the GitHub personal token (github.com/settings/tokens — revoke this

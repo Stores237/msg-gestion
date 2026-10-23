@@ -2545,6 +2545,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}'**
   String unfilledSlots(int n, String title);
+
+  /// No description provided for @roleVicePresident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vice-président'**
+  String get roleVicePresident;
+
+  /// No description provided for @roleSecretaryGeneralDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Secrétaire général adjoint'**
+  String get roleSecretaryGeneralDeputy;
 }
 
 class _AppLocalizationsDelegate

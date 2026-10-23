@@ -1475,4 +1475,10 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0 · $title';
   }
+
+  @override
+  String get roleVicePresident => 'Vice-president';
+
+  @override
+  String get roleSecretaryGeneralDeputy => 'Deputy general secretary';
 }

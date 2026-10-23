@@ -961,5 +961,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "roleVicePresident": "Vice-président",
+  "roleSecretaryGeneralDeputy": "Secrétaire général adjoint"
 }
