@@ -155,3 +155,17 @@ def test_cancel_expire_and_last_group(login, choir):
     Group.objects.filter(pk=choir.pk).update(is_active=False)
     r = a.post(f"/bo/groupes/{first.pk}/supprimer/", {"action": "request", "reason": "x", "confirm_name": first.name}, follow=True)
     assert "seul groupe" in r.content.decode()
+
+
+def test_login_pages_work_with_several_groups(login, choir):
+    """Staging, 2026-10-23: /bo/connexion/ answered 500 once a second group
+    existed (the side panel asked for "the" group before any was chosen)."""
+    c = Client()
+    assert c.get("/bo/connexion/").status_code == 200
+    assert c.post("/bo/connexion/", {"phone": "677000009", "password": "faux"}).status_code == 401  # not 500
+    a = login("677000001")  # password page, code page, then the dashboard
+    assert a.get("/bo/").status_code == 200
+    # A hidden group still counts as a group: the pages hold.
+    Group.objects.filter(pk=choir.pk).update(is_active=False)
+    assert Client().get("/bo/connexion/").status_code == 200
+    assert a.get("/bo/").status_code == 200

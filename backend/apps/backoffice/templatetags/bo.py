@@ -38,9 +38,15 @@ def platform_groups():
 
 @register.simple_tag
 def group_settings():
-    from apps.core.models import Settings
+    """The current group's settings; None before a group is chosen (the
+    login pages, with several groups on the platform)."""
+    from apps.core.groups import current_group_id
+    from apps.core.models import Group, Settings
 
-    return Settings.get()
+    gid = current_group_id()
+    if gid is None:
+        return None
+    return Settings.get(Group(pk=gid))
 
 
 @register.filter

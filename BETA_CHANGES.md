@@ -441,3 +441,13 @@ président, censeur, secrétaire, formateur, commissaire aux comptes or trésori
   duties still applies (one person can't be trésorier and commissaire the same day).
 
 **Verify.** `pytest -k "role_of_the_day or daily"`; `flutter test test/modules_test.dart`.
+
+## 21. Fix: back-office login answered 500 once there were several groups
+
+Staging, 2026-10-23. The login side panel showed "the" group's name, looked up before any group
+is chosen; with a second group on the platform (even a deleted one) that lookup refuses on purpose
+(`NoGroupContext`), so `/bo/connexion/` failed for everyone, phone or desktop. The panel now says
+"Plateforme MSG", and the `group_settings` tag returns nothing before a group is chosen.
+
+**Verify.** `pytest apps/backoffice/test_group_delete.py::test_login_pages_work_with_several_groups`
+(fails on the old code with the same error as staging).
