@@ -4,15 +4,52 @@
 {% block heading %}Groupes{% endblock %}
 {% block acts %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-group').showModal()">{% icon 'plus' %}Nouveau groupe</button>{% endblock %}
 {% block body %}
+{% for g in rows %}{% if g.pending %}
+<div class="notice alert" role="alert" style="margin-bottom:16px" id="pending-{{ g.pk }}">{% icon 'triangle-alert' %}<span style="flex:1"><b>Suppression demandée : {{ g.name }}.</b>
+  Par {{ g.pending.requested_by.full_name|default:"—" }} le {{ g.pending.requested_at|date:"j F Y à H:i" }}. Motif : « {{ g.pending.reason }} ».
+  {% if g.pending.requested_by_id == request.user.pk %}Un autre super admin doit la confirmer avant le {{ g.pending.expires|date:"j F à H:i" }} ; sinon elle expire.{% else %}Votre confirmation supprimera le groupe et toutes ses données.{% endif %}</span>
+  <span style="display:flex;gap:8px;flex-wrap:wrap">{% if g.pending.requested_by_id != request.user.pk %}<button class="btn btn-danger btn-sm" type="button" onclick="document.getElementById('dlg-confirm-{{ g.pk }}').showModal()">Confirmer la suppression</button>{% endif %}
+  <form method="post" action="{% url 'backoffice:group_delete' g.pk %}">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="btn btn-secondary btn-sm">Annuler la demande</button></form></span></div>
+{% endif %}{% endfor %}
 <section class="panel">
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupe</th><th class="amt">Membres</th><th>Statut</th><th></th></tr></thead><tbody>
-    {% for g in rows %}<tr><td><b>{{ g.name }}</b>{% if g.pk == request.group.pk %} <span class="rb sys"><i></i>Groupe en cours</span>{% endif %}<br><small class="muted">{{ g.settings.parish|default:"" }}</small></td>
-      <td class="tnum amt">{{ g.n }}</td><td>{% if g.is_active %}<span class="status ok"><i></i>Actif</span>{% else %}<span class="status off"><i></i>Inactif</span>{% endif %}</td>
-      <td class="amt">{% if g.pk != request.group.pk and g.is_active %}<form method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">Travailler sur ce groupe</button></form>{% endif %}</td></tr>
+    {% for g in rows %}<tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{{ g.st.color }};vertical-align:middle;margin-right:6px" aria-hidden="true"></span><b>{{ g.name }}</b>{% if g.pk == request.group.pk %} <span class="rb sys"><i></i>Groupe en cours</span>{% endif %}<br><small class="muted">{{ g.st.parish|default:"" }}</small></td>
+      <td class="tnum amt">{{ g.n }}</td><td>{% if g.pending %}<span class="status err"><i></i>Suppression demandée</span>{% elif g.is_active %}<span class="status ok"><i></i>Actif</span>{% else %}<span class="status off"><i></i>Inactif</span>{% endif %}</td>
+      <td class="amt"><span style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">{% if g.pk != request.group.pk and g.is_active %}<form method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">Travailler sur ce groupe</button></form>{% endif %}
+        <button class="btn btn-secondary btn-sm" type="button" data-edit="{{ g.pk }}" onclick="document.getElementById('dlg-edit-{{ g.pk }}').showModal()">{% icon 'pencil' 16 %}Modifier</button>
+        {% if not g.pending %}<button class="btn btn-ghost btn-sm" type="button" style="color:var(--red-500)" onclick="document.getElementById('dlg-del-{{ g.pk }}').showModal()">{% icon 'trash-2' 16 %}Supprimer</button>{% endif %}</span></td></tr>
     {% empty %}<tr class="empty-row"><td colspan="4">Aucun groupe.</td></tr>{% endfor %}
   </tbody></table></div>
-  <div class="tbl-f"><span>Un nouveau groupe démarre avec les rôles et permissions par défaut ; ajustez-les ensuite dans « Rôles et permissions ». Le nom, le lieu et le message de bienvenue se modifient dans « Paramètres ».</span></div>
+  <div class="tbl-f"><span>Un nouveau groupe démarre avec les rôles et permissions par défaut ; ajustez-les ensuite dans « Rôles et permissions ». La suppression d’un groupe se fait à deux : un super admin la demande, un autre la confirme dans les 3 jours.</span></div>
 </section>
+{% for g in rows %}
+<dialog id="dlg-edit-{{ g.pk }}" class="dialog" style="border:none;padding:24px;max-width:560px;width:100%"><form method="post" action="{% url 'backoffice:group_edit' g.pk %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}
+  <h3>Modifier · {{ g.name }}</h3>
+  <label class="fld"><span class="fld-l">Nom du groupe<em> *</em></span><span class="fld-box"><input name="name" required maxlength="120" value="{{ g.name }}"></span></label>
+  <label class="fld"><span class="fld-l">Lieu ou rattachement</span><span class="fld-box"><input name="parish" maxlength="160" value="{{ g.st.parish }}"></span></label>
+  <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" maxlength="120" value="{{ g.st.motto }}"></span></label>
+  <label class="fld"><span class="fld-l">Message de bienvenue</span><span class="fld-box" style="align-items:flex-start;padding-top:10px;padding-bottom:10px"><textarea name="welcome_message" rows="4" maxlength="600" style="width:100%;border:none;background:transparent;font:inherit;color:inherit;resize:vertical">{{ g.st.welcome_message }}</textarea></span></label>
+  <div class="fld"><span class="fld-l">Couleur de l’application</span><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+    {% for hex, label in palette %}<label title="{{ label }}" style="cursor:pointer"><input type="radio" name="color" value="{{ hex }}" {% if g.st.color|upper == hex %}checked{% endif %} style="position:absolute;opacity:0;width:0;height:0"><span class="swatch" style="display:inline-block;width:32px;height:32px;border-radius:50%;background:{{ hex }};box-shadow:0 0 0 2px var(--surface-card),0 0 0 4px transparent"></span></label>{% endfor %}
+  </div></div>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
+</form></dialog>
+{% if g.pending %}{% if g.pending.requested_by_id != request.user.pk %}
+<dialog id="dlg-confirm-{{ g.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" action="{% url 'backoffice:group_delete' g.pk %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="confirm">
+  <h3>Confirmer la suppression · {{ g.name }}</h3>
+  <div class="notice alert">{% icon 'triangle-alert' %}<span>Le groupe, ses {{ g.n }} membre{{ g.n|pluralize }}, ses rôles, sa caisse, son calendrier, son planning et ses annonces seront supprimés <b>définitivement</b>. Les comptes des personnes restent (ils peuvent être dans d’autres groupes).</span></div>
+  <label class="fld"><span class="fld-l">Recopiez le nom du groupe : <b>{{ g.name }}</b></span><span class="fld-box"><input name="confirm_name" required autocomplete="off"></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-danger">Supprimer définitivement</button></div>
+</form></dialog>{% endif %}
+{% else %}
+<dialog id="dlg-del-{{ g.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" action="{% url 'backoffice:group_delete' g.pk %}" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="request">
+  <h3>Demander la suppression · {{ g.name }}</h3>
+  <div class="notice warn">{% icon 'shield-alert' %}<span>Double validation : votre demande ne supprime rien. Un <b>autre super admin</b> devra la confirmer dans les 3 jours ; alors le groupe et toutes ses données seront supprimés définitivement.</span></div>
+  <label class="fld"><span class="fld-l">Motif<em> *</em></span><span class="fld-box multi"><textarea name="reason" rows="3" required maxlength="600"></textarea></span></label>
+  <label class="fld"><span class="fld-l">Recopiez le nom du groupe : <b>{{ g.name }}</b></span><span class="fld-box"><input name="confirm_name" required autocomplete="off"></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-danger">Demander la suppression</button></div>
+</form></dialog>
+{% endif %}{% endfor %}
 <dialog id="dlg-group" class="dialog" style="border:none;padding:24px;max-width:560px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}
   <h3>Nouveau groupe</h3>
   <label class="fld"><span class="fld-l">Nom du groupe<em> *</em></span><span class="fld-box"><input name="name" required maxlength="120" placeholder="Ex. Chorale Sainte-Cécile"></span></label>

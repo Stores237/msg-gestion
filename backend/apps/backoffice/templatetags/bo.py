@@ -23,6 +23,13 @@ def pending_access():
 
 
 @register.simple_tag
+def pending_group_deletions():
+    from apps.core.models import GroupDeletion
+
+    return GroupDeletion.objects.filter(status=GroupDeletion.Status.PENDING).count()
+
+
+@register.simple_tag
 def platform_groups():
     from apps.core.models import Group
 

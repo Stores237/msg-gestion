@@ -389,3 +389,18 @@ Owner, 2026-10-23 (screenshots).
 
 **Verify.** `pytest` (`test_group_color_is_set_in_settings`, `/me` colour in
 `test_groups.py`); `flutter test test/appearance_test.dart`.
+
+## 18. Edit and delete a group (two super admins)
+
+Owner, 2026-10-23. Back-office → Groupes.
+
+- **Modifier** on each group: name, place, motto, welcome message, app colour. Audited (platform).
+- **Supprimer** is a double validation: a super admin asks, with a mandatory reason and the
+  group's name typed back. Nothing is deleted yet; a red banner on Groupes and a count in the menu
+  show the request. **Another** super admin confirms (typing the name again) within 3 days; then
+  the group and all its data are deleted for good. Accounts stay (they may be in other groups).
+  The asker can't confirm their own request; either can cancel it; after 3 days it lapses. The
+  platform's only group can't be deleted. `core.0007_group_deletion`.
+
+**Verify.** `pytest apps/backoffice/test_group_delete.py` (edit, refusals, the full two-admin
+deletion with money and roles in the group, cancel, expiry, last group).

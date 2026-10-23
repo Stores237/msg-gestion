@@ -52,6 +52,11 @@ Defined in `apps/accounts/registry.py`:
 - Back-office permissions belong to the super admin role only.
 - The super admin holds every permission, finances included, but only in the back-office.
 - There must always be at least 2 active super admins; removing one below that is refused.
+- Deleting a group takes two super admins (`apps/core/group_admin.py`): one asks, with a reason
+  and the group's name typed back; a different one confirms, again typing the name, within 3
+  days (the request lapses after). The platform's last group can't be deleted. Deletion is
+  final for the group's data (roles, money, calendar, planning, announcements, memberships);
+  accounts stay. Request, cancellation, refusal and deletion are in the platform audit log.
 
 Each refusal is written to the audit log.
 

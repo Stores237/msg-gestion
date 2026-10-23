@@ -1,10 +1,14 @@
-"""Creating a group on the platform (back-office → Groupes)."""
+"""The platform's groups (back-office → Groupes): create, edit, delete."""
 
+from datetime import timedelta
+
+from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 from django.utils.text import slugify
 
 from . import audit
-from .models import Group, Settings
+from .models import Group, GroupDeletion, Settings
 
 
 def template_group():
@@ -43,3 +47,119 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
     audit.record("Groupe créé", actor=by, obj=group, request=request, sensitive=True, platform=True,
                  detail={"nom": group.name, "roles": roles})
     return group
+
+
+# --- Editing and deleting (owner, 2026-10-23) -------------------------------------------
+
+DELETION_WINDOW = timedelta(days=3)
+
+
+class GroupAdminError(Exception):
+    """A refused change; the message is shown to the super admin as is."""
+
+
+def update_group(group, *, by, request=None, name=None, **fields):
+    """Name (on the group) and place, motto, welcome message, colour (on its
+    settings), from the Groupes page. Returns what changed."""
+    st = Settings.get(group)
+    values = {}
+    for f, value in fields.items():
+        if value is None:
+            continue
+        field = Settings._meta.get_field(f)
+        value = field.to_python(value.strip())
+        try:
+            field.run_validators(value)
+        except ValidationError as e:
+            raise GroupAdminError(f"{field.verbose_name.capitalize()} : {e.messages[0]}") from None
+        values[f] = value
+    # All checked: nothing is saved when one value is refused.
+    changed = {}
+    name = (name or "").strip()
+    if name and name != group.name:
+        changed["nom"] = name
+        group.name = name
+        group.save(update_fields=["name"])
+    for f, value in values.items():
+        if getattr(st, f) != value:
+            changed[f] = value
+            setattr(st, f, value)
+    if changed:
+        st.save()
+        audit.record("Groupe modifié", actor=by, obj=group, request=request, platform=True, detail=changed)
+    return changed
+
+
+def pending_deletion(group):
+    """The open request for this group, if still within the window."""
+    d = group.deletions.filter(status=GroupDeletion.Status.PENDING).first()
+    if d is not None and timezone.now() - d.requested_at > DELETION_WINDOW:
+        d.status = GroupDeletion.Status.CANCELLED
+        d.decided_at = timezone.now()
+        d.save(update_fields=["status", "decided_at"])
+        audit.record("Suppression de groupe expirée", obj=group, platform=True, sensitive=True)
+        return None
+    return d
+
+
+def _check_name(group, typed):
+    if (typed or "").strip() != group.name:
+        raise GroupAdminError("Recopiez exactement le nom du groupe pour confirmer.")
+
+
+def request_deletion(group, *, by, reason, typed_name, request=None):
+    """First super admin: asks for the deletion. Nothing is deleted yet."""
+    _check_name(group, typed_name)
+    reason = (reason or "").strip()
+    if not reason:
+        raise GroupAdminError("Le motif est obligatoire.")
+    if Group.objects.exclude(pk=group.pk).count() == 0:
+        raise GroupAdminError("C’est le seul groupe de la plateforme : il ne peut pas être supprimé.")
+    if pending_deletion(group) is not None:
+        raise GroupAdminError("Une demande de suppression est déjà en attente pour ce groupe.")
+    d = GroupDeletion.objects.create(group=group, reason=reason, requested_by=by)
+    audit.record("Suppression de groupe demandée", actor=by, obj=group, request=request, platform=True,
+                 sensitive=True, detail={"motif": reason})
+    return d
+
+
+def cancel_deletion(group, *, by, request=None):
+    d = pending_deletion(group)
+    if d is None:
+        raise GroupAdminError("Aucune demande de suppression en attente.")
+    d.status = GroupDeletion.Status.CANCELLED
+    d.decided_by, d.decided_at = by, timezone.now()
+    d.save(update_fields=["status", "decided_by", "decided_at"])
+    audit.record("Suppression de groupe annulée", actor=by, obj=group, request=request, platform=True, sensitive=True)
+
+
+def confirm_deletion(group, *, by, typed_name, request=None):
+    """Second super admin: deletes the group and everything it owns. The
+    accounts stay (they may be in other groups)."""
+    d = pending_deletion(group)
+    if d is None:
+        raise GroupAdminError("Aucune demande de suppression en attente : un super admin doit d’abord la demander.")
+    if d.requested_by_id == by.pk:
+        raise GroupAdminError("La suppression doit être confirmée par un autre super admin que celui qui l’a demandée.")
+    _check_name(group, typed_name)
+    name, pk, reason, asked_by = group.name, group.pk, d.reason, d.requested_by
+    members = group.memberships.count()
+    _delete_group(group)
+    audit.record("Groupe supprimé", actor=by, request=request, platform=True, sensitive=True,
+                 detail={"groupe": name, "id": pk, "motif": reason, "membres": members,
+                         "demandé par": asked_by.full_name if asked_by else "", "confirmé par": by.full_name})
+    return name
+
+
+@transaction.atomic
+def _delete_group(group):
+    from apps.accounts.models import RoleAssignment
+    from apps.finances.models import Entry
+    from apps.members.models import AccessRequest
+
+    # Rows that protect what they point at go first; the rest follows the
+    # group (on_delete=CASCADE).
+    Entry.all_groups.filter(group=group).delete()
+    AccessRequest.all_groups.filter(group=group).delete()
+    RoleAssignment.all_groups.filter(role__group=group).delete()
+    group.delete()

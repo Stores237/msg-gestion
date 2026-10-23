@@ -23,6 +23,30 @@ class Group(models.Model):
         return self.name
 
 
+class GroupDeletion(models.Model):
+    """Deleting a group takes two super admins (owner, 2026-10-23): one asks,
+    with a reason; another confirms within DELETION_WINDOW. Removed with the
+    group; the audit log keeps the trace."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        CANCELLED = "cancelled", "Annulée"
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="deletions")
+    reason = models.TextField(max_length=600)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    requested_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-requested_at"]
+
+    def __str__(self):
+        return f"Suppression de {self.group}"
+
+
 class Membership(models.Model):
     """A person in a group. One account (one phone number) can belong to
     several groups, with different roles in each."""
