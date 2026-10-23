@@ -8,6 +8,7 @@
     {% with p=request.user|perms %}
     {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'groups' %} on{% endif %}" href="{% url 'backoffice:groups' %}">{% icon 'building-2' %}Groupes</a>
     <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}">{% icon 'layout-dashboard' %}Tableau de bord</a>
+    <a class="bo-nav{% if nav == 'access' %} on{% endif %}" href="{% url 'backoffice:access_requests' %}">{% icon 'user-check' %}Demandes d’accès{% pending_access as n %}{% if n %}<span class="rb sys" style="margin-left:auto"><i></i>{{ n }}</span>{% endif %}</a>
     <a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>
     <a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}">{% icon 'shield' %}Rôles et permissions</a>
     <a class="bo-nav{% if nav == 'assign' %} on{% endif %}" href="{% url 'backoffice:assignments' %}">{% icon 'calendar-range' %}Affectations</a>{% endif %}

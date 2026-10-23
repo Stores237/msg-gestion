@@ -136,3 +136,53 @@ class BureauEntrySerializer(serializers.Serializer):
     role = RoleBriefSerializer()
     ends_on = serializers.DateField(allow_null=True)
 
+
+
+class AccessRequestCreateSerializer(MemberCreateSerializer):
+    """What the group leader sends: who, and with which role."""
+
+    role = serializers.SlugField(default="membre")
+    note = serializers.CharField(max_length=300, required=False, allow_blank=True, default="")
+
+    def validate_phone(self, value):
+        from apps.core.groups import default_group_id
+
+        from .models import AccessRequest
+
+        if User.objects.filter(phone=value, memberships__group_id=default_group_id(), memberships__is_active=True).exists():
+            raise serializers.ValidationError("Ce numéro est déjà celui d’un membre du groupe.", code="phone_taken")
+        if AccessRequest.objects.filter(phone=value, status=AccessRequest.Status.PENDING).exists():
+            raise serializers.ValidationError("Une demande est déjà en attente pour ce numéro.", code="already_requested")
+        return value
+
+    def validate_role(self, value):
+        from apps.accounts import registry
+        from apps.accounts.models import Role
+
+        role = Role.objects.filter(slug=value, is_archived=False, group__isnull=False).exclude(slug=registry.SUPER_ADMIN_SLUG).first()
+        if role is None:
+            raise serializers.ValidationError("Rôle inconnu dans ce groupe.", code="bad_role")
+        return role
+
+
+class AccessRequestSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    full_name = serializers.CharField()
+    phone = serializers.CharField()
+    role = serializers.CharField(source="role.slug")
+    role_name = serializers.CharField(source="role.name")
+    status = serializers.CharField()
+    note = serializers.CharField()
+    decision_note = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    decided_at = serializers.DateTimeField(allow_null=True)
+    pin_ready = serializers.SerializerMethodField()
+    existing_account = serializers.SerializerMethodField()
+
+    def get_pin_ready(self, req) -> bool:
+        from .services import pin_available
+
+        return pin_available(req)
+
+    def get_existing_account(self, req) -> bool:
+        return req.status == "approved" and not req.temp_pin and req.pin_revealed_at is None

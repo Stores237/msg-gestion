@@ -33,14 +33,21 @@ def test_settings_feed_the_app():
 
 
 def test_registration_fee_goes_to_cash_book_pending():
+    """Paid to the leader with the access request: owed at approval, and the
+    leader's line waits for the trésorier."""
+    from apps.members import services as access
+    from apps.members.models import AccessRequest
+
     api, sg = client_for("secretaire-general")
-    r = api.post("/api/members/", {"last_name": "Ndjock", "first_name": "Patrick", "phone": "674583902", "registration_paid": True}, format="json")
+    r = api.post("/api/members/access-requests/", {"last_name": "Ndjock", "first_name": "Patrick", "phone": "674583902", "registration_paid": True}, format="json")
     assert r.status_code == 201, r.json()
-    due = Due.objects.get(member_id=r.json()["id"])
+    member = access.approve(AccessRequest.objects.get(pk=r.json()["id"]), by=UserFactory()).user
+    due = Due.objects.get(member=member)
     entry = Entry.objects.get(due=due)
     assert (due.kind, due.amount, entry.amount, entry.status, entry.created_by) == ("inscription", 500, 500, "pending", sg)
-    r2 = api.post("/api/members/", {"last_name": "B", "first_name": "S", "phone": "672905114"}, format="json")
-    assert Due.objects.filter(member_id=r2.json()["id"]).exists() and not Entry.objects.filter(member_id=r2.json()["id"]).exists()
+    r2 = api.post("/api/members/access-requests/", {"last_name": "B", "first_name": "S", "phone": "672905114"}, format="json")
+    other = access.approve(AccessRequest.objects.get(pk=r2.json()["id"]), by=UserFactory()).user
+    assert Due.objects.filter(member=other).exists() and not Entry.objects.filter(member=other).exists()
 
 
 def test_profile_shows_last_four_assises():

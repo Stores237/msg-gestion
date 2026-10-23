@@ -31,7 +31,7 @@ def _enter_group(request):
     from apps.core.groups import set_current_group
     from apps.core.models import Group
 
-    groups = Group.objects.filter(is_active=True)
+    groups = Group.objects.filter(is_active=True).order_by("pk")
     group = groups.filter(pk=request.session.get(SESSION_GROUP)).first() or groups.first()
     if group is not None:
         request.session[SESSION_GROUP] = group.pk

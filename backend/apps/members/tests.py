@@ -91,35 +91,37 @@ def test_bureau_lists_mandate_roles_only():
     assert sorted(r["role"]["slug"] for r in rows) == ["censeur-general", "tresorier"]
 
 
-def test_secretary_registers_a_minor_with_parent():
+def test_secretary_requests_a_minor_with_parent_and_partner_creates_it():
+    from apps.members import services as access
+    from apps.members.models import AccessRequest
+
     api, sg = client_for("secretaire-general")
     r = api.post(
-        "/api/members/",
+        "/api/members/access-requests/",
         {"last_name": "Ndjock", "first_name": "Patrick", "phone": "6 74 58 39 02", "birth_date": "2010-03-03",
          "parent_name": "Mme Ndjock Hélène", "parent_relation": "Mère", "parent_phone": "699120044"},
         format="json",
     )
     assert r.status_code == 201, r.json()
-    body = r.json()
-    member = User.objects.get(pk=body["id"])
-    assert member.check_pin(body["temporary_pin"]) and not member.has_usable_password()
+    req = access.approve(AccessRequest.objects.get(pk=r.json()["id"]), by=UserFactory())
+    member = req.user
+    assert member.check_pin(req.temp_pin) and not member.has_usable_password()
     assert member.role_slugs() == {"membre"}
     assert member.parent_phone == "+237699120044"
-    assert AuditLog.objects.filter(action="Membre inscrit", actor=sg).exists()
+    assert AuditLog.objects.filter(action="Demande d’accès envoyée", actor=sg).exists()
 
 
 def test_minor_without_parent_phone_is_refused_with_a_code():
     api, _ = client_for("secretaire-general")
-    r = api.post("/api/members/", {"last_name": "N", "first_name": "P", "phone": "674583902", "birth_date": "2010-03-03"}, format="json")
+    r = api.post("/api/members/access-requests/", {"last_name": "N", "first_name": "P", "phone": "674583902", "birth_date": "2010-03-03"}, format="json")
     assert r.status_code == 400
     assert "parent_phone" in r.json()
-    assert not User.objects.filter(phone="+237674583902").exists()
 
 
-def test_duplicate_phone_refused():
+def test_phone_already_in_the_group_refused():
     api, _ = client_for("secretaire-general")
     UserFactory(phone="+237674583902")
-    r = api.post("/api/members/", {"last_name": "N", "first_name": "P", "phone": "674583902"}, format="json")
+    r = api.post("/api/members/access-requests/", {"last_name": "N", "first_name": "P", "phone": "674583902"}, format="json")
     assert r.status_code == 400 and "phone" in r.json()
 
 

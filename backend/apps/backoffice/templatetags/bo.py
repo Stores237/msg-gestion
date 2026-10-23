@@ -16,6 +16,13 @@ STATUS_DOT = {"actif": "ok", "conge": "warn", "classe": "off", "suspendu": "off"
 
 
 @register.simple_tag
+def pending_access():
+    from apps.members.models import AccessRequest
+
+    return AccessRequest.objects.filter(status=AccessRequest.Status.PENDING).count()
+
+
+@register.simple_tag
 def platform_groups():
     from apps.core.models import Group
 

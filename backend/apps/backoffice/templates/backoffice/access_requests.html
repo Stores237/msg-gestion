@@ -1,0 +1,24 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Demandes d’accès{% endblock %}
+{% block crumb %}<div class="crumb">{{ request.group.name }} · {{ pending|length }} en attente</div>{% endblock %}
+{% block heading %}Demandes d’accès{% endblock %}
+{% block body %}
+<section class="panel"><div class="panel-h"><h2>En attente</h2></div>
+  <div class="list">{% for r in pending %}<div class="row" style="flex-wrap:wrap;gap:12px">
+    <div class="row-main" style="min-width:220px"><div class="row-t" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">{{ r.full_name }}{% role_badge r.role %}</div>
+      <div class="row-s">{{ r.phone|phone }}{% if r.birth_date %} · né(e) le {{ r.birth_date|date:"d/m/Y" }}{% endif %}{% if r.is_diaspora %} · diaspora{% if r.city %} ({{ r.city }}){% endif %}{% endif %}{% if r.registration_paid %} · inscription payée{% endif %}</div>
+      <div class="row-s">demandé par {{ r.requested_by.short_name|default:"—" }} le {{ r.created_at|date:"d/m/Y H:i" }}{% if r.note %} · « {{ r.note }} »{% endif %}</div></div>
+    {% if can_edit %}<form method="post" action="{% url 'backoffice:access_request' r.pk %}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">{% csrf_token %}
+      <span class="fld-box" style="min-height:40px;min-width:180px"><input name="reason" placeholder="Motif si refus" aria-label="Motif du refus"></span>
+      <button class="btn btn-secondary btn-sm">Refuser</button><button class="btn btn-primary btn-sm" name="approve" value="1">Créer l’accès</button></form>{% endif %}
+  </div>{% empty %}<div class="row"><div class="row-main"><div class="row-s">Aucune demande en attente pour ce groupe.</div></div></div>{% endfor %}</div>
+  <div class="tbl-f"><span>Créer l’accès ouvre le compte (ou ajoute au groupe un numéro qui a déjà un compte), affecte le rôle demandé et prépare un code PIN provisoire : le responsable le voit une fois dans l’application et le remet au membre, qui choisit son propre code à la première connexion.</span></div>
+</section>
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Traitées récemment</h2></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Personne</th><th>Rôle</th><th>Demandé par</th><th>Décision</th><th>Code provisoire</th></tr></thead><tbody>
+    {% for r in done %}<tr><td><b>{{ r.full_name }}</b><br><small class="muted">{{ r.phone|phone }}</small></td><td>{{ r.role.name }}</td><td class="muted">{{ r.requested_by.short_name|default:"—" }}</td>
+      <td>{% if r.status == 'approved' %}<span class="status ok"><i></i>Accès créé</span>{% else %}<span class="status off"><i></i>Refusée</span>{% if r.decision_note %}<br><small class="muted">{{ r.decision_note }}</small>{% endif %}{% endif %}<br><small class="muted">{{ r.decided_by.short_name|default:"" }} · {{ r.decided_at|date:"d/m/Y H:i" }}</small></td>
+      <td class="muted">{% if r.status != 'approved' %}—{% elif r.pin_revealed_at %}remis le {{ r.pin_revealed_at|date:"d/m/Y" }}{% elif r.temp_pin %}en attente du responsable{% else %}compte existant{% endif %}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="5">Rien pour l’instant.</td></tr>{% endfor %}
+  </tbody></table></div></section>
+{% endblock %}

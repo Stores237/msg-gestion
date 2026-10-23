@@ -1,6 +1,5 @@
 
 
-from django.db import transaction
 from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -13,14 +12,18 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.accounts.permissions import require
-from apps.accounts.services import assign_role, reset_pin, temporary_pin
+from apps.accounts.services import reset_pin
 from apps.core import audit
-from apps.core.models import Settings
-from apps.core.notify import notify
-from apps.finances.models import Due, Entry
-from apps.finances.services import record_entry
 
-from .serializers import BureauEntrySerializer, MemberCreateSerializer, MemberDetailSerializer, MemberListSerializer
+from . import services as access
+from .models import AccessRequest
+from .serializers import (
+    AccessRequestCreateSerializer,
+    AccessRequestSerializer,
+    BureauEntrySerializer,
+    MemberDetailSerializer,
+    MemberListSerializer,
+)
 
 VISIBLE = ~Q(status=User.Status.ARCHIVED)
 STATUS_FILTERS = {"actif", "conge", "classe", "suspendu"}
@@ -32,7 +35,7 @@ def _members():
 
 class MemberListView(APIView):
     """GET: the member list with the counts for the filter chips.
-    POST: register a new member (secrétaire général by default)."""
+    POST: gone — see AccessRequestListView."""
 
     def get_permissions(self):
         action = "create" if self.request.method == "POST" else "view"
@@ -64,36 +67,12 @@ class MemberListView(APIView):
         data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate(), "request": request}).data
         return Response({"counts": counts, "results": data})
 
-    @extend_schema(request=MemberCreateSerializer, responses=MemberDetailSerializer)
+    @extend_schema(responses={410: None})
     def post(self, request):
-        s = MemberCreateSerializer(data=request.data)
-        s.is_valid(raise_exception=True)
-        pin = temporary_pin()
-        data = dict(s.validated_data)
-        registration_paid = data.pop("registration_paid", False)
-        with transaction.atomic():
-            user = User(**data)
-            user.set_unusable_password()  # app only; back-office access is a separate step
-            user.set_pin(pin, temporary=True)
-            user.save()
-            assign_role(user, Role.objects.get(slug="membre"), reason="Inscription", by=request.user, request=request)
-            fee = Settings.get().fee_registration
-            due = Due.objects.create(member=user, kind=Due.Kind.REGISTRATION, label="Inscription", amount=fee, created_by=request.user)
-            if registration_paid:
-                # Into the cash book, waiting for the commissaire's validation.
-                record_entry(by=request.user, request=request, direction=Entry.Direction.IN, amount=fee,
-                             category=Entry.Category.REGISTRATION, label=f"Inscription · {user.full_name}", member=user,
-                             due=due, date=timezone.localdate())
-        audit.record("Membre inscrit", actor=request.user, obj=user, request=request)
-        bureau = [a.user for a in RoleAssignment.objects.active().filter(role__slug__in=["president", "secretaire-general"]).select_related("user")]
-        notify([u for u in bureau if u.pk != request.user.pk], "member", "Nouveau membre",
-               f"{user.full_name} a rejoint le mouvement", {"type": "member", "id": user.pk})
-        user = _members().get(pk=user.pk)
-        body = dict(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user, "request": request}).data)
-        # Shown once to whoever registered the member, who passes it on in
-        # person. Replaced by an SMS once Twilio is set up (TODOS.md).
-        body["temporary_pin"] = pin
-        return Response(body, status=status.HTTP_201_CREATED)
+        # Accounts are now opened by the platform's partner, on the group
+        # leader's request (AccessRequestListView).
+        return Response({"detail": "Les nouveaux membres passent par une demande d’accès. Mettez l’application à jour.",
+                         "code": "use_access_request"}, status=status.HTTP_410_GONE)
 
 
 class MemberDetailView(APIView):
@@ -196,3 +175,39 @@ def _photo_url(request, member):
         return None
     url = member.photo.url
     return request.build_absolute_uri(url) if url.startswith("/") else url
+
+
+class AccessRequestListView(APIView):
+    """The group leader's access requests (owner, 2026-10-23): GET the
+    group's requests, POST a new one for the partner to process."""
+
+    permission_classes = [require("members.profile", "create")]
+
+    @extend_schema(responses=AccessRequestSerializer(many=True))
+    def get(self, request):
+        items = AccessRequest.objects.select_related("role")[:50]
+        return Response(AccessRequestSerializer(items, many=True).data)
+
+    @extend_schema(request=AccessRequestCreateSerializer, responses=AccessRequestSerializer)
+    def post(self, request):
+        s = AccessRequestCreateSerializer(data=request.data)
+        s.is_valid(raise_exception=True)
+        data = dict(s.validated_data)
+        data.pop("joined_on", None)
+        req = access.submit(by=request.user, request=request, **data)
+        return Response(AccessRequestSerializer(req).data, status=status.HTTP_201_CREATED)
+
+
+class AccessRequestPinView(APIView):
+    """POST: the temporary PIN of an approved request, shown once to the
+    leader who hands it over; erased afterwards."""
+
+    permission_classes = [require("members.profile", "create")]
+
+    def post(self, request, pk):
+        req = get_object_or_404(AccessRequest, pk=pk, status=AccessRequest.Status.APPROVED)
+        pin = access.reveal(req, by=request.user, request=request)
+        if pin is None:
+            return Response({"detail": "Code déjà remis ou expiré. Demandez une réinitialisation au partenaire.", "code": "pin_gone"},
+                            status=status.HTTP_410_GONE)
+        return Response({"full_name": req.user.full_name, "phone": req.user.phone, "pin": pin})
