@@ -23,6 +23,13 @@ Built on the Spekooh architecture playbook (`app-architecture-playbook` skill). 
 
 ## Conventions
 
+- **Every group-owned model is scoped.** Give it `group = FK("core.Group", default=default_group_id)`
+  (or reach a group through a parent) and `objects = scoped(...)` + `all_groups = models.Manager()`
+  (`apps/core/groups.py`). The current group comes from the app's `X-Group` header
+  (`AppJWTAuthentication`) or the back-office session; `objects` then filters on it. Use
+  `User.objects.members()` for a group's people (accounts are platform-wide; `Membership` puts one
+  in a group). Jobs loop over groups with `in_group(g)`. Never create group data with several
+  groups and no group chosen — `default_group_id` refuses on purpose.
 - **Group-neutral wording.** Copy that names this group's people or habits ("le secrétaire
   général", "l'assise du samedi") belongs in settings or role names, not in fixed strings.
 - **French first.** UI copy, server error messages and the back-office are in French. Every

@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.accounts.permissions import require
-from apps.events.models import Event
+from apps.events.models import ActivityType, Event
 
 from . import services
 from .models import SIZES, AlbRotation, Assignment, Request, Service, ServiceGroup, slots_for
@@ -67,7 +67,7 @@ class WeekView(APIView):
         unplanned = Event.objects.filter(
             starts_at__gte=_midnight(start),
             starts_at__lt=_midnight(end),
-            kind__in=["messe", "service_exterieur", "grande_veillee"], service__isnull=True,
+            kind__in=ActivityType.objects.filter(needs_lineup=True).values("slug"), service__isnull=True,
         )
         return Response({
             "start": start, "end": end - timedelta(days=1),

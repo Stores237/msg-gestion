@@ -32,6 +32,15 @@
   (dev settings). Otherwise login fails with a clear error instead of pretending a code was sent.
 - The HTML forms have their own per-IP rate limit (20/h) in the same Redis.
 
+## Groups
+
+- Every app request works inside one group: the `X-Group` header, checked against the member's
+  memberships (`not_in_group` otherwise). Group-owned tables are filtered by the current group in
+  their default manager; cross-group access goes through `all_groups` explicitly.
+- Access requests: the temporary PIN of a new account is stored in clear only until the leader
+  has seen it once (then erased, audited) and for 7 days at most; the member must replace it at
+  first sign-in.
+
 ## Fixed rules (cannot be changed from the back-office)
 
 Defined in `apps/accounts/registry.py`:

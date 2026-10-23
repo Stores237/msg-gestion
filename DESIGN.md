@@ -61,4 +61,9 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Finances in two hands: commissaire aux comptes enters, trésorier validates (and signs off the quarter) | Owner: the trésorier holds the money, so he confirms the figures match it. Replaces the commissaire-validates rule of the same day |
 | 2026-10-23 | Back-office for super admins only; group officers work in the app | Owner: the platform will serve other groups; the back-office administers the platform, not one group |
 | 2026-10-23 | Group-neutral wording in login help, errors and the back-office | Same reasoning. Group facts come from Paramètres |
+| 2026-10-23 | MSG is the platform's name; one platform for several groups (option B) | Owner. One account per phone number, memberships per group, roles per group |
+| 2026-10-23 | Group scoping in default managers (current group from X-Group / back-office session) | Safer than filtering by hand in every query: a forgotten filter can't leak another group's data |
+| 2026-10-23 | Access process: leader requests in the app → partner (super admin) creates in the back-office → temporary PIN shown once to the leader → member signs in and sees their role | Owner. Replaces direct registration in the app |
+| 2026-10-23 | Welcome message per group, on Accueil | Owner |
+| 2026-10-23 | Activity types and dress codes per group, edited in Paramètres; defaults translated, the group's own wording shown as written | Owner ("move it to editable settings") |
 

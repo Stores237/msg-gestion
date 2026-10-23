@@ -7,7 +7,7 @@ from apps.accounts.models import User
 from apps.core.groups import in_group
 from apps.core.models import Group, Notification
 from apps.core.notify import notify
-from apps.events.models import Event
+from apps.events.models import Event, dress_names
 
 
 class Command(BaseCommand):
@@ -31,10 +31,11 @@ class Command(BaseCommand):
         members = list(User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
         today_start = timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
         sent = 0
+        dresses = dress_names()
         for e in events:
             if Notification.objects.filter(kind="reminder", target__type="event", target__id=e.pk, created_at__gte=today_start).exists():
                 continue
             when = timezone.localtime(e.starts_at)
-            body = " · ".join(x for x in [e.get_dress_display() if e.dress else "", e.place] if x)
+            body = " · ".join(x for x in [dresses.get(e.dress, "") if e.dress else "", e.place] if x)
             sent += notify(members, "reminder", f"Rappel : {e.title} demain {when:%H:%M}", body, {"type": "event", "id": e.pk})
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")

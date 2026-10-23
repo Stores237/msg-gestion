@@ -1,5 +1,5 @@
-/// Kind keys: assise, messe, service_exterieur, grande_veillee, reunion, autre.
-/// Dress keys: '', interieure, exterieure, sportive, civile.
+/// Kind and dress keys are the group's own (back-office → Paramètres); the
+/// server also sends their names (kindName, dressName).
 /// Attendance keys: present, absent, excuse ('' = not marked).
 class CalendarEvent {
   const CalendarEvent({
@@ -13,7 +13,12 @@ class CalendarEvent {
     required this.notes,
     this.myAttendance,
     this.attendanceCounts,
+    this.kindName,
+    this.dressName,
   });
+
+  final String? kindName;
+  final String? dressName;
 
   final int id;
   final String kind;
@@ -29,6 +34,8 @@ class CalendarEvent {
   factory CalendarEvent.fromJson(Map<String, dynamic> j) => CalendarEvent(
     id: j['id'] as int,
     kind: j['kind'] as String,
+    kindName: j['kind_name'] as String?,
+    dressName: j['dress_name'] as String?,
     title: j['title'] as String,
     startsAt: DateTime.parse(j['starts_at'] as String).toLocal(),
     endsAt: j['ends_at'] == null

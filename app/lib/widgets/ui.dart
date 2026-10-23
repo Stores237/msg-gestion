@@ -816,7 +816,7 @@ class EventCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        eventKindLabel(l, e.kind).toUpperCase(),
+                        eventKindLabel(l, e.kind, e.kindName).toUpperCase(),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -842,7 +842,10 @@ class EventCard extends StatelessWidget {
                       if (e.place.isNotEmpty)
                         meta(Icons.place_outlined, e.place),
                       if (e.dress.isNotEmpty)
-                        meta(Icons.checkroom_outlined, dressLabel(l, e.dress)),
+                        meta(
+                          Icons.checkroom_outlined,
+                          dressLabel(l, e.dress, e.dressName),
+                        ),
                     ],
                   ),
                 ),

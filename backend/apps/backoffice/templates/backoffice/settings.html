@@ -38,4 +38,25 @@
 </div>
 <div style="margin-top:24px"><button class="btn btn-primary">Enregistrer</button></div>
 </form>
+<form method="post" action="{% url 'backoffice:settings_lists' %}" style="margin-top:32px">{% csrf_token %}
+<div class="bo-cols half">
+  <section class="panel"><div class="panel-h"><h2>Types d’activités</h2></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Planning</th><th>Présences</th><th>Retiré</th></tr></thead><tbody>
+      {% for a in activity_types %}<tr><td><span class="fld-box" style="min-height:40px"><input name="a{{ a.pk }}_name" value="{{ a.name }}" maxlength="60" aria-label="Nom"></span></td>
+        <td><input type="checkbox" name="a{{ a.pk }}_lineup"{% if a.needs_lineup %} checked{% endif %} aria-label="Planning des services pour {{ a.name }}"></td>
+        <td><input type="checkbox" name="a{{ a.pk }}_presence"{% if a.counts_presence %} checked{% endif %} aria-label="Compte dans les présences : {{ a.name }}"></td>
+        <td><input type="checkbox" name="a{{ a.pk }}_archived"{% if a.is_archived %} checked{% endif %} aria-label="Retirer {{ a.name }}"></td></tr>{% endfor %}
+      <tr><td><span class="fld-box" style="min-height:40px"><input name="a_new_name" maxlength="60" placeholder="Nouveau type (ex. Répétition)" aria-label="Nouveau type"></span></td>
+        <td><input type="checkbox" name="a_new_lineup" aria-label="Planning des services"></td><td><input type="checkbox" name="a_new_presence" aria-label="Compte dans les présences"></td><td></td></tr>
+    </tbody></table></div>
+    <div class="tbl-f"><span>« Planning » : un tableau de service est préparé pour ce type. « Présences » : il compte dans le résumé des présences d’un membre. Un type retiré reste sur les événements passés.</span></div></section>
+  <section class="panel"><div class="panel-h"><h2>Tenues</h2></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Retirée</th></tr></thead><tbody>
+      {% for d in dress_codes %}<tr><td><span class="fld-box" style="min-height:40px"><input name="d{{ d.pk }}_name" value="{{ d.name }}" maxlength="60" aria-label="Nom"></span></td>
+        <td><input type="checkbox" name="d{{ d.pk }}_archived"{% if d.is_archived %} checked{% endif %} aria-label="Retirer {{ d.name }}"></td></tr>{% endfor %}
+      <tr><td><span class="fld-box" style="min-height:40px"><input name="d_new_name" maxlength="60" placeholder="Nouvelle tenue" aria-label="Nouvelle tenue"></span></td><td></td></tr>
+    </tbody></table></div></section>
+</div>
+<div style="margin-top:16px"><button class="btn btn-primary">Enregistrer les listes</button></div>
+</form>
 {% endblock %}

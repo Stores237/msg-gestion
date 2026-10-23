@@ -29,6 +29,7 @@ urlpatterns = [
     path("roles/<slug:slug>/", views.roles, name="role"),
     path("roles/<slug:slug>/gerer/", views_admin.role_manage, name="role_manage"),
     path("parametres/", views_admin.settings_view, name="settings"),
+    path("parametres/listes/", views_admin.settings_lists, name="settings_lists"),
     path("finances/", views_finances.statement, name="finances"),
     path("finances/bilan.pdf", views_finances.statement_pdf_view, name="statement_pdf"),
     path("finances/bilan.csv", views_finances.statement_csv, name="statement_csv"),

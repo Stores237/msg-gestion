@@ -62,9 +62,10 @@ class MemberDetailSerializer(MemberListSerializer):
         """Last 4 past assises (design: "Présences · 4 dernières assises")."""
         from django.utils import timezone
 
-        from apps.events.models import Attendance, Event
+        from apps.events.models import ActivityType, Attendance, Event
 
-        events = list(Event.objects.filter(kind="assise", starts_at__lt=timezone.now()).order_by("-starts_at")[:4])
+        meetings = ActivityType.objects.filter(counts_presence=True).values("slug")
+        events = list(Event.objects.filter(kind__in=meetings, starts_at__lt=timezone.now()).order_by("-starts_at")[:4])
         marks = dict(Attendance.objects.filter(member=user, event__in=events).values_list("event_id", "status"))
         counts = {"present": 0, "absent": 0, "excuse": 0}
         for st in marks.values():

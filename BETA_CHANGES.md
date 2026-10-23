@@ -21,6 +21,7 @@ whether it touches real data.
 | 12 | Finance rights (commissaire: all; trésorier: read); members' balance statement in the app and back-office | Permissions changed |
 | 13 | Super admin: every right and every figure, in the back-office only | Permissions changed |
 | 14 | Finances in two hands (commissaire enters, trésorier validates); back-office for super admins only; group-neutral wording | Permissions changed |
+| 15 | MSG, a platform for several groups: groups, memberships, access requests, welcome message, per-group activity types and dress codes | New tables; every group-owned table gets a group |
 
 ## 1. Backend skeleton
 
@@ -317,3 +318,41 @@ change, delete, export; trésorier: view, validate, export; back-office permissi
 every role but super admin). Runs on deploy.
 
 **Verify.** `pytest` (189) and `flutter test` (57).
+
+## 15. MSG: one platform, several groups
+
+Owner decisions, 2026-10-23: MSG is the platform's name; one platform serves several groups
+(option B); one phone number can belong to several groups; roles are each group's own; the
+partner who creates accesses is the super admin; accesses are requested from the app.
+
+- **Groups and memberships.** `core.Group` and `core.Membership` (an account in a group). The
+  existing data all becomes the first group's ("Mouvement Garde Suisse"); everyone already there
+  is a member of it, except the super admins, who run the platform. Settings are per group, with a
+  new **welcome message** shown on Accueil.
+- **Scoping.** Every group-owned table carries its group (events, announcements, money,
+  planning, roles, notifications, settings…). The app names its group in the `X-Group` header (the
+  member's first group by default; a group they're not in is refused with `not_in_group`). The
+  back-office has a group switcher under the logo. Default managers filter on the current group,
+  so a forgotten filter can't show another group's data (`apps/core/groups.py`).
+- **Roles per group.** A new group starts with a copy of the first group's roles and permissions,
+  activity types and dress codes. Super admin is a platform role (no group).
+- **Access process.** The group leader (whoever may register members: président, secrétaire by
+  default) sends "Demander un accès" from the app (name, phone, role, note). The partner sees it in
+  back-office → Demandes d'accès and creates the access, or refuses with a reason. A new account
+  gets a temporary PIN that the leader sees **once** in the app ("Demandes d'accès"), then it is
+  erased (or dropped after 7 days); a number that already has an account just joins the group. The
+  member signs in, chooses their own PIN and sees their role. Direct registration in the app is
+  retired (`410 use_access_request`).
+- **Per-group lists.** Activity types (with "planning" and "présences" switches) and dress codes are
+  edited in back-office → Paramètres. The app shows the group's wording (the defaults stay
+  translated).
+- **Back-office**: Groupes page (create a group with its welcome message, switch), Demandes
+  d'accès (with a pending count in the menu), name MSG. **App**: named MSG, group switcher and
+  welcome message on Accueil, requests and PIN screen, offline cache and queued writes kept per
+  group.
+
+**Data.** `core.0004_groups`, `accounts.0010_roles_per_group`, `members.0001_access_requests`,
+`events.0002`/`0003`, `finances.0002`, `planning.0003`, `announcements.0003`. Run on deploy.
+
+**Verify.** `pytest` (201) and `flutter test` (61). Isolation tests: `apps/core/test_groups.py`;
+the access process end to end: `apps/members/test_access.py`.

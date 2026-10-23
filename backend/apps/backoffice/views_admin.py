@@ -561,7 +561,59 @@ def settings_view(request):
             audit.record("Paramètres modifiés", actor=request.user, obj=None, request=request, detail=changed)
         messages.success(request, "Paramètres enregistrés.")
         return redirect("backoffice:settings")
-    return render(request, "backoffice/settings.html", {"nav": "settings", "s": st, "today": date.today()})
+    from apps.events.models import ActivityType, DressCode
+
+    return render(request, "backoffice/settings.html", {
+        "nav": "settings", "s": st, "today": date.today(),
+        "activity_types": ActivityType.objects.all(), "dress_codes": DressCode.objects.all(),
+    })
+
+
+def _new_slug(model, name, max_length):
+    from django.utils.text import slugify
+
+    base = slugify(name)[:max_length - 3] or "x"
+    slug, n = base, 2
+    while model.objects.filter(slug=slug).exists():
+        slug, n = f"{base}-{n}"[:max_length], n + 1
+    return slug
+
+
+@require_POST
+@backoffice_view("backoffice.users", "change")
+def settings_lists(request):
+    """The group's own activity types and dress codes."""
+    from apps.events.models import ActivityType, DressCode
+
+    P = request.POST
+    changed = []
+    for a in ActivityType.objects.all():
+        k = f"a{a.pk}"
+        new = (P.get(f"{k}_name", a.name).strip() or a.name, bool(P.get(f"{k}_lineup")), bool(P.get(f"{k}_presence")), bool(P.get(f"{k}_archived")))
+        if new != (a.name, a.needs_lineup, a.counts_presence, a.is_archived):
+            a.name, a.needs_lineup, a.counts_presence, a.is_archived = new
+            a.save()
+            changed.append(a.name)
+    if P.get("a_new_name", "").strip():
+        name = P["a_new_name"].strip()[:60]
+        ActivityType.objects.create(slug=_new_slug(ActivityType, name, 20), name=name, needs_lineup=bool(P.get("a_new_lineup")),
+                                    counts_presence=bool(P.get("a_new_presence")), sort_order=ActivityType.objects.count() * 10)
+        changed.append(name)
+    for d in DressCode.objects.all():
+        k = f"d{d.pk}"
+        new = (P.get(f"{k}_name", d.name).strip() or d.name, bool(P.get(f"{k}_archived")))
+        if new != (d.name, d.is_archived):
+            d.name, d.is_archived = new
+            d.save()
+            changed.append(d.name)
+    if P.get("d_new_name", "").strip():
+        name = P["d_new_name"].strip()[:60]
+        DressCode.objects.create(slug=_new_slug(DressCode, name, 12), name=name, sort_order=DressCode.objects.count() * 10)
+        changed.append(name)
+    if changed:
+        audit.record("Listes du groupe modifiées", actor=request.user, request=request, detail={"elements": ", ".join(changed)[:300]})
+    messages.success(request, "Listes enregistrées.")
+    return redirect("backoffice:settings")
 
 
 @backoffice_view("backoffice.audit", "export")

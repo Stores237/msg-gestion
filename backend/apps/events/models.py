@@ -4,6 +4,52 @@ from django.db import models
 from apps.core.groups import default_group_id, scoped
 
 
+class ActivityType(models.Model):
+    """A kind of activity on a group's calendar (owner, 2026-10-23: each
+    group names its own — the Garde Suisse's assise, messe, grande
+    veillée…; a choir's rehearsal…). Edited in back-office → Paramètres."""
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    slug = models.SlugField(max_length=20)
+    name = models.CharField(max_length=60)
+    # A service lineup is made for it (planning: "à planifier").
+    needs_lineup = models.BooleanField(default=False)
+    # Counts in a member's presence summary (the weekly meeting).
+    counts_presence = models.BooleanField(default=False)
+    sort_order = models.PositiveSmallIntegerField(default=100)
+    is_archived = models.BooleanField(default=False)
+
+    objects = scoped()
+    all_groups = models.Manager()
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        constraints = [models.UniqueConstraint(fields=["group", "slug"], name="activity_slug_per_group")]
+
+    def __str__(self):
+        return self.name
+
+
+class DressCode(models.Model):
+    """A dress code a group asks for (tenue intérieure…). Per group."""
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    slug = models.SlugField(max_length=12)
+    name = models.CharField(max_length=60)
+    sort_order = models.PositiveSmallIntegerField(default=100)
+    is_archived = models.BooleanField(default=False)
+
+    objects = scoped()
+    all_groups = models.Manager()
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        constraints = [models.UniqueConstraint(fields=["group", "slug"], name="dress_slug_per_group")]
+
+    def __str__(self):
+        return self.name
+
+
 class Event(models.Model):
     """Anything on the movement's calendar: assises, masses, services,
     night vigils, meetings. Kind and dress are fixed lists the app
@@ -24,12 +70,14 @@ class Event(models.Model):
         SPORT = "sportive", "Tenue sportive"
         CIVIL = "civile", "Tenue civile"
 
-    kind = models.CharField(max_length=20, choices=Kind.choices)
+    # The slug of one of the group's ActivityType (Kind: the defaults).
+    kind = models.CharField(max_length=20)
     title = models.CharField(max_length=140)
     starts_at = models.DateTimeField(db_index=True)
     ends_at = models.DateTimeField(null=True, blank=True)
     place = models.CharField(max_length=140, blank=True)
-    dress = models.CharField(max_length=12, choices=Dress.choices, blank=True)
+    # The slug of one of the group's DressCode, or empty.
+    dress = models.CharField(max_length=12, blank=True)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -69,3 +117,11 @@ class Attendance(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["event", "member"], name="one_mark_per_member")]
+
+
+def kind_names():
+    return dict(ActivityType.objects.values_list("slug", "name"))
+
+
+def dress_names():
+    return dict(DressCode.objects.values_list("slug", "name"))

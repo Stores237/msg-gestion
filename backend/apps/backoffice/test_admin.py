@@ -255,3 +255,23 @@ def test_groups_create_switch_and_scope(admin, client):
     page = client.get("/bo/utilisateurs/").content.decode()
     assert "Ancien Membre" in page and "Choriste Anne" not in page
     assert "Paramètres" in page and 'selected>Mouvement' in page.replace('"', "")
+
+
+def test_settings_lists_edit_activity_types_and_dress_codes(admin, client):
+    from apps.events.models import ActivityType, DressCode
+
+    assise = ActivityType.objects.get(slug="assise")
+    data = {f"a{a.pk}_name": a.name for a in ActivityType.objects.all()}
+    data.update({f"a{a.pk}_presence": "on" for a in ActivityType.objects.filter(counts_presence=True)})
+    data.update({f"a{a.pk}_lineup": "on" for a in ActivityType.objects.filter(needs_lineup=True)})
+    data.update({f"d{d.pk}_name": d.name for d in DressCode.objects.all()})
+    data[f"a{assise.pk}_name"] = "Assise hebdomadaire"
+    data["a_new_name"] = "Sortie"
+    data["a_new_lineup"] = "on"
+    data["d_new_name"] = "Aube"
+    client.post("/bo/parametres/listes/", data)
+    assise.refresh_from_db()
+    assert assise.name == "Assise hebdomadaire" and assise.counts_presence
+    assert ActivityType.objects.get(name="Sortie").needs_lineup
+    assert DressCode.objects.filter(name="Aube").exists()
+    assert "Assise hebdomadaire" in client.get("/bo/parametres/").content.decode()

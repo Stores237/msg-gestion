@@ -109,3 +109,25 @@ def test_money_stays_in_its_group(two_groups):
     give(tre, first, "tresorier")
     assert app_client(tre, first).get("/api/finances/entries/").json() == []
     assert app_client(tre, first).get("/api/finances/summary/").json()["balance"] == 0
+
+
+def test_each_group_has_its_own_activity_types(two_groups):
+    from apps.events.models import ActivityType
+
+    first, second = two_groups
+    assert ActivityType.all_groups.filter(group=second, slug="assise").exists()  # copied at creation
+    with in_group(second):
+        ActivityType.objects.create(slug="repetition", name="Répétition", counts_presence=True)
+    leader = UserFactory(membership=second)
+    give(leader, second, "secretaire-general")
+    api = app_client(leader, second)
+    start = (timezone.now() + timedelta(days=3)).isoformat()
+    r = api.post("/api/events/", {"kind": "repetition", "title": "Répétition", "starts_at": start}, format="json")
+    assert r.status_code == 201, r.json()
+    assert r.json()["kind_name"] == "Répétition"
+    kinds = {k["slug"] for k in api.get("/api/settings/").json()["activity_types"]}
+    assert "repetition" in kinds
+    other = UserFactory(membership=first)
+    give(other, first, "secretaire-general")
+    r = app_client(other, first).post("/api/events/", {"kind": "repetition", "title": "X", "starts_at": start}, format="json")
+    assert r.status_code == 400 and "kind" in r.json()

@@ -43,6 +43,8 @@ class SettingsView(APIView):
     """What the app needs from Paramètres: official amounts, defaults."""
 
     def get(self, request):
+        from apps.events.models import ActivityType, DressCode
+
         from .models import Settings
 
         st = Settings.get()
@@ -50,6 +52,10 @@ class SettingsView(APIView):
             "name": st.name, "parish": st.parish, "motto": st.motto,
             "fees": {"inscription": st.fee_registration, "medaille": st.fee_medal, "maladie": st.fee_illness, "deces": st.fee_death},
             "quick_amounts": st.quick_amounts(), "installments": st.installments,
+            # The group's own lists (back-office → Paramètres).
+            "activity_types": [{"slug": a.slug, "name": a.name, "needs_lineup": a.needs_lineup}
+                               for a in ActivityType.objects.filter(is_archived=False)],
+            "dress_codes": [{"slug": d.slug, "name": d.name} for d in DressCode.objects.filter(is_archived=False)],
         })
 
 

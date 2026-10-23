@@ -1,3 +1,4 @@
+import '../data/repositories/profile_repository.dart';
 import '../l10n/app_localizations.dart';
 
 /// Role names come from the server in French (the back-office edits them);
@@ -30,32 +31,42 @@ String memberStatusLabel(AppLocalizations l, String status) => switch (status) {
   _ => status,
 };
 
-String eventKindLabel(AppLocalizations l, String kind) => switch (kind) {
-  'assise' => l.kindAssise,
-  'messe' => l.kindMass,
-  'service_exterieur' => l.kindOutsideService,
-  'grande_veillee' => l.kindVigil,
-  'reunion' => l.kindMeeting,
-  _ => l.kindOther,
-};
+/// Activity types and dress codes are each group's own (back-office →
+/// Paramètres). The default ones are translated while the group keeps
+/// their default French name; anything else is shown as the group wrote it.
+String eventKindLabel(AppLocalizations l, String kind, [String? name]) {
+  final fallback = _defaultName(AppSettings.defaultActivityTypes, kind);
+  if (name != null && name.isNotEmpty && name != fallback) return name;
+  return switch (kind) {
+    'assise' => l.kindAssise,
+    'messe' => l.kindMass,
+    'service_exterieur' => l.kindOutsideService,
+    'grande_veillee' => l.kindVigil,
+    'reunion' => l.kindMeeting,
+    'autre' => l.kindOther,
+    _ => name ?? kind,
+  };
+}
 
-const eventKinds = [
-  'assise',
-  'messe',
-  'service_exterieur',
-  'grande_veillee',
-  'reunion',
-  'autre',
-];
-const dressCodes = ['interieure', 'exterieure', 'sportive', 'civile', ''];
+String dressLabel(AppLocalizations l, String dress, [String? name]) {
+  final fallback = _defaultName(AppSettings.defaultDressCodes, dress);
+  if (name != null && name.isNotEmpty && name != fallback) return name;
+  return switch (dress) {
+    'interieure' => l.dressInside,
+    'exterieure' => l.dressOutside,
+    'sportive' => l.dressSport,
+    'civile' => l.dressCivil,
+    '' => l.dressNone,
+    _ => name ?? dress,
+  };
+}
 
-String dressLabel(AppLocalizations l, String dress) => switch (dress) {
-  'interieure' => l.dressInside,
-  'exterieure' => l.dressOutside,
-  'sportive' => l.dressSport,
-  'civile' => l.dressCivil,
-  _ => l.dressNone,
-};
+String? _defaultName(List<NamedItem> items, String slug) {
+  for (final (s, n) in items) {
+    if (s == slug) return n;
+  }
+  return null;
+}
 
 String presenceLabel(AppLocalizations l, String status) => switch (status) {
   'present' => l.presencePresent,

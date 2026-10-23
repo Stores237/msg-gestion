@@ -117,7 +117,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     children: [
                       Text(
-                        eventKindLabel(l, e.kind).toUpperCase(),
+                        eventKindLabel(l, e.kind, e.kindName).toUpperCase(),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
@@ -157,7 +157,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           if (e.dress.isNotEmpty)
                             ListRow(
                               lead: const Icon(Icons.checkroom_outlined),
-                              title: Text(dressLabel(l, e.dress)),
+                              title: Text(dressLabel(l, e.dress, e.dressName)),
                             ),
                         ],
                       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/repositories/profile_repository.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/event.dart';
@@ -29,11 +30,28 @@ class _EventFormScreenState extends State<EventFormScreen> {
   TimeOfDay _start = const TimeOfDay(hour: 15, minute: 0);
   TimeOfDay? _end;
   bool _busy = false;
+  List<NamedItem> _kinds = AppSettings.defaultActivityTypes;
+  List<NamedItem> _dresses = AppSettings.defaultDressCodes;
 
   @override
   void initState() {
     super.initState();
     _day = widget.initialDay;
+    // The group's own lists; the defaults until they arrive.
+    RepositoryLocator.instance.profile
+        .settings()
+        .then((s) {
+          if (!mounted) return;
+          setState(() {
+            if (s.activityTypes.isNotEmpty) _kinds = s.activityTypes;
+            if (s.dressCodes.isNotEmpty) _dresses = s.dressCodes;
+            if (!_kinds.any((k) => k.$1 == _kind)) _kind = _kinds.first.$1;
+            if (_dress.isNotEmpty && !_dresses.any((d) => d.$1 == _dress)) {
+              _dress = '';
+            }
+          });
+        })
+        .catchError((_) {});
   }
 
   @override
@@ -134,10 +152,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
                       initialValue: _kind,
                       decoration: deco(),
                       items: [
-                        for (final k in eventKinds)
+                        for (final (k, name) in _kinds)
                           DropdownMenuItem(
                             value: k,
-                            child: Text(eventKindLabel(l, k)),
+                            child: Text(eventKindLabel(l, k, name)),
                           ),
                       ],
                       onChanged: (v) => setState(() {
@@ -227,10 +245,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
                         prefix: const Icon(Icons.checkroom_outlined),
                       ),
                       items: [
-                        for (final k in dressCodes)
+                        for (final (k, name) in [..._dresses, ('', '')])
                           DropdownMenuItem(
                             value: k,
-                            child: Text(dressLabel(l, k)),
+                            child: Text(dressLabel(l, k, name)),
                           ),
                       ],
                       onChanged: (v) => setState(() => _dress = v!),

@@ -1,8 +1,35 @@
 import '../../models/me.dart';
 
+/// (slug, name) of one of the group's activity types or dress codes.
+typedef NamedItem = (String, String);
+
 class AppSettings {
-  const AppSettings({required this.quickAmounts, required this.fees});
+  const AppSettings({
+    required this.quickAmounts,
+    required this.fees,
+    this.activityTypes = defaultActivityTypes,
+    this.dressCodes = defaultDressCodes,
+  });
   final List<int> quickAmounts;
+
+  /// The group's own lists (back-office → Paramètres).
+  final List<NamedItem> activityTypes;
+  final List<NamedItem> dressCodes;
+
+  static const defaultActivityTypes = <NamedItem>[
+    ('assise', 'Assise du samedi'),
+    ('messe', 'Messe'),
+    ('service_exterieur', 'Service extérieur'),
+    ('grande_veillee', 'Grande veillée'),
+    ('reunion', 'Réunion'),
+    ('autre', 'Autre'),
+  ];
+  static const defaultDressCodes = <NamedItem>[
+    ('interieure', 'Tenue intérieure'),
+    ('exterieure', 'Tenue extérieure'),
+    ('sportive', 'Tenue sportive'),
+    ('civile', 'Tenue civile'),
+  ];
 
   /// inscription | medaille | maladie | deces → amount
   final Map<String, int> fees;

@@ -18,6 +18,14 @@ class HttpProfileRepository implements ProfileRepository {
       fees: (j['fees'] as Map<String, dynamic>).map(
         (k, v) => MapEntry(k, v as int),
       ),
+      activityTypes: [
+        for (final a in (j['activity_types'] as List?) ?? const [])
+          (a['slug'] as String, a['name'] as String),
+      ],
+      dressCodes: [
+        for (final d in (j['dress_codes'] as List?) ?? const [])
+          (d['slug'] as String, d['name'] as String),
+      ],
     );
   }
 

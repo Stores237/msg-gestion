@@ -32,6 +32,14 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
                                           mandate_months=role.mandate_months, sort_order=role.sort_order)
             RolePermission.objects.bulk_create([RolePermission(role=copy, resource=r, action=a) for r, a in perms])
             roles += 1
+    if template is not None:
+        from apps.events.models import ActivityType, DressCode
+
+        for a in ActivityType.all_groups.filter(group=template, is_archived=False):
+            ActivityType.all_groups.create(group=group, slug=a.slug, name=a.name, needs_lineup=a.needs_lineup,
+                                           counts_presence=a.counts_presence, sort_order=a.sort_order)
+        for d in DressCode.all_groups.filter(group=template, is_archived=False):
+            DressCode.all_groups.create(group=group, slug=d.slug, name=d.name, sort_order=d.sort_order)
     audit.record("Groupe créé", actor=by, obj=group, request=request, sensitive=True, platform=True,
                  detail={"nom": group.name, "roles": roles})
     return group
