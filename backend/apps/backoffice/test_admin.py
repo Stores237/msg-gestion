@@ -212,3 +212,43 @@ def test_any_bureau_role_for_one_day(admin, client):
     client.post("/bo/affectations/role-du-jour/", {"member": m.id, "role": "super-admin", "day": today.isoformat(), "reason": "x"})
     client.post("/bo/affectations/role-du-jour/", {"member": m.id, "role": "president", "day": (today - timedelta(days=1)).isoformat(), "reason": "x"})
     assert not RoleAssignment.objects.filter(user=m, role__slug__in=["super-admin", "president"]).exists()
+
+
+def _bo_login(client, codes, phone, *roles):
+    user = UserFactory(phone=f"+237{phone}", password=PASSWORD)
+    for r in roles:
+        give_role(user, r)
+    client.post("/bo/connexion/", {"phone": phone, "password": PASSWORD})
+    client.post("/bo/connexion/code/", {"code": codes["code"]})
+    return user
+
+
+@pytest.mark.parametrize("role", ["tresorier", "commissaire-aux-comptes"])
+def test_finance_roles_reach_the_statement_and_download_it(client, codes, role):
+    from apps.finances.models import Due
+
+    _bo_login(client, codes, "677000050", role)
+    m = UserFactory(last_name="Ateba", first_name="Paul")
+    Due.objects.create(member=m, kind="amende", label="Tenue", amount=500)
+    # Lands on the statement, not on the (forbidden) dashboard.
+    r = client.get("/bo/", follow=True)
+    assert r.redirect_chain[-1][0] == "/bo/finances/"
+    page = r.content.decode()
+    assert "Ateba Paul" in page and "500" in page and "Utilisateurs" not in page
+    assert client.get("/bo/utilisateurs/").status_code == 403
+    pdf = client.get("/bo/finances/bilan.pdf")
+    assert pdf.status_code == 200 and pdf["Content-Type"] == "application/pdf" and pdf.content.startswith(b"%PDF")
+    csv_ = client.get("/bo/finances/bilan.csv").content.decode("utf-8-sig")
+    assert "Ateba Paul" in csv_ and "500" in csv_
+    detail = client.get(f"/bo/finances/membres/{m.id}/").content.decode()
+    assert "Tenue" in detail
+    one = client.get(f"/bo/finances/membres/{m.id}/bilan.pdf")
+    assert one.status_code == 200 and one.content.startswith(b"%PDF")
+    assert AuditLog.objects.filter(action="Export PDF du bilan individuel", object_id=str(m.id)).exists()
+    assert client.get("/bo/securite/").status_code == 200
+
+
+def test_super_admin_never_sees_the_statement(admin, client):
+    assert client.get("/bo/finances/").status_code == 403
+    assert client.get("/bo/finances/bilan.pdf").status_code == 403
+    assert "Bilan financier" not in client.get("/bo/").content.decode()

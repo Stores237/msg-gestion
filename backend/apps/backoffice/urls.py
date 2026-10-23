@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, views_admin
+from . import views, views_admin, views_finances
 
 app_name = "backoffice"
 
@@ -25,6 +25,11 @@ urlpatterns = [
     path("roles/<slug:slug>/", views.roles, name="role"),
     path("roles/<slug:slug>/gerer/", views_admin.role_manage, name="role_manage"),
     path("parametres/", views_admin.settings_view, name="settings"),
+    path("finances/", views_finances.statement, name="finances"),
+    path("finances/bilan.pdf", views_finances.statement_pdf_view, name="statement_pdf"),
+    path("finances/bilan.csv", views_finances.statement_csv, name="statement_csv"),
+    path("finances/membres/<int:pk>/", views_finances.member_statement, name="member_statement"),
+    path("finances/membres/<int:pk>/bilan.pdf", views_finances.member_statement_pdf_view, name="member_statement_pdf"),
     path("journal/", views.audit_log, name="audit"),
     path("journal/export.csv", views_admin.audit_export, name="audit_export"),
 ]

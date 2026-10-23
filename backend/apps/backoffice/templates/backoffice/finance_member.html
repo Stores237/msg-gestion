@@ -1,0 +1,22 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Bilan · {{ member.full_name }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:finances' %}">Bilan financier</a> / {{ member.full_name }}</div>{% endblock %}
+{% block heading %}{{ member.full_name }}{% endblock %}
+{% block acts %}{% if can_export %}<a class="btn btn-primary" href="{% url 'backoffice:member_statement_pdf' member.pk %}">{% icon 'file-down' %}Bilan individuel (PDF)</a>{% endif %}{% endblock %}
+{% block body %}
+<div class="kpis money">
+  <div class="kpi"><span>Total dû</span><b class="tnum">{{ st.owed|fcfa }}</b><small>{{ member.phone|phone }} · {% status member %}</small></div>
+  <div class="kpi"><span>Versé (validé)</span><b class="tnum">{{ st.paid|fcfa }}</b><small>{% if st.pending %}+ {{ st.pending|fcfa }} à valider{% else %}rien en attente{% endif %}</small></div>
+  <div class="kpi{% if st.remaining %} alert{% endif %}"><span>Reste à payer</span><b class="tnum">{{ st.remaining|fcfa }}</b><small>{% if st.remaining %}à régulariser{% else %}à jour{% endif %}</small></div>
+</div>
+<section class="panel"><div class="panel-h"><h2>Dettes</h2></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nature</th><th>Libellé</th><th class="amt">Montant</th><th class="amt">Payé</th><th class="amt">Reste</th></tr></thead><tbody>
+    {% for d in st.dues %}<tr><td>{{ d.kind_label }}</td><td>{{ d.label }}</td><td class="tnum amt">{{ d.amount|fcfa }}</td><td class="tnum amt">{{ d.paid|fcfa }}</td><td class="tnum amt">{% if d.remaining %}<b>{{ d.remaining|fcfa }}</b>{% else %}<span class="status ok"><i></i>Soldé</span>{% endif %}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="5">Aucune dette.</td></tr>{% endfor %}
+  </tbody></table></div></section>
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Opérations à son nom</h2></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Libellé</th><th>Saisi par</th><th>Validation</th><th class="amt">Montant</th></tr></thead><tbody>
+    {% for e in st.entries %}<tr><td class="tnum" style="white-space:nowrap">{{ e.date|date:"d/m/Y" }}</td><td>{{ e.category_label }} · {{ e.label }}</td><td class="muted">{{ e.created_by }}</td><td>{% if e.validated_by %}<span class="status ok"><i></i>{{ e.validated_by }}</span>{% else %}<span class="status warn"><i></i>À valider</span>{% endif %}</td><td class="tnum amt">{% if e.direction == 'in' %}+{% else %}−{% endif %} {{ e.amount|fcfa }}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="5">Aucune opération.</td></tr>{% endfor %}
+  </tbody></table></div></section>
+{% endblock %}

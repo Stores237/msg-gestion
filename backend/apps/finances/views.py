@@ -313,3 +313,47 @@ class CashbookPdfView(APIView):
         entries = list(Entry.objects.select_related("member", "created_by", "validated_by")[:1000])
         audit.record("Export PDF du livre de caisse", actor=request.user, request=request, detail={"lignes": len(entries)})
         return _pdf_response(request, publish(cashbook_pdf(entries), "livre-de-caisse"))
+
+
+# --- Members' balance statement ("bilan") ---------------------------------------------
+
+
+class StatementView(APIView):
+    """Bilan général: every member's dues and payments."""
+
+    permission_classes = [require("finances.cashbook", "view")]
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request):
+        rows = services.statement_rows()
+        return Response({"rows": rows, "totals": services.statement_totals(rows)})
+
+
+class MemberStatementView(APIView):
+    permission_classes = [require("finances.cashbook", "view")]
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, pk):
+        return Response(services.member_statement(get_object_or_404(User, pk=pk)))
+
+
+class StatementPdfView(APIView):
+    permission_classes = [require("finances.cashbook", "export")]
+
+    def get(self, request):
+        from .pdf import publish, statement_pdf
+
+        rows = services.statement_rows()
+        audit.record("Export PDF du bilan général", actor=request.user, request=request, detail={"membres": len(rows)})
+        return _pdf_response(request, publish(statement_pdf(rows, services.statement_totals(rows)), "bilan-general"))
+
+
+class MemberStatementPdfView(APIView):
+    permission_classes = [require("finances.cashbook", "export")]
+
+    def get(self, request, pk):
+        from .pdf import member_statement_pdf, publish
+
+        member = get_object_or_404(User, pk=pk)
+        audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
+        return _pdf_response(request, publish(member_statement_pdf(services.member_statement(member)), "bilan-membre"))

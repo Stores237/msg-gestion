@@ -15,6 +15,17 @@ ROLE_BADGE_CLASS = {"bureau": "bureau", "systeme": "sys", "temporaire": "temp", 
 STATUS_DOT = {"actif": "ok", "conge": "warn", "classe": "off", "suspendu": "off", "archive": "off"}
 
 
+@register.filter
+def fcfa(n):
+    return f"{n or 0:,}".replace(",", "\u00a0") + "\u00a0FCFA"
+
+
+@register.filter
+def perms(user):
+    """{"resource:action", …} for the menu: {% with p=request.user|perms %}."""
+    return {f"{r}:{a}" for r, a in user.permission_set()}
+
+
 @register.simple_tag
 def icon(name, size=18):
     # Replaced by an inline <svg> by lucide.createIcons() (base.html).

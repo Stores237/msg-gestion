@@ -96,6 +96,14 @@ class _FinancesScreenState extends State<FinancesScreen> {
             title: l.tabFinances,
             sync: true,
             actions: [
+              if (widget.me.can('finances.cashbook', 'export'))
+                IconButton(
+                  key: const Key('export-statement'),
+                  tooltip: l.statementPdf,
+                  icon: const Icon(Icons.summarize_outlined),
+                  onPressed: () =>
+                      _export(RepositoryLocator.instance.finances.statementPdf),
+                ),
               if (_tab == 0 && widget.me.can('finances.cashbook', 'export'))
                 IconButton(
                   key: const Key('export-cashbook'),

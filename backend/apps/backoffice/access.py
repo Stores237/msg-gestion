@@ -24,7 +24,9 @@ SESSION_SMS_OK = "bo_sms_ok"
 TRUST_COOKIE = "bo_trust"
 TRUST_SALT = "backoffice.trusted-device"
 
-BACKOFFICE_PERMS = [("backoffice.users", "view"), ("backoffice.audit", "view")]
+# Reading the cash book opens the back-office too: the commissaire aux
+# comptes and the trésorier download the members' balance there.
+BACKOFFICE_PERMS = [("backoffice.users", "view"), ("backoffice.audit", "view"), ("finances.cashbook", "view")]
 
 
 def can_enter(user):
@@ -59,6 +61,9 @@ def rate_limited(request, scope, limit, window=3600):
 
 
 def backoffice_view(resource="backoffice.users", action="view"):
+    """Login + 2FA + live session, then resource:action (None: the view
+    checks for itself)."""
+
     def decorate(view):
         @wraps(view)
         def wrapper(request, *args, **kwargs):
@@ -75,7 +80,7 @@ def backoffice_view(resource="backoffice.users", action="view"):
                 logout(request)
                 return redirect("backoffice:login")
             live.update(last_seen=timezone.now())
-            if not user.can(resource, action):
+            if resource and not user.can(resource, action):
                 return render(request, "backoffice/forbidden.html", status=403)
             return view(request, *args, **kwargs)
 

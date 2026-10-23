@@ -35,9 +35,17 @@ def record_entry(*, by, request=None, **fields):
         existing = Entry.objects.filter(client_uuid=uuid).first()
         if existing:
             return existing, False
+    # The commissaire aux comptes holds every finance right (owner,
+    # 2026-10-23): what they enter is validated at once, under their name.
+    # Anyone else's line waits for the commissaire.
+    if by.can("finances.cashbook", "validate"):
+        fields.update(status=Entry.Status.VALIDATED, validated_by=by, validated_at=timezone.now())
     entry = Entry.objects.create(created_by=by, **fields)
-    audit.record("Opération saisie", actor=by, obj=entry, request=request,
+    validated = entry.status == Entry.Status.VALIDATED
+    audit.record("Opération saisie et validée" if validated else "Opération saisie", actor=by, obj=entry, request=request,
                  detail={"sens": entry.direction, "montant": entry.amount, "categorie": entry.category})
+    if validated and entry.member_id and entry.direction == Entry.Direction.IN:
+        notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} FCFA", {"type": "dues"})
     return entry, True
 
 
@@ -141,3 +149,49 @@ def validate_report(year, quarter, *, by, request=None):
         raise FinanceRule("already_validated", "Ce rapport est déjà validé.")
     audit.record("Rapport trimestriel validé", actor=by, obj=rep, request=request, detail={"annee": year, "trimestre": quarter})
     return rep
+
+
+# --- Members' balance statement ("bilan") -----------------------------------------------
+
+
+def statement_rows(members=None):
+    """Bilan général: per member, what they owe (fines, shares, registration),
+    what they paid (validated, and still waiting for validation) and what is
+    left to pay. Members with nothing at all are listed too, at zero."""
+    if members is None:
+        members = User.objects.exclude(status=User.Status.ARCHIVED)
+    members = list(members.order_by("last_name", "first_name"))
+    ids = [m.pk for m in members]
+    dues = Due.objects.filter(member_id__in=ids, cancelled=False).annotate(p=Sum("entries__amount"))
+    owed, left = {}, {}
+    for d in dues:
+        owed[d.member_id] = owed.get(d.member_id, 0) + d.amount
+        left[d.member_id] = left.get(d.member_id, 0) + max(d.amount - (d.p or 0), 0)
+    paid_in = Entry.objects.filter(member_id__in=ids, direction=Entry.Direction.IN)
+    validated = dict(paid_in.filter(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
+    pending = dict(paid_in.filter(status=Entry.Status.PENDING).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
+    return [{
+        "member": m.pk, "full_name": m.full_name, "phone": m.phone, "status": m.status,
+        "owed": owed.get(m.pk, 0), "paid": validated.get(m.pk, 0), "pending": pending.get(m.pk, 0), "remaining": left.get(m.pk, 0),
+    } for m in members]
+
+
+def statement_totals(rows):
+    return {k: sum(r[k] for r in rows) for k in ("owed", "paid", "pending", "remaining")}
+
+
+def member_statement(member):
+    """Bilan of one member: the totals, each debt, and every cash-book line
+    in their name."""
+    row = statement_rows(User.objects.filter(pk=member.pk))[0]
+    dues = []
+    for d in Due.objects.filter(member=member, cancelled=False).annotate(p=Sum("entries__amount")).order_by("created_at"):
+        paid = d.p or 0
+        dues.append({"id": d.pk, "kind": d.kind, "kind_label": d.get_kind_display(), "label": d.label, "amount": d.amount,
+                     "paid": paid, "remaining": max(d.amount - paid, 0), "created_at": d.created_at})
+    entries = [{
+        "id": e.pk, "date": e.date, "direction": e.direction, "amount": e.amount, "category": e.category,
+        "category_label": e.get_category_display(), "label": e.label, "status": e.status,
+        "created_by": e.created_by.short_name, "validated_by": e.validated_by.short_name if e.validated_by else None,
+    } for e in Entry.objects.filter(member=member).select_related("created_by", "validated_by").order_by("date", "created_at")]
+    return {**row, "dues": dues, "entries": entries}

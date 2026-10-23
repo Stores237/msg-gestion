@@ -18,4 +18,8 @@ urlpatterns = [
     path("report/validate/", views.ReportValidateView.as_view(), name="fin-report-validate"),
     path("report/pdf/", views.ReportPdfView.as_view(), name="fin-report-pdf"),
     path("entries/pdf/", views.CashbookPdfView.as_view(), name="fin-entries-pdf"),
+    path("statement/", views.StatementView.as_view(), name="fin-statement"),
+    path("statement/pdf/", views.StatementPdfView.as_view(), name="fin-statement-pdf"),
+    path("statement/<int:pk>/", views.MemberStatementView.as_view(), name="fin-member-statement"),
+    path("statement/<int:pk>/pdf/", views.MemberStatementPdfView.as_view(), name="fin-member-statement-pdf"),
 ]

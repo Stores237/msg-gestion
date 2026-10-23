@@ -90,6 +90,53 @@ void main() {
     expect(f.finances.exports, ['cashbook']);
   });
 
+  testWidgets('profile: one member\'s financial statement', (tester) async {
+    final f = await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        tabs: const ['accueil', 'membres'],
+        permissions: const {
+          'members.profile': ['view'],
+          'finances.cashbook': ['view', 'export'],
+        },
+      ),
+    );
+    await tester.tap(find.byKey(const Key('tab-membres')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ewane Brice'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('member-statement')),
+      100,
+      scrollable: _vertical,
+    );
+    await tester.tap(find.byKey(const Key('member-statement')));
+    await tester.pumpAndSettle();
+    expect(f.finances.exports.single, startsWith('statement:'));
+  });
+
+  testWidgets('finances: download the members\' balance statement', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        tabs: const ['accueil', 'finances'],
+        permissions: const {
+          'finances.cashbook': ['view', 'export'],
+        },
+      ),
+    );
+    await tester.tap(find.byKey(const Key('tab-finances')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('new-entry')), findsNothing);
+    await tester.tap(find.byKey(const Key('export-statement')));
+    await tester.pumpAndSettle();
+    expect(f.finances.exports, ['statement']);
+  });
+
   testWidgets('Accueil: À suivre for the bureau', (tester) async {
     await setUpApp(tester);
     (RepositoryLocator.instance.profile as FakeProfileRepository).bureau =

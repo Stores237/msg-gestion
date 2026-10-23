@@ -30,6 +30,10 @@ These need an account, a decision or a person — not code.
 - [ ] **Beta window**: start date, length, and who the testers are.
 - [ ] Confirm what a président / vice-président lineup change should require beyond the
   audit entry and the formateurs' notification (e.g. a written reason each time).
+- [ ] Confirm that the commissaire aux comptes' own entries should count as validated at once
+  (2026-10-23). The alternative is a second validator (e.g. the président) for those lines.
+- [ ] Give the trésorier and the commissaire aux comptes a back-office password (member page →
+  "Accès back-office") if they should use the "Bilan financier" page.
 - [ ] Confirm the default role permissions (migration `accounts.0002`), taken from the design's
   "Navigation par rôle" table — e.g. should the président be able to *validate* the quarterly
   report, or only approve it?

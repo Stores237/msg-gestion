@@ -53,4 +53,7 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Chef de groupe designated per service among its guards; standing role archived | Owner: "everyone can be chef de groupe", decided when the lineup is made |
 | 2026-10-23 | Roles of the day: any role except super admin, for one day, assigned by the super admin | Owner: more inclusive; censeur du jour and bureau roles rotate per activity |
 | 2026-10-23 | Back-office usable on phones: drawer menu under 820px | Owner: primarily desktop but accessible on every device. The design hid the sidebar with no replacement |
+| 2026-10-23 | Commissaire aux comptes: every finance right, own entries validated on entry; trésorier read + download only | Owner rule, replacing the design's "le trésorier saisit, le commissaire valide". With one person entering, a second validation step would block every line |
+| 2026-10-23 | Members' balance statement (bilan général / individuel), PDF in the app, PDF + CSV in the back-office | Owner: commissaire and trésorier download it for all members or one. "Versé" counts validated payments only |
+| 2026-10-23 | Back-office opens to finance roles, showing only "Bilan financier" | Owner: "add it on back office". The menu follows the permissions; the super admin still sees no amounts |
 

@@ -148,8 +148,21 @@ def logout_view(request):
 # --- Pages -----------------------------------------------------------------------
 
 
-@backoffice_view("backoffice.users", "view")
+def _balance():
+    from apps.finances.models import Entry
+    from apps.finances.services import balance
+
+    return balance(Entry.objects.filter(status=Entry.Status.VALIDATED))
+
+
+@backoffice_view(None)
 def dashboard(request):
+    if not request.user.can("backoffice.users", "view"):
+        # A finance-only account (commissaire aux comptes, trésorier) lands
+        # on the page it can use.
+        if request.user.can("finances.cashbook", "view"):
+            return redirect("backoffice:finances")
+        return render(request, "backoffice/forbidden.html", status=403)
     today = timezone.localdate()
     active = User.objects.filter(status=User.Status.ACTIVE, is_active=True)
     soon = (
@@ -168,6 +181,7 @@ def dashboard(request):
         "min_super_admins": registry.MIN_SUPER_ADMINS,
         "recent": AuditLog.objects.filter(sensitive=True).select_related("actor")[:6],
         "can_see_finances": request.user.can("finances.cashbook", "view"),
+        "balance": _balance() if request.user.can("finances.cashbook", "view") else None,
         "requests": RoleRequest.objects.filter(status=RoleRequest.Status.PENDING).select_related("member", "role", "requested_by")[:10],
         "expiring": soon.select_related("user", "role")[:5],
         "users_total": User.objects.exclude(status=User.Status.ARCHIVED).count(),

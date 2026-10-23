@@ -1,0 +1,30 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Bilan financier{% endblock %}
+{% block crumb %}<div class="crumb">Finances · {{ rows|length }} membre{{ rows|length|pluralize }}</div>{% endblock %}
+{% block heading %}Bilan financier des membres{% endblock %}
+{% block acts %}{% if can_export %}<a class="btn btn-outline" href="{% url 'backoffice:statement_csv' %}">{% icon 'file-spreadsheet' %}CSV</a><a class="btn btn-primary" href="{% url 'backoffice:statement_pdf' %}">{% icon 'file-down' %}Bilan général (PDF)</a>{% endif %}{% endblock %}
+{% block body %}
+<div class="kpis money">
+  <div class="kpi"><span>Solde de la caisse</span><b class="tnum">{{ balance|fcfa }}</b><small>opérations validées{% if pending %} · {{ pending }} à valider{% endif %}</small></div>
+  <div class="kpi"><span>Total dû</span><b class="tnum">{{ totals.owed|fcfa }}</b><small>amendes, contributions, inscriptions</small></div>
+  <div class="kpi"><span>Versé (validé)</span><b class="tnum">{{ totals.paid|fcfa }}</b><small>{% if totals.pending %}+ {{ totals.pending|fcfa }} à valider{% else %}rien en attente{% endif %}</small></div>
+  <div class="kpi{% if totals.remaining %} alert{% endif %}"><span>Reste à payer</span><b class="tnum">{{ totals.remaining|fcfa }}</b><small>tous membres confondus</small></div>
+</div>
+<section class="panel">
+  <form class="filters" method="get">
+    <div class="search">{% icon 'search' 16 %}<input name="q" value="{{ q }}" placeholder="Nom, téléphone…" aria-label="Rechercher"></div>
+    <a class="fsel{% if not only %} on{% endif %}" href="?q={{ q|urlencode }}">Tous les membres</a><a class="fsel{% if only == '1' %} on{% endif %}" href="?q={{ q|urlencode }}&reste=1">Avec un reste à payer</a>
+  </form>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Membre</th><th class="amt">Dû</th><th class="amt">Versé (validé)</th><th class="amt">À valider</th><th class="amt">Reste à payer</th><th></th></tr></thead><tbody>
+    {% for r in rows %}<tr><td><a class="who" href="{% url 'backoffice:member_statement' r.member %}" style="color:inherit"><span><b>{{ r.full_name }}</b><small style="white-space:nowrap">{{ r.phone|phone }}</small></span></a></td>
+      <td class="tnum amt">{{ r.owed|fcfa }}</td><td class="tnum amt">{{ r.paid|fcfa }}</td>
+      <td class="tnum muted amt">{% if r.pending %}{{ r.pending|fcfa }}{% else %}—{% endif %}</td>
+      <td class="tnum amt">{% if r.remaining %}<b>{{ r.remaining|fcfa }}</b>{% elif r.owed %}<span class="status ok"><i></i>Soldé</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+      <td class="amt"><span class="row-acts"><a class="btn btn-secondary btn-sm" href="{% url 'backoffice:member_statement' r.member %}">Détail</a>{% if can_export %}<a class="iconbtn" href="{% url 'backoffice:member_statement_pdf' r.member %}" aria-label="Bilan PDF de {{ r.full_name }}" title="Bilan PDF">{% icon 'file-down' 20 %}</a>{% endif %}</span></td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="6">Aucun membre ne correspond.</td></tr>{% endfor %}
+  </tbody>
+  {% if rows %}<tfoot><tr><td><b>Total</b></td><td class="tnum amt"><b>{{ totals.owed|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.paid|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.pending|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.remaining|fcfa }}</b></td><td></td></tr></tfoot>{% endif %}
+  </table></div>
+  <div class="tbl-f"><span>« Versé » ne compte que les paiements validés par le commissaire aux comptes.</span></div>
+</section>
+{% endblock %}

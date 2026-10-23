@@ -97,6 +97,17 @@ class _ProfileBody extends StatelessWidget {
     }
   }
 
+  Future<void> _statement(BuildContext context) async {
+    try {
+      final url = await RepositoryLocator.instance.finances.memberStatementPdf(
+        m.summary.id,
+      );
+      if (context.mounted) await openUri(context, Uri.parse(url));
+    } catch (e) {
+      if (context.mounted) showErrorSnack(context, e);
+    }
+  }
+
   Future<void> _resetPin(BuildContext context) async {
     final l = AppLocalizations.of(context);
     final name = m.summary.fullName;
@@ -306,6 +317,19 @@ class _ProfileBody extends StatelessWidget {
             onPressed: () => _resetPin(context),
             icon: const Icon(Icons.lock_reset),
             label: Text(l.resetPin),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              shape: const StadiumBorder(),
+            ),
+          ),
+        ],
+        if (currentUser.value?.can('finances.cashbook', 'export') ?? false) ...[
+          const SizedBox(height: 20),
+          OutlinedButton.icon(
+            key: const Key('member-statement'),
+            onPressed: () => _statement(context),
+            icon: const Icon(Icons.summarize_outlined),
+            label: Text(l.memberStatementPdf),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(48),
               shape: const StadiumBorder(),

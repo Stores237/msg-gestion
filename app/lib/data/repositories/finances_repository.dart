@@ -25,4 +25,8 @@ abstract class FinancesRepository {
   /// Signed download links for the PDF exports.
   Future<String> reportPdf(int year, int quarter);
   Future<String> cashbookPdf();
+
+  /// Bilan: every member's dues and payments, or one member's.
+  Future<String> statementPdf();
+  Future<String> memberStatementPdf(int memberId);
 }

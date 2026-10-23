@@ -69,9 +69,9 @@ def test_wrong_password_same_message_as_unknown_number(client, admin_user):
 
 
 def test_member_without_backoffice_permission_cannot_log_in(client):
-    """Even with a valid password: a treasurer has no back-office rights."""
+    """Even with a valid password: a plain member has no back-office rights."""
     user = UserFactory(phone="+237677452108", password=PASSWORD)
-    give_role(user, "tresorier")
+    give_role(user, "membre")
     assert _password_step(client, phone="677452108").status_code == 401
 
 

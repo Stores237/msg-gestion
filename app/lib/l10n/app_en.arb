@@ -416,5 +416,7 @@
   "removeChef": "Remove the group lead",
   "noChefYet": "No group lead yet",
   "youAreChef": "You are the group lead",
-  "chefNeedsGuards": "Assign guards to this service first."
+  "chefNeedsGuards": "Assign guards to this service first.",
+  "statementPdf": "Members' balance statement (PDF)",
+  "memberStatementPdf": "Financial statement (PDF)"
 }

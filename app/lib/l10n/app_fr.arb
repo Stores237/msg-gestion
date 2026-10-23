@@ -970,5 +970,7 @@
   "removeChef": "Retirer le chef de groupe",
   "noChefYet": "Pas encore de chef de groupe",
   "youAreChef": "Vous êtes chef de groupe",
-  "chefNeedsGuards": "Affectez d’abord des gardes à ce service."
+  "chefNeedsGuards": "Affectez d’abord des gardes à ce service.",
+  "statementPdf": "Bilan général des membres (PDF)",
+  "memberStatementPdf": "Bilan financier (PDF)"
 }

@@ -1502,4 +1502,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chefNeedsGuards => 'Assign guards to this service first.';
+
+  @override
+  String get statementPdf => 'Members\' balance statement (PDF)';
+
+  @override
+  String get memberStatementPdf => 'Financial statement (PDF)';
 }

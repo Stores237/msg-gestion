@@ -1505,4 +1505,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chefNeedsGuards => 'Affectez d’abord des gardes à ce service.';
+
+  @override
+  String get statementPdf => 'Bilan général des membres (PDF)';
+
+  @override
+  String get memberStatementPdf => 'Bilan financier (PDF)';
 }

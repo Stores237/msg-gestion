@@ -2599,6 +2599,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Affectez d’abord des gardes à ce service.'**
   String get chefNeedsGuards;
+
+  /// No description provided for @statementPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan général des membres (PDF)'**
+  String get statementPdf;
+
+  /// No description provided for @memberStatementPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan financier (PDF)'**
+  String get memberStatementPdf;
 }
 
 class _AppLocalizationsDelegate

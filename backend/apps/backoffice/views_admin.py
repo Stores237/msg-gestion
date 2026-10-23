@@ -40,7 +40,7 @@ def _deny(request):
 # --- Account security ------------------------------------------------------------
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view(None)  # one's own account: every back-office user
 def security(request):
     """"Sécurité du compte" (design: BSessions): sessions, 2FA, backup codes."""
     me = request.user

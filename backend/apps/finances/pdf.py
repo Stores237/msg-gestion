@@ -87,6 +87,55 @@ def cashbook_pdf(entries):
     return _doc("Livre de caisse", build)
 
 
+STATUS = {"validated": "validé", "pending": "à valider"}
+
+
+def statement_pdf(rows, totals):
+    """Bilan général: one line per member."""
+    def build(styles):
+        table = [["Membre", "Dû", "Versé (validé)", "À valider", "Reste à payer"]]
+        for r in rows:
+            table.append([Paragraph(r["full_name"], styles["BodyText"]), money(r["owed"]), money(r["paid"]),
+                          money(r["pending"]) if r["pending"] else "", money(r["remaining"]) if r["remaining"] else "soldé"])
+        table.append(["Total", money(totals["owed"]), money(totals["paid"]), money(totals["pending"]), money(totals["remaining"])])
+        t = _table(table, [58 * mm, 28 * mm, 30 * mm, 28 * mm, 30 * mm], (1, 2, 3, 4))
+        t.setStyle(TableStyle([("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"), ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#E8F2EB"))]))
+        return [Paragraph(f"{len(rows)} membres · « Versé » ne compte que les paiements validés par le commissaire aux comptes.",
+                          styles["Normal"]), Spacer(1, 4 * mm), t]
+
+    return _doc("Bilan financier des membres", build)
+
+
+def member_statement_pdf(st):
+    """Bilan of one member: totals, debts, payments."""
+    def build(styles):
+        summary = [["Synthèse", "Montant"], ["Total dû", money(st["owed"])], ["Versé (validé)", money(st["paid"])],
+                   ["En attente de validation", money(st["pending"])], ["Reste à payer", money(st["remaining"])]]
+        out = [Paragraph(f"<b>{st['full_name']}</b> · {st['phone']}", styles["Normal"]), Spacer(1, 4 * mm),
+               _table(summary, [110 * mm, 50 * mm], (1,)), Spacer(1, 6 * mm), Paragraph("<b>Dettes</b>", styles["Heading3"])]
+        if st["dues"]:
+            dues = [["Nature", "Libellé", "Montant", "Payé", "Reste"]]
+            for d in st["dues"]:
+                dues.append([d["kind_label"], Paragraph(d["label"], styles["BodyText"]), money(d["amount"]), money(d["paid"]),
+                             money(d["remaining"]) if d["remaining"] else "soldé"])
+            out.append(_table(dues, [36 * mm, 56 * mm, 26 * mm, 26 * mm, 26 * mm], (2, 3, 4)))
+        else:
+            out.append(Paragraph("Aucune dette.", styles["Normal"]))
+        out += [Spacer(1, 6 * mm), Paragraph("<b>Opérations à son nom</b>", styles["Heading3"])]
+        if st["entries"]:
+            lines = [["Date", "Libellé", "Saisi / validé", "Montant"]]
+            for e in st["entries"]:
+                who = e["created_by"] + (f" / {e['validated_by']}" if e["validated_by"] else " / à valider")
+                lines.append([f"{e['date']:%d/%m/%Y}", Paragraph(f"{e['category_label']} · {e['label']}", styles["BodyText"]), who,
+                              ("+ " if e["direction"] == "in" else "− ") + money(e["amount"])])
+            out.append(_table(lines, [24 * mm, 70 * mm, 46 * mm, 30 * mm], (3,)))
+        else:
+            out.append(Paragraph("Aucune opération.", styles["Normal"]))
+        return out
+
+    return _doc("Bilan financier individuel", build)
+
+
 def publish(pdf_bytes, prefix):
     name = default_storage.save(f"exports/{prefix}-{secrets.token_urlsafe(12)}.pdf", ContentFile(pdf_bytes))
     return default_storage.url(name)

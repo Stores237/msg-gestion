@@ -18,6 +18,7 @@ whether it touches real data.
 | 9 | Members, calendar, announcements (API + app); beta build 2 | New tables; staging demo content |
 | 10 | Everything else in the design (except SMS/push delivery); build 3 | New tables |
 | 11 | Who makes the lineup; chef de groupe per service; roles of the day; back-office on phones | Roles and permissions changed; one column moved |
+| 12 | Finance rights (commissaire: all; trésorier: read); members' balance statement in the app and back-office | Permissions changed |
 
 ## 1. Backend skeleton
 
@@ -243,3 +244,29 @@ chefs are not carried over). Both run on deploy.
 **Verify.** `pytest` (181) and `flutter test` (54). On staging after deploy, run
 `add_role_testers` to create the formateur adjoint tester.
 
+## 12. Finance rights and the members' balance statement (bilan)
+
+- **The commissaire aux comptes holds every finance right** (cash book, solidarity
+  collections, quarterly report: view, create, change, validate, delete, export). A line they
+  enter is validated at once under their name ("Opération saisie et validée" in the audit
+  log). A line entered by someone else (e.g. a registration fee taken at signup) still waits
+  for their validation, and nobody validates a pending line they entered themselves.
+- **The trésorier only reads and downloads**: `registry.LOCKED` locks create, change, validate
+  and delete on every finance resource for that role, so the back-office matrix can't hand
+  them back.
+- **Bilan général and bilan individuel**: per member, what they owe (fines, solidarity shares,
+  registration), what they paid (validated), what waits for validation, and what is left.
+  - API: `GET /api/finances/statement/`, `/statement/<id>/`, and `/pdf/` on each (needs
+    `finances.cashbook` view / export). Every download is audited.
+  - App: Finances → summary icon (bilan général PDF); a member's profile → "Bilan financier
+    (PDF)".
+  - Back-office: new "Bilan financier" page (totals, search, "Avec un reste à payer" filter,
+    PDF and CSV of the whole list, a page per member with its own PDF). Reading the cash book
+    now opens the back-office: a finance-only account lands on this page and sees only it,
+    plus its own security page. The super admin still never sees an amount.
+
+**Data.** `accounts.0007_finance_rights` (commissaire gets every finance right; trésorier
+keeps view + export). Runs on deploy. A trésorier or commissaire needs a back-office password
+(super admin: member page → "Accès back-office") to use the back-office page.
+
+**Verify.** `pytest` (189) and `flutter test` (56). Back-office checked at 1280px and 375px.

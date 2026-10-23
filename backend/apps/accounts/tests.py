@@ -222,13 +222,22 @@ def test_future_role_not_active_yet():
 # --- Separation of duties ---------------------------------------------------------------
 
 
-def test_treasurer_can_never_validate_even_if_db_says_so():
+def test_treasurer_only_reads_finances_even_if_db_says_otherwise():
     user = UserFactory()
     give_role(user, "tresorier")
     role = Role.objects.get(slug="tresorier")
-    RolePermission.objects.create(role=role, resource="finances.cashbook", action="validate")
-    assert user.can("finances.cashbook", "change")
-    assert not user.can("finances.cashbook", "validate")
+    for act in ("create", "change", "validate", "delete"):
+        RolePermission.objects.get_or_create(role=role, resource="finances.cashbook", action=act)
+    assert user.can("finances.cashbook", "view") and user.can("finances.cashbook", "export")
+    assert not any(user.can("finances.cashbook", a) for a in ("create", "change", "validate", "delete"))
+
+
+def test_auditor_holds_every_finance_right():
+    user = UserFactory()
+    give_role(user, "commissaire-aux-comptes")
+    for res, spec in registry.RESOURCES.items():
+        if spec[0] == "finances":
+            assert all(user.can(res, a) for a in spec[2]), res
 
 
 def test_super_admin_never_sees_finances_even_with_another_role():

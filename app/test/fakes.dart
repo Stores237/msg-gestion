@@ -642,6 +642,18 @@ class FakeFinancesRepository implements FinancesRepository {
     exports.add('cashbook');
     return 'https://example.test/c.pdf';
   }
+
+  @override
+  Future<String> statementPdf() async {
+    exports.add('statement');
+    return 'https://example.test/s.pdf';
+  }
+
+  @override
+  Future<String> memberStatementPdf(int memberId) async {
+    exports.add('statement:$memberId');
+    return 'https://example.test/m.pdf';
+  }
 }
 
 class FakePlanningRepository implements PlanningRepository {

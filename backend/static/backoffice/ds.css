@@ -89,6 +89,7 @@ dialog.dialog::backdrop{background:var(--msg-backdrop)}
 }
 @container (max-width:520px){
   .kpis{gap:10px}
+  .kpis.money{grid-template-columns:minmax(0,1fr)}
   .bo-top .acts{width:100%}
   .bo-top .acts>*{flex:1}
   .panel-h .acts{width:100%}
@@ -97,3 +98,7 @@ dialog.dialog::backdrop{background:var(--msg-backdrop)}
   dialog.dialog .acts{flex-wrap:wrap}
   dialog.dialog .acts .btn{flex:1}
 }
+
+/* Money columns (Bilan financier): right-aligned, never split over two lines. */
+.tbl .amt{text-align:right;white-space:nowrap}
+.row-acts{display:inline-flex;gap:8px;align-items:center;justify-content:flex-end}

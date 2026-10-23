@@ -41,11 +41,14 @@ RESOURCES = {
     "backoffice.audit": ("backoffice", "Journal d’audit", [VIEW, EXPORT], True),
 }
 
-# Fixed rules (design: "le trésorier saisit, le commissaire aux comptes
-# valide. Le super admin gère les accès sans voir les montants"). A locked
-# cell can never be granted, whatever the database says.
+# Fixed rules. A locked cell can never be granted, whatever the database says.
+# - The commissaire aux comptes holds every finance right; the trésorier only
+#   reads and downloads (owner, 2026-10-23 — replaces the design's "le
+#   trésorier saisit, le commissaire valide").
+# - The super admin manages access without seeing any amount (design).
+FINANCE_WRITE = {CREATE, CHANGE, VALIDATE, DELETE}
 LOCKED = {
-    "tresorier": {("finances.cashbook", VALIDATE), ("finances.solidarity", VALIDATE), ("finances.report", VALIDATE)},
+    "tresorier": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2] if act in FINANCE_WRITE},
     "super-admin": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2]},
 }
 
