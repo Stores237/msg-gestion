@@ -4,7 +4,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, FilteredRelation, Q
 from django.utils import timezone
 
 from apps.core.groups import current_group_id, default_group_id, scoped
@@ -23,13 +23,18 @@ class UserManager(BaseUserManager):
         return user
 
     def members(self):
-        """People of the current group (everyone when no group is set: jobs
-        and the platform's own views). Accounts are platform-wide; a
-        Membership puts one in a group."""
+        """People of the current group, each with `gstatus`: their status
+        in that group (filter on it: .filter(gstatus=…)). With no group set
+        (platform jobs, tests), everyone, with gstatus = account status.
+        Accounts are platform-wide; a Membership puts one in a group."""
         gid = current_group_id()
         if gid is None:
-            return self.all()
-        return self.filter(memberships__group_id=gid, memberships__is_active=True)
+            return self.annotate(gstatus=F("status"))
+        return (
+            self.annotate(m=FilteredRelation("memberships", condition=Q(memberships__group_id=gid)))
+            .filter(m__isnull=False, m__is_active=True)
+            .annotate(gstatus=F("m__status"))
+        )
 
     def create_superuser(self, phone, password, **extra):
         extra.setdefault("is_staff", True)
@@ -164,6 +169,24 @@ class User(AbstractBaseUser, PermissionsMixin):
         return (resource, action) in self.permission_set()
 
     @property
+    def group_status(self):
+        """Status in the current group (Membership.status); the account's
+        own status when no group is set or the person isn't a member."""
+        if hasattr(self, "gstatus"):
+            return self.gstatus
+        gid = current_group_id()
+        if gid is not None:
+            from apps.core.models import Membership
+
+            st = Membership.all_groups.filter(user=self, group_id=gid).values_list("status", flat=True).first()
+            if st:
+                return st
+        return self.status
+
+    def get_group_status_display(self):
+        return dict(self.Status.choices).get(self.group_status, self.group_status)
+
+    @property
     def is_super_admin(self):
         # Platform role: looked up across groups, whatever group is current.
         return RoleAssignment.all_groups.active().filter(
@@ -171,9 +194,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         ).exists()
 
     def groups_joined(self):
-        from apps.core.models import Group
+        # Suspended or archived in a group: no way into it from the app.
+        from apps.core.models import Group, Membership
 
-        return Group.objects.filter(memberships__user=self, memberships__is_active=True, is_active=True).order_by("memberships__created_at")
+        closed = Membership.all_groups.filter(user=self, status__in=["suspendu", "archive"]).values("group_id")
+        return (Group.objects.filter(memberships__user=self, memberships__is_active=True, is_active=True)
+                .exclude(pk__in=closed).order_by("memberships__created_at"))
 
     def tabs(self):
         perms = self.permission_set()

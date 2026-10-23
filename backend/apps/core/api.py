@@ -73,7 +73,7 @@ class BureauHomeView(APIView):
         u = request.user
         out = {}
         if u.can("members.profile", "view"):
-            out["members_active"] = User.objects.members().filter(status=User.Status.ACTIVE, is_active=True).count()
+            out["members_active"] = User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True).count()
         if u.can("finances.cashbook", "view"):
             out["to_validate"] = Entry.objects.filter(status=Entry.Status.PENDING).count()
         if u.can("finances.solidarity", "view"):

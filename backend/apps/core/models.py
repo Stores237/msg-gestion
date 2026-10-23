@@ -29,6 +29,10 @@ class Membership(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships")
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="memberships")
     joined_on = models.DateField(null=True, blank=True)
+    # Actif, en congé, classé, suspendu, archivé — in this group (owner,
+    # 2026-10-23: one person can be on leave in one group, active in another).
+    status = models.CharField(max_length=10, default="actif", choices=[
+        ("actif", "Actif"), ("conge", "En congé"), ("classe", "Classé"), ("suspendu", "Suspendu"), ("archive", "Archivé")])
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -45,7 +49,7 @@ class Membership(models.Model):
     def join(cls, user, group_id=None):
         """Put `user` in a group (the current one by default); idempotent."""
         m, created = cls.all_groups.get_or_create(user=user, group_id=group_id or default_group_id(),
-                                                  defaults={"joined_on": user.joined_on})
+                                                  defaults={"joined_on": user.joined_on, "status": "actif"})
         if not m.is_active:
             m.is_active = True
             m.save(update_fields=["is_active"])

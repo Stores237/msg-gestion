@@ -99,7 +99,9 @@ def test_reset_pin_suspend_and_backoffice_access(admin, client):
     assert "Nouveau code PIN provisoire" in body
     client.post(f"/bo/utilisateurs/{m.id}/", {"action": "suspend", "reason": "3 absences"})
     m.refresh_from_db()
-    assert m.status == "suspendu"
+    from apps.core.models import Membership
+
+    assert Membership.all_groups.get(user=m).status == "suspendu" and m.status == "actif"  # in this group only
     body = client.post(f"/bo/utilisateurs/{m.id}/", {"action": "password"}, follow=True).content.decode()
     m.refresh_from_db()
     assert BackupCode.remaining(m) == 0 and "réservé aux super admins" in body
@@ -120,7 +122,9 @@ def test_new_user_and_bulk(admin, client):
     assert r["Content-Type"].startswith("text/csv") and "Ndjock Patrick" in r.content.decode("utf-8-sig")
     client.post("/bo/utilisateurs/actions/", {"ids": [u.id], "action": "suspend"})
     u.refresh_from_db()
-    assert u.status == "suspendu"
+    from apps.core.models import Membership
+
+    assert Membership.all_groups.get(user=u).status == "suspendu"
 
 
 def test_import_csv_valid_rows_only(admin, client):

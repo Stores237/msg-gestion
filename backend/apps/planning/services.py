@@ -58,7 +58,7 @@ def note_exceptional(by, what, service=None, request=None, **detail):
 
 
 def _available_members():
-    return User.objects.members().filter(status=User.Status.ACTIVE, is_active=True)
+    return User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True)
 
 
 def service_counts(month_of):
@@ -93,11 +93,11 @@ def candidates(service):
     counts = service_counts(timezone.localtime(service.event.starts_at).date())
     taken = set(service.assignments.values_list("member_id", flat=True))
     out = []
-    for m in User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True):
+    for m in User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True):
         if m.pk in taken:
             continue
         flag = None
-        if m.status == User.Status.LEAVE:
+        if m.gstatus == User.Status.LEAVE:
             flag = "on_leave"
         else:
             other = busy_same_day(m.pk, service)
@@ -171,7 +171,7 @@ def assign_group(service, group, *, by, request=None):
     filled = {(a.post, a.side, a.index) for a in service.assignments.all()}
     empty = [s for s in slots_for(service.size) if s not in filled]
     taken = set(service.assignments.values_list("member_id", flat=True))
-    pool = [m for m in group.members.filter(status=User.Status.ACTIVE) if m.pk not in taken and not busy_same_day(m.pk, service)]
+    pool = [m for m in User.objects.members().filter(gstatus=User.Status.ACTIVE, service_groups=group) if m.pk not in taken and not busy_same_day(m.pk, service)]
     pool.sort(key=lambda m: (counts.get(m.pk, 0), m.last_name))
     created = []
     with transaction.atomic():
@@ -258,7 +258,7 @@ def publish(services, *, by, request=None):
 def request_swap(assignment, *, by, target, reason=""):
     if assignment.member_id != by.pk:
         raise PlanningRule("not_yours", "Ce service n’est pas le vôtre.", status=403)
-    if target.pk == by.pk or target.status != User.Status.ACTIVE:
+    if target.pk == by.pk or target.group_status != User.Status.ACTIVE:
         raise PlanningRule("bad_target", "Choisissez un collègue actif.")
     if busy_same_day(target.pk, assignment.service):
         raise PlanningRule("target_busy", f"{target.short_name} a déjà un service ce jour-là.")

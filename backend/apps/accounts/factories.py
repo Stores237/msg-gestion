@@ -33,7 +33,7 @@ class UserFactory(factory.django.DjangoModelFactory):
             from apps.core.models import Membership
 
             gid = extracted.pk if extracted not in (None, True) else default_group_id()
-            Membership.all_groups.get_or_create(user=obj, group_id=gid)
+            Membership.all_groups.get_or_create(user=obj, group_id=gid, defaults={"status": obj.status})
 
     @factory.post_generation
     def password(obj, create, extracted, **kwargs):

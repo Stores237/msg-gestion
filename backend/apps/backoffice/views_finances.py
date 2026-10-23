@@ -21,7 +21,7 @@ from .access import backoffice_view
 
 def _members(request):
     q = request.GET.get("q", "").strip()
-    qs = User.objects.members().exclude(status=User.Status.ARCHIVED)
+    qs = User.objects.members().exclude(gstatus=User.Status.ARCHIVED)
     if q:
         qs = qs.filter(Q(last_name__icontains=q) | Q(first_name__icontains=q) | Q(phone__icontains=q.replace(" ", "")))
     return q, qs

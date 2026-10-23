@@ -24,6 +24,7 @@ class RoleBriefSerializer(serializers.Serializer):
 
 class MemberListSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
+    status = serializers.CharField(source="group_status", read_only=True)  # in the current group
     age = serializers.IntegerField(read_only=True)
     is_minor = serializers.BooleanField(read_only=True)
     joined_year = serializers.SerializerMethodField()

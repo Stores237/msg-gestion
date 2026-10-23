@@ -66,4 +66,5 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Access process: leader requests in the app → partner (super admin) creates in the back-office → temporary PIN shown once to the leader → member signs in and sees their role | Owner. Replaces direct registration in the app |
 | 2026-10-23 | Welcome message per group, on Accueil | Owner |
 | 2026-10-23 | Activity types and dress codes per group, edited in Paramètres; defaults translated, the group's own wording shown as written | Owner ("move it to editable settings") |
+| 2026-10-23 | Member status per group (Membership.status); suspending in the back-office acts on the current group only | Owner: on leave in one group, active in another |
 

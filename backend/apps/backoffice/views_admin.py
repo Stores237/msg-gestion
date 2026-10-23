@@ -116,8 +116,10 @@ def user_detail(request, pk):
             elif action in ("suspend", "reactivate"):
                 if not reason:
                     raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
-                member.status = User.Status.SUSPENDED if action == "suspend" else User.Status.ACTIVE
-                member.save(update_fields=["status"])
+                # In the group being worked on; the person's other groups are untouched.
+                Membership.join(member, request.group.pk)
+                Membership.objects.filter(user=member).update(
+                    status=User.Status.SUSPENDED if action == "suspend" else User.Status.ACTIVE)
                 audit.record("Utilisateur suspendu" if action == "suspend" else "Utilisateur réactivé", actor=request.user, obj=member,
                              request=request, sensitive=True, detail={"motif": reason})
                 messages.success(request, "Statut mis à jour.")
@@ -200,7 +202,7 @@ def users_bulk(request):
     if action == "export":
         return _users_csv(qs, "selection")
     if action == "suspend":
-        n = qs.exclude(status=User.Status.SUSPENDED).update(status=User.Status.SUSPENDED)
+        n = Membership.objects.filter(user__in=qs.values("pk")).exclude(status=User.Status.SUSPENDED).update(status=User.Status.SUSPENDED)
         audit.record("Suspension groupée", actor=request.user, request=request, sensitive=True, detail={"utilisateurs": n})
         messages.success(request, f"{n} utilisateur(s) suspendu(s).")
     elif action == "reset_pin":
@@ -214,7 +216,7 @@ def _users_csv(qs, name):
     w = csv.writer(buf, delimiter=";")
     w.writerow(["Nom", "Prénoms", "Téléphone", "Statut", "Diaspora", "Ville", "Date de naissance", "Adhésion", "Rôles"])
     for u in qs.prefetch_related("assignments__role"):
-        w.writerow([u.last_name, u.first_name, u.phone, u.get_status_display(), "oui" if u.is_diaspora else "non", u.city,
+        w.writerow([u.last_name, u.first_name, u.phone, u.get_group_status_display(), "oui" if u.is_diaspora else "non", u.city,
                     u.birth_date or "", u.joined_on, ", ".join(a.role.name for a in _active_roles(u))])
     resp = HttpResponse("﻿" + buf.getvalue(), content_type="text/csv; charset=utf-8")
     resp["Content-Disposition"] = f'attachment; filename="membres-{name}.csv"'
@@ -235,7 +237,7 @@ def _pins_csv(pins):
 
 @backoffice_view("backoffice.users", "export")
 def users_export(request):
-    return _users_csv(User.objects.members().exclude(status=User.Status.ARCHIVED), "tous")
+    return _users_csv(User.objects.members().exclude(gstatus=User.Status.ARCHIVED), "tous")
 
 
 # --- Import -----------------------------------------------------------------------------
@@ -403,7 +405,7 @@ def assignments(request):
         "nav": "assign", "rows": rows, "soon": soon, "horizon": horizon, "upcoming": upcoming, "today": today,
         "can_edit": request.user.can("backoffice.users", "change"),
         "day_roles": Role.objects.filter(is_archived=False).exclude(slug__in=["membre", registry.SUPER_ADMIN_SLUG]),
-        "members": User.objects.members().filter(status=User.Status.ACTIVE, is_active=True),
+        "members": User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True),
     })
 
 
@@ -422,7 +424,7 @@ def _assign_for_the_day(member, role, day, *, reason, by, request=None):
 @require_POST
 @backoffice_view("backoffice.users", "change")
 def assignment_day(request):
-    member = get_object_or_404(User.objects.members(), pk=request.POST.get("member"), status=User.Status.ACTIVE)
+    member = get_object_or_404(User.objects.members(), pk=request.POST.get("member"), gstatus=User.Status.ACTIVE)
     role = get_object_or_404(Role, slug=request.POST.get("role"), is_archived=False)
     day = parse_date(request.POST.get("day") or "") or timezone.localdate()
     if day < timezone.localdate():

@@ -63,7 +63,7 @@ def open_collection(*, by, kind, title, amount_per_member, installments=3, opene
     with transaction.atomic():
         c = Collection.objects.create(kind=kind, title=title, amount_per_member=amount_per_member, installments=installments,
                                       opened_on=opened_on or timezone.localdate(), created_by=by)
-        members = User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
+        members = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
         Due.objects.bulk_create([
             Due(member=m, kind=Due.Kind.SOLIDARITY, label=title, amount=amount_per_member, collection=c, created_by=by) for m in members
         ])
@@ -151,7 +151,7 @@ def statement_rows(members=None):
     what they paid (validated, and still waiting for validation) and what is
     left to pay. Members with nothing at all are listed too, at zero."""
     if members is None:
-        members = User.objects.members().exclude(status=User.Status.ARCHIVED)
+        members = User.objects.members().exclude(gstatus=User.Status.ARCHIVED)
     members = list(members.order_by("last_name", "first_name"))
     ids = [m.pk for m in members]
     dues = Due.objects.filter(member_id__in=ids, cancelled=False).annotate(p=Sum("entries__amount"))
@@ -163,7 +163,7 @@ def statement_rows(members=None):
     validated = dict(paid_in.filter(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
     pending = dict(paid_in.filter(status=Entry.Status.PENDING).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
     return [{
-        "member": m.pk, "full_name": m.full_name, "phone": m.phone, "status": m.status,
+        "member": m.pk, "full_name": m.full_name, "phone": m.phone, "status": m.gstatus,
         "owed": owed.get(m.pk, 0), "paid": validated.get(m.pk, 0), "pending": pending.get(m.pk, 0), "remaining": left.get(m.pk, 0),
     } for m in members]
 
@@ -175,7 +175,7 @@ def statement_totals(rows):
 def member_statement(member):
     """Bilan of one member: the totals, each debt, and every cash-book line
     in their name."""
-    row = statement_rows(User.objects.filter(pk=member.pk))[0]
+    row = statement_rows(User.objects.members().filter(pk=member.pk))[0]
     dues = []
     for d in Due.objects.filter(member=member, cancelled=False).annotate(p=Sum("entries__amount")).order_by("created_at"):
         paid = d.p or 0

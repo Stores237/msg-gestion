@@ -92,7 +92,7 @@ class AttendanceView(APIView):
 
     def _sheet(self, event):
         marks = {a.member_id: a for a in event.attendance.all()}
-        members = User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
+        members = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
         rows = [
             {
                 "member": m.pk,

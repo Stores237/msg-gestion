@@ -77,4 +77,5 @@ def role_badge(role, ends_on=None, starts_on=None):
 
 @register.simple_tag
 def status(user):
-    return format_html('<span class="status {}"><i></i>{}</span>', STATUS_DOT.get(user.status, "off"), user.get_status_display())
+    # The status in the group being worked on.
+    return format_html('<span class="status {}"><i></i>{}</span>', STATUS_DOT.get(user.group_status, "off"), user.get_group_status_display())

@@ -26,7 +26,7 @@ class Command(BaseCommand):
     def run_for_group(self):
         now = timezone.now()
         events = Event.objects.filter(starts_at__gte=now + timedelta(minutes=90), starts_at__lt=now + timedelta(minutes=150))
-        members = list(User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_2h=True))
+        members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_2h=True))
         sent = 0
         for e in events:
             if Notification.objects.filter(kind="reminder", target__type="event", target__id=e.pk, target__when="2h").exists():

@@ -131,3 +131,26 @@ def test_each_group_has_its_own_activity_types(two_groups):
     give(other, first, "secretaire-general")
     r = app_client(other, first).post("/api/events/", {"kind": "repetition", "title": "X", "starts_at": start}, format="json")
     assert r.status_code == 400 and "kind" in r.json()
+
+
+def test_status_is_per_group(two_groups):
+    """Owner, 2026-10-23: on leave in one group, active in another;
+    suspended in one group closes only that group."""
+    first, second = two_groups
+    m = UserFactory(membership=first)
+    give(m, first, "membre")
+    give(m, second, "membre")
+    Membership.all_groups.filter(user=m, group=first).update(status="conge")
+    Membership.all_groups.filter(user=m, group=second).update(status="actif")
+    leader1 = UserFactory(membership=first)
+    give(leader1, first, "secretaire-general")
+    leader2 = UserFactory(membership=second)
+    give(leader2, second, "secretaire-general")
+    row1 = next(r for r in app_client(leader1, first).get("/api/members/").json()["results"] if r["id"] == m.pk)
+    row2 = next(r for r in app_client(leader2, second).get("/api/members/").json()["results"] if r["id"] == m.pk)
+    assert (row1["status"], row2["status"]) == ("conge", "actif")
+    assert app_client(m, first).get("/api/me/").json()["status"] == "conge"
+    Membership.all_groups.filter(user=m, group=first).update(status="suspendu")
+    assert app_client(m, first).get("/api/me/").json()["code"] == "not_in_group"
+    me = app_client(m).get("/api/me/").json()
+    assert me["group"]["id"] == second.pk and [g["id"] for g in me["groups"]] == [second.pk]

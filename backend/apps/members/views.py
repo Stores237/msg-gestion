@@ -25,7 +25,7 @@ from .serializers import (
     MemberListSerializer,
 )
 
-VISIBLE = ~Q(status=User.Status.ARCHIVED)
+VISIBLE = ~Q(gstatus=User.Status.ARCHIVED)  # status in the current group (members())
 STATUS_FILTERS = {"actif", "conge", "classe", "suspendu"}
 
 
@@ -46,9 +46,9 @@ class MemberListView(APIView):
         base = User.objects.members().filter(VISIBLE)
         counts = base.aggregate(
             all=Count("id"),
-            actif=Count("id", filter=Q(status=User.Status.ACTIVE)),
-            conge=Count("id", filter=Q(status=User.Status.LEAVE)),
-            classe=Count("id", filter=Q(status=User.Status.RETIRED)),
+            actif=Count("id", filter=Q(gstatus=User.Status.ACTIVE)),
+            conge=Count("id", filter=Q(gstatus=User.Status.LEAVE)),
+            classe=Count("id", filter=Q(gstatus=User.Status.RETIRED)),
             diaspora=Count("id", filter=Q(is_diaspora=True)),
         )
         qs = _members()
@@ -61,7 +61,7 @@ class MemberListView(APIView):
             qs = qs.filter(match)
         st = request.query_params.get("status")
         if st in STATUS_FILTERS:
-            qs = qs.filter(status=st)
+            qs = qs.filter(gstatus=st)
         if request.query_params.get("diaspora") in ("1", "true"):
             qs = qs.filter(is_diaspora=True)
         data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate(), "request": request}).data

@@ -28,7 +28,7 @@ class Command(BaseCommand):
         tomorrow = timezone.localdate() + timedelta(days=1)
         lo = timezone.make_aware(datetime.combine(tomorrow, time.min))
         events = Event.objects.filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1))
-        members = list(User.objects.members().filter(status__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
+        members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
         today_start = timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
         sent = 0
         dresses = dress_names()

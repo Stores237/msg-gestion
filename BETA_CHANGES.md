@@ -22,6 +22,7 @@ whether it touches real data.
 | 13 | Super admin: every right and every figure, in the back-office only | Permissions changed |
 | 14 | Finances in two hands (commissaire enters, trésorier validates); back-office for super admins only; group-neutral wording | Permissions changed |
 | 15 | MSG, a platform for several groups: groups, memberships, access requests, welcome message, per-group activity types and dress codes | New tables; every group-owned table gets a group |
+| 16 | Member status per group (actif, congé, classé, suspendu, archivé) | One column added, filled from the account |
 
 ## 1. Backend skeleton
 
@@ -356,3 +357,17 @@ partner who creates accesses is the super admin; accesses are requested from the
 
 **Verify.** `pytest` (201) and `flutter test` (61). Isolation tests: `apps/core/test_groups.py`;
 the access process end to end: `apps/members/test_access.py`.
+
+## 16. A member's status is per group
+
+Owner, 2026-10-23: one person can be on leave in one group and active in another.
+
+- `Membership.status` (actif, congé, classé, suspendu, archivé), filled from the account's status by
+  `core.0005_membership_status`. Member lists, counts, reminders, collections, the planning pool and
+  the balance statement use the status in the current group (`User.objects.members()` annotates it
+  as `gstatus`; `user.group_status` for one person). The app shows it as before (`status`).
+- Suspending from the back-office suspends in the group being worked on only. A member suspended or
+  archived in a group no longer reaches that group from the app; their other groups are unchanged.
+  The account-wide status stays for the platform (a fully blocked account).
+
+**Verify.** `pytest` (202): `test_status_is_per_group`.

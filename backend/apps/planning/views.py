@@ -173,8 +173,8 @@ class GroupsView(APIView):
             members = list(g.members.all())
             out.append({"id": g.pk, "name": g.name,
                         "members": [{"id": m.pk, "full_name": m.full_name} for m in members],
-                        "available": sum(1 for m in members if m.status == User.Status.ACTIVE),
-                        "on_leave": sum(1 for m in members if m.status == User.Status.LEAVE)})
+                        "available": sum(1 for m in members if m.group_status == User.Status.ACTIVE),
+                        "on_leave": sum(1 for m in members if m.group_status == User.Status.LEAVE)})
         return Response(out)
 
     def post(self, request):

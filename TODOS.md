@@ -66,8 +66,7 @@ These need an account, a decision or a person — not code.
 - [ ] Group-neutral app, what's left: the duty grid (posts per service size, côté cour/jardin) and
   the alb-washing rotation are still the Garde Suisse's. Next: per-group module switches
   (planning, aubes) and editable post names.
-- [ ] A member's status (actif, congé, suspendu…) is still account-wide; make it per group if one
-  person can be on leave in one group and active in another.
+- [x] A member's status (actif, congé, suspendu…) is per group (2026-10-23).
 - [ ] Tell the partner when an access request arrives (today: count in the back-office menu; the
   partner has no app). E-mail once an e-mail service is chosen.
 - [ ] Back-office in English too (the app is bilingual; the back-office is French only for now).

@@ -40,7 +40,7 @@ class MeSerializer(serializers.Serializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     full_name = serializers.CharField()
-    status = serializers.CharField()
+    status = serializers.CharField(source="group_status")
     is_diaspora = serializers.BooleanField()
     age = serializers.IntegerField(allow_null=True)
     pin_must_change = serializers.BooleanField()

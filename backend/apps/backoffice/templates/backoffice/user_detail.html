@@ -4,7 +4,7 @@
 {% block heading %}{{ member.full_name }}{% endblock %}
 {% block acts %}{% if can_edit %}
   <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="reset_pin">{% icon 'key-round' %}Réinitialiser le PIN</button></form>
-  {% if member.status == 'suspendu' %}
+  {% if member.group_status == 'suspendu' %}
   <button class="btn btn-outline" onclick="document.getElementById('dlg-status').showModal()">Réactiver</button>
   {% else %}
   <button class="btn btn-danger" onclick="document.getElementById('dlg-status').showModal()">Suspendre</button>
@@ -62,9 +62,9 @@
   <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
   <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Retirer</button></div>
 </form></dialog>
-<dialog id="dlg-status" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="{% if member.status == 'suspendu' %}reactivate{% else %}suspend{% endif %}">
-  <h3>{% if member.status == 'suspendu' %}Réactiver{% else %}Suspendre{% endif %} {{ member.short_name }} ?</h3>
-  <p>{% if member.status == 'suspendu' %}Le membre pourra de nouveau se connecter.{% else %}Le membre ne pourra plus se connecter à l’application.{% endif %}</p>
+<dialog id="dlg-status" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="{% if member.group_status == 'suspendu' %}reactivate{% else %}suspend{% endif %}">
+  <h3>{% if member.group_status == 'suspendu' %}Réactiver{% else %}Suspendre{% endif %} {{ member.short_name }} ?</h3>
+  <p>{% if member.group_status == 'suspendu' %}Le membre retrouvera ce groupe dans l’application.{% else %}Le membre n’aura plus accès à ce groupe dans l’application ; ses autres groupes ne changent pas.{% endif %}</p>
   <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
   <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Confirmer</button></div>
 </form></dialog>
