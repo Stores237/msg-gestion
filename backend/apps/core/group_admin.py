@@ -113,7 +113,9 @@ def request_deletion(group, *, by, reason, typed_name, request=None):
     reason = (reason or "").strip()
     if not reason:
         raise GroupAdminError("Le motif est obligatoire.")
-    if Group.objects.exclude(pk=group.pk).count() == 0:
+    if not group.is_active:
+        raise GroupAdminError("Ce groupe est déjà supprimé.")
+    if not Group.objects.filter(is_active=True).exclude(pk=group.pk).exists():
         raise GroupAdminError("C’est le seul groupe de la plateforme : il ne peut pas être supprimé.")
     if pending_deletion(group) is not None:
         raise GroupAdminError("Une demande de suppression est déjà en attente pour ce groupe.")
@@ -133,33 +135,38 @@ def cancel_deletion(group, *, by, request=None):
     audit.record("Suppression de groupe annulée", actor=by, obj=group, request=request, platform=True, sensitive=True)
 
 
+@transaction.atomic
 def confirm_deletion(group, *, by, typed_name, request=None):
-    """Second super admin: deletes the group and everything it owns. The
-    accounts stay (they may be in other groups)."""
+    """Second super admin: the group is hidden (members can no longer open
+    it, it leaves the back-office's group list). Nothing is erased; it can
+    be restored."""
     d = pending_deletion(group)
     if d is None:
         raise GroupAdminError("Aucune demande de suppression en attente : un super admin doit d’abord la demander.")
     if d.requested_by_id == by.pk:
         raise GroupAdminError("La suppression doit être confirmée par un autre super admin que celui qui l’a demandée.")
     _check_name(group, typed_name)
-    name, pk, reason, asked_by = group.name, group.pk, d.reason, d.requested_by
-    members = group.memberships.count()
-    _delete_group(group)
-    audit.record("Groupe supprimé", actor=by, request=request, platform=True, sensitive=True,
-                 detail={"groupe": name, "id": pk, "motif": reason, "membres": members,
-                         "demandé par": asked_by.full_name if asked_by else "", "confirmé par": by.full_name})
-    return name
+    now = timezone.now()
+    d.status, d.decided_by, d.decided_at = GroupDeletion.Status.DONE, by, now
+    d.save(update_fields=["status", "decided_by", "decided_at"])
+    group.is_active, group.deleted_at, group.deleted_by = False, now, by
+    group.save(update_fields=["is_active", "deleted_at", "deleted_by"])
+    asked = d.requested_by
+    audit.record("Groupe supprimé", actor=by, obj=group, request=request, platform=True, sensitive=True,
+                 detail={"motif": d.reason, "membres": group.memberships.count(),
+                         "demandé par": asked.full_name if asked else "", "confirmé par": by.full_name,
+                         "données": "conservées (groupe masqué)"})
+    return group.name
 
 
-@transaction.atomic
-def _delete_group(group):
-    from apps.accounts.models import RoleAssignment
-    from apps.finances.models import Entry
-    from apps.members.models import AccessRequest
+def last_deletion(group):
+    return group.deletions.filter(status=GroupDeletion.Status.DONE).first()
 
-    # Rows that protect what they point at go first; the rest follows the
-    # group (on_delete=CASCADE).
-    Entry.all_groups.filter(group=group).delete()
-    AccessRequest.all_groups.filter(group=group).delete()
-    RoleAssignment.all_groups.filter(role__group=group).delete()
-    group.delete()
+
+def restore_group(group, *, by, request=None):
+    """Brings a deleted group back as it was."""
+    if group.is_active:
+        raise GroupAdminError("Ce groupe n’est pas supprimé.")
+    group.is_active, group.deleted_at, group.deleted_by = True, None, None
+    group.save(update_fields=["is_active", "deleted_at", "deleted_by"])
+    audit.record("Groupe restauré", actor=by, obj=group, request=request, platform=True, sensitive=True)

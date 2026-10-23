@@ -398,9 +398,11 @@ Owner, 2026-10-23. Back-office → Groupes.
 - **Supprimer** is a double validation: a super admin asks, with a mandatory reason and the
   group's name typed back. Nothing is deleted yet; a red banner on Groupes and a count in the menu
   show the request. **Another** super admin confirms (typing the name again) within 3 days; then
-  the group and all its data are deleted for good. Accounts stay (they may be in other groups).
-  The asker can't confirm their own request; either can cancel it; after 3 days it lapses. The
-  platform's only group can't be deleted. `core.0007_group_deletion`.
+  the group is **hidden, its data kept** (owner's choice): its members can no longer open it in
+  the app, it leaves the group choice, and it is listed under "Groupes supprimés" with a
+  **Restaurer** button that brings it back as it was. The asker can't confirm their own request;
+  either can cancel it; after 3 days it lapses. The platform's last active group can't be
+  deleted. `core.0007_group_deletion`, `core.0008_group_soft_delete`.
 
-**Verify.** `pytest apps/backoffice/test_group_delete.py` (edit, refusals, the full two-admin
-deletion with money and roles in the group, cancel, expiry, last group).
+**Verify.** `pytest apps/backoffice/test_group_delete.py` (edit, refusals, the two-admin
+deletion with money and roles kept, members locked out, restore, cancel, expiry, last group).

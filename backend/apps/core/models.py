@@ -12,8 +12,12 @@ class Group(models.Model):
 
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
+    # False = deleted by two super admins: hidden from the app and the
+    # back-office's group list, its data kept; a super admin can restore it.
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
 
     class Meta:
         ordering = ["name"]
@@ -25,12 +29,13 @@ class Group(models.Model):
 
 class GroupDeletion(models.Model):
     """Deleting a group takes two super admins (owner, 2026-10-23): one asks,
-    with a reason; another confirms within DELETION_WINDOW. Removed with the
-    group; the audit log keeps the trace."""
+    with a reason; another confirms within DELETION_WINDOW. The group is
+    then hidden, its data kept (owner: "hide the group and keep its data")."""
 
     class Status(models.TextChoices):
         PENDING = "pending", "En attente"
         CANCELLED = "cancelled", "Annulée"
+        DONE = "done", "Effectuée"
 
     group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="deletions")
     reason = models.TextField(max_length=600)

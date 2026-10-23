@@ -1,21 +1,23 @@
 """Editing a group, and deleting it with two super admins (owner,
-2026-10-23): one asks with a reason, another confirms."""
+2026-10-23): one asks with a reason, another confirms; the group is then
+hidden with its data kept, and can be restored."""
 
 from datetime import timedelta
 
 import pytest
 from django.test import Client
 from django.utils import timezone
+from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.factories import UserFactory, give_role
 from apps.accounts.models import Role, RoleAssignment, User
 from apps.core import sms
-from apps.core.group_admin import _delete_group, create_group
+from apps.core.group_admin import create_group
 from apps.core.groups import in_group
 from apps.core.models import AuditLog, Group, GroupDeletion, Membership, Settings
 from apps.finances.models import Due, Entry
 from apps.members import services as access
-from apps.members.models import AccessRequest
 
 pytestmark = pytest.mark.django_db
 PASSWORD = "correct-horse-battery"
@@ -43,6 +45,15 @@ def login(monkeypatch):
         return c
 
     return as_admin
+
+
+def app_get(user, group=None):
+    api = APIClient()
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {RefreshToken.for_user(user).access_token}"}
+    if group is not None:
+        headers["HTTP_X_GROUP"] = str(group.pk)
+    api.credentials(**headers)
+    return api.get("/api/me/")
 
 
 @pytest.fixture
@@ -98,22 +109,30 @@ def test_deletion_needs_a_second_super_admin(login, choir):
     assert "autre super admin" in r.content.decode()
     assert Group.objects.filter(pk=choir.pk).exists()
 
-    # Another super admin confirms: the group and its data go, accounts stay.
+    # Another super admin confirms: the group is hidden, its data kept.
     assert "Confirmer la suppression" in b.get("/bo/groupes/").content.decode()
     r = b.post(url, {"action": "confirm", "confirm_name": choir.name}, follow=True)
-    assert "supprimé" in r.content.decode()
-    assert not Group.objects.filter(pk=choir.pk).exists()
-    assert not Entry.all_groups.filter(group_id=choir.pk).exists()
-    assert not Role.all_groups.filter(group_id=choir.pk).exists()
-    assert not RoleAssignment.all_groups.filter(user=rose).exists()
-    assert not AccessRequest.all_groups.exists()
-    assert not Membership.all_groups.filter(group_id=choir.pk).exists()
-    assert User.objects.filter(pk=rose.pk).exists()
+    assert "données sont conservées" in r.content.decode()
+    choir.refresh_from_db()
+    assert not choir.is_active and choir.deleted_by == b.user
+    assert Entry.all_groups.filter(group=choir).exists() and Role.all_groups.filter(group=choir).exists()
+    assert RoleAssignment.all_groups.filter(user=rose).exists() and Membership.all_groups.filter(group=choir).exists()
     log = AuditLog.objects.get(action="Groupe supprimé")
     assert log.group is None and log.actor == b.user and log.detail["motif"] == "Groupe créé en double"
-    # The first group is untouched and the back-office still works.
-    assert Group.objects.filter(pk=first.pk).exists()
-    assert b.get("/bo/").status_code == 200 and a.get("/bo/groupes/").status_code == 200
+    # Gone from the app and from the back-office's group choice.
+    assert app_get(rose).status_code == 403
+    assert app_get(rose, choir).json()["code"] == "not_in_group"
+    page = a.get("/bo/groupes/").content.decode()
+    assert "Groupes supprimés" in page and f'value="{choir.pk}"' not in a.get("/bo/").content.decode().split("bo-group")[1].split("</form>")[0]
+    assert a.post("/bo/groupes/choisir/", {"group": choir.pk}).status_code == 404
+    assert Group.objects.filter(pk=first.pk, is_active=True).exists()
+
+    # Restored as it was.
+    a.post(url, {"action": "restore"})
+    choir.refresh_from_db()
+    assert choir.is_active and choir.deleted_at is None
+    assert AuditLog.objects.filter(action="Groupe restauré").exists()
+    assert app_get(rose, choir).status_code == 200
 
 
 def test_cancel_expire_and_last_group(login, choir):
@@ -133,6 +152,6 @@ def test_cancel_expire_and_last_group(login, choir):
 
     # The platform's only group cannot be deleted.
     first = Group.objects.order_by("pk").first()
-    _delete_group(choir)
+    Group.objects.filter(pk=choir.pk).update(is_active=False)
     r = a.post(f"/bo/groupes/{first.pk}/supprimer/", {"action": "request", "reason": "x", "confirm_name": first.name}, follow=True)
     assert "seul groupe" in r.content.decode()

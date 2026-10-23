@@ -54,9 +54,10 @@ Defined in `apps/accounts/registry.py`:
 - There must always be at least 2 active super admins; removing one below that is refused.
 - Deleting a group takes two super admins (`apps/core/group_admin.py`): one asks, with a reason
   and the group's name typed back; a different one confirms, again typing the name, within 3
-  days (the request lapses after). The platform's last group can't be deleted. Deletion is
-  final for the group's data (roles, money, calendar, planning, announcements, memberships);
-  accounts stay. Request, cancellation, refusal and deletion are in the platform audit log.
+  days (the request lapses after). The platform's last active group can't be deleted. A deleted
+  group is hidden (`is_active=False`): its members can't open it in the app and it leaves the
+  back-office's group choice, but its data is kept and a super admin can restore it. Request,
+  cancellation, refusal, deletion and restore are in the platform audit log.
 
 Each refusal is written to the audit log.
 

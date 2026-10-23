@@ -14,8 +14,10 @@ from apps.core.group_admin import (
     cancel_deletion,
     confirm_deletion,
     create_group,
+    last_deletion,
     pending_deletion,
     request_deletion,
+    restore_group,
     update_group,
 )
 from apps.core.models import APP_COLORS, Group, Settings
@@ -40,10 +42,14 @@ def groups(request):
     rows = list(Group.objects.annotate(n=Count("memberships", filter=Q(memberships__is_active=True))).order_by("name"))
     for g in rows:
         g.st = Settings.get(g)
-        g.pending = pending_deletion(g)
+        g.pending = pending_deletion(g) if g.is_active else None
         if g.pending is not None:
             g.pending.expires = g.pending.requested_at + DELETION_WINDOW
-    return render(request, "backoffice/groups.html", {"nav": "groups", "rows": rows, "palette": APP_COLORS})
+        g.deletion = None if g.is_active else last_deletion(g)
+    return render(request, "backoffice/groups.html", {
+        "nav": "groups", "rows": [g for g in rows if g.is_active], "palette": APP_COLORS,
+        "deleted": [g for g in rows if not g.is_active],
+    })
 
 
 def _refused(request, group, action, err):
@@ -70,7 +76,8 @@ def group_edit(request, pk):
 @require_POST
 @backoffice_view("backoffice.users", "delete")
 def group_delete(request, pk):
-    """action=request (1st super admin), confirm (another one), cancel."""
+    """action=request (1st super admin), confirm (another one), cancel;
+    restore brings a deleted group back."""
     g = get_object_or_404(Group, pk=pk)
     action = request.POST.get("action")
     typed = request.POST.get("confirm_name", "")
@@ -81,10 +88,14 @@ def group_delete(request, pk):
                                       f"dans les {DELETION_WINDOW.days} jours ; rien n’est supprimé d’ici là.")
         elif action == "confirm":
             name = confirm_deletion(g, by=request.user, typed_name=typed, request=request)
-            messages.success(request, f"Groupe « {name} » supprimé, avec ses données. Les comptes des membres restent.")
+            messages.success(request, f"Groupe « {name} » supprimé : il n’apparaît plus, ses données sont conservées. "
+                                      "Vous pouvez le restaurer depuis « Groupes supprimés ».")
         elif action == "cancel":
             cancel_deletion(g, by=request.user, request=request)
             messages.success(request, "Demande de suppression annulée.")
+        elif action == "restore":
+            restore_group(g, by=request.user, request=request)
+            messages.success(request, f"Groupe « {g.name} » restauré, avec toutes ses données.")
         else:
             return redirect("backoffice:groups")
     except GroupAdminError as e:
