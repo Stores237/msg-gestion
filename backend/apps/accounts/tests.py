@@ -464,7 +464,7 @@ def test_add_role_testers_covers_every_staff_role():
 
     out = StringIO()
     call_command("add_role_testers", stdout=out)
-    staff = set(Role.objects.exclude(slug__in=["membre", "super-admin"]).values_list("slug", flat=True))
+    staff = set(Role.objects.filter(is_archived=False).exclude(slug__in=["membre", "super-admin"]).values_list("slug", flat=True))
     covered = {a.role.slug for u in User.objects.all() for a in u.active_assignments()}
     assert staff <= covered
     assert all(u.pin_must_change and not u.has_usable_password() for u in User.objects.all())
@@ -472,4 +472,4 @@ def test_add_role_testers_covers_every_staff_role():
     assert vp.can("members.profile", "create") and not vp.can("finances.report", "validate")
     again = StringIO()
     call_command("add_role_testers", stdout=again)
-    assert again.getvalue().count("skipped") == 11
+    assert again.getvalue().count("skipped") == 12

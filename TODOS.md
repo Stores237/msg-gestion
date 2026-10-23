@@ -28,6 +28,8 @@ These need an account, a decision or a person — not code.
   `app/android/key.properties` (git-ignored, only on this machine). Losing them means the app
   can never be updated on Google Play under the same listing.
 - [ ] **Beta window**: start date, length, and who the testers are.
+- [ ] Confirm what a président / vice-président lineup change should require beyond the
+  audit entry and the formateurs' notification (e.g. a written reason each time).
 - [ ] Confirm the default role permissions (migration `accounts.0002`), taken from the design's
   "Navigation par rôle" table — e.g. should the président be able to *validate* the quarterly
   report, or only approve it?

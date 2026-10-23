@@ -30,13 +30,16 @@ def avatar(user, size=36):
 
 
 @register.simple_tag
-def role_badge(role, ends_on=None):
+def role_badge(role, ends_on=None, starts_on=None):
     cls = ROLE_BADGE_CLASS.get(role.kind, "")
+    one_day = ends_on is not None and ends_on == starts_on
     until = None
-    if ends_on:
+    if one_day:
+        until = f"du jour {ends_on:%d/%m}"
+    elif ends_on:
         until = f"fin {ends_on:%d/%m/%Y}" if role.kind == "bureau" else f"jusqu’au {ends_on:%d/%m}"
     extra = format_html('<span style="font-weight:600;opacity:.85">· {}</span>', until) if until else ""
-    timer = mark_safe('<i data-lucide="timer" width="12" height="12"></i>') if role.kind == "temporaire" else ""
+    timer = mark_safe('<i data-lucide="timer" width="12" height="12"></i>') if role.kind == "temporaire" or one_day else ""
     return format_html('<span class="rb {}"><i></i>{}{}{}</span>', cls, role.name, extra, timer)
 
 

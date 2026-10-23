@@ -13,6 +13,7 @@ from django.contrib import messages
 from django.contrib.sessions.models import Session
 from django.core.cache import cache
 from django.db import transaction
+from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -25,6 +26,7 @@ from apps.accounts.phone import InvalidPhone, format_phone, normalize_phone
 from apps.accounts.services import RuleViolation, assign_role, default_end, reset_pin, revoke_assignment, temporary_pin
 from apps.core import audit
 from apps.core.models import AuditLog, Settings
+from apps.core.notify import notify
 from apps.planning.models import ServiceGroup
 
 from .access import backoffice_view
@@ -98,9 +100,13 @@ def user_detail(request, pk):
             if action == "assign":
                 role = get_object_or_404(Role, slug=request.POST.get("role"), is_archived=False)
                 start = parse_date(request.POST.get("starts_on") or "") or timezone.localdate()
-                end = parse_date(request.POST.get("ends_on") or "") if request.POST.get("ends_on") else None
-                assign_role(member, role, reason=reason, by=request.user, starts_on=start, ends_on=end, request=request)
-                messages.success(request, f"Rôle « {role.name} » affecté.")
+                if request.POST.get("one_day"):
+                    _assign_for_the_day(member, role, start, reason=reason, by=request.user, request=request)
+                    messages.success(request, f"{member.short_name} est {role.name} le {start:%d/%m/%Y} (rôle du jour).")
+                else:
+                    end = parse_date(request.POST.get("ends_on") or "") if request.POST.get("ends_on") else None
+                    assign_role(member, role, reason=reason, by=request.user, starts_on=start, ends_on=end, request=request)
+                    messages.success(request, f"Rôle « {role.name} » affecté.")
             elif action == "revoke":
                 a = get_object_or_404(RoleAssignment, pk=request.POST.get("assignment"), user=member, revoked_at__isnull=True)
                 revoke_assignment(a, by=request.user, reason=reason, request=request)
@@ -376,7 +382,9 @@ def assignments(request):
             total = max((a.ends_on - a.starts_on).days, 1)
             progress = max(0, min(100, round(100 * (today - a.starts_on).days / total)))
             left = (a.ends_on - today).days
-            if a.role.kind == Role.Kind.TEMPORARY:
+            if a.is_one_day:
+                state, label = "off", "rôle du jour" if left == 0 else f"rôle du jour · dans {(a.starts_on - today).days} j"
+            elif a.role.kind == Role.Kind.TEMPORARY:
                 state, label = "off", "expire ce soir" if left == 0 else f"expire dans {left} j"
             elif left <= 30:
                 state, label = "warn", f"dans {left} jours"
@@ -384,7 +392,45 @@ def assignments(request):
                 label = f"{left // 30} mois"
         rows.append({"a": a, "progress": progress, "state": state, "label": label})
     soon = [r for r in rows if r["state"] == "warn"]
-    return render(request, "backoffice/assignments.html", {"nav": "assign", "rows": rows, "soon": soon, "horizon": horizon})
+    upcoming = (
+        RoleAssignment.objects.filter(revoked_at__isnull=True, starts_on__gt=today, ends_on=F("starts_on"))
+        .select_related("user", "role").order_by("starts_on")
+    )
+    return render(request, "backoffice/assignments.html", {
+        "nav": "assign", "rows": rows, "soon": soon, "horizon": horizon, "upcoming": upcoming, "today": today,
+        "can_edit": request.user.can("backoffice.users", "change"),
+        "day_roles": Role.objects.filter(is_archived=False).exclude(slug__in=["membre", registry.SUPER_ADMIN_SLUG]),
+        "members": User.objects.filter(status=User.Status.ACTIVE, is_active=True),
+    })
+
+
+def _assign_for_the_day(member, role, day, *, reason, by, request=None):
+    """Any role except super admin, for one day only (owner, 2026-10-23:
+    the censeur du jour, and every bureau role, can be given to someone for
+    one activity). It ends by itself at midnight; the member is told."""
+    if role.slug == registry.SUPER_ADMIN_SLUG:
+        raise RuleViolation("Le rôle de super admin ne peut pas être donné pour une journée.")
+    a = assign_role(member, role, reason=reason, by=by, starts_on=day, ends_on=day, request=request)
+    when = "aujourd’hui" if day == timezone.localdate() else f"le {day:%d/%m/%Y}"
+    notify([member], "member", "Rôle du jour", f"Vous êtes {role.name} {when}.", {"type": "role"})
+    return a
+
+
+@require_POST
+@backoffice_view("backoffice.users", "change")
+def assignment_day(request):
+    member = get_object_or_404(User, pk=request.POST.get("member"), status=User.Status.ACTIVE)
+    role = get_object_or_404(Role, slug=request.POST.get("role"), is_archived=False)
+    day = parse_date(request.POST.get("day") or "") or timezone.localdate()
+    if day < timezone.localdate():
+        messages.error(request, "Choisissez aujourd’hui ou une date à venir.")
+        return redirect("backoffice:assignments")
+    try:
+        _assign_for_the_day(member, role, day, reason=request.POST.get("reason", ""), by=request.user, request=request)
+        messages.success(request, f"{member.short_name} est {role.name} le {day:%d/%m/%Y} (rôle du jour).")
+    except RuleViolation as e:
+        messages.error(request, str(e))
+    return redirect("backoffice:assignments")
 
 
 @require_POST

@@ -54,7 +54,7 @@ def test_profile_shows_last_four_assises():
 
 
 def test_role_request_by_bureau_member():
-    api, _ = client_for("censeur-general")
+    api, _ = client_for("formateur")
     member_api, _ = client_for("membre")
     target = UserFactory()
     r = api.post(f"/api/members/{target.id}/role-requests/", {"role": "censeur-du-jour", "reason": "Grande veillée"}, format="json")

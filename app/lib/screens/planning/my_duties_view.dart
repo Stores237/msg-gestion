@@ -67,6 +67,40 @@ class DutyCard extends StatelessWidget {
                 a.title!,
                 style: TextStyle(fontSize: 14, color: c.textSecondary),
               ),
+            if (a.isChef) ...[
+              const SizedBox(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  key: const Key('you-are-chef'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: c.primaryTint,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.flag, size: 14, color: c.primaryText),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          l.youAreChef,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: c.primaryText,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             if (a.chef != null || (a.dress ?? '').isNotEmpty) ...[
               const SizedBox(height: 6),
               if (a.chef != null)

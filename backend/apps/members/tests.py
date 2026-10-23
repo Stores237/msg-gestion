@@ -86,7 +86,7 @@ def test_bureau_lists_mandate_roles_only():
     api, _ = client_for("membre", "censeur-general")
     treasurer = UserFactory(last_name="Fotso")
     give_role(treasurer, "tresorier", ends_on=date(2027, 9, 30))
-    give_role(UserFactory(), "chef-de-groupe")
+    give_role(UserFactory(), "censeur-du-jour")
     rows = api.get("/api/members/bureau/").json()
     assert sorted(r["role"]["slug"] for r in rows) == ["censeur-general", "tresorier"]
 

@@ -133,7 +133,8 @@ def assign_role(user, role, *, reason, by, starts_on=None, ends_on=None, request
         obj=user,
         request=request,
         sensitive=True,
-        detail={"role": role.name, "debut": str(starts_on), "fin": str(ends_on) if ends_on else None, "motif": reason.strip()},
+        detail={"role": role.name, "debut": str(starts_on), "fin": str(ends_on) if ends_on else None, "motif": reason.strip(),
+                **({"role_du_jour": True} if assignment.is_one_day else {})},
     )
     return assignment
 

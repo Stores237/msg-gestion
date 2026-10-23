@@ -17,6 +17,7 @@ urlpatterns = [
     path("utilisateurs/export.csv", views_admin.users_export, name="users_export"),
     path("utilisateurs/<int:pk>/", views_admin.user_detail, name="user"),
     path("affectations/", views_admin.assignments, name="assignments"),
+    path("affectations/role-du-jour/", views_admin.assignment_day, name="assignment_day"),
     path("affectations/<int:pk>/renouveler/", views_admin.assignment_renew, name="assignment_renew"),
     path("demandes/<int:pk>/", views_admin.role_request_decide, name="role_request"),
     path("roles/", views.roles, name="roles"),

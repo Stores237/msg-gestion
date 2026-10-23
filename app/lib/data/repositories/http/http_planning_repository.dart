@@ -63,6 +63,10 @@ class HttpPlanningRepository implements PlanningRepository {
   }
 
   @override
+  Future<void> setChef(int serviceId, int? member) =>
+      _api.put('/planning/services/$serviceId/chef/', body: {'member': member});
+
+  @override
   Future<int> publish(DateTime day) async =>
       ((await _api.post('/planning/publish/', body: {'day': _day(day)}))
               as Map<String, dynamic>)['notified']

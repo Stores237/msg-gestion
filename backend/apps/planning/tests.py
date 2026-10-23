@@ -40,8 +40,8 @@ def test_slots_by_size():
     assert slots_for(5) == []
 
 
-def test_censor_builds_a_week_with_alerts():
-    api, _ = client_for("censeur-general")
+def test_formateur_builds_a_week_with_alerts():
+    api, _ = client_for("formateur")
     s1 = service(days=3, hour=6, size=2, title="Première messe")
     s2 = service(days=3, hour=9, size=4)
     kevin = UserFactory(last_name="Essomba")
@@ -59,7 +59,7 @@ def test_censor_builds_a_week_with_alerts():
 
 
 def test_member_on_leave_cannot_be_assigned():
-    api, _ = client_for("censeur-general")
+    api, _ = client_for("formateur")
     s = service()
     away = UserFactory(status=User.Status.LEAVE)
     r = api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "yapoma", "member": away.id}, format="json")
@@ -69,7 +69,7 @@ def test_member_on_leave_cannot_be_assigned():
 
 
 def test_candidates_least_solicited_first():
-    api, _ = client_for("censeur-general")
+    api, _ = client_for("formateur")
     busy, fresh = UserFactory(last_name="Aaa"), UserFactory(last_name="Zzz")
     for d in (1, 2):
         Assignment.objects.create(service=service(days=d, hour=18), post="premiere_centrale", side="pariso", member=busy)
@@ -79,21 +79,21 @@ def test_candidates_least_solicited_first():
 
 
 def test_assign_whole_group_skips_leave_and_busy():
-    api, _ = client_for("censeur-general")
-    chef, a, b, away = UserFactory(), UserFactory(), UserFactory(), UserFactory(status=User.Status.LEAVE)
-    g = ServiceGroup.objects.create(name="Saint-Michel", chef=chef)
-    g.members.set([chef, a, b, away])
+    api, _ = client_for("formateur")
+    c, a, b, away = UserFactory(), UserFactory(), UserFactory(), UserFactory(status=User.Status.LEAVE)
+    g = ServiceGroup.objects.create(name="Saint-Michel")
+    g.members.set([c, a, b, away])
     other = service(days=3, hour=6, size=2)
     Assignment.objects.create(service=other, post="premiere_centrale", side="pariso", member=b)
     s = service(days=3, hour=9, size=4)
     r = api.post(f"/api/planning/services/{s.id}/assign-group/", {"group": g.id}, format="json").json()
     assert r == {"assigned": 2, "still_empty": 2}
     members = set(s.assignments.values_list("member_id", flat=True))
-    assert members == {chef.id, a.id}
+    assert members == {c.id, a.id}
 
 
 def test_member_sees_duties_only_after_publish_and_is_notified():
-    api, _ = client_for("censeur-general")
+    api, _ = client_for("formateur")
     member_api, member = client_for("membre")
     s = service(days=4)
     api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": member.id}, format="json")
@@ -108,8 +108,8 @@ def test_member_sees_duties_only_after_publish_and_is_notified():
     assert Assignment.objects.get().status == "conf"
 
 
-def test_swap_colleague_accepts_then_chef_approves():
-    censor_api, _ = client_for("censeur-general")
+def test_swap_colleague_accepts_then_formateur_approves():
+    censor_api, _ = client_for("formateur")
     me_api, me = client_for("membre")
     col_api, colleague = client_for("membre")
     s = service(days=4)
@@ -137,7 +137,7 @@ def test_someone_elses_duty_cannot_be_swapped():
 
 
 def test_absence_then_replacement():
-    censor_api, _ = client_for("censeur-general")
+    censor_api, _ = client_for("formateur")
     me_api, me = client_for("membre")
     repl = UserFactory()
     a = Assignment.objects.create(service=service(), post="controle", side="pariso", member=me)
@@ -151,7 +151,7 @@ def test_absence_then_replacement():
 
 
 def test_alb_rotation_and_fairness():
-    censor_api, _ = client_for("censeur-general")
+    censor_api, _ = client_for("formateur")
     member_api, member = client_for("membre")
     g = ServiceGroup.objects.create(name="Saint-Michel")
     g.members.add(member)
@@ -177,3 +177,91 @@ def test_swap_candidates_are_free_colleagues_only():
     assert free.id in ids and busy.id not in ids and away.id not in ids and me.id not in ids
     other_api, _ = client_for("membre")
     assert other_api.get(f"/api/planning/assignments/{a.id}/swap-candidates/").status_code == 404
+
+
+# --- Who makes the lineup, and the chef de groupe (owner, 2026-10-23) -----------------
+
+
+@pytest.mark.parametrize("slug", ["formateur", "formateur-adjoint", "president", "vice-president"])
+def test_lineup_makers_can_assign(slug):
+    api, _ = client_for(slug)
+    s = service()
+    r = api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": UserFactory().id}, format="json")
+    assert r.status_code == 200
+
+
+@pytest.mark.parametrize("slug", ["secretaire-general", "secretaire-general-adjoint", "censeur-general", "tresorier"])
+def test_other_roles_only_look_at_the_lineup(slug):
+    api, _ = client_for(slug)
+    s = service()
+    assert api.get("/api/planning/week/").status_code == 200
+    r = api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": UserFactory().id}, format="json")
+    assert r.status_code == 403
+    assert api.put(f"/api/planning/services/{s.id}/chef/", {"member": None}, format="json").status_code == 403
+
+
+def test_lineup_rights_cannot_be_granted_to_another_role():
+    from apps.accounts.models import Role
+    from apps.accounts.services import RuleViolation, set_role_permissions
+
+    sg = Role.objects.get(slug="secretaire-general")
+    with pytest.raises(RuleViolation):
+        set_role_permissions(sg, {("calendar.planning", "change"): True}, by=None, reason="essai")
+
+
+def test_chef_de_groupe_is_no_longer_a_standing_role():
+    from apps.accounts.models import Role
+
+    assert Role.objects.get(slug="chef-de-groupe").is_archived
+    assert Role.objects.filter(slug="formateur-adjoint", is_archived=False).exists()
+
+
+def test_president_changes_are_recorded_as_exceptional():
+    from apps.core.models import AuditLog
+
+    formateur = UserFactory()
+    give_role(formateur, "formateur")
+    pres_api, _ = client_for("president")
+    form_api, _ = client_for("formateur", user=formateur)
+    s = service(days=4)
+    form_api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": UserFactory().id}, format="json")
+    assert not AuditLog.objects.filter(action__contains="exceptionnel").exists()
+    pres_api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "yapoma", "member": UserFactory().id}, format="json")
+    assert AuditLog.objects.filter(action="Planning modifié à titre exceptionnel", sensitive=True).count() == 1
+    pres_api.post("/api/planning/publish/", {"day": (timezone.localdate() + timedelta(days=4)).isoformat()}, format="json")
+    assert AuditLog.objects.filter(action="Planning publié à titre exceptionnel").exists()
+    assert Notification.objects.filter(user=formateur, title="Planning publié par le bureau").exists()
+
+
+def test_chef_is_designated_among_the_guards_of_the_service():
+    api, _ = client_for("formateur")
+    guard_api, guard = client_for("membre")
+    outsider = UserFactory()
+    s = service(days=4)
+    api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": guard.id}, format="json")
+    r = api.put(f"/api/planning/services/{s.id}/chef/", {"member": outsider.id}, format="json")
+    assert r.json()["code"] == "chef_not_on_duty"
+    r = api.put(f"/api/planning/services/{s.id}/chef/", {"member": guard.id}, format="json").json()
+    assert r["chef_id"] == guard.id and r["chef"] == guard.short_name
+    api.post("/api/planning/publish/", {"day": (timezone.localdate() + timedelta(days=4)).isoformat()}, format="json")
+    assert "chef de groupe" in Notification.objects.get(user=guard, kind="duty").body
+    duty = guard_api.get("/api/planning/mine/").json()[0]
+    assert duty["is_chef"] and duty["chef"] == guard.full_name
+    # Freeing the chef's post removes the designation.
+    api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": None}, format="json")
+    s.refresh_from_db()
+    assert s.chef is None
+
+
+def test_absence_goes_to_formateurs_and_the_days_chef():
+    formateur = UserFactory()
+    give_role(formateur, "formateur")
+    me_api, me = client_for("membre")
+    chef = UserFactory()
+    s = service(days=4)
+    a = Assignment.objects.create(service=s, post="controle", side="pariso", member=me)
+    Assignment.objects.create(service=s, post="controle", side="yapoma", member=chef)
+    s.chef = chef
+    s.save()
+    me_api.post(f"/api/planning/assignments/{a.id}/swap/", {"absence": True, "reason": "Malade"}, format="json")
+    assert set(Notification.objects.filter(title="Absence déclarée").values_list("user", flat=True)) == {formateur.id, chef.id}

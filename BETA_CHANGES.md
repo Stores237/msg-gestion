@@ -17,6 +17,7 @@ whether it touches real data.
 | 8 | Bilingual app (FR/EN) | No |
 | 9 | Members, calendar, announcements (API + app); beta build 2 | New tables; staging demo content |
 | 10 | Everything else in the design (except SMS/push delivery); build 3 | New tables |
+| 11 | Who makes the lineup; chef de groupe per service; roles of the day; back-office on phones | Roles and permissions changed; one column moved |
 
 ## 1. Backend skeleton
 
@@ -208,3 +209,37 @@ staging URL in `libapp.so`. APK SHA-256
 back-office sessions, attachments. Applied with `migrate` (Render runs it on start).
 
 **Verify.** `pytest` (166) and `flutter test` (52).
+
+## 11. Lineup rules, chef de groupe per service, roles of the day, mobile back-office
+
+**What/why.** Owner rules (2026-10-23):
+- **The lineup is made by the formateur or the formateur adjoint** (new bureau role), and on
+  exceptional occasions by the président or vice-président. `registry.LINEUP_ROLES` locks
+  create/change/validate/delete on `calendar.planning` for every other role, so the back-office
+  can't grant it. When the président or vice-président changes or publishes the lineup, it is
+  written to the audit log as "à titre exceptionnel", and the formateurs are notified when
+  they publish. Swap and absence decisions go to the formateurs too.
+- **The chef de groupe is designated for each service**, among that service's guards, whenever
+  the lineup is made (`Service.chef`, `PUT /api/planning/services/<id>/chef/`). It is no
+  longer a standing role: the "Chef de groupe" role is archived and its holders'
+  assignments ended (audited). The chef sees "Vous êtes chef de groupe" in Mes services and
+  is told in the duty notification; absences go to the formateurs and to that day's chef.
+  Freeing the chef's post or approving their swap removes the designation.
+- **Roles of the day**: the super admin can give anyone any role except super admin
+  (censeur du jour or a bureau role) for a single day: from Affectations → "Rôle du jour",
+  or "Rôle du jour" in the assign dialog on a member's page. It ends on its own at midnight,
+  the member is notified, and it isn't counted as a mandate (no expiry alert, not in the
+  app's bureau list).
+- **Back-office on phones**: under 820px the sidebar opens as a drawer from a menu button,
+  and spacing is tightened for 360px screens. Checked at 375px: login, code, dashboard,
+  users, member page + dialogs, roles, assignments, audit, settings; nothing scrolls
+  sideways except the tables, which scroll inside their card.
+
+**Data.** `accounts.0006_lineup_roles` (adds Formateur adjoint; removes lineup rights from
+non-lineup roles; archives Chef de groupe and ends its assignments, with audit rows) and
+`planning.0002_service_chef` (moves `chef` from the group to the service; existing group
+chefs are not carried over). Both run on deploy.
+
+**Verify.** `pytest` (181) and `flutter test` (54). On staging after deploy, run
+`add_role_testers` to create the formateur adjoint tester.
+

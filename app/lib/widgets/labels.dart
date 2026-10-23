@@ -16,6 +16,7 @@ String roleLabel(AppLocalizations l, String slug, String serverName) =>
       'formateur' => l.roleTrainer,
       'conseiller' => l.roleAdviser,
       'chef-de-groupe' => l.roleGroupLeader,
+      'formateur-adjoint' => l.roleFormateurDeputy,
       'censeur-du-jour' => l.roleCensorOfTheDay,
       'membre' => l.roleMember,
       _ => serverName,

@@ -28,6 +28,7 @@ class DutyAssignment {
     this.startsAt,
     this.dress,
     this.chef,
+    this.isChef = false,
   });
 
   final int id;
@@ -45,6 +46,7 @@ class DutyAssignment {
   final DateTime? startsAt;
   final String? dress;
   final String? chef;
+  final bool isChef;
 
   factory DutyAssignment.fromJson(Map<String, dynamic> j) => DutyAssignment(
     id: j['id'] as int,
@@ -60,6 +62,7 @@ class DutyAssignment {
         : DateTime.parse(j['starts_at'] as String).toLocal(),
     dress: j['dress'] as String?,
     chef: j['chef'] as String?,
+    isChef: j['is_chef'] == true,
   );
 }
 
@@ -72,6 +75,7 @@ class PlannedService {
     required this.size,
     this.group,
     this.chef,
+    this.chefId,
     required this.published,
     required this.slots,
     required this.assignments,
@@ -83,7 +87,10 @@ class PlannedService {
   final DateTime startsAt;
   final int size;
   final String? group;
+
+  /// The chef de groupe, designated for this service among its guards.
   final String? chef;
+  final int? chefId;
   final bool published;
   final List<Slot> slots;
   final List<DutyAssignment> assignments;
@@ -107,6 +114,7 @@ class PlannedService {
     size: j['size'] as int,
     group: j['group'] as String?,
     chef: j['chef'] as String?,
+    chefId: j['chef_id'] as int?,
     published: j['published'] as bool,
     slots: [
       for (final s in j['slots'] as List)
@@ -218,20 +226,17 @@ class ServiceGroupInfo {
   const ServiceGroupInfo({
     required this.id,
     required this.name,
-    this.chef,
     required this.members,
     required this.available,
   });
   final int id;
   final String name;
-  final String? chef;
   final int members;
   final int available;
 
   factory ServiceGroupInfo.fromJson(Map<String, dynamic> j) => ServiceGroupInfo(
     id: j['id'] as int,
     name: j['name'] as String,
-    chef: j['chef'] as String?,
     members: (j['members'] as List).length,
     available: j['available'] as int,
   );

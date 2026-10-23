@@ -409,5 +409,12 @@
   "awaitingAuditor": "Waiting for the auditor",
   "unfilledSlots": "{n, plural, =1{1 unfilled post} other{{n} unfilled posts}} · {title}",
   "roleVicePresident": "Vice-president",
-  "roleSecretaryGeneralDeputy": "Deputy general secretary"
+  "roleSecretaryGeneralDeputy": "Deputy general secretary",
+  "roleFormateurDeputy": "Deputy trainer",
+  "designateChef": "Choose the group lead",
+  "chefSheetHint": "From this service's guards.",
+  "removeChef": "Remove the group lead",
+  "noChefYet": "No group lead yet",
+  "youAreChef": "You are the group lead",
+  "chefNeedsGuards": "Assign guards to this service first."
 }

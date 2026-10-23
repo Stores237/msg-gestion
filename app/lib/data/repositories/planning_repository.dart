@@ -15,6 +15,9 @@ abstract class PlanningRepository {
   Future<List<Candidate>> candidates(int serviceId);
   Future<List<ServiceGroupInfo>> groups();
   Future<(int, int)> assignGroup(int serviceId, int groupId);
+
+  /// Designates the service's chef de groupe among its guards (null removes).
+  Future<void> setChef(int serviceId, int? member);
   Future<int> publish(DateTime day);
   Future<List<DutyAssignment>> mine();
   Future<void> confirm(int assignmentId);

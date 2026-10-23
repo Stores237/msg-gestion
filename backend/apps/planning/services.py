@@ -4,7 +4,8 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.accounts.models import User
+from apps.accounts import registry
+from apps.accounts.models import RoleAssignment, User
 from apps.core import audit
 from apps.core.notify import notify
 
@@ -28,6 +29,32 @@ def _day_bounds(d):
 def week_bounds(any_day):
     monday = any_day - timedelta(days=any_day.weekday())
     return monday, monday + timedelta(days=7)
+
+
+# --- Who makes the lineup ------------------------------------------------------
+# The formateur or formateur adjoint makes it; the président or vice-président
+# only exceptionally (registry.LINEUP_ROLES). An exceptional change is
+# recorded in the audit log and the formateurs are told when it is published.
+
+REGULAR_LINEUP_ROLES = registry.LINEUP_ROLES - registry.LINEUP_EXCEPTIONAL_ROLES
+
+
+def is_exceptional(user):
+    return not (user.role_slugs() & REGULAR_LINEUP_ROLES)
+
+
+def lineup_makers():
+    ids = RoleAssignment.objects.active().filter(role__slug__in=REGULAR_LINEUP_ROLES).values("user")
+    return list(User.objects.filter(pk__in=ids, is_active=True))
+
+
+def note_exceptional(by, what, service=None, request=None, **detail):
+    if by is None or not is_exceptional(by):
+        return
+    if service is not None:
+        detail["service"] = f"{service.event.title} · {timezone.localtime(service.event.starts_at):%d/%m %H:%M}"
+    audit.record("Planning modifié à titre exceptionnel", actor=by, request=request, sensitive=True,
+                 detail={"action": what, **detail})
 
 
 def _available_members():
@@ -100,30 +127,59 @@ def assign(service, post, side, index, member, *, by, force=False, request=None)
         service=service, post=post, side=side, index=index,
         defaults={"member": member, "status": Assignment.Status.PENDING, "assigned_by": by},
     )
+    note_exceptional(by, "affectation", service, request, membre=member.short_name, poste=_post_label(a))
     if service.published_at:
         _notify_duty([a])
     return a
 
 
-def clear(service, post, side, index):
-    service.assignments.filter(post=post, side=side, index=index).delete()
+def clear(service, post, side, index, *, by=None, request=None):
+    gone = service.assignments.filter(post=post, side=side, index=index).first()
+    if gone is None:
+        return
+    if service.chef_id == gone.member_id:
+        service.chef = None
+        service.save(update_fields=["chef"])
+    gone.delete()
+    note_exceptional(by, "poste libéré", service, request, poste=_post_label(gone))
 
 
-def assign_group(service, group, *, by):
-    """Fill empty slots with the group's available members, chef first then
-    least-solicited; members on leave or already busy that day are skipped."""
+def set_chef(service, member, *, by, request=None):
+    """Designate the chef de groupe for this service, among its guards
+    (None removes the designation)."""
+    if member is not None:
+        on_duty = service.assignments.filter(member=member).exclude(
+            status__in=[Assignment.Status.REPLACED, Assignment.Status.ABSENT]
+        ).exists()
+        if not on_duty:
+            raise PlanningRule("chef_not_on_duty", "Le chef de groupe doit faire partie du service.")
+    previous = service.chef
+    service.chef = member
+    service.save(update_fields=["chef"])
+    note_exceptional(by, "chef de groupe", service, request, chef=member.short_name if member else None)
+    if service.published_at and member is not None and member != previous:
+        when = timezone.localtime(service.event.starts_at)
+        notify([member], "duty", "Chef de groupe", f"Vous êtes chef de groupe pour {service.event.title} le {when:%d/%m} à {when:%H:%M}.",
+               {"type": "duty", "service": service.pk})
+    return service
+
+
+def assign_group(service, group, *, by, request=None):
+    """Fill empty slots with the group's available members, least-solicited
+    first; members on leave or already busy that day are skipped."""
     counts = service_counts(timezone.localtime(service.event.starts_at).date())
     filled = {(a.post, a.side, a.index) for a in service.assignments.all()}
     empty = [s for s in slots_for(service.size) if s not in filled]
     taken = set(service.assignments.values_list("member_id", flat=True))
     pool = [m for m in group.members.filter(status=User.Status.ACTIVE) if m.pk not in taken and not busy_same_day(m.pk, service)]
-    pool.sort(key=lambda m: (m.pk != group.chef_id, counts.get(m.pk, 0), m.last_name))
+    pool.sort(key=lambda m: (counts.get(m.pk, 0), m.last_name))
     created = []
     with transaction.atomic():
         for slot, m in zip(empty, pool, strict=False):
             created.append(Assignment.objects.create(service=service, post=slot[0], side=slot[1], index=slot[2], member=m, assigned_by=by))
         service.group = group
         service.save(update_fields=["group"])
+    note_exceptional(by, "groupe affecté", service, request, groupe=group.name, affectés=len(created))
     if service.published_at:
         _notify_duty(created)
     return created, len(empty) - len(created)
@@ -170,7 +226,9 @@ def _notify_duty(assignments):
     for a in assignments:
         ev = a.service.event
         when = timezone.localtime(ev.starts_at)
-        notify([a.member], "duty", "Nouveau service", f"{when:%d/%m} à {when:%H:%M} · {_post_label(a)}. Confirmez votre présence.",
+        chef = " Vous êtes chef de groupe." if a.service.chef_id == a.member_id else ""
+        notify([a.member], "duty", "Nouveau service",
+               f"{when:%d/%m} à {when:%H:%M} · {_post_label(a)}.{chef} Confirmez votre présence.",
                {"type": "duty", "id": a.pk})
 
 
@@ -184,7 +242,13 @@ def publish(services, *, by, request=None):
                 s.save(update_fields=["published_at"])
                 to_notify += list(s.assignments.select_related("service__event", "member"))
     _notify_duty(to_notify)
-    audit.record("Planning publié", actor=by, request=request, detail={"services": len(services), "notifiés": len(to_notify)})
+    exceptional = is_exceptional(by)
+    audit.record("Planning publié" + (" à titre exceptionnel" if exceptional else ""), actor=by, request=request,
+                 sensitive=exceptional, detail={"services": len(services), "notifiés": len(to_notify)})
+    if exceptional and services:
+        notify(lineup_makers(), "duty", "Planning publié par le bureau",
+               f"{by.short_name} a publié le planning ({len(services)} service(s)) à titre exceptionnel.",
+               {"type": "planning"})
     return len(to_notify)
 
 
@@ -211,8 +275,9 @@ def declare_absence(assignment, *, by, reason=""):
     r = Request.objects.create(kind=Request.Kind.ABSENCE, assignment=assignment, requester=by, reason=reason, status=Request.Status.ACCEPTED)
     assignment.status = Assignment.Status.ABSENT
     assignment.save(update_fields=["status"])
-    chef = assignment.service.group.chef if assignment.service.group else None
-    notify([chef], "request", "Absence déclarée", f"{by.short_name} · {_post_label(assignment)} · {reason}", {"type": "request", "id": r.pk})
+    # The formateurs find the replacement; the day's chef de groupe is told.
+    chef = assignment.service.chef if assignment.service.chef_id != by.pk else None
+    notify([*lineup_makers(), chef], "request", "Absence déclarée", f"{by.short_name} · {_post_label(assignment)} · {reason}", {"type": "request", "id": r.pk})
     return r
 
 
@@ -229,8 +294,8 @@ def target_answer(req, *, by, accept):
 
 
 def decide(req, *, by, approve, replacement=None, request=None):
-    """Chef de groupe / censeur: approve a swap (accepted by the colleague)
-    or fill an absence with a replacement."""
+    """Whoever makes the lineup approves a swap (accepted by the colleague)
+    or fills an absence with a replacement."""
     if req.status != Request.Status.ACCEPTED:
         raise PlanningRule("not_ready", "Cette demande n’attend pas de décision.")
     a = req.assignment
@@ -244,6 +309,10 @@ def decide(req, *, by, approve, replacement=None, request=None):
                 raise PlanningRule("replacement_required", "Choisissez un remplaçant.")
             if busy_same_day(new_member.pk, a.service):
                 raise PlanningRule("double_service", f"{new_member.short_name} a déjà un service ce jour-là.", status=409)
+            if a.service.chef_id == a.member_id:
+                # The chef is leaving this service: the lineup maker designates another.
+                a.service.chef = None
+                a.service.save(update_fields=["chef"])
             a.member = new_member
             a.status = Assignment.Status.CONFIRMED if req.kind == Request.Kind.SWAP else Assignment.Status.PENDING
             req.status = Request.Status.APPROVED
@@ -251,7 +320,8 @@ def decide(req, *, by, approve, replacement=None, request=None):
         req.decided_by = by
         req.save(update_fields=["status", "decided_by", "target"])
         a.save(update_fields=["member", "status"])
-    audit.record("Demande de service " + ("approuvée" if approve else "refusée"), actor=by, request=request, detail={"type": req.kind})
+    audit.record("Demande de service " + ("approuvée" if approve else "refusée"), actor=by, request=request,
+                 sensitive=is_exceptional(by), detail={"type": req.kind, "exceptionnel": is_exceptional(by)})
     notify([req.requester, req.target if approve else None], "request", "Demande " + ("approuvée" if approve else "refusée"),
            _post_label(a), {"type": "request", "id": req.pk})
     return req
@@ -287,5 +357,5 @@ def may_advance_alb(rot, user):
         return True
     if rot.responsible_id == user.pk:
         return True
-    return bool(rot.group and (rot.group.chef_id == user.pk or rot.group.members.filter(pk=user.pk).exists()))
+    return bool(rot.group and rot.group.members.filter(pk=user.pk).exists())
 

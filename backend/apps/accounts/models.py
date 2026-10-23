@@ -229,6 +229,12 @@ class RoleAssignment(models.Model):
     def __str__(self):
         return f"{self.user} · {self.role}"
 
+    @property
+    def is_one_day(self):
+        """A role held for a single day (owner, 2026-10-23: censeur du jour,
+        and any bureau role, can be given to someone for one activity)."""
+        return self.ends_on is not None and self.ends_on == self.starts_on
+
 
 class RoleRequest(models.Model):
     """A bureau member proposes a role for someone (design: dashboard →

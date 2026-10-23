@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
@@ -152,7 +152,11 @@ def logout_view(request):
 def dashboard(request):
     today = timezone.localdate()
     active = User.objects.filter(status=User.Status.ACTIVE, is_active=True)
-    soon = RoleAssignment.objects.active().filter(ends_on__isnull=False, ends_on__lte=today + timedelta(days=30), role__kind=Role.Kind.BUREAU)
+    soon = (
+        RoleAssignment.objects.active()
+        .filter(ends_on__isnull=False, ends_on__lte=today + timedelta(days=30), role__kind=Role.Kind.BUREAU)
+        .exclude(ends_on=F("starts_on"))  # a role of the day isn't a mandate
+    )
     super_admins = RoleAssignment.objects.active().filter(role__slug=registry.SUPER_ADMIN_SLUG).values("user").distinct().count()
     ctx = {
         "nav": "dash",

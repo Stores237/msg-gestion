@@ -128,6 +128,74 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
     }
   }
 
+  /// The chef de groupe is chosen for each service, among its guards
+  /// (anyone can be chef). Only whoever makes the lineup sees this.
+  Future<void> _chooseChef(PlannedService s) async {
+    final l = AppLocalizations.of(context);
+    final guards = s.assignments
+        .where((a) => a.status != 'repl' && a.status != 'absent')
+        .toList();
+    if (guards.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.chefNeedsGuards)));
+      return;
+    }
+    // Wrapped so "remove" (null) differs from dismissing the sheet.
+    final choice = await showModalBottomSheet<({int? id})>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          children: [
+            Text(
+              l.designateChef,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(l.chefSheetHint),
+            const SizedBox(height: 12),
+            GroupCard(
+              children: [
+                for (final a in guards)
+                  ListRow(
+                    key: Key('chef-${a.memberId}'),
+                    lead: MemberAvatar(name: a.memberName, size: 36),
+                    title: Text(a.memberName),
+                    subtitle: Text(
+                      '${postLabel(l, a.slot.post)} · ${sideLabel(l, a.slot.side)}',
+                    ),
+                    trailing: a.memberId == s.chefId
+                        ? const Icon(Icons.flag)
+                        : null,
+                    onTap: () => Navigator.of(context).pop((id: a.memberId)),
+                  ),
+              ],
+            ),
+            if (s.chefId != null) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const Key('remove-chef'),
+                onPressed: () => Navigator.of(context).pop((id: null)),
+                icon: const Icon(Icons.outlined_flag),
+                label: Text(l.removeChef),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+    if (choice == null || choice.id == s.chefId) return;
+    try {
+      await RepositoryLocator.instance.planning.setChef(s.id, choice.id);
+      await _load();
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    }
+  }
+
   Future<void> _assignGroup(PlannedService s) async {
     final l = AppLocalizations.of(context);
     final groups = await RepositoryLocator.instance.planning
@@ -153,10 +221,7 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                   key: Key('group-${g.id}'),
                   title: Text(g.name),
                   subtitle: Text(
-                    [
-                      if (g.chef != null) l.chefLabel(g.chef!),
-                      l.groupMembersInfo(g.members, g.available),
-                    ].join('\n'),
+                    [l.groupMembersInfo(g.members, g.available)].join('\n'),
                   ),
                   onTap: () => Navigator.of(context).pop(g),
                 ),
@@ -365,6 +430,7 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                                 onGroup: _canEdit
                                     ? () => _assignGroup(s)
                                     : null,
+                                onChef: _canEdit ? () => _chooseChef(s) : null,
                               ),
                             ),
                         ],
@@ -421,10 +487,16 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
 }
 
 class _Column extends StatelessWidget {
-  const _Column({required this.service, required this.onTap, this.onGroup});
+  const _Column({
+    required this.service,
+    required this.onTap,
+    this.onGroup,
+    this.onChef,
+  });
   final PlannedService service;
   final ValueChanged<Slot> onTap;
   final VoidCallback? onGroup;
+  final VoidCallback? onChef;
 
   @override
   Widget build(BuildContext context) {
@@ -464,22 +536,42 @@ class _Column extends StatelessWidget {
             '${s.title} · ${l.filledOf(s.filled, s.size)}',
             style: TextStyle(fontSize: 12, color: c.textSecondary),
           ),
-          if (s.chef != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Row(
-                children: [
-                  Icon(Icons.flag_outlined, size: 12, color: c.textSecondary),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      l.chefLabel(s.chef!),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+          if (s.chef != null || onChef != null)
+            InkWell(
+              key: Key('chef-btn-${s.id}'),
+              onTap: onChef,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: onChef == null ? 0 : 40),
+                child: Row(
+                  children: [
+                    Icon(
+                      s.chef == null
+                          ? Icons.outlined_flag
+                          : Icons.flag_outlined,
+                      size: 14,
+                      color: s.chef == null ? c.warnText : c.textSecondary,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        s.chef != null ? l.chefLabel(s.chef!) : l.noChefYet,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: s.chef == null ? c.warnText : c.textSecondary,
+                          fontWeight: s.chef == null ? FontWeight.w600 : null,
+                        ),
+                      ),
+                    ),
+                    if (onChef != null)
+                      Icon(
+                        Icons.edit_outlined,
+                        size: 14,
+                        color: c.textTertiary,
+                      ),
+                  ],
+                ),
               ),
             ),
           for (final post in posts) ...[

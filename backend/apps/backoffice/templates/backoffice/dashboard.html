@@ -13,7 +13,7 @@
 <div class="bo-cols">
   <div style="display:flex;flex-direction:column;gap:24px">
   <section class="panel"><div class="panel-h"><h2>Demandes de rôle</h2></div>
-    <div class="list">{% for r in requests %}<div class="row">{% avatar r.member 40 %}<div class="row-main"><div class="row-t" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">{{ r.member.full_name }}{% role_badge r.role r.ends_on %}</div><div class="row-s">demandé par {{ r.requested_by.short_name|default:"—" }} · {{ r.reason }} · à partir du {{ r.starts_on|date:"d/m" }}</div></div>
+    <div class="list">{% for r in requests %}<div class="row">{% avatar r.member 40 %}<div class="row-main"><div class="row-t" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">{{ r.member.full_name }}{% role_badge r.role r.ends_on r.starts_on %}</div><div class="row-s">demandé par {{ r.requested_by.short_name|default:"—" }} · {{ r.reason }} · à partir du {{ r.starts_on|date:"d/m" }}</div></div>
       <form method="post" action="{% url 'backoffice:role_request' r.pk %}" style="display:flex;gap:8px">{% csrf_token %}<button class="btn btn-secondary btn-sm">Refuser</button><button class="btn btn-primary btn-sm" name="approve" value="1">Approuver</button></form></div>
     {% empty %}<div class="row"><div class="row-main"><div class="row-s">Aucune demande en attente.</div></div></div>{% endfor %}</div></section>
   <section class="panel"><div class="panel-h"><h2>Actions sensibles récentes</h2><div class="acts"><a href="{% url 'backoffice:audit' %}?sensibles=1">Journal d’audit</a></div></div>

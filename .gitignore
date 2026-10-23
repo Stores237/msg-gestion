@@ -18,3 +18,4 @@ app/build/
 *.log
 backend/.staging-admins.txt
 backend/.staging-testers.txt
+.gstack/

@@ -1,7 +1,8 @@
 {% extends "backoffice/base.html" %}{% load bo %}
 {% block frame %}
-<div class="bo-shell">
-  <aside class="bo-side">
+<div class="bo-shell" id="bo-shell">
+  <div class="bo-scrim" onclick="boNav(false)"></div>
+  <aside class="bo-side" id="bo-side" aria-label="Menu">
     <div class="bo-brand"><div class="msg-logo" style="width:36px;height:36px;border-radius:12px;font-size:11px" role="img" aria-label="MSG">MSG</div><div><b>MSG Gestion</b><small>Back-office</small></div></div>
     <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}">{% icon 'layout-dashboard' %}Tableau de bord</a>
     <a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>
@@ -14,11 +15,19 @@
       <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
   </aside>
   <main class="bo-main">
-    <div class="bo-top"><div>{% block crumb %}{% endblock %}<h1>{% block heading %}{% endblock %}</h1></div><div class="acts">{% block acts %}{% endblock %}</div></div>
+    <div class="bo-top"><button type="button" class="iconbtn bo-menu" aria-label="Menu" aria-controls="bo-side" aria-expanded="false" onclick="boNav(true)">{% icon 'menu' 22 %}</button><div class="bo-title">{% block crumb %}{% endblock %}<h1>{% block heading %}{% endblock %}</h1></div><div class="acts">{% block acts %}{% endblock %}</div></div>
     <div class="bo-body">
       {% if messages %}<div class="msgs">{% for m in messages %}<div class="notice {% if m.level_tag == 'error' %}alert{% else %}ok{% endif %}">{% if m.level_tag == 'error' %}{% icon 'circle-alert' %}{% else %}{% icon 'circle-check' %}{% endif %}<span>{{ m }}</span></div>{% endfor %}</div>{% endif %}
       {% block body %}{% endblock %}
     </div>
   </main>
 </div>
+<script>
+  /* Phones and narrow windows: the sidebar opens as a drawer. */
+  function boNav(open) {
+    document.getElementById('bo-shell').classList.toggle('nav-open', open);
+    document.querySelector('.bo-menu').setAttribute('aria-expanded', open);
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') boNav(false); });
+</script>
 {% endblock %}

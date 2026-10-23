@@ -49,6 +49,15 @@ LOCKED = {
     "super-admin": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2]},
 }
 
+# The service lineup (who serves where, who is chef de groupe that day) is
+# made by the formateur or the formateur adjoint, and on exceptional occasions
+# by the président or vice-président (owner, 2026-10-23). Every other role
+# can only look at it. This is per role, not per person: holding "membre"
+# alongside "formateur" must not take the lineup away.
+LINEUP_ROLES = {"formateur", "formateur-adjoint", "president", "vice-president"}
+LINEUP_EXCEPTIONAL_ROLES = {"president", "vice-president"}
+LINEUP_ACTIONS = {("calendar.planning", a) for a in (CREATE, CHANGE, VALIDATE, DELETE)}
+
 # Two roles one person may never hold at the same time.
 INCOMPATIBLE_ROLES = [
     ("tresorier", "commissaire-aux-comptes"),
@@ -69,6 +78,8 @@ SUPER_ADMIN_SLUG = "super-admin"
 
 
 def is_locked(role_slug, resource, action):
+    if (resource, action) in LINEUP_ACTIONS and role_slug not in LINEUP_ROLES:
+        return True
     return (resource, action) in LOCKED.get(role_slug, set())
 
 

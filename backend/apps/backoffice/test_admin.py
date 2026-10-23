@@ -178,3 +178,37 @@ def test_pages_render(admin, client, url):
 
 def test_user_detail_renders(admin, client):
     assert client.get(f"/bo/utilisateurs/{admin.id}/").status_code == 200
+
+
+def test_any_bureau_role_for_one_day(admin, client):
+    """Owner, 2026-10-23: censeur du jour and every bureau role can be given
+    to anyone for a single day; it isn't a mandate and ends by itself."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.core.models import Notification
+
+    today = timezone.localdate()
+    m = UserFactory()
+    r = client.post("/bo/affectations/role-du-jour/", {"member": m.id, "role": "formateur", "day": today.isoformat(), "reason": "Grand-messe"}, follow=True)
+    assert "rôle du jour" in r.content.decode()
+    a = RoleAssignment.objects.get(user=m, role__slug="formateur")
+    assert a.starts_on == a.ends_on == today and a.is_one_day
+    assert m.can("calendar.planning", "change")
+    assert m.role_slugs(on=today + timedelta(days=1)) == set()
+    assert Notification.objects.filter(user=m, title="Rôle du jour").exists()
+    assert AuditLog.objects.filter(action="Rôle affecté", detail__role_du_jour=True).exists()
+    # Not a mandate: no "bientôt terminé" alert, not in the app's bureau list.
+    assert "Mandat bientôt terminé" not in client.get("/bo/affectations/").content.decode()
+    assert "Mandat bientôt terminé" not in client.get("/bo/").content.decode()
+    # From the member's page too, for a later day.
+    tomorrow = today + timedelta(days=1)
+    client.post(f"/bo/utilisateurs/{m.id}/", {"action": "assign", "role": "censeur-du-jour", "reason": "Veillée",
+                                              "starts_on": tomorrow.isoformat(), "one_day": "1"})
+    assert RoleAssignment.objects.get(user=m, role__slug="censeur-du-jour").ends_on == tomorrow
+    assert "prévu le" in client.get("/bo/affectations/").content.decode()
+    # Never the super admin role, never a past day.
+    client.post("/bo/affectations/role-du-jour/", {"member": m.id, "role": "super-admin", "day": today.isoformat(), "reason": "x"})
+    client.post("/bo/affectations/role-du-jour/", {"member": m.id, "role": "president", "day": (today - timedelta(days=1)).isoformat(), "reason": "x"})
+    assert not RoleAssignment.objects.filter(user=m, role__slug__in=["super-admin", "president"]).exists()

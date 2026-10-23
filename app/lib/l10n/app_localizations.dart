@@ -2557,6 +2557,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Secrétaire général adjoint'**
   String get roleSecretaryGeneralDeputy;
+
+  /// No description provided for @roleFormateurDeputy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Formateur adjoint'**
+  String get roleFormateurDeputy;
+
+  /// No description provided for @designateChef.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désigner le chef de groupe'**
+  String get designateChef;
+
+  /// No description provided for @chefSheetHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parmi les gardes de ce service.'**
+  String get chefSheetHint;
+
+  /// No description provided for @removeChef.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le chef de groupe'**
+  String get removeChef;
+
+  /// No description provided for @noChefYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore de chef de groupe'**
+  String get noChefYet;
+
+  /// No description provided for @youAreChef.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes chef de groupe'**
+  String get youAreChef;
+
+  /// No description provided for @chefNeedsGuards.
+  ///
+  /// In fr, this message translates to:
+  /// **'Affectez d’abord des gardes à ce service.'**
+  String get chefNeedsGuards;
 }
 
 class _AppLocalizationsDelegate

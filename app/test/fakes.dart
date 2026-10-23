@@ -737,19 +737,18 @@ class FakePlanningRepository implements PlanningRepository {
 
   @override
   Future<List<ServiceGroupInfo>> groups() async => const [
-    ServiceGroupInfo(
-      id: 1,
-      name: 'Saint-Michel',
-      chef: 'Eboa Lionel',
-      members: 7,
-      available: 7,
-    ),
+    ServiceGroupInfo(id: 1, name: 'Saint-Michel', members: 7, available: 7),
   ];
 
   @override
   Future<(int, int)> assignGroup(int serviceId, int groupId) async {
     calls.add('group:$serviceId:$groupId');
     return (3, 0);
+  }
+
+  @override
+  Future<void> setChef(int serviceId, int? member) async {
+    calls.add('chef:$serviceId:$member');
   }
 
   @override
@@ -770,6 +769,7 @@ class FakePlanningRepository implements PlanningRepository {
         title: 'Première messe',
         startsAt: now.add(const Duration(days: 5)),
         chef: 'Din Yannick',
+        isChef: true,
         dress: 'interieure',
       )
     else

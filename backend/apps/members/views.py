@@ -1,7 +1,7 @@
 
 
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -115,6 +115,7 @@ class BureauView(APIView):
         rows = (
             RoleAssignment.objects.active()
             .filter(role__kind=Role.Kind.BUREAU)
+            .exclude(ends_on=F("starts_on"))  # roles of the day aren't the bureau
             .select_related("role", "user")
             .prefetch_related("user__assignments__role")
             .order_by("role__sort_order", "user__last_name")

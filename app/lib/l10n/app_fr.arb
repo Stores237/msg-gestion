@@ -963,5 +963,12 @@
     }
   },
   "roleVicePresident": "Vice-président",
-  "roleSecretaryGeneralDeputy": "Secrétaire général adjoint"
+  "roleSecretaryGeneralDeputy": "Secrétaire général adjoint",
+  "roleFormateurDeputy": "Formateur adjoint",
+  "designateChef": "Désigner le chef de groupe",
+  "chefSheetHint": "Parmi les gardes de ce service.",
+  "removeChef": "Retirer le chef de groupe",
+  "noChefYet": "Pas encore de chef de groupe",
+  "youAreChef": "Vous êtes chef de groupe",
+  "chefNeedsGuards": "Affectez d’abord des gardes à ce service."
 }

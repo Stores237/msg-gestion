@@ -1484,4 +1484,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get roleSecretaryGeneralDeputy => 'Secrétaire général adjoint';
+
+  @override
+  String get roleFormateurDeputy => 'Formateur adjoint';
+
+  @override
+  String get designateChef => 'Désigner le chef de groupe';
+
+  @override
+  String get chefSheetHint => 'Parmi les gardes de ce service.';
+
+  @override
+  String get removeChef => 'Retirer le chef de groupe';
+
+  @override
+  String get noChefYet => 'Pas encore de chef de groupe';
+
+  @override
+  String get youAreChef => 'Vous êtes chef de groupe';
+
+  @override
+  String get chefNeedsGuards => 'Affectez d’abord des gardes à ce service.';
 }

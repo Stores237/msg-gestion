@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'fakes.dart';
 import 'helpers.dart';
 
-const _censor = {
+const _formateur = {
   'members.profile': ['view'],
   'calendar.events': ['view'],
   'calendar.attendance': ['view', 'change'],
@@ -36,6 +36,7 @@ void main() {
     expect(find.text('Mes services'), findsOneWidget);
     expect(find.text('Première centrale · Pariso'), findsOneWidget);
     expect(find.text('Chef : Din Yannick'), findsOneWidget);
+    expect(find.byKey(const Key('you-are-chef')), findsOneWidget);
     await tester.tap(find.byKey(const Key('swap-1')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('swap-reason')), 'Examen');
@@ -51,13 +52,13 @@ void main() {
   });
 
   testWidgets(
-    'censor: grid with alerts, assign a free slot with double-service warning, publish',
+    'formateur: grid with alerts, assign a free slot with double-service warning, publish',
     (tester) async {
       final f = await setUpApp(tester);
       f.planning.doubleOnce = true;
       await pumpShell(
         tester,
-        fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _censor),
+        fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
       );
       await openThirdView(tester);
       expect(find.textContaining('2 alertes'), findsOneWidget);
@@ -94,13 +95,13 @@ void main() {
     },
   );
 
-  testWidgets('censor: plan an event size and assign a whole group', (
+  testWidgets('formateur: plan an event size and assign a whole group', (
     tester,
   ) async {
     final f = await setUpApp(tester);
     await pumpShell(
       tester,
-      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _censor),
+      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
     );
     await openThirdView(tester);
     await tester.scrollUntilVisible(
@@ -129,13 +130,50 @@ void main() {
     expect(f.planning.calls, contains('group:5:1'));
   });
 
+  testWidgets('formateur: designates the chef de groupe among the guards', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
+    );
+    await openThirdView(tester);
+    await tester.tap(find.byKey(const Key('chef-btn-5')));
+    await tester.pumpAndSettle();
+    expect(find.text('Désigner le chef de groupe'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('chef-4')));
+    await tester.pumpAndSettle();
+    expect(f.planning.calls, contains('chef:5:4'));
+  });
+
+  testWidgets('member without lineup rights cannot change the chef', (
+    tester,
+  ) async {
+    await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        tabs: const ['accueil', 'calendrier'],
+        permissions: const {
+          'calendar.events': ['view'],
+          'calendar.planning': ['view'],
+        },
+      ),
+    );
+    await openThirdView(tester);
+    await tester.tap(find.byKey(const Key('chef-btn-5')));
+    await tester.pumpAndSettle();
+    expect(find.text('Désigner le chef de groupe'), findsNothing);
+  });
+
   testWidgets(
     'requests: accept a swap for me, fill an absence with a replacement',
     (tester) async {
       final f = await setUpApp(tester);
       await pumpShell(
         tester,
-        fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _censor),
+        fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
       );
       await openThirdView(tester);
       await tester.tap(find.byKey(const Key('open-requests')));
@@ -158,7 +196,7 @@ void main() {
     final f = await setUpApp(tester);
     await pumpShell(
       tester,
-      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _censor),
+      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
     );
     await openThirdView(tester);
     await tester.tap(find.byKey(const Key('open-albs')));

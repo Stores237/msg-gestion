@@ -228,6 +228,12 @@ void main() {
       tester,
       fakeMe(tabs: const ['accueil', 'calendrier', 'annonces']),
     );
+    // The duty card above it is taller when the member is chef de groupe.
+    await tester.scrollUntilVisible(
+      find.text('Assise hebdomadaire'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('PROCHAIN RENDEZ-VOUS'), findsOneWidget);
     expect(find.text('Assise hebdomadaire'), findsOneWidget);
     await tester.scrollUntilVisible(

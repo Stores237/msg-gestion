@@ -7,10 +7,23 @@
 <div class="notice warn">{% icon 'triangle-alert' %}<span><b>Mandat bientôt terminé.</b> {{ r.a.role.name }} · {{ r.a.user.full_name }} · fin le {{ r.a.ends_on|date:"l j F Y" }} ({{ r.label }}).
   <form method="post" action="{% url 'backoffice:assignment_renew' r.a.pk %}" style="display:inline">{% csrf_token %}<button class="btn btn-ghost btn-sm" style="padding:0 6px;min-height:28px">Renouveler</button></form> ou <a href="{% url 'backoffice:user' r.a.user.pk %}">désigner un successeur</a>.</span></div>
 {% endfor %}
+{% if can_edit %}
+<section class="panel"><div class="panel-h"><h2>Rôle du jour</h2></div><div class="panel-b">
+  <p class="muted" style="margin:0 0 12px">Pour une messe ou une activité, n’importe quel membre peut recevoir un rôle — censeur du jour ou un rôle du bureau — pour une seule journée. Il est prévenu dans l’application et le rôle prend fin seul à minuit.</p>
+  <form method="post" action="{% url 'backoffice:assignment_day' %}" class="form-grid">{% csrf_token %}
+    <label class="fld"><span class="fld-l">Membre<em> *</em></span><span class="fld-box"><select name="member" required><option value="">—</option>{% for m in members %}<option value="{{ m.pk }}">{{ m.full_name }}</option>{% endfor %}</select></span></label>
+    <label class="fld"><span class="fld-l">Rôle<em> *</em></span><span class="fld-box"><select name="role" required>{% for r in day_roles %}<option value="{{ r.slug }}"{% if r.slug == 'censeur-du-jour' %} selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></span></label>
+    <label class="fld"><span class="fld-l">Jour<em> *</em></span><span class="fld-box"><input type="date" name="day" value="{{ today|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}" required></span></label>
+    <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required placeholder="Grand-messe de dimanche…"></span></label>
+    <div class="acts" style="grid-column:1/-1"><button class="btn btn-primary">{% icon 'timer' 16 %}Désigner pour la journée</button></div>
+  </form>
+  {% if upcoming %}<div class="list" style="margin-top:12px">{% for a in upcoming %}<div class="row">{% avatar a.user 32 %}<div class="row-main"><div class="row-t">{{ a.user.full_name }} {% role_badge a.role a.ends_on a.starts_on %}</div><div class="row-s">prévu le {{ a.starts_on|date:"l j F" }} · {{ a.reason }}</div></div></div>{% endfor %}</div>{% endif %}
+</div></section>
+{% endif %}
 <section class="panel">
   <div class="filters"><a class="fsel{% if not horizon %} on{% endif %}" href="?">Toutes</a><a class="fsel{% if horizon == '30' %} on{% endif %}" href="?echeance=30">Échéance : 30 jours</a><a class="fsel{% if horizon == '90' %} on{% endif %}" href="?echeance=90">Échéance : 90 jours</a></div>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Personne</th><th>Rôle</th><th>Début</th><th>Fin</th><th style="width:220px">Durée écoulée</th><th>Statut</th></tr></thead><tbody>
-  {% for r in rows %}<tr><td><a class="who" href="{% url 'backoffice:user' r.a.user.pk %}" style="color:inherit">{% avatar r.a.user 32 %}<b>{{ r.a.user.full_name }}</b></a></td><td>{% role_badge r.a.role r.a.ends_on %}</td><td class="tnum">{{ r.a.starts_on|date:"d/m/Y" }}</td><td class="tnum">{{ r.a.ends_on|date:"d/m/Y"|default:"—" }}</td>
+  {% for r in rows %}<tr><td><a class="who" href="{% url 'backoffice:user' r.a.user.pk %}" style="color:inherit">{% avatar r.a.user 32 %}<b>{{ r.a.user.full_name }}</b></a></td><td>{% role_badge r.a.role r.a.ends_on r.a.starts_on %}</td><td class="tnum">{{ r.a.starts_on|date:"d/m/Y" }}</td><td class="tnum">{{ r.a.ends_on|date:"d/m/Y"|default:"—" }}</td>
     <td>{% if r.progress is None %}<span class="muted">—</span>{% else %}<div class="tl-bar" style="height:10px"><i class="{% if r.state == 'warn' %}w{% endif %}" style="left:0;width:{{ r.progress }}%"></i></div>{% endif %}</td><td><span class="status {{ r.state }}"><i></i>{{ r.label }}</span></td></tr>
   {% empty %}<tr class="empty-row"><td colspan="6">Aucune affectation.</td></tr>{% endfor %}</tbody></table></div>
 </section>

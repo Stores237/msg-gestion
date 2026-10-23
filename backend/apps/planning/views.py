@@ -35,7 +35,8 @@ def _service_json(s, conflicts=()):
     e = s.event
     return {
         "id": s.pk, "event": e.pk, "title": e.title, "kind": e.kind, "starts_at": e.starts_at, "size": s.size,
-        "group": s.group.name if s.group else None, "chef": s.group.chef.short_name if s.group and s.group.chef else None,
+        "group": s.group.name if s.group else None,
+        "chef": s.chef.short_name if s.chef else None, "chef_id": s.chef_id,
         "published": s.published_at is not None,
         "slots": [{"post": p, "side": sd, "index": i} for p, sd, i in slots_for(s.size)],
         "assignments": [_assignment_json(a, conflicts) for a in s.assignments.all()],
@@ -47,7 +48,7 @@ def _week_services(start, end):
     hi = lo + (end - start)
     return list(
         Service.objects.filter(event__starts_at__gte=lo, event__starts_at__lt=hi)
-        .select_related("event", "group__chef")
+        .select_related("event", "group", "chef")
         .prefetch_related("assignments__member")
         .order_by("event__starts_at")
     )
@@ -89,7 +90,11 @@ class ServiceCreateView(APIView):
             return Response({"detail": "Taille invalide.", "code": "bad_size"}, status=400)
         s, _ = Service.objects.update_or_create(event=event, defaults={"size": size})
         s.assignments.exclude(pk__in=[a.pk for a in s.assignments.all() if (a.post, a.side, a.index) in slots_for(size)]).delete()
-        return Response(_service_json(Service.objects.select_related("event", "group__chef").get(pk=s.pk)), status=201)
+        if s.chef_id and not s.assignments.filter(member_id=s.chef_id).exists():
+            s.chef = None
+            s.save(update_fields=["chef"])
+        services.note_exceptional(request.user, "taille du service", s, request, taille=size)
+        return Response(_service_json(Service.objects.select_related("event", "group", "chef").get(pk=s.pk)), status=201)
 
 
 class SlotView(APIView):
@@ -102,7 +107,7 @@ class SlotView(APIView):
         post, side, index = request.data.get("post"), request.data.get("side"), int(request.data.get("index") or 0)
         member_id = request.data.get("member")
         if member_id is None:
-            services.clear(s, post, side, index)
+            services.clear(s, post, side, index, by=request.user, request=request)
             return Response(status=status.HTTP_204_NO_CONTENT)
         member = get_object_or_404(User, pk=member_id)
         try:
@@ -125,8 +130,25 @@ class AssignGroupView(APIView):
     def post(self, request, pk):
         s = get_object_or_404(Service.objects.select_related("event"), pk=pk)
         group = get_object_or_404(ServiceGroup, pk=request.data.get("group"))
-        created, missing = services.assign_group(s, group, by=request.user)
+        created, missing = services.assign_group(s, group, by=request.user, request=request)
         return Response({"assigned": len(created), "still_empty": missing})
+
+
+class ChefView(APIView):
+    """PUT {member} to designate the service's chef de groupe among its
+    guards; member null removes the designation."""
+
+    permission_classes = [require("calendar.planning", "change")]
+
+    def put(self, request, pk):
+        s = get_object_or_404(Service.objects.select_related("event", "group", "chef"), pk=pk)
+        member = get_object_or_404(User, pk=request.data["member"]) if request.data.get("member") else None
+        try:
+            services.set_chef(s, member, by=request.user, request=request)
+        except services.PlanningRule as e:
+            return _rule(e)
+        s = Service.objects.select_related("event", "group", "chef").prefetch_related("assignments__member").get(pk=pk)
+        return Response(_service_json(s))
 
 
 class PublishView(APIView):
@@ -147,9 +169,9 @@ class GroupsView(APIView):
 
     def get(self, request):
         out = []
-        for g in ServiceGroup.objects.select_related("chef").prefetch_related("members"):
+        for g in ServiceGroup.objects.prefetch_related("members"):
             members = list(g.members.all())
-            out.append({"id": g.pk, "name": g.name, "chef": g.chef.full_name if g.chef else None, "chef_id": g.chef_id,
+            out.append({"id": g.pk, "name": g.name,
                         "members": [{"id": m.pk, "full_name": m.full_name} for m in members],
                         "available": sum(1 for m in members if m.status == User.Status.ACTIVE),
                         "on_leave": sum(1 for m in members if m.status == User.Status.LEAVE)})
@@ -160,9 +182,6 @@ class GroupsView(APIView):
         if not name:
             return Response({"detail": "Nom requis.", "code": "required"}, status=400)
         g, _ = ServiceGroup.objects.get_or_create(name=name)
-        if request.data.get("chef"):
-            g.chef = get_object_or_404(User, pk=request.data["chef"])
-            g.save(update_fields=["chef"])
         if "members" in request.data:
             g.members.set(User.objects.filter(pk__in=request.data["members"]))
         return Response({"id": g.pk}, status=201)
@@ -176,13 +195,14 @@ class MineView(APIView):
         qs = (
             Assignment.objects.filter(member=request.user, service__published_at__isnull=False, service__event__starts_at__gte=now)
             .exclude(status=Assignment.Status.REPLACED)
-            .select_related("service__event", "service__group__chef")
+            .select_related("service__event", "service__chef")
             .order_by("service__event__starts_at")
         )
         return Response([{
             **_assignment_json(a),
             "event": a.service.event_id, "title": a.service.event.title, "starts_at": a.service.event.starts_at,
-            "dress": a.service.event.dress, "chef": a.service.group.chef.full_name if a.service.group and a.service.group.chef else None,
+            "dress": a.service.event.dress, "chef": a.service.chef.full_name if a.service.chef else None,
+            "is_chef": a.service.chef_id == request.user.pk,
         } for a in qs])
 
 
@@ -198,7 +218,7 @@ class SwapView(APIView):
     """POST {target, reason} → ask a colleague; or {absence: true, reason}."""
 
     def post(self, request, pk):
-        a = get_object_or_404(Assignment.objects.select_related("service__event", "service__group__chef"), pk=pk)
+        a = get_object_or_404(Assignment.objects.select_related("service__event", "service__chef"), pk=pk)
         try:
             if request.data.get("absence"):
                 r = services.declare_absence(a, by=request.user, reason=request.data.get("reason", ""))
@@ -221,8 +241,8 @@ def _request_json(r):
 
 
 class RequestsView(APIView):
-    """For chefs/censeurs: what waits for a decision. For anyone: swaps
-    proposed to me."""
+    """For whoever makes the lineup: what waits for a decision. For anyone:
+    swaps proposed to me."""
 
     def get(self, request):
         base = Request.objects.select_related("assignment__service__event", "requester", "target")

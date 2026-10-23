@@ -49,3 +49,8 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-20 | App defaults to French; English only when the phone is set to English | The movement works in French; the playbook requires every string in both locale files |
 | 2026-10-20 | Logo = the letters "MSG" in white on the primary green, rounded square (`app/lib/widgets/msg_logo.dart`, `.msg-logo` in `ds.css`); replaces the design's dashed placeholders | Owner's choice. One widget/class, so a drawn logo later is a one-file swap |
 | 2026-10-23 | Added roles Vice-président (président's rights minus validating the quarterly report) and Secrétaire général adjoint (same as the SG), bureau, 2-year mandate | Owner request; the design mentions the SG adjoint but had no vice-president. Editable in the back-office |
+| 2026-10-23 | Lineup made only by the formateur / formateur adjoint; président and vice-président exceptionally (audited, formateurs notified) | Owner rule. Enforced as a locked cell per role, not per person, so holding "membre" too never removes it |
+| 2026-10-23 | Chef de groupe designated per service among its guards; standing role archived | Owner: "everyone can be chef de groupe", decided when the lineup is made |
+| 2026-10-23 | Roles of the day: any role except super admin, for one day, assigned by the super admin | Owner: more inclusive; censeur du jour and bureau roles rotate per activity |
+| 2026-10-23 | Back-office usable on phones: drawer menu under 820px | Owner: primarily desktop but accessible on every device. The design hid the sidebar with no replacement |
+
