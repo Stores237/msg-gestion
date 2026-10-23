@@ -1576,4 +1576,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get platformTagline =>
       'Your group, managed: members, cash book, calendar, duties, announcements.';
+
+  @override
+  String get goodMorning => 'Good morning';
+
+  @override
+  String get goodAfternoon => 'Good afternoon';
+
+  @override
+  String get goodEvening => 'Good evening';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get appColor => 'App colour';
+
+  @override
+  String get groupColorChoice => 'Group colour';
+
+  @override
+  String get appColorHint =>
+      'For this phone. “Group colour” follows your group’s setting.';
+
+  @override
+  String colorN(int n) {
+    return 'Colour $n';
+  }
 }

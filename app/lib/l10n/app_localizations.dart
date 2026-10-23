@@ -2731,6 +2731,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'La gestion de votre groupe : membres, caisse, calendrier, services, annonces.'**
   String get platformTagline;
+
+  /// No description provided for @goodMorning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour'**
+  String get goodMorning;
+
+  /// No description provided for @goodAfternoon.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bon après-midi'**
+  String get goodAfternoon;
+
+  /// No description provided for @goodEvening.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonsoir'**
+  String get goodEvening;
+
+  /// No description provided for @appearance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Apparence'**
+  String get appearance;
+
+  /// No description provided for @appColor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur de l’application'**
+  String get appColor;
+
+  /// No description provided for @groupColorChoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur du groupe'**
+  String get groupColorChoice;
+
+  /// No description provided for @appColorHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour ce téléphone. « Couleur du groupe » suit le réglage de votre groupe.'**
+  String get appColorHint;
+
+  /// No description provided for @colorN.
+  ///
+  /// In fr, this message translates to:
+  /// **'Couleur {n}'**
+  String colorN(int n);
 }
 
 class _AppLocalizationsDelegate

@@ -13,8 +13,8 @@ import '../theme/tokens.dart';
 import '../widgets/dates.dart';
 import '../widgets/labels.dart';
 import '../widgets/money.dart';
-import '../widgets/msg_logo.dart';
-import '../widgets/notification_bell.dart';
+import '../widgets/home_header.dart';
+import '../widgets/sync_widgets.dart';
 import '../widgets/ui.dart';
 import 'account_screen.dart';
 import 'planning/my_duties_view.dart';
@@ -101,30 +101,17 @@ class HomeScreen extends StatelessWidget {
     ].join(' · ');
     return Column(
       children: [
-        ScreenHeader(
-          title: l.helloName(me.firstName),
-          sync: true,
-          subtitle: sub,
-          leading: const MsgLogo(size: 40),
-          actions: [
-            const NotificationBell(),
-            Semantics(
-              button: true,
-              label: l.openAccount,
-              child: InkWell(
-                key: const Key('open-account'),
-                customBorder: const CircleBorder(),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => AccountScreen(me: me)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: MemberAvatar(name: me.fullName, size: 40),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
+        HomeHeader(
+          firstName: me.firstName,
+          fullName: me.fullName,
+          role: sub,
+          onOpenAccount: () => Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (_) => AccountScreen(me: me))),
+        ),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: SyncLine(),
         ),
         Expanded(
           child: AsyncView<_HomeData>(

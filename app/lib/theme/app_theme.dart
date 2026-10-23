@@ -5,8 +5,11 @@ import 'tokens.dart';
 
 /// Plus Jakarta Sans everywhere; tabular figures are applied per widget
 /// (amounts, times, counters) via [tabular].
-ThemeData buildTheme(Brightness brightness) {
-  final c = brightness == Brightness.dark ? MsgColors.dark : MsgColors.light;
+ThemeData buildTheme(
+  Brightness brightness, [
+  Color seed = const Color(0xFF2E7D46),
+]) {
+  final c = MsgColors.fromSeed(seed, brightness);
   final base = ThemeData(
     brightness: brightness,
     useMaterial3: true,

@@ -371,3 +371,21 @@ Owner, 2026-10-23: one person can be on leave in one group and active in another
   The account-wide status stays for the platform (a fully blocked account).
 
 **Verify.** `pytest` (202): `test_status_is_per_group`.
+
+## 17. Accueil's header, the app colour, header buttons
+
+Owner, 2026-10-23 (screenshots).
+
+- **Accueil header** after the owner's reference: a dark band (a deep shade of the app colour)
+  reaching under the status bar, with the avatar (opens Mon compte), a greeting by time of day
+  and the first name, the FR/EN switch, an Apparence button and the bell; the member's role as a
+  gold chip; a row of gold and clay diamonds. Under 380 dp of width, FR/EN moves next to the chip.
+- **App colour.** Each group has one (back-office → Paramètres → Couleur de l’application: nine
+  colours or any #RRVVBB; `core.0006_group_color`). Sent in `/api/me/` (`group.color`) and
+  `/api/settings/`. A member can pick their own in the app (Apparence, from the gear on Accueil);
+  "Couleur du groupe" goes back to the group's. All the app's greens are derived from it.
+- **Header buttons** (Finances CSV/PDF, Calendrier +, Membres, Notifications) were drawn in the
+  middle of the screen; they are now pinned to the right edge, as round buttons.
+
+**Verify.** `pytest` (`test_group_color_is_set_in_settings`, `/me` colour in
+`test_groups.py`); `flutter test test/appearance_test.dart`.

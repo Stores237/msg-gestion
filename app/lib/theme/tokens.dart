@@ -22,6 +22,7 @@ class MsgColors extends ThemeExtension<MsgColors> {
     required this.warnText,
     required this.warnTint,
     required this.ink800,
+    this.header = const Color(0xFF1C2A20),
   });
 
   final Color primary;
@@ -41,6 +42,9 @@ class MsgColors extends ThemeExtension<MsgColors> {
   final Color warnText;
   final Color warnTint;
   final Color ink800;
+
+  /// The dark band at the top of Accueil (a deep shade of [primary]).
+  final Color header;
 
   static const light = MsgColors(
     primary: Color(0xFF2E7D46),
@@ -81,6 +85,37 @@ class MsgColors extends ThemeExtension<MsgColors> {
     warnTint: Color(0xFF3A3020),
     ink800: Color(0xFF3A3732),
   );
+
+  /// The tokens with [seed] as the main colour (ThemeController): the
+  /// greens of the design are replaced by shades of the chosen colour.
+  static MsgColors fromSeed(Color seed, Brightness brightness) {
+    final base = brightness == Brightness.dark ? dark : light;
+    final isDark = brightness == Brightness.dark;
+    return MsgColors(
+      primary: seed,
+      primaryText: isDark
+          ? Color.lerp(seed, Colors.white, 0.5)!
+          : Color.lerp(seed, Colors.black, 0.15)!,
+      primaryTint: isDark
+          ? Color.lerp(base.surfaceCard, seed, 0.28)!
+          : Color.lerp(Colors.white, seed, 0.16)!,
+      surfaceBg: base.surfaceBg,
+      surfaceCard: base.surfaceCard,
+      surfaceSunken: base.surfaceSunken,
+      borderSubtle: base.borderSubtle,
+      borderStrong: base.borderStrong,
+      textPrimary: base.textPrimary,
+      textSecondary: base.textSecondary,
+      textTertiary: base.textTertiary,
+      alert: base.alert,
+      alertTint: base.alertTint,
+      warn: base.warn,
+      warnText: base.warnText,
+      warnTint: base.warnTint,
+      ink800: base.ink800,
+      header: Color.lerp(const Color(0xFF15120D), seed, 0.3)!,
+    );
+  }
 
   @override
   MsgColors copyWith() => this;

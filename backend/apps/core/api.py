@@ -49,7 +49,7 @@ class SettingsView(APIView):
 
         st = Settings.get()
         return Response({
-            "name": st.name, "parish": st.parish, "motto": st.motto,
+            "name": st.name, "parish": st.parish, "motto": st.motto, "color": st.color,
             "fees": {"inscription": st.fee_registration, "medaille": st.fee_medal, "maladie": st.fee_illness, "deces": st.fee_death},
             "quick_amounts": st.quick_amounts(), "installments": st.installments,
             # The group's own lists (back-office → Paramètres).

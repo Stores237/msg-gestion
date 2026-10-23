@@ -77,12 +77,34 @@ class ScreenHeader extends StatelessWidget {
               ],
             ),
           ),
+          // Pinned to the right edge; at most half the width, shrunk
+          // rather than pushed off screen with large text.
           if (actions.isNotEmpty)
-            Flexible(
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width / 2,
+              ),
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.centerRight,
-                child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+                child: IconButtonTheme(
+                  data: IconButtonThemeData(
+                    style: IconButton.styleFrom(
+                      backgroundColor: c.surfaceSunken,
+                      foregroundColor: c.textPrimary,
+                      fixedSize: const Size(44, 44),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final (i, a) in actions.indexed) ...[
+                        if (i > 0 && a is! SizedBox) const SizedBox(width: 8),
+                        a,
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
         ],

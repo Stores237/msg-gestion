@@ -32,7 +32,11 @@ class GroupInfo {
     this.place = '',
     this.motto = '',
     this.welcomeMessage = '',
+    this.color,
   });
+
+  /// The group's app colour, "#RRGGBB" (back-office → Paramètres).
+  final String? color;
 
   final int id;
   final String name;
@@ -48,6 +52,7 @@ class GroupInfo {
     place: (j['place'] as String?) ?? '',
     motto: (j['motto'] as String?) ?? '',
     welcomeMessage: (j['welcome_message'] as String?) ?? '',
+    color: j['color'] as String?,
   );
 }
 

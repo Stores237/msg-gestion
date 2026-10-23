@@ -6,7 +6,10 @@ import '../theme/tokens.dart';
 
 /// FR | EN toggle. Takes effect immediately and is remembered.
 class LanguageSwitch extends StatelessWidget {
-  const LanguageSwitch({super.key});
+  const LanguageSwitch({super.key, this.onDark = false});
+
+  /// On the dark band of Accueil.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +21,9 @@ class LanguageSwitch extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: c.surfaceSunken,
+          color: onDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : c.surfaceSunken,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
@@ -38,14 +43,14 @@ class LanguageSwitch extends StatelessWidget {
                   onTap: () => LocaleController.instance.setLanguage(code),
                   child: Container(
                     constraints: const BoxConstraints(
-                      minWidth: 48,
-                      minHeight: 40,
+                      minWidth: 44,
+                      minHeight: 36,
                     ),
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
                       color: current == code
-                          ? c.surfaceCard
+                          ? (onDark ? Colors.white : c.surfaceCard)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -56,8 +61,8 @@ class LanguageSwitch extends StatelessWidget {
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: current == code
-                              ? c.textPrimary
-                              : c.textSecondary,
+                              ? (onDark ? c.header : c.textPrimary)
+                              : (onDark ? Colors.white : c.textSecondary),
                         ),
                       ),
                     ),

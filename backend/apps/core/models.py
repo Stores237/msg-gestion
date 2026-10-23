@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import RegexValidator
 from django.db import models
 
 from .groups import default_group_id, scoped
@@ -116,6 +117,15 @@ class Notification(models.Model):
         ordering = ["-created_at"]
 
 
+# The colours offered in the back-office and the app (white text stays
+# readable on each: contrast ≥ 4.5). Any other #RRVVBB is accepted too.
+APP_COLORS = [
+    ("#2E7D46", "Vert"), ("#00695C", "Sarcelle"), ("#1E5AA8", "Bleu"), ("#23395B", "Bleu nuit"),
+    ("#5B3FA0", "Violet"), ("#8E1B3A", "Bordeaux"), ("#B3261E", "Rouge"), ("#7A4E1D", "Brun"),
+    ("#8A6514", "Or"),
+]
+
+
 class Settings(models.Model):
     """A group's settings (back-office → Paramètres): place, motto, welcome
     message, amounts and times. One row per group; the name is the group's."""
@@ -125,6 +135,10 @@ class Settings(models.Model):
     motto = models.CharField(max_length=120, blank=True)
     # Shown to the group's members when they open the app (owner, 2026-10-23).
     welcome_message = models.TextField("message de bienvenue", max_length=600, blank=True)
+    # The app's main colour for this group (owner, 2026-10-23); members can
+    # still pick their own in the app.
+    color = models.CharField("couleur de l’application", max_length=7, default="#2E7D46",
+                             validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Couleur au format #RRVVBB.")])
     fee_registration = models.PositiveIntegerField(default=500)
     fee_medal = models.PositiveIntegerField(default=2000)
     fee_illness = models.PositiveIntegerField(default=1000)

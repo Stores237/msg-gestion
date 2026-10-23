@@ -5,9 +5,18 @@ import '../l10n/app_localizations.dart';
 import '../screens/notifications_screen.dart';
 import '../theme/tokens.dart';
 
+/// Round, light-on-dark icon button (top of Accueil).
+final onDarkButton = IconButton.styleFrom(
+  backgroundColor: Colors.white.withValues(alpha: 0.12),
+  foregroundColor: Colors.white,
+);
+
 /// Bell with a red dot when something is unread (design: IconBtn bell + dot).
 class NotificationBell extends StatefulWidget {
-  const NotificationBell({super.key});
+  const NotificationBell({super.key, this.onDark = false});
+
+  /// Round light-on-dark button for the band at the top of Accueil.
+  final bool onDark;
 
   @override
   State<NotificationBell> createState() => _NotificationBellState();
@@ -38,7 +47,8 @@ class _NotificationBellState extends State<NotificationBell> {
     return IconButton(
       key: const Key('bell'),
       tooltip: l.notifications,
-      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+      style: widget.onDark ? onDarkButton : null,
       onPressed: () async {
         await Navigator.of(
           context,
@@ -60,7 +70,10 @@ class _NotificationBellState extends State<NotificationBell> {
                 decoration: BoxDecoration(
                   color: c.alert,
                   shape: BoxShape.circle,
-                  border: Border.all(color: c.surfaceBg, width: 2),
+                  border: Border.all(
+                    color: widget.onDark ? c.header : c.surfaceBg,
+                    width: 2,
+                  ),
                 ),
               ),
             ),

@@ -1002,5 +1002,20 @@
   "switchGroup": "Changer de groupe",
   "chooseGroup": "Choisir un groupe",
   "errorNoGroup": "Ce compte n’appartient encore à aucun groupe. Demandez au responsable de votre groupe.",
-  "platformTagline": "La gestion de votre groupe : membres, caisse, calendrier, services, annonces."
+  "platformTagline": "La gestion de votre groupe : membres, caisse, calendrier, services, annonces.",
+  "goodMorning": "Bonjour",
+  "goodAfternoon": "Bon après-midi",
+  "goodEvening": "Bonsoir",
+  "appearance": "Apparence",
+  "appColor": "Couleur de l’application",
+  "groupColorChoice": "Couleur du groupe",
+  "appColorHint": "Pour ce téléphone. « Couleur du groupe » suit le réglage de votre groupe.",
+  "colorN": "Couleur {n}",
+  "@colorN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

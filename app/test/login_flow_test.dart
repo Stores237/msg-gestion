@@ -95,7 +95,7 @@ void main() {
     await pumpLogin(tester);
     await enterPhone(tester, '677452108');
     await typePin(tester, '4821');
-    expect(find.text('Bonjour Ingrid'), findsOneWidget);
+    expect(find.text('Ingrid'), findsOneWidget); // Accueil's greeting
     expect(find.byKey(const Key('tab-accueil')), findsOneWidget);
     expect(find.byKey(const Key('tab-calendrier')), findsOneWidget);
     expect(find.byKey(const Key('tab-annonces')), findsOneWidget);

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'dart:async';
 
 import '../data/current_user.dart';
 import '../data/offline.dart';
 import '../data/repository_locator.dart';
+import '../data/theme_controller.dart';
 import '../widgets/sync_widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
+import '../theme/tokens.dart';
 import 'announcements/announcements_screen.dart';
 import 'calendar/calendar_screen.dart';
 import 'finances/finances_screen.dart';
@@ -35,6 +38,12 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     currentUser.value = widget.me;
+    // After this frame: the whole app rebuilds in the group's colour.
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ThemeController.instance.setGroupColor(
+        ThemeController.parse(widget.me.group?.color),
+      ),
+    );
     WidgetsBinding.instance.addObserver(this);
     // While saves wait for the network, try again every 30 s.
     _flushTimer = Timer.periodic(const Duration(seconds: 30), (_) {
@@ -125,16 +134,28 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
     final l = AppLocalizations.of(context);
     final tabs = _tabs;
     final index = _index.clamp(0, tabs.length - 1);
+    // Accueil's dark band reaches up under the status bar (light icons).
+    final home = tabs[index] == AppTab.accueil;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: home || dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         child: Column(
           children: [
-            const NetBar(),
+            Container(
+              color: home ? context.msg.header : null,
+              child: const SafeArea(bottom: false, child: NetBar()),
+            ),
             Expanded(
-              child: KeyedSubtree(
-                key: ValueKey(tabs[index]),
-                child: _screen(tabs[index]),
+              child: MediaQuery.removePadding(
+                context: context,
+                removeTop: true,
+                child: KeyedSubtree(
+                  key: ValueKey(tabs[index]),
+                  child: _screen(tabs[index]),
+                ),
               ),
             ),
           ],

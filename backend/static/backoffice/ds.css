@@ -107,3 +107,5 @@ dialog.dialog::backdrop{background:var(--msg-backdrop)}
 .bo-group{margin:0 0 8px}
 .bo-group label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--text-secondary)}
 .bo-group select{width:100%;min-height:40px;border:1px solid var(--border-subtle);border-radius:12px;padding:0 10px;background:var(--surface-card);color:var(--text-primary);font:inherit;font-size:14px;font-weight:600}
+label:has(input[name=color]:checked) .swatch{box-shadow:0 0 0 2px var(--surface-card),0 0 0 4px var(--text-primary)!important}
+label:has(input[name=color]:focus-visible) .swatch{outline:2px solid var(--text-primary);outline-offset:4px}

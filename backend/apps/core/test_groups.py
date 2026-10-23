@@ -86,6 +86,7 @@ def test_one_account_two_groups_picks_with_header(two_groups):
     assert me1["group"]["id"] == first.pk and "finances" in me1["tabs"]
     assert me2["group"]["id"] == second.pk and "finances" not in me2["tabs"]
     assert me2["group"]["welcome_message"] == "Bienvenue à la chorale !"
+    assert me2["group"]["color"] == "#2E7D46"  # each group has its own colour
 
 
 def test_header_for_a_group_you_are_not_in_is_refused(two_groups):

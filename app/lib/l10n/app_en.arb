@@ -438,5 +438,13 @@
   "switchGroup": "Switch group",
   "chooseGroup": "Choose a group",
   "errorNoGroup": "This account isn’t in any group yet. Ask your group’s organiser.",
-  "platformTagline": "Your group, managed: members, cash book, calendar, duties, announcements."
+  "platformTagline": "Your group, managed: members, cash book, calendar, duties, announcements.",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "appearance": "Appearance",
+  "appColor": "App colour",
+  "groupColorChoice": "Group colour",
+  "appColorHint": "For this phone. “Group colour” follows your group’s setting.",
+  "colorN": "Colour {n}"
 }

@@ -59,7 +59,7 @@ class MeSerializer(serializers.Serializer):
 
         st = Settings.get()
         return {"id": st.group_id, "name": st.group.name, "place": st.parish, "motto": st.motto,
-                "welcome_message": st.welcome_message}
+                "welcome_message": st.welcome_message, "color": st.color}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:

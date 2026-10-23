@@ -178,6 +178,15 @@ def test_role_management_and_settings(admin, client):
     assert Settings.get().fee_death == 3000
 
 
+def test_group_color_is_set_in_settings(admin, client):
+    assert 'value="#1E5AA8"' in client.get("/bo/parametres/").content.decode()
+    client.post("/bo/parametres/", {"color": "#1E5AA8"})
+    assert Settings.get().color == "#1E5AA8"
+    r = client.post("/bo/parametres/", {"color": "vert"}, follow=True)
+    assert "Valeur invalide" in r.content.decode()
+    assert Settings.get().color == "#1E5AA8"
+
+
 @pytest.mark.parametrize("url", ["/bo/securite/", "/bo/affectations/", "/bo/parametres/", "/bo/utilisateurs/nouveau/", "/bo/utilisateurs/import/",
                                  "/bo/utilisateurs/export.csv", "/bo/journal/export.csv", "/bo/utilisateurs/?role=super-admin&diaspora=0"])
 def test_pages_render(admin, client, url):

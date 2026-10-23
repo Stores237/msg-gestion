@@ -67,4 +67,7 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Welcome message per group, on Accueil | Owner |
 | 2026-10-23 | Activity types and dress codes per group, edited in Paramètres; defaults translated, the group's own wording shown as written | Owner ("move it to editable settings") |
 | 2026-10-23 | Member status per group (Membership.status); suspending in the back-office acts on the current group only | Owner: on leave in one group, active in another |
+| 2026-10-23 | Accueil header: dark band in a deep shade of the app colour, greeting by time of day, FR/EN, Apparence, bell, role as a gold chip, diamond row | Owner's reference screenshot |
+| 2026-10-23 | App colour per group (back-office), overridable per phone in the app; every green token derived from one seed (`MsgColors.fromSeed`) | Owner: "the in-app color should be modifiable" |
+| 2026-10-23 | Screen header actions pinned right, round tonal buttons | Owner: top buttons drawn mid-screen |
 

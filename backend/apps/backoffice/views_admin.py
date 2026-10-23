@@ -25,7 +25,7 @@ from apps.accounts.models import Role, RoleAssignment, RolePermission, RoleReque
 from apps.accounts.phone import InvalidPhone, format_phone, normalize_phone
 from apps.accounts.services import RuleViolation, assign_role, default_end, reset_pin, revoke_assignment, temporary_pin
 from apps.core import audit
-from apps.core.models import AuditLog, Membership, Settings
+from apps.core.models import APP_COLORS, AuditLog, Membership, Settings
 from apps.core.notify import notify
 from apps.planning.models import ServiceGroup
 
@@ -529,7 +529,7 @@ def role_manage(request, slug=None):
 # --- Settings ----------------------------------------------------------------------------
 
 
-SETTING_FIELDS = ["parish", "welcome_message", "motto", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
+SETTING_FIELDS = ["parish", "welcome_message", "motto", "color", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
                   "assise_time", "vigil_time", "reminder_time", "duty_template"]
 
 
@@ -552,6 +552,7 @@ def settings_view(request):
             field = Settings._meta.get_field(f)
             try:
                 value = field.to_python(raw)
+                field.run_validators(value)
             except Exception:
                 messages.error(request, f"Valeur invalide : {field.verbose_name}.")
                 return redirect("backoffice:settings")
@@ -566,7 +567,7 @@ def settings_view(request):
     from apps.events.models import ActivityType, DressCode
 
     return render(request, "backoffice/settings.html", {
-        "nav": "settings", "s": st, "today": date.today(),
+        "nav": "settings", "s": st, "today": date.today(), "palette": APP_COLORS,
         "activity_types": ActivityType.objects.all(), "dress_codes": DressCode.objects.all(),
     })
 
