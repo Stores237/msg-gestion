@@ -29,3 +29,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  # Plus Jakarta Sans shipped with the app (OFL, see OFL.txt): the same
+  # letters offline on first launch, and in tests.
+  assets:
+    - assets/google_fonts/

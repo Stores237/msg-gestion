@@ -142,7 +142,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                                             () =>
                                                 repo.answer(r.id, accept: true),
                                           ),
-                                          child: Text(l.accept),
+                                          child: FitText(l.accept),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -155,7 +155,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                                               accept: false,
                                             ),
                                           ),
-                                          child: Text(l.refuse),
+                                          child: FitText(l.refuse),
                                         ),
                                       ),
                                     ],
@@ -208,7 +208,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                                                   ),
                                                 )
                                               : _replace(r),
-                                          child: Text(
+                                          child: FitText(
                                             r.kind == 'swap'
                                                 ? l.approve
                                                 : l.chooseReplacement,
@@ -225,7 +225,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                                               approve: false,
                                             ),
                                           ),
-                                          child: Text(l.refuse),
+                                          child: FitText(l.refuse),
                                         ),
                                       ),
                                     ],

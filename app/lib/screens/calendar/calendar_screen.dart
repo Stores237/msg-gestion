@@ -349,38 +349,41 @@ class _DayCell extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '$day',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: selected ? Colors.white : c.textPrimary,
-                  fontFeatures: tabular,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$day',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? Colors.white : c.textPrimary,
+                    fontFeatures: tabular,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 3),
-              SizedBox(
-                height: 5,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (var i = 0; i < dots.clamp(0, 3); i++)
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 1),
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: selected ? Colors.white : c.primary,
-                          shape: BoxShape.circle,
+                const SizedBox(height: 3),
+                SizedBox(
+                  height: 5,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < dots.clamp(0, 3); i++)
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          width: 5,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: selected ? Colors.white : c.primary,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

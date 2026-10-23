@@ -55,9 +55,11 @@ class ScreenHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Two lines before it cuts: "Bonjour Ingrid" stays whole
+                // with large text on a small phone.
                 Text(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: small ? 18 : 22,
@@ -75,7 +77,14 @@ class ScreenHeader extends StatelessWidget {
               ],
             ),
           ),
-          ...actions,
+          if (actions.isNotEmpty)
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Row(mainAxisSize: MainAxisSize.min, children: actions),
+              ),
+            ),
         ],
       ),
     );
@@ -231,7 +240,21 @@ class ListRow extends StatelessWidget {
                 ],
               ),
             ),
-            if (trailing != null) ...[const SizedBox(width: 8), trailing!],
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              // At most 45% of the row; scaled down beyond (large text),
+              // so the title never gets squeezed to a sliver.
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+                ),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: trailing!,
+                ),
+              ),
+            ],
             if (chevron)
               Icon(Icons.chevron_right, size: 20, color: c.textTertiary),
           ],
@@ -779,35 +802,40 @@ class EventCard extends StatelessWidget {
                     color: c.surfaceSunken,
                     borderRadius: BorderRadius.circular(MsgRadius.md),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        d.weekdayShort(e.startsAt).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: c.textSecondary,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  // Scales down rather than overflow with large text.
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          d.weekdayShort(e.startsAt).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: c.textSecondary,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${e.startsAt.day}',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          height: 1.1,
-                          fontFeatures: tabular,
+                        Text(
+                          '${e.startsAt.day}',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            height: 1.1,
+                            fontFeatures: tabular,
+                          ),
                         ),
-                      ),
-                      Text(
-                        d.monthShort(e.startsAt).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: c.textSecondary,
+                        Text(
+                          d.monthShort(e.startsAt).toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: c.textSecondary,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -889,28 +917,43 @@ class AnnouncementCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Badge2(
-                      a.isConvocation ? l.kindConvocation : l.kindAnnouncement,
-                      tone: a.isConvocation ? Tone.green : Tone.neutral,
+                    // Wraps instead of overflowing on narrow phones / large text.
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Badge2(
+                            a.isConvocation
+                                ? l.kindConvocation
+                                : l.kindAnnouncement,
+                            tone: a.isConvocation ? Tone.green : Tone.neutral,
+                          ),
+                          if (a.pinned)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.push_pin_outlined,
+                                  size: 14,
+                                  color: c.textSecondary,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  l.pinned,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: c.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
                     ),
-                    if (a.pinned) ...[
-                      const SizedBox(width: 8),
-                      Icon(
-                        Icons.push_pin_outlined,
-                        size: 14,
-                        color: c.textSecondary,
-                      ),
-                      const SizedBox(width: 2),
-                      Text(
-                        l.pinned,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: c.textSecondary,
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     Text(
                       d.dayMonth(a.createdAt),
                       style: TextStyle(fontSize: 12, color: c.textSecondary),
@@ -1026,4 +1069,17 @@ class AnnouncementCard extends StatelessWidget {
       ],
     );
   }
+}
+
+/// A button label for buttons side by side: one line, scaled down rather
+/// than broken mid-word on narrow phones or with large text.
+class FitText extends StatelessWidget {
+  const FitText(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => FittedBox(
+    fit: BoxFit.scaleDown,
+    child: Text(text, maxLines: 1, softWrap: false),
+  );
 }

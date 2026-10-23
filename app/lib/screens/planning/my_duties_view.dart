@@ -132,7 +132,7 @@ class DutyCard extends StatelessWidget {
                     child: FilledButton(
                       key: Key('confirm-${a.id}'),
                       onPressed: () => _confirm(context),
-                      child: Text(l.confirmDuty),
+                      child: FitText(l.confirmDuty),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -147,7 +147,7 @@ class DutyCard extends StatelessWidget {
                         final sent = await showSwapSheet(context, a);
                         if (sent == true) onChanged();
                       },
-                      child: Text(l.swapDuty),
+                      child: FitText(l.swapDuty),
                     ),
                   ),
                 ],

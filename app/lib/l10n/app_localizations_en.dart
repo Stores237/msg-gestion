@@ -95,7 +95,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabCalendar => 'Calendar';
 
   @override
-  String get tabAnnouncements => 'Announcements';
+  String get tabAnnouncements => 'News';
 
   @override
   String get comingSoonTitle => 'Coming soon';

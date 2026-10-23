@@ -100,6 +100,26 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
     AppTab.finances => FinancesScreen(me: widget.me),
   };
 
+  /// Each tab gets width / count. Under ~72 dp a slot can't hold
+  /// "Calendrier" enlarged: labels go to 11 sp with no enlargement there.
+  static Widget _narrowBar(BuildContext context, int count, Widget bar) {
+    final slot = MediaQuery.sizeOf(context).width / count;
+    if (slot >= 72) {
+      return MediaQuery.withClampedTextScaling(maxScaleFactor: 1.1, child: bar);
+    }
+    final theme = Theme.of(context).navigationBarTheme;
+    return MediaQuery.withNoTextScaling(
+      child: NavigationBarTheme(
+        data: theme.copyWith(
+          labelTextStyle: WidgetStateProperty.resolveWith(
+            (s) => theme.labelTextStyle?.resolve(s)?.copyWith(fontSize: 11),
+          ),
+        ),
+        child: bar,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -122,22 +142,29 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
       ),
       bottomNavigationBar: tabs.length < 2
           ? null
-          : NavigationBar(
-              selectedIndex: index,
-              onDestinationSelected: (i) => setState(() => _index = i),
-              destinations: [
-                for (final t in tabs)
-                  NavigationDestination(
-                    key: Key('tab-${t.name}'),
-                    icon: Badge(
-                      isLabelVisible: t == AppTab.annonces && _unread > 0,
-                      label: Text('$_unread'),
-                      child: Icon(_def(t).$1),
+          // Up to five tabs share the width: the bar keeps its labels on
+          // one line even when the phone's text is set large (the screens
+          // above still follow the phone's setting).
+          : _narrowBar(
+              context,
+              tabs.length,
+              NavigationBar(
+                selectedIndex: index,
+                onDestinationSelected: (i) => setState(() => _index = i),
+                destinations: [
+                  for (final t in tabs)
+                    NavigationDestination(
+                      key: Key('tab-${t.name}'),
+                      icon: Badge(
+                        isLabelVisible: t == AppTab.annonces && _unread > 0,
+                        label: Text('$_unread'),
+                        child: Icon(_def(t).$1),
+                      ),
+                      selectedIcon: Icon(_def(t).$2),
+                      label: _def(t).$3(l),
                     ),
-                    selectedIcon: Icon(_def(t).$2),
-                    label: _def(t).$3(l),
-                  ),
-              ],
+                ],
+              ),
             ),
     );
   }

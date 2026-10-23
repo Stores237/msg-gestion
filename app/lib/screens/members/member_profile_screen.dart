@@ -248,7 +248,7 @@ class _ProfileBody extends StatelessWidget {
                   ),
                   onPressed: () => openUri(context, telUri(m.phone!)),
                   icon: const Icon(Icons.call_outlined, size: 18),
-                  label: Text(l.call),
+                  label: FitText(l.call),
                 ),
               ),
               const SizedBox(width: 8),
@@ -261,7 +261,7 @@ class _ProfileBody extends StatelessWidget {
                   ),
                   onPressed: () => openUri(context, smsUri(m.phone!)),
                   icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: Text(l.message),
+                  label: FitText(l.message),
                 ),
               ),
             ],
@@ -478,7 +478,7 @@ class _ProposeRoleSheetState extends State<_ProposeRoleSheet> {
                     );
                     if (p != null) setState(() => _from = p);
                   },
-                  child: Text('${l.fromDate} ${d.shortDate(_from)}'),
+                  child: FitText('${l.fromDate} ${d.shortDate(_from)}'),
                 ),
               ),
               const SizedBox(width: 8),
@@ -493,7 +493,7 @@ class _ProposeRoleSheetState extends State<_ProposeRoleSheet> {
                     );
                     setState(() => _to = p);
                   },
-                  child: Text(
+                  child: FitText(
                     _to == null
                         ? l.toDate
                         : '${l.toDate.split(' ').first} ${d.shortDate(_to!)}',
