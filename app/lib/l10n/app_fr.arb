@@ -1017,5 +1017,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "myPhoto": "Photo de profil",
+  "photoFromGallery": "Choisir dans la galerie",
+  "photoFromCamera": "Prendre une photo",
+  "removePhoto": "Retirer la photo",
+  "photoRemoved": "Photo retirée."
 }

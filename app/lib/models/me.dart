@@ -73,7 +73,31 @@ class Me {
     this.remind2h = false,
     this.group,
     this.groups = const [],
+    this.photo,
   });
+
+  /// Signed URL of the member's own picture; null = initials.
+  final String? photo;
+
+  /// The same member with a new picture (Mon compte → Photo de profil).
+  Me withPhoto(String? photo) => Me(
+    id: id,
+    firstName: firstName,
+    lastName: lastName,
+    fullName: fullName,
+    status: status,
+    isDiaspora: isDiaspora,
+    age: age,
+    roles: roles,
+    permissions: permissions,
+    tabs: tabs,
+    pinMustChange: pinMustChange,
+    remindEve: remindEve,
+    remind2h: remind2h,
+    group: group,
+    groups: groups,
+    photo: photo,
+  );
 
   /// The group this session works in, and every group the member is in.
   final GroupInfo? group;
@@ -113,6 +137,7 @@ class Me {
       for (final e in (json['permissions'] as Map<String, dynamic>).entries)
         e.key: List<String>.from(e.value as List),
     },
+    photo: json['photo'] as String?,
     group: json['group'] == null
         ? null
         : GroupInfo.fromJson(json['group'] as Map<String, dynamic>),

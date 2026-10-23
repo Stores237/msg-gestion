@@ -17,7 +17,10 @@ class HomeHeader extends StatelessWidget {
     required this.fullName,
     required this.role,
     required this.onOpenAccount,
+    this.photo,
   });
+
+  final String? photo;
 
   final String firstName;
   final String fullName;
@@ -80,7 +83,11 @@ class HomeHeader extends StatelessWidget {
                             color: Colors.white24,
                             shape: BoxShape.circle,
                           ),
-                          child: MemberAvatar(name: fullName, size: 48),
+                          child: MemberAvatar(
+                            name: fullName,
+                            photo: photo,
+                            size: 48,
+                          ),
                         ),
                       ),
                     ),

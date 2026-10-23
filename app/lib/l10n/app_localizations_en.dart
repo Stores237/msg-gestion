@@ -1603,4 +1603,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String colorN(int n) {
     return 'Colour $n';
   }
+
+  @override
+  String get myPhoto => 'Profile picture';
+
+  @override
+  String get photoFromGallery => 'Choose from gallery';
+
+  @override
+  String get photoFromCamera => 'Take a photo';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get photoRemoved => 'Photo removed.';
 }

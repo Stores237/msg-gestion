@@ -2779,6 +2779,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Couleur {n}'**
   String colorN(int n);
+
+  /// No description provided for @myPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de profil'**
+  String get myPhoto;
+
+  /// No description provided for @photoFromGallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir dans la galerie'**
+  String get photoFromGallery;
+
+  /// No description provided for @photoFromCamera.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get photoFromCamera;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la photo'**
+  String get removePhoto;
+
+  /// No description provided for @photoRemoved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo retirée.'**
+  String get photoRemoved;
 }
 
 class _AppLocalizationsDelegate

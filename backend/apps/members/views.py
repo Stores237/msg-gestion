@@ -146,6 +146,24 @@ class RequestableRolesView(APIView):
                          for r in Role.objects.filter(kind__in=REQUESTABLE_KINDS, is_archived=False).exclude(slug="membre")])
 
 
+def _save_photo(request, member, action):
+    """JPEG/PNG ≤ 5 MB in the multipart field `photo`; replaces the old one."""
+    from apps.announcements.files import sniff
+
+    upload = request.FILES.get("photo")
+    if upload is None:
+        return Response({"detail": "Aucune photo.", "code": "no_file"}, status=400)
+    if upload.size > 5 * 1024 * 1024:
+        return Response({"detail": "Photo trop lourde (5 Mo maximum).", "code": "file_too_large"}, status=400)
+    if sniff(upload) not in ("image/jpeg", "image/png"):
+        return Response({"detail": "JPEG ou PNG uniquement.", "code": "file_type"}, status=400)
+    if member.photo:
+        member.photo.delete(save=False)
+    member.photo.save(f"{member.pk}-{upload.name.rsplit('/', 1)[-1]}", upload, save=True)
+    audit.record(action, actor=request.user, obj=member, request=request)
+    return Response({"photo": _photo_url(request, member)})
+
+
 class PhotoView(APIView):
     """POST multipart `photo` (JPEG/PNG ≤ 5 MB) — design: "Ajouter une photo"."""
 
@@ -153,21 +171,25 @@ class PhotoView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request, pk):
-        from apps.announcements.files import sniff
-
         member = get_object_or_404(User.objects.members().filter(VISIBLE), pk=pk)
-        upload = request.FILES.get("photo")
-        if upload is None:
-            return Response({"detail": "Aucune photo.", "code": "no_file"}, status=400)
-        if upload.size > 5 * 1024 * 1024:
-            return Response({"detail": "Photo trop lourde (5 Mo maximum).", "code": "file_too_large"}, status=400)
-        if sniff(upload) not in ("image/jpeg", "image/png"):
-            return Response({"detail": "JPEG ou PNG uniquement.", "code": "file_type"}, status=400)
-        if member.photo:
-            member.photo.delete(save=False)
-        member.photo.save(f"{member.pk}-{upload.name.rsplit('/', 1)[-1]}", upload, save=True)
-        audit.record("Photo modifiée", actor=request.user, obj=member, request=request)
-        return Response({"photo": _photo_url(request, member)})
+        return _save_photo(request, member, "Photo modifiée")
+
+
+class MyPhotoView(APIView):
+    """Every member changes their own profile picture (owner, 2026-10-23):
+    POST multipart `photo`, DELETE to remove it. No permission needed."""
+
+    parser_classes = [MultiPartParser]
+
+    def post(self, request):
+        return _save_photo(request, request.user, "Photo de profil modifiée par le membre")
+
+    def delete(self, request):
+        me = request.user
+        if me.photo:
+            me.photo.delete(save=True)
+            audit.record("Photo de profil retirée par le membre", actor=me, obj=me, request=request)
+        return Response({"photo": None})
 
 
 def _photo_url(request, member):

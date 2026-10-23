@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/current_user.dart';
 import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
@@ -101,13 +102,17 @@ class HomeScreen extends StatelessWidget {
     ].join(' · ');
     return Column(
       children: [
-        HomeHeader(
-          firstName: me.firstName,
-          fullName: me.fullName,
-          role: sub,
-          onOpenAccount: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (_) => AccountScreen(me: me))),
+        ValueListenableBuilder(
+          valueListenable: currentUser,
+          builder: (context, cur, _) => HomeHeader(
+            firstName: me.firstName,
+            fullName: me.fullName,
+            photo: (cur ?? me).photo,
+            role: sub,
+            onOpenAccount: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => AccountScreen(me: me))),
+          ),
         ),
         const Padding(
           padding: EdgeInsets.fromLTRB(16, 8, 16, 0),

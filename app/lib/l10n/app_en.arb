@@ -446,5 +446,10 @@
   "appColor": "App colour",
   "groupColorChoice": "Group colour",
   "appColorHint": "For this phone. “Group colour” follows your group’s setting.",
-  "colorN": "Colour {n}"
+  "colorN": "Colour {n}",
+  "myPhoto": "Profile picture",
+  "photoFromGallery": "Choose from gallery",
+  "photoFromCamera": "Take a photo",
+  "removePhoto": "Remove photo",
+  "photoRemoved": "Photo removed."
 }

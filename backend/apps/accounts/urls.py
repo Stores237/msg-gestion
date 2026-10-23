@@ -1,5 +1,7 @@
 from django.urls import path
 
+from apps.members.views import MyPhotoView
+
 from . import views
 
 urlpatterns = [
@@ -12,4 +14,5 @@ urlpatterns = [
     path("auth/pin/forgot/confirm/", views.ForgotPinConfirmView.as_view(), name="pin-forgot-confirm"),
     path("me/", views.MeView.as_view(), name="me"),
     path("me/preferences/", views.PreferencesView.as_view(), name="me-preferences"),
+    path("me/photo/", MyPhotoView.as_view(), name="me-photo"),
 ]

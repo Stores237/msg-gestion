@@ -144,3 +144,20 @@ def test_photo_upload_checked_and_listed():
     assert api.post(f"/api/members/{m.id}/photo/", {"photo": pdf}, format="multipart").json()["code"] == "file_type"
     member_api, _ = client_for("tresorier")
     assert member_api.post(f"/api/members/{m.id}/photo/", {"photo": png}, format="multipart").status_code == 403
+
+
+def test_every_member_changes_their_own_photo():
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.core.models import AuditLog
+
+    api, me = client_for("membre")  # no members.profile right
+    png = SimpleUploadedFile("moi.png", b"\x89PNG\r\n\x1a\n" + b"0" * 32, content_type="image/png")
+    r = api.post("/api/me/photo/", {"photo": png}, format="multipart")
+    assert r.status_code == 200 and r.json()["photo"].startswith("http")
+    assert api.get("/api/me/").json()["photo"] == r.json()["photo"]
+    assert AuditLog.objects.filter(action="Photo de profil modifiée par le membre", actor=me).exists()
+    pdf = SimpleUploadedFile("p.jpg", b"%PDF-1.4", content_type="image/jpeg")
+    assert api.post("/api/me/photo/", {"photo": pdf}, format="multipart").json()["code"] == "file_type"
+    assert api.delete("/api/me/photo/").json() == {"photo": None}
+    assert api.get("/api/me/").json()["photo"] is None

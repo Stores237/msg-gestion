@@ -16,6 +16,8 @@ import 'package:msg_gestion/screens/shell_screen.dart';
 import 'fakes.dart';
 
 class Fakes {
+  Fakes(Me me) : profile = FakeProfileRepository(me);
+  final FakeProfileRepository profile;
   final auth = FakeAuthRepository();
   final members = FakeMembersRepository();
   final events = FakeEventsRepository();
@@ -35,12 +37,12 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   GroupController.debugSetInstance(GroupController());
   ThemeController.debugSetInstance(ThemeController());
   OfflineState.debugSetInstance(OfflineState(storage: MemoryOfflineStorage()));
-  final f = Fakes();
+  final f = Fakes(me ?? fakeMe());
   RepositoryLocator.debugSetInstance(
     RepositoryLocator(
       authSession: AuthSession(storage: InMemoryTokenStorage()),
       auth: f.auth,
-      profile: FakeProfileRepository(me ?? fakeMe()),
+      profile: f.profile,
       members: f.members,
       events: f.events,
       announcements: f.announcements,

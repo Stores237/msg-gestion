@@ -50,6 +50,14 @@ class MeSerializer(serializers.Serializer):
     permissions = serializers.SerializerMethodField()
     tabs = serializers.SerializerMethodField()
     group = serializers.SerializerMethodField()
+    photo = serializers.SerializerMethodField()
+
+    def get_photo(self, user) -> str | None:
+        if not user.photo:
+            return None
+        url = user.photo.url  # signed on Supabase Storage
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request is not None and url.startswith("/") else url
     groups = serializers.SerializerMethodField()
 
     @extend_schema_field(OpenApiTypes.OBJECT)

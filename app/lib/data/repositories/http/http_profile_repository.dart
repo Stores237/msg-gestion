@@ -11,6 +11,23 @@ class HttpProfileRepository implements ProfileRepository {
       Me.fromJson(await _api.get('/me/') as Map<String, dynamic>);
 
   @override
+  Future<String?> uploadMyPhoto({
+    required List<int> bytes,
+    required String filename,
+  }) async =>
+      ((await _api.postFile(
+                '/me/photo/',
+                field: 'photo',
+                bytes: bytes,
+                filename: filename,
+              ))
+              as Map<String, dynamic>)['photo']
+          as String?;
+
+  @override
+  Future<void> removeMyPhoto() async => _api.delete('/me/photo/');
+
+  @override
   Future<AppSettings> settings() async {
     final j = await _api.get('/settings/') as Map<String, dynamic>;
     return AppSettings(

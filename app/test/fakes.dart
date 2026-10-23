@@ -124,6 +124,20 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<Me> fetchMe() async => me;
 
+  final photos = <String>[];
+
+  @override
+  Future<String?> uploadMyPhoto({
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    photos.add(filename);
+    return 'https://example.test/$filename';
+  }
+
+  @override
+  Future<void> removeMyPhoto() async => photos.add('removed');
+
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
 

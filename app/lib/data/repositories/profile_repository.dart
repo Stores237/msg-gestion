@@ -73,4 +73,11 @@ abstract class ProfileRepository {
   Future<AppSettings> settings();
   Future<void> setReminders({bool? eve, bool? twoHours});
   Future<BureauHome> bureauHome();
+
+  /// The member's own picture: returns its new URL; [removeMyPhoto] clears it.
+  Future<String?> uploadMyPhoto({
+    required List<int> bytes,
+    required String filename,
+  });
+  Future<void> removeMyPhoto();
 }

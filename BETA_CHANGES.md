@@ -406,3 +406,18 @@ Owner, 2026-10-23. Back-office → Groupes.
 
 **Verify.** `pytest apps/backoffice/test_group_delete.py` (edit, refusals, the two-admin
 deletion with money and roles kept, members locked out, restore, cancel, expiry, last group).
+
+## 19. Every member changes their own profile picture
+
+Owner, 2026-10-23.
+
+- **App**: Mon compte → tap the avatar (camera badge) or "Photo de profil": choose from the
+  gallery, take a photo (front camera), or remove it. The picture is resized to 1024 px before
+  upload and shows at once on Mon compte and in Accueil's header.
+- **Server**: `POST /api/me/photo/` (multipart `photo`, JPEG/PNG ≤ 5 MB, content checked) and
+  `DELETE /api/me/photo/`; no permission needed, the member's own account only; audited.
+  `/api/me/` returns `photo`. Officers with members.profile:change still set others' photos.
+- iOS: camera and photo-library usage texts in Info.plist.
+
+**Verify.** `pytest apps/members/tests.py::test_every_member_changes_their_own_photo`;
+`flutter test test/my_photo_test.dart`.

@@ -1607,4 +1607,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String colorN(int n) {
     return 'Couleur $n';
   }
+
+  @override
+  String get myPhoto => 'Photo de profil';
+
+  @override
+  String get photoFromGallery => 'Choisir dans la galerie';
+
+  @override
+  String get photoFromCamera => 'Prendre une photo';
+
+  @override
+  String get removePhoto => 'Retirer la photo';
+
+  @override
+  String get photoRemoved => 'Photo retirée.';
 }

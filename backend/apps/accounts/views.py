@@ -113,7 +113,7 @@ class MeView(APIView):
 
     @extend_schema(responses=MeSerializer)
     def get(self, request):
-        return Response(MeSerializer(request.user).data)
+        return Response(MeSerializer(request.user, context={"request": request}).data)
 
 
 

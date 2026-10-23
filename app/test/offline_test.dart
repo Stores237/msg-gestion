@@ -175,7 +175,7 @@ void main() {
         httpClient: server.client,
         baseUrl: 'http://x/api',
       );
-      final f = Fakes();
+      final f = Fakes(fakeMe());
       RepositoryLocator.debugSetInstance(
         RepositoryLocator(
           authSession: session,

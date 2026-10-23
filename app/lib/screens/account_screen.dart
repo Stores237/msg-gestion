@@ -9,6 +9,8 @@ import '../theme/tokens.dart';
 import '../widgets/dates.dart';
 import '../widgets/labels.dart';
 import '../widgets/language_switch.dart';
+import '../widgets/appearance_sheet.dart';
+import '../widgets/my_photo.dart';
 import '../widgets/ui.dart';
 import 'login_phone_screen.dart';
 import 'pin_screens.dart';
@@ -45,11 +47,50 @@ class AccountScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      MemberAvatar(
-                        name: me.fullName,
-                        status: me.status,
-                        diaspora: me.isDiaspora,
-                        size: 64,
+                      // Tap to change: the member's own picture.
+                      Semantics(
+                        button: true,
+                        label: l.myPhoto,
+                        child: InkWell(
+                          key: const Key('my-photo'),
+                          customBorder: const CircleBorder(),
+                          onTap: () => changeMyPhoto(context),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              ValueListenableBuilder(
+                                valueListenable: currentUser,
+                                builder: (context, cur, _) => MemberAvatar(
+                                  name: me.fullName,
+                                  status: me.status,
+                                  diaspora: me.isDiaspora,
+                                  photo: (cur ?? me).photo,
+                                  size: 72,
+                                ),
+                              ),
+                              Positioned(
+                                right: -4,
+                                bottom: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: c.primary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: c.surfaceBg,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.photo_camera_outlined,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -90,6 +131,20 @@ class AccountScreen extends StatelessWidget {
                       ListRow(
                         title: Text(l.language),
                         trailing: const LanguageSwitch(),
+                      ),
+                      ListRow(
+                        key: const Key('change-photo'),
+                        lead: const Icon(Icons.account_circle_outlined),
+                        title: Text(l.myPhoto),
+                        chevron: true,
+                        onTap: () => changeMyPhoto(context),
+                      ),
+                      ListRow(
+                        key: const Key('open-appearance-account'),
+                        lead: const Icon(Icons.palette_outlined),
+                        title: Text(l.appearance),
+                        chevron: true,
+                        onTap: () => showAppearanceSheet(context),
                       ),
                       ListRow(
                         key: const Key('change-pin'),
