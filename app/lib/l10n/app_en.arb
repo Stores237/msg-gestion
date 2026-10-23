@@ -455,5 +455,15 @@
   "requestDayRole": "Request a role of the day",
   "dayRoleHint": "For an active member with no role, for one day. The partner approves; the role ends that night.",
   "onDay": "On {date}",
-  "dayRoleRequestSent": "Request sent to the partner."
+  "dayRoleRequestSent": "Request sent to the partner.",
+  "unlockTitle": "Enter your PIN",
+  "unlockSubtitle": "To open MSG.",
+  "unlockWrong": "Wrong PIN. {n} attempt(s) left.",
+  "unlockTooMany": "Too many attempts: sign in again with your number.",
+  "unlockSignInAgain": "For your security, sign in once more with your number and PIN.",
+  "unlockOtherAccount": "Sign in another way",
+  "biometricReason": "Unlock MSG",
+  "biometricUnlock": "Unlock with fingerprint or face",
+  "biometricUnavailable": "No fingerprint or face is set up on this phone.",
+  "biometricHint": "Your PIN always works too."
 }

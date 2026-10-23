@@ -70,7 +70,7 @@ These need an account, a decision or a person — not code.
 - [ ] Tell the partner when an access request arrives (today: count in the back-office menu; the
   partner has no app). E-mail once an e-mail service is chosen.
 - [ ] Back-office in English too (the app is bilingual; the back-office is French only for now).
-- [ ] Biometric unlock (fingerprint key is shown disabled).
+- [x] Biometric unlock (fingerprint or face, Mon compte; 2026-10-23).
 - [ ] Notifications (push).
 - [ ] Mandate-expiry reminder 30 days before the end (a scheduled job; see
   `RENDER_STAGING.md` §3 for how jobs are added).

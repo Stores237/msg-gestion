@@ -56,6 +56,8 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
         phone: widget.lookup.phone,
         pin: _pin,
       );
+      // The lock screen checks this PIN when the app reopens.
+      if (!mustChange) await repos.authSession.rememberPin(_pin);
       if (mustChange && mounted) {
         // Temporary PIN from the secretary: pick a personal one first.
         await Navigator.of(context).push(

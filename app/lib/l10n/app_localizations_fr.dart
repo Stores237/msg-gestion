@@ -1637,4 +1637,39 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get dayRoleRequestSent => 'Demande envoyée au partenaire.';
+
+  @override
+  String get unlockTitle => 'Entrez votre code PIN';
+
+  @override
+  String get unlockSubtitle => 'Pour ouvrir MSG.';
+
+  @override
+  String unlockWrong(int n) {
+    return 'Code incorrect. Encore $n essai(s).';
+  }
+
+  @override
+  String get unlockTooMany =>
+      'Trop d’essais : reconnectez-vous avec votre numéro.';
+
+  @override
+  String get unlockSignInAgain =>
+      'Pour votre sécurité, reconnectez-vous une fois avec votre numéro et votre code.';
+
+  @override
+  String get unlockOtherAccount => 'Se connecter autrement';
+
+  @override
+  String get biometricReason => 'Déverrouiller MSG';
+
+  @override
+  String get biometricUnlock => 'Déverrouiller avec l’empreinte ou le visage';
+
+  @override
+  String get biometricUnavailable =>
+      'Aucune empreinte ni visage enregistré sur ce téléphone.';
+
+  @override
+  String get biometricHint => 'Le code PIN reste toujours possible.';
 }

@@ -1633,4 +1633,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dayRoleRequestSent => 'Request sent to the partner.';
+
+  @override
+  String get unlockTitle => 'Enter your PIN';
+
+  @override
+  String get unlockSubtitle => 'To open MSG.';
+
+  @override
+  String unlockWrong(int n) {
+    return 'Wrong PIN. $n attempt(s) left.';
+  }
+
+  @override
+  String get unlockTooMany =>
+      'Too many attempts: sign in again with your number.';
+
+  @override
+  String get unlockSignInAgain =>
+      'For your security, sign in once more with your number and PIN.';
+
+  @override
+  String get unlockOtherAccount => 'Sign in another way';
+
+  @override
+  String get biometricReason => 'Unlock MSG';
+
+  @override
+  String get biometricUnlock => 'Unlock with fingerprint or face';
+
+  @override
+  String get biometricUnavailable =>
+      'No fingerprint or face is set up on this phone.';
+
+  @override
+  String get biometricHint => 'Your PIN always works too.';
 }

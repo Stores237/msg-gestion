@@ -15,6 +15,7 @@ import 'announcements/announcements_screen.dart';
 import 'calendar/calendar_screen.dart';
 import 'finances/finances_screen.dart';
 import 'home_screen.dart';
+import 'lock_screen.dart';
 import 'members/members_screen.dart';
 
 /// Bottom navigation with only the tabs the server granted (design: "la
@@ -60,10 +61,26 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
+  DateTime? _hiddenAt;
+  bool _locking = false;
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        OfflineState.instance.pending > 0) {
+    if (state == AppLifecycleState.paused) _hiddenAt ??= DateTime.now();
+    if (state != AppLifecycleState.resumed) return;
+    final hidden = _hiddenAt;
+    _hiddenAt = null;
+    // Back after a while in the background: the PIN again (LockScreen).
+    if (hidden != null &&
+        DateTime.now().difference(hidden) >= LockScreen.lockAfter &&
+        RepositoryLocator.instance.authSession.isLoggedIn &&
+        !_locking) {
+      _locking = true;
+      LockScreen.show(
+        Navigator.of(context, rootNavigator: true),
+      ).whenComplete(() => _locking = false);
+    }
+    if (OfflineState.instance.pending > 0) {
       RepositoryLocator.instance.apiClient.flushOutbox();
     }
   }

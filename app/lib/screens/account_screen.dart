@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/biometrics.dart';
 import '../data/current_user.dart';
 import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
@@ -146,6 +147,7 @@ class AccountScreen extends StatelessWidget {
                         chevron: true,
                         onTap: () => showAppearanceSheet(context),
                       ),
+                      const _BiometricRow(),
                       ListRow(
                         key: const Key('change-pin'),
                         lead: const Icon(Icons.pin_outlined),
@@ -177,6 +179,62 @@ class AccountScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// "Déverrouiller avec l’empreinte ou le visage": shown when the phone has
+/// one enrolled; turning it on asks for it once, to be sure it works.
+class _BiometricRow extends StatefulWidget {
+  const _BiometricRow();
+
+  @override
+  State<_BiometricRow> createState() => _BiometricRowState();
+}
+
+class _BiometricRowState extends State<_BiometricRow> {
+  bool? _available;
+  bool _on = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final available = await Biometrics.instance.available();
+    final on = await RepositoryLocator.instance.authSession.biometricEnabled;
+    if (!mounted) return;
+    setState(() {
+      _available = available;
+      _on = on;
+    });
+  }
+
+  Future<void> _toggle(bool want) async {
+    final l = AppLocalizations.of(context);
+    if (want && !await Biometrics.instance.authenticate(l.biometricReason)) {
+      return;
+    }
+    await RepositoryLocator.instance.authSession.setBiometric(want);
+    if (mounted) setState(() => _on = want);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (_available == null) return const SizedBox.shrink();
+    return ListRow(
+      key: const Key('biometric-row'),
+      lead: const Icon(Icons.fingerprint),
+      title: Text(l.biometricUnlock),
+      subtitle: Text(_available! ? l.biometricHint : l.biometricUnavailable),
+      trailing: Switch(
+        key: const Key('biometric-switch'),
+        value: _on && _available!,
+        onChanged: _available! ? _toggle : null,
       ),
     );
   }

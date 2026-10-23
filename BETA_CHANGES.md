@@ -451,3 +451,23 @@ is chosen; with a second group on the platform (even a deleted one) that lookup 
 
 **Verify.** `pytest apps/backoffice/test_group_delete.py::test_login_pages_work_with_several_groups`
 (fails on the old code with the same error as staging).
+
+## 22. App lock: PIN on reopening, fingerprint or face
+
+Owner, 2026-10-23: the PIN wasn't asked when the app was reopened; biometrics weren't set up.
+
+- **Lock screen** (MSG logo, "Entrez votre code PIN", keypad): when the app opens on a saved
+  session, and when it comes back after 2 minutes or more in the background. Works offline (the
+  PIN is checked against a salted hash kept in the phone's secure storage). 5 wrong PINs close
+  the session; "Se connecter autrement" signs out to the number screen.
+- **Fingerprint or face**: Mon compte → "Déverrouiller avec l’empreinte ou le visage" (shown
+  greyed when the phone has none enrolled; asks for it once when turned on). Then the lock
+  screen prompts at once; the fingerprint key on the keypad retries; the PIN always works.
+- After installing this version, members who were already signed in sign in once more (their
+  PIN had never been saved on the phone).
+- Android: `MainActivity` is a `FlutterFragmentActivity`, launch theme AppCompat,
+  `USE_BIOMETRIC`. iOS: `NSFaceIDUsageDescription`.
+
+**Verify.** `flutter test test/lock_test.dart` (reopen, wrong PIN count, 5 wrong → signed out,
+old session → sign in again, fingerprint auto-unlock and retry key, background → locked, the
+switch in Mon compte). On a phone: sign in, close the app from recent apps, reopen → PIN.

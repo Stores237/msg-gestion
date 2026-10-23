@@ -9,6 +9,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/errors.dart';
 import '../widgets/msg_logo.dart';
+import 'lock_screen.dart';
 import 'login_phone_screen.dart';
 import 'pin_screens.dart';
 import 'shell_screen.dart';
@@ -24,6 +25,9 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   Object? _error;
 
+  /// Retries (network error, group fallback) don't ask the PIN again.
+  bool _unlocked = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +42,26 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!repos.authSession.isLoggedIn) {
       _go(const LoginPhoneScreen());
       return;
+    }
+    // The PIN (or fingerprint) before anything else. A session opened
+    // before the lock existed has no PIN to check against: sign in once.
+    if (!_unlocked) {
+      if (!await repos.authSession.canUnlock) {
+        await repos.authSession.clear();
+        if (!mounted) return;
+        final messenger = ScaffoldMessenger.of(context);
+        _go(const LoginPhoneScreen());
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).unlockSignInAgain),
+          ),
+        );
+        return;
+      }
+      if (!mounted) return;
+      final ok = await LockScreen.show(Navigator.of(context));
+      if (ok != true || !mounted) return; // signed out from the lock screen
+      _unlocked = true;
     }
     try {
       var me = await repos.profile.fetchMe();

@@ -39,15 +39,19 @@ class PinDots extends StatelessWidget {
   }
 }
 
-/// 3×4 keypad, 60 dp keys. The fingerprint key is shown disabled until
-/// biometric unlock exists (TODOS.md), so the layout matches the design.
+/// 3×4 keypad, 60 dp keys. The fingerprint key works when [onBiometric] is
+/// given (lock screen, biometric unlock turned on); otherwise it is shown
+/// disabled so the layout matches the design.
 class PinKeypad extends StatelessWidget {
   const PinKeypad({
     super.key,
     required this.onDigit,
     required this.onDelete,
     this.enabled = true,
+    this.onBiometric,
   });
+
+  final VoidCallback? onBiometric;
 
   final ValueChanged<String> onDigit;
   final VoidCallback onDelete;
@@ -75,10 +79,11 @@ class PinKeypad extends StatelessWidget {
           children: [
             Expanded(
               child: _Key(
+                key: const Key('key-fingerprint'),
                 icon: Icons.fingerprint,
                 semantic: l.keypadFingerprint,
                 ghost: true,
-                onTap: null,
+                onTap: enabled ? onBiometric : null,
               ),
             ),
             Expanded(child: key('0')),
@@ -99,6 +104,7 @@ class PinKeypad extends StatelessWidget {
 
 class _Key extends StatelessWidget {
   const _Key({
+    super.key,
     this.label,
     this.icon,
     this.semantic,

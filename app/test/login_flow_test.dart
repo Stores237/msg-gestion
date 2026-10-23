@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:msg_gestion/data/locale_controller.dart';
+import 'package:msg_gestion/data/repository_locator.dart';
 import 'package:msg_gestion/main.dart';
 import 'package:msg_gestion/screens/login_phone_screen.dart';
 
@@ -96,6 +97,10 @@ void main() {
     await enterPhone(tester, '677452108');
     await typePin(tester, '4821');
     expect(find.text('Ingrid'), findsOneWidget); // Accueil's greeting
+    // The lock screen will check this PIN when the app reopens.
+    final session = RepositoryLocator.instance.authSession;
+    expect(await session.checkPin('4821'), isNull);
+    expect(await session.checkPin('1234'), 4);
     expect(find.byKey(const Key('tab-accueil')), findsOneWidget);
     expect(find.byKey(const Key('tab-calendrier')), findsOneWidget);
     expect(find.byKey(const Key('tab-annonces')), findsOneWidget);

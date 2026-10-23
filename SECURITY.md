@@ -18,6 +18,20 @@
   blacklisted. The app shares one in-flight refresh between concurrent requests
   (`AuthSession.refreshAccessToken`) so rotation never logs a member out.
 
+### App lock (owner, 2026-10-23)
+
+- The PIN is asked whenever the app opens on a saved session, and when it comes back after 2
+  minutes or more in the background. Fingerprint or face unlock (the phone's own prompt,
+  `local_auth`, biometric only) can be turned on in Mon compte; it is confirmed once when turned
+  on, and the PIN always works too.
+- The lock checks the PIN on the phone, so it works offline: at sign-in, PIN change or PIN reset
+  the app keeps a salted hash (SHA-256 × 20 000, 16-byte random salt) in the phone's secure
+  storage (Android Keystore / iOS Keychain), never the PIN itself. The server still checks the
+  PIN at every sign-in and keeps its own attempt counter and lock-out.
+- 5 wrong PINs on the lock screen close the session (tokens, PIN hash and biometric setting are
+  erased); the member signs in again with number and PIN. Signing out erases them too.
+- A session opened before this version has no PIN hash: the member signs in once more.
+
 ## Back-office login
 
 - Phone + password (Django's hasher, minimum 10 characters), then a 6-digit SMS code via Twilio

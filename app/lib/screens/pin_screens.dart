@@ -90,6 +90,7 @@ class _SetPinScreenState extends State<SetPinScreen> {
         currentPin: widget.currentPin ?? _current.text,
         newPin: _new.text,
       );
+      await RepositoryLocator.instance.authSession.rememberPin(_new.text);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -238,6 +239,8 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
         code: _code.text.trim(),
         newPin: _new.text,
       );
+      // The lock screen checks this PIN from now on.
+      await RepositoryLocator.instance.authSession.rememberPin(_new.text);
       if (mounted) Navigator.of(context).pop(true);
     });
   }

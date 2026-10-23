@@ -2833,6 +2833,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demande envoyée au partenaire.'**
   String get dayRoleRequestSent;
+
+  /// No description provided for @unlockTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez votre code PIN'**
+  String get unlockTitle;
+
+  /// No description provided for @unlockSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour ouvrir MSG.'**
+  String get unlockSubtitle;
+
+  /// No description provided for @unlockWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code incorrect. Encore {n} essai(s).'**
+  String unlockWrong(int n);
+
+  /// No description provided for @unlockTooMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop d’essais : reconnectez-vous avec votre numéro.'**
+  String get unlockTooMany;
+
+  /// No description provided for @unlockSignInAgain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour votre sécurité, reconnectez-vous une fois avec votre numéro et votre code.'**
+  String get unlockSignInAgain;
+
+  /// No description provided for @unlockOtherAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se connecter autrement'**
+  String get unlockOtherAccount;
+
+  /// No description provided for @biometricReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déverrouiller MSG'**
+  String get biometricReason;
+
+  /// No description provided for @biometricUnlock.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déverrouiller avec l’empreinte ou le visage'**
+  String get biometricUnlock;
+
+  /// No description provided for @biometricUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune empreinte ni visage enregistré sur ce téléphone.'**
+  String get biometricUnavailable;
+
+  /// No description provided for @biometricHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code PIN reste toujours possible.'**
+  String get biometricHint;
 }
 
 class _AppLocalizationsDelegate
