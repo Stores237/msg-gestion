@@ -14,6 +14,8 @@ String describeError(BuildContext context, Object error) {
     AccountLocked(:final minutes) => l.errorLocked(minutes),
     UnknownMember() => l.errorUnknownMember,
     NoPinSet() => l.errorNoPin,
+    BackofficeOnly() => l.errorBackofficeOnly,
+    ApiException(code: 'backoffice_only') => l.errorBackofficeOnly,
     QueuedOffline() => l.savedOnPhone,
     NetworkException() => l.networkError,
     ApiException(statusCode: 403) => l.errorForbidden,

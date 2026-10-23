@@ -56,4 +56,6 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Commissaire aux comptes: every finance right, own entries validated on entry; trésorier read + download only | Owner rule, replacing the design's "le trésorier saisit, le commissaire valide". With one person entering, a second validation step would block every line |
 | 2026-10-23 | Members' balance statement (bilan général / individuel), PDF in the app, PDF + CSV in the back-office | Owner: commissaire and trésorier download it for all members or one. "Versé" counts validated payments only |
 | 2026-10-23 | Back-office opens to finance roles, showing only "Bilan financier" | Owner: "add it on back office". The menu follows the permissions; the super admin still sees no amounts |
+| 2026-10-23 | Super admin: every right and every figure (finances on the dashboard) | Owner: "should be able to do everything and see everything". Replaces the design's masked amounts |
+| 2026-10-23 | Super admin accounts work only in the back-office, never in the mobile app | Owner rule. Refused after a correct PIN so the refusal doesn't reveal who is super admin |
 

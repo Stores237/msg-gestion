@@ -45,11 +45,12 @@ RESOURCES = {
 # - The commissaire aux comptes holds every finance right; the trésorier only
 #   reads and downloads (owner, 2026-10-23 — replaces the design's "le
 #   trésorier saisit, le commissaire valide").
-# - The super admin manages access without seeing any amount (design).
+# - The super admin can do and see everything, finances included (owner,
+#   2026-10-23 — replaces the design's "sans voir les montants"); see
+#   all_cells() and User.permission_set().
 FINANCE_WRITE = {CREATE, CHANGE, VALIDATE, DELETE}
 LOCKED = {
     "tresorier": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2] if act in FINANCE_WRITE},
-    "super-admin": {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2]},
 }
 
 # The service lineup (who serves where, who is chef de groupe that day) is
@@ -57,8 +58,9 @@ LOCKED = {
 # by the président or vice-président (owner, 2026-10-23). Every other role
 # can only look at it. This is per role, not per person: holding "membre"
 # alongside "formateur" must not take the lineup away.
-LINEUP_ROLES = {"formateur", "formateur-adjoint", "president", "vice-president"}
-LINEUP_EXCEPTIONAL_ROLES = {"president", "vice-president"}
+# The super admin can step in too, always as an exceptional change.
+LINEUP_ROLES = {"formateur", "formateur-adjoint", "president", "vice-president", "super-admin"}
+LINEUP_EXCEPTIONAL_ROLES = {"president", "vice-president", "super-admin"}
 LINEUP_ACTIONS = {("calendar.planning", a) for a in (CREATE, CHANGE, VALIDATE, DELETE)}
 
 # Two roles one person may never hold at the same time.
@@ -84,6 +86,11 @@ def is_locked(role_slug, resource, action):
     if (resource, action) in LINEUP_ACTIONS and role_slug not in LINEUP_ROLES:
         return True
     return (resource, action) in LOCKED.get(role_slug, set())
+
+
+def all_cells():
+    """Every (resource, action) that exists: what the super admin holds."""
+    return {(res, act) for res, spec in RESOURCES.items() for act in spec[2]}
 
 
 def is_applicable(resource, action):

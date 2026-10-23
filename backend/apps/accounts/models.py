@@ -140,8 +140,13 @@ class User(AbstractBaseUser, PermissionsMixin):
                     granted.add((res, act))
         # A locked cell on *any* held role wins (separation of duties is
         # about the person, not the role row).
-        for slug in self.role_slugs(on):
+        slugs = self.role_slugs(on)
+        for slug in slugs:
             granted -= registry.LOCKED.get(slug, set())
+        # The super admin does and sees everything (owner, 2026-10-23), even
+        # alongside a role whose cells are locked.
+        if registry.SUPER_ADMIN_SLUG in slugs:
+            granted |= registry.all_cells()
         return granted
 
     def can(self, resource, action):

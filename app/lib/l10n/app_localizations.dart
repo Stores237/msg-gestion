@@ -2611,6 +2611,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bilan financier (PDF)'**
   String get memberStatementPdf;
+
+  /// No description provided for @errorBackofficeOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.'**
+  String get errorBackofficeOnly;
 }
 
 class _AppLocalizationsDelegate

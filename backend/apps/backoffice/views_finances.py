@@ -1,7 +1,6 @@
 """Finances in the back-office: the members' balance statement ("bilan"),
-for whoever's role reads the cash book — the commissaire aux comptes, the
-trésorier, the président. The super admin never sees an amount (the cells
-are locked in registry.LOCKED), so these pages refuse them like anyone else."""
+for whoever's role reads the cash book — the super admin, the commissaire
+aux comptes, the trésorier, the président."""
 
 import csv
 import io

@@ -46,6 +46,9 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       if (mounted) _go(ShellScreen(me: me));
     } on ApiException catch (e) {
+      // A super admin's account works only in the back-office: drop the
+      // session, and the login screen says why on the next attempt.
+      if (e.code == 'backoffice_only') await repos.authSession.clear();
       // Session no longer valid server-side (refresh failed and cleared).
       if (!repos.authSession.isLoggedIn || e.statusCode == 401) {
         if (mounted) _go(const LoginPhoneScreen());

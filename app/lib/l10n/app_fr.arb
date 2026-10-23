@@ -972,5 +972,6 @@
   "youAreChef": "Vous êtes chef de groupe",
   "chefNeedsGuards": "Affectez d’abord des gardes à ce service.",
   "statementPdf": "Bilan général des membres (PDF)",
-  "memberStatementPdf": "Bilan financier (PDF)"
+  "memberStatementPdf": "Bilan financier (PDF)",
+  "errorBackofficeOnly": "Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application."
 }

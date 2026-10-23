@@ -1508,4 +1508,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get memberStatementPdf => 'Financial statement (PDF)';
+
+  @override
+  String get errorBackofficeOnly =>
+      'Super admin accounts work only in the back-office (web browser), not in the app.';
 }

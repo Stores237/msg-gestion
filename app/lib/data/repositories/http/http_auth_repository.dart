@@ -54,6 +54,8 @@ class HttpAuthRepository implements AuthRepository {
           throw const UnknownMember();
         case 409:
           throw const NoPinSet();
+        case 403 when e.code == 'backoffice_only':
+          throw const BackofficeOnly();
       }
       rethrow;
     }

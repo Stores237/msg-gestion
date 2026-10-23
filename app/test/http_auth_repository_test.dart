@@ -71,6 +71,16 @@ void main() {
     );
   });
 
+  test('403 backoffice_only becomes BackofficeOnly (super admin)', () async {
+    await expectLater(
+      repoReturning(403, {
+        'detail': 'back-office',
+        'code': 'backoffice_only',
+      }).loginWithPin(phone: 'x', pin: '1'),
+      throwsA(isA<BackofficeOnly>()),
+    );
+  });
+
   test('success stores both tokens', () async {
     final session = AuthSession(storage: InMemoryTokenStorage());
     await repoReturning(200, {

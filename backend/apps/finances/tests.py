@@ -102,12 +102,10 @@ def test_summary_balance_only_counts_validated():
     assert (s["balance"], s["balance_with_pending"], s["pending"]) == (10000, 7000, 1)
 
 
-def test_super_admin_and_members_see_no_money():
-    sa_api, _ = client_for("super-admin")
+def test_members_see_no_money():
     member_api, _ = client_for("membre")
-    for api in (sa_api, member_api):
-        assert api.get("/api/finances/summary/").status_code == 403
-        assert api.get("/api/finances/entries/").status_code == 403
+    assert member_api.get("/api/finances/summary/").status_code == 403
+    assert member_api.get("/api/finances/entries/").status_code == 403
 
 
 def test_collection_in_thirds_and_bulk_payment():
@@ -197,5 +195,3 @@ def test_statement_pdfs_need_export_and_are_audited():
     assert AuditLog.objects.filter(action="Export PDF du bilan individuel", object_id=str(member.id)).exists()
     assert member_api.get("/api/finances/statement/").status_code == 403
     assert member_api.get(f"/api/finances/statement/{member.id}/pdf/").status_code == 403
-    sa_api, _ = client_for("super-admin")
-    assert sa_api.get("/api/finances/statement/").status_code == 403

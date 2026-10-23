@@ -27,8 +27,15 @@
       <dt>Dernière activité</dt><dd>{{ last_activity.created_at|date:"d/m H:i"|default:"—" }}</dd>
       <dt>Sauvegarde</dt><dd>quotidienne (Supabase)</dd></dl></div></section>
     {% if expiring %}<section class="panel"><div class="panel-h"><h2>Mandats à échéance</h2><div class="acts"><a href="{% url 'backoffice:assignments' %}?echeance=30">Affectations</a></div></div><div class="list">{% for a in expiring %}<div class="row"><div class="row-main"><div class="row-t">{{ a.user.full_name }}</div><div class="row-s">{{ a.role.name }} · fin le {{ a.ends_on|date:"d/m/Y" }}</div></div></div>{% endfor %}</div></section>{% endif %}
-    <section class="panel"><div class="panel-h"><h2>Finances</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:var(--text-secondary)">Solde de la caisse</span>
-      {% if can_see_finances %}<b class="tnum" style="font-size:24px">{{ balance|fcfa }}</b><a href="{% url 'backoffice:finances' %}">Bilan financier des membres</a>{% else %}<span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600">{% icon 'eye-off' 14 %}Montant masqué</span><span style="font-size:13px;color:var(--text-secondary);line-height:1.45">Visible par le trésorier, le commissaire aux comptes et le président.</span>{% endif %}</div></section>
+    <section class="panel"><div class="panel-h"><h2>Finances</h2>{% if fin %}<div class="acts"><a href="{% url 'backoffice:finances' %}">Bilan financier</a></div>{% endif %}</div><div class="panel-b" style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;color:var(--text-secondary)">Solde de la caisse</span>
+      {% if fin %}<b class="tnum" style="font-size:28px">{{ fin.balance|fcfa }}</b>
+      <dl class="dl" style="grid-template-columns:minmax(0,1fr) auto">
+        <dt>Total dû par les membres</dt><dd class="tnum">{{ fin.owed|fcfa }}</dd>
+        <dt>Versé (validé)</dt><dd class="tnum">{{ fin.paid|fcfa }}</dd>
+        <dt>Reste à payer</dt><dd class="tnum">{% if fin.remaining %}<b style="color:var(--red-500)">{{ fin.remaining|fcfa }}</b>{% else %}0 FCFA{% endif %}</dd>
+        <dt>Opérations à valider</dt><dd class="tnum">{% if fin.pending %}<span class="status warn"><i></i>{{ fin.pending }}</span>{% else %}0{% endif %}</dd>
+        <dt>Collectes ouvertes</dt><dd class="tnum">{{ fin.open_collections }}</dd></dl>
+      {% else %}<span style="display:inline-flex;gap:6px;align-items:center;color:var(--text-secondary);font-weight:600">{% icon 'eye-off' 14 %}Montant masqué</span><span style="font-size:13px;color:var(--text-secondary);line-height:1.45">Visible par le super admin, le commissaire aux comptes, le trésorier et le président.</span>{% endif %}</div></section>
   </div>
 </div>
 {% endblock %}

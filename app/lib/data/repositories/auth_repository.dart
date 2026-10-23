@@ -34,6 +34,11 @@ class NoPinSet extends PinFailure {
   const NoPinSet();
 }
 
+/// A super admin account: it works only in the web back-office.
+class BackofficeOnly extends PinFailure {
+  const BackofficeOnly();
+}
+
 abstract class AuthRepository {
   /// Throws [UnknownMember] when the number isn't a member's.
   Future<PhoneLookup> lookupPhone(String phone);

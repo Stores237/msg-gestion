@@ -19,6 +19,7 @@ whether it touches real data.
 | 10 | Everything else in the design (except SMS/push delivery); build 3 | New tables |
 | 11 | Who makes the lineup; chef de groupe per service; roles of the day; back-office on phones | Roles and permissions changed; one column moved |
 | 12 | Finance rights (commissaire: all; trésorier: read); members' balance statement in the app and back-office | Permissions changed |
+| 13 | Super admin: every right and every figure, in the back-office only | Permissions changed |
 
 ## 1. Backend skeleton
 
@@ -270,3 +271,23 @@ keeps view + export). Runs on deploy. A trésorier or commissaire needs a back-o
 (super admin: member page → "Accès back-office") to use the back-office page.
 
 **Verify.** `pytest` (189) and `flutter test` (56). Back-office checked at 1280px and 375px.
+
+## 13. Super admin: everything, in the back-office only
+
+- **The super admin can do and see everything**, finances included (owner, 2026-10-23,
+  replacing the design's "sans voir les montants"). `registry.all_cells()` is granted in
+  `User.permission_set()`, even alongside a role with locked cells; `accounts.0008` ticks every
+  cell for the role so the matrix shows it. Planning changes by a super admin count as
+  exceptional (audited, formateurs notified), like the président's.
+- **Dashboard**: the Finances panel shows the cash balance, the total owed by members, what is
+  paid (validated), what is left to pay, lines waiting for validation and open collections, with
+  a link to "Bilan financier".
+- **Not in the mobile app**: a super admin account is refused at app login with code
+  `backoffice_only` (checked after a correct PIN, so the answer reveals nothing to a stranger;
+  audited), and any older app token stops working (`AppJWTAuthentication`). The app explains:
+  "Les comptes super admin s'utilisent uniquement sur le back-office". On staging this concerns
+  only the two super admin accounts.
+
+**Data.** `accounts.0008_super_admin_everything`. Runs on deploy.
+
+**Verify.** `pytest` (190) and `flutter test` (57).

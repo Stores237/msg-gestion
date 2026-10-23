@@ -248,7 +248,6 @@ def test_finance_roles_reach_the_statement_and_download_it(client, codes, role):
     assert client.get("/bo/securite/").status_code == 200
 
 
-def test_super_admin_never_sees_the_statement(admin, client):
-    assert client.get("/bo/finances/").status_code == 403
-    assert client.get("/bo/finances/bilan.pdf").status_code == 403
-    assert "Bilan financier" not in client.get("/bo/").content.decode()
+def test_super_admin_sees_the_statement(admin, client):
+    assert client.get("/bo/finances/").status_code == 200
+    assert client.get("/bo/finances/bilan.pdf").status_code == 200

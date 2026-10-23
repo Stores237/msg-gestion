@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.core import audit, sms
 
+from .authentication import BACKOFFICE_ONLY
 from .models import User
 from .serializers import LogoutSerializer, MeSerializer, PhoneLookupSerializer, PinLoginSerializer
 from .services import check_pin_login, pin_problem
@@ -81,6 +82,11 @@ class PinLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
+        if user.is_super_admin:
+            # Checked after the PIN, so the answer only tells the holder
+            # which accounts are super admins.
+            audit.record("Refus · super admin dans l’application", actor=user, obj=user, request=request, refused=True)
+            return Response({"detail": BACKOFFICE_ONLY, "code": "backoffice_only"}, status=status.HTTP_403_FORBIDDEN)
         refresh = RefreshToken.for_user(result.user)
         User.objects.filter(pk=user.pk).update(last_login=timezone.now())
         return Response({"access": str(refresh.access_token), "refresh": str(refresh), "pin_must_change": result.user.pin_must_change})

@@ -240,14 +240,33 @@ def test_auditor_holds_every_finance_right():
             assert all(user.can(res, a) for a in spec[2]), res
 
 
-def test_super_admin_never_sees_finances_even_with_another_role():
-    """The lock follows the person: a super admin who is also président
-    still can't see amounts (design: Masked)."""
+def test_super_admin_can_do_everything_even_with_a_locked_role():
+    """Owner, 2026-10-23: the super admin does and sees everything,
+    finances included, even when also holding the trésorier's locked role."""
     user = UserFactory()
-    give_role(user, "president")
+    give_role(user, "tresorier")
     give_role(user, "super-admin")
-    assert not user.can("finances.cashbook", "view")
-    assert "finances" not in user.tabs()
+    assert user.permission_set() == registry.all_cells()
+
+
+def test_super_admin_is_refused_in_the_app(api):
+    """A super admin account works only in the back-office: refused after a
+    correct PIN (so a stranger learns nothing), and any old app token stops
+    working."""
+    user = UserFactory(phone="+237677452108", pin="4821")
+    give_role(user, "super-admin")
+    r = _login(api, "4821")
+    assert (r.status_code, r.json()["code"]) == (403, "backoffice_only")
+    assert AuditLog.objects.filter(action="Refus · super admin dans l’application", refused=True).exists()
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    token = RefreshToken.for_user(user).access_token
+    api.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+    me = api.get("/api/me/")
+    assert (me.status_code, me.json()["code"]) == (403, "backoffice_only")
+    other = UserFactory(phone="+237677452109", pin="4821")
+    give_role(other, "secretaire-general")
+    assert _login(api, "4821", phone="677452109").status_code == 200
 
 
 def test_treasurer_cannot_also_be_auditor():

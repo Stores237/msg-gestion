@@ -1511,4 +1511,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get memberStatementPdf => 'Bilan financier (PDF)';
+
+  @override
+  String get errorBackofficeOnly =>
+      'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.';
 }

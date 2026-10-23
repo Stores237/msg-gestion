@@ -120,8 +120,9 @@ def test_pages_require_login(client):
         assert r.status_code == 302 and r["Location"] == "/bo/connexion/"
 
 
-def test_super_admin_dashboard_masks_finances(logged_in):
-    assert "Montant masqué" in logged_in.get("/bo/").content.decode()
+def test_super_admin_dashboard_shows_finances(logged_in):
+    body = logged_in.get("/bo/").content.decode()
+    assert "Montant masqué" not in body and "Total dû par les membres" in body and "Bilan financier" in body
 
 
 def test_users_search(logged_in):

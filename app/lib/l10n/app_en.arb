@@ -418,5 +418,6 @@
   "youAreChef": "You are the group lead",
   "chefNeedsGuards": "Assign guards to this service first.",
   "statementPdf": "Members' balance statement (PDF)",
-  "memberStatementPdf": "Financial statement (PDF)"
+  "memberStatementPdf": "Financial statement (PDF)",
+  "errorBackofficeOnly": "Super admin accounts work only in the back-office (web browser), not in the app."
 }
