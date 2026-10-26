@@ -12,17 +12,17 @@ from apps.members.models import AccessRequest
 from .access import backoffice_view
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.access", "view")
 def access_requests(request):
     pending = AccessRequest.objects.filter(status=AccessRequest.Status.PENDING).select_related("role", "requested_by")
     done = AccessRequest.objects.exclude(status=AccessRequest.Status.PENDING).select_related("role", "requested_by", "decided_by")[:30]
     return render(request, "backoffice/access_requests.html", {
-        "nav": "access", "pending": pending, "done": done, "can_edit": request.user.can("backoffice.users", "create"),
+        "nav": "access", "pending": pending, "done": done, "can_edit": request.user.can("backoffice.access", "validate"),
     })
 
 
 @require_POST
-@backoffice_view("backoffice.users", "create")
+@backoffice_view("backoffice.access", "validate")
 def access_request_decide(request, pk):
     req = get_object_or_404(AccessRequest, pk=pk)
     try:

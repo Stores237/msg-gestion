@@ -1508,7 +1508,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get errorBackofficeOnly =>
-      'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.';
+      'Les comptes du back-office (super admin, équipes support, IT, intégrations) s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.';
 
   @override
   String get requestAccess => 'Demander un accès';

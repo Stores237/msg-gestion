@@ -37,7 +37,16 @@ RESOURCES = {
     "calendar.attendance": ("calendar", "Appel des présences", [VIEW, CHANGE, EXPORT], False),
     "calendar.planning": ("calendar", "Planning des services", ACTIONS, False),
     "announcements.posts": ("announcements", "Annonces et convocations", [VIEW, CREATE, CHANGE, DELETE], False),
-    "backoffice.users": ("backoffice", "Utilisateurs et rôles", [VIEW, CREATE, CHANGE, DELETE, EXPORT], True),
+    # The back-office, area by area, so each staff team gets only its part
+    # (owner, 2026-10-26).
+    "backoffice.users": ("backoffice", "Comptes et membres (PIN, suspension)", [VIEW, CREATE, CHANGE, DELETE, EXPORT], True),
+    "backoffice.access": ("backoffice", "Demandes d’accès", [VIEW, VALIDATE], True),
+    "backoffice.roles": ("backoffice", "Rôles, permissions et affectations", [VIEW, CHANGE], True),
+    "backoffice.groups": ("backoffice", "Groupes", [VIEW, CREATE, CHANGE, DELETE], False),
+    "backoffice.settings": ("backoffice", "Paramètres des groupes", [VIEW, CHANGE], False),
+    "backoffice.platform": ("backoffice", "Plateforme · aide", [VIEW, CHANGE], False),
+    "backoffice.security": ("backoffice", "Sécurité et sessions", [VIEW, CHANGE], True),
+    "backoffice.integrations": ("backoffice", "Intégrations et services", [VIEW, CHANGE], False),
     "backoffice.audit": ("backoffice", "Journal d’audit", [VIEW, EXPORT], True),
 }
 
@@ -54,11 +63,34 @@ LOCKED = {
     "commissaire-aux-comptes": {(res, act) for res, act in FINANCE_CELLS if act == VALIDATE},
 }
 
-# The back-office is the platform's administration console, used only by the
-# super admin (owner, 2026-10-23): the app serves any group, and whoever runs
-# the platform is not one of a group's officers. No other role can hold a
-# back-office permission.
+# The back-office is the platform's administration console (owner,
+# 2026-10-23): the app serves any group, and whoever runs the platform is not
+# one of a group's officers. Only platform roles hold back-office cells: the
+# super admin, and the back-office staff teams below.
 BACKOFFICE_CELLS = {(res, act) for res, spec in RESOURCES.items() if spec[0] == "backoffice" for act in spec[2]}
+
+# Back-office staff (owner, 2026-10-26): three teams, two levels each —
+# agent (level 1) and responsable (level 2). Platform roles: no group, back-
+# office only, never in the app. slug -> (name, team, level)
+STAFF_ROLES = {
+    "support-agent": ("Support · agent", "Équipe support", 1),
+    "support-responsable": ("Support · responsable", "Équipe support", 2),
+    "it-agent": ("IT helpdesk · agent", "IT helpdesk", 1),
+    "it-responsable": ("IT helpdesk · responsable", "IT helpdesk", 2),
+    "integration-agent": ("Intégrations · agent", "Integration Ops", 1),
+    "integration-responsable": ("Intégrations · responsable", "Integration Ops", 2),
+}
+PLATFORM_ROLES = {"super-admin", *STAFF_ROLES}
+
+# What no staff role can ever hold, whatever the matrix says: anything
+# outside the back-office (a group's finances, members, calendar…), changing
+# roles and permissions, and creating, changing or deleting groups. Those
+# stay with the super admin.
+STAFF_LOCKED = (
+    {(res, act) for res, spec in RESOURCES.items() if spec[0] != "backoffice" for act in spec[2]}
+    | {("backoffice.roles", CHANGE)}
+    | {("backoffice.groups", a) for a in (CREATE, CHANGE, DELETE)}
+)
 
 # The service lineup (who serves where, who is chef de groupe that day) is
 # made by the formateur or the formateur adjoint, and on exceptional occasions
@@ -92,7 +124,9 @@ SUPER_ADMIN_SLUG = "super-admin"
 def is_locked(role_slug, resource, action):
     if (resource, action) in LINEUP_ACTIONS and role_slug not in LINEUP_ROLES:
         return True
-    if (resource, action) in BACKOFFICE_CELLS and role_slug != SUPER_ADMIN_SLUG:
+    if (resource, action) in BACKOFFICE_CELLS and role_slug not in PLATFORM_ROLES:
+        return True
+    if role_slug in STAFF_ROLES and (resource, action) in STAFF_LOCKED:
         return True
     return (resource, action) in LOCKED.get(role_slug, set())
 

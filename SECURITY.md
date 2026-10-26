@@ -63,7 +63,15 @@ Defined in `apps/accounts/registry.py`:
   who holds the money, validates (never enters, changes or deletes). Nobody validates a line they
   entered.
 - One person can't be both trésorier and commissaire aux comptes.
-- Back-office permissions belong to the super admin role only.
+- Back-office permissions belong to platform roles only: the super admin and the back-office
+  staff (support, IT helpdesk, integration ops; agent and responsable levels). Staff roles can
+  never hold anything outside the back-office (finances, a group's members, calendar…), changing
+  roles and permissions, or creating, changing or deleting groups. Only the super admin creates,
+  changes or removes staff accounts, sets back-office passwords, and acts on a super admin's
+  account; staff never act on platform accounts except the IT helpdesk's session/backup-code
+  help for other staff.
+- Platform accounts (super admin, staff) work only in the back-office; the app refuses them
+  (`backoffice_only`), and an access request can't add one to a group.
 - The super admin holds every permission, finances included, but only in the back-office.
 - There must always be at least 2 active super admins; removing one below that is refused.
 - Deleting a group takes two super admins (`apps/core/group_admin.py`): one asks, with a reason

@@ -5,8 +5,9 @@ Its first group is the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de
 (Douala), and it is meant to serve other groups later, so group-specific facts (name, place,
 amounts, times) live in `core.Settings`, not in code or copy.
 Two surfaces: the Android app (iOS-compatible) for the group's members and officers, and a web
-back-office that is the platform's administration console, for super admins only. A super
-admin account works only in the back-office.
+back-office that is the platform's administration console, for super admins and the back-office
+staff teams (support, IT helpdesk, integration ops; `registry.STAFF_ROLES`), each limited to its
+areas. These platform accounts work only in the back-office.
 
 Built on the Spekooh architecture playbook (`app-architecture-playbook` skill). Read its
 "Lessons learned" table before debugging anything that only fails when deployed.

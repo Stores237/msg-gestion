@@ -43,8 +43,9 @@ def approve(req, *, by, request=None):
         pin = temporary_pin()
         user.set_pin(pin, temporary=True)
         user.save()
-    elif user.is_super_admin:
-        raise RuleViolation("Ce numéro est celui d’un super admin : il ne peut pas être membre d’un groupe.")
+    elif user.is_platform_account:
+        raise RuleViolation("Ce numéro est celui d’un compte du back-office (super admin ou équipe) : "
+                            "il ne peut pas être membre d’un groupe.")
     Membership.join(user, req.group_id)
     reason = f"Demande d’accès de {req.requested_by.short_name if req.requested_by else 'un responsable'}"
     held = user.role_slugs()

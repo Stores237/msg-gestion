@@ -147,6 +147,24 @@ class User(AbstractBaseUser, PermissionsMixin):
     def role_slugs(self, on=None):
         return {a.role.slug for a in self.active_assignments(on)}
 
+    @property
+    def is_backoffice_staff(self):
+        """Holds a back-office staff role (support, IT helpdesk, integration
+        ops): a platform account, back-office only (owner, 2026-10-26)."""
+        return RoleAssignment.all_groups.active().filter(
+            user=self, role__slug__in=registry.STAFF_ROLES, role__group__isnull=True
+        ).exists()
+
+    @property
+    def is_platform_account(self):
+        """Super admin or back-office staff: never used in the app."""
+        return self.is_super_admin or self.is_backoffice_staff
+
+    def staff_role(self):
+        a = (RoleAssignment.all_groups.active().filter(user=self, role__slug__in=registry.STAFF_ROLES, role__group__isnull=True)
+             .select_related("role").first())
+        return a.role if a else None
+
     def display_role(self, on=None):
         """The role shown next to what the member posts (owner, 2026-10-26):
         the bureau role first, then any other; "… du jour" for a role of the
@@ -226,6 +244,7 @@ class Role(models.Model):
         SYSTEM = "systeme", "Système"
         TEMPORARY = "temporaire", "Temporaire"
         STANDARD = "standard", "Standard"
+        PLATFORM = "plateforme", "Équipe du back-office"
 
     # Each group has its own roles, started from the default set; platform
     # roles (super admin) belong to no group.

@@ -82,7 +82,7 @@ class PinLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        if user.is_super_admin:
+        if user.is_platform_account:
             # Checked after the PIN, so the answer only tells the holder
             # which accounts are super admins.
             audit.record("Refus · super admin dans l’application", actor=user, obj=user, request=request, refused=True)

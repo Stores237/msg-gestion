@@ -1,0 +1,42 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Équipe du back-office{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme MSG · {{ rows|length }} compte{{ rows|length|pluralize }}</div>{% endblock %}
+{% block heading %}Équipe du back-office{% endblock %}
+{% block acts %}{% if can_manage %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-staff').showModal()">{% icon 'user-plus' %}Ajouter un membre de l’équipe</button>{% endif %}{% endblock %}
+{% block body %}
+{% if once %}<section class="panel" style="margin-bottom:24px" id="once"><div class="panel-h"><h2>{{ once.title }}</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+  <div class="notice warn">{% icon 'triangle-alert' %}<span>{{ once.hint }}</span></div>
+  {% if once.password %}<div><span class="fld-l">Mot de passe provisoire</span><div class="tnum" style="font-size:22px;font-weight:800;letter-spacing:.04em" id="once-password">{{ once.password }}</div></div>{% endif %}
+  <div><span class="fld-l">Codes de secours (un par connexion)</span><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:6px">{% for c in once.codes %}<code class="tnum" style="font-size:15px">{{ c }}</code>{% endfor %}</div></div>
+</div></section>{% endif %}
+<section class="panel">
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Personne</th><th>Équipe · niveau</th><th>Accès</th><th></th></tr></thead><tbody>
+  {% for r in rows %}<tr><td><b>{{ r.a.user.full_name }}</b><br><small class="muted tnum">{{ r.phone }}</small></td>
+    <td>{% if r.a.role.slug == 'super-admin' %}<span class="rb sys"><i></i>Super admin</span>{% else %}<span class="rb temp"><i></i>{{ r.a.role.name }}</span><br><small class="muted">{{ r.team }} · niveau {{ r.level }}</small>{% endif %}</td>
+    <td><small>{% if r.password %}Mot de passe défini{% else %}Pas de mot de passe{% endif %} · {{ r.codes }} code{{ r.codes|pluralize }} de secours · {{ r.sessions }} session{{ r.sessions|pluralize }}</small></td>
+    <td class="amt">{% if r.a.role.slug != 'super-admin' or request.user.is_super_admin %}<span style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+      {% if can_help %}<form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ r.a.user.pk }}"><button class="btn btn-ghost btn-sm" name="action" value="close_sessions">Fermer les sessions</button></form>
+      <form method="post">{% csrf_token %}<input type="hidden" name="user" value="{{ r.a.user.pk }}"><button class="btn btn-ghost btn-sm" name="action" value="new_codes">Nouveaux codes</button></form>{% endif %}
+      {% if can_manage and r.a.role.slug != 'super-admin' %}<form method="post" style="display:inline-flex;gap:6px">{% csrf_token %}<input type="hidden" name="user" value="{{ r.a.user.pk }}"><input type="hidden" name="action" value="change_role"><select name="role" aria-label="Rôle" onchange="this.form.submit()">{% for slug, name, team, level in roles %}<option value="{{ slug }}"{% if slug == r.a.role.slug %} selected{% endif %}>{{ name }}</option>{% endfor %}</select></form>
+      <form method="post" onsubmit="var m=prompt('Motif du retrait ?');if(!m)return false;this.reason.value=m">{% csrf_token %}<input type="hidden" name="user" value="{{ r.a.user.pk }}"><input type="hidden" name="reason"><button class="btn btn-ghost btn-sm" name="action" value="remove" style="color:var(--red-500)">Retirer</button></form>{% endif %}
+    </span>{% endif %}</td></tr>
+  {% empty %}<tr class="empty-row"><td colspan="4">Personne pour l’instant.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Ce que chaque rôle peut faire</h2>{% if can_manage %}<div class="acts"><a href="{% url 'backoffice:roles' %}">Modifier dans Rôles et permissions</a></div>{% endif %}</div>
+  <div class="panel-b" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+  {% for r in access %}<div><b>{{ r.name }}</b><br><small class="muted">{{ r.team }} · niveau {{ r.level }}</small>
+    <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6">{% for area, acts in r.cells %}<li>{{ area }} : {{ acts|join:", " }}</li>{% empty %}<li>Aucun accès</li>{% endfor %}</ul></div>{% endfor %}
+  </div>
+  <div class="tbl-f"><span>Règles fixes : l’équipe ne modifie jamais les rôles et permissions, ne crée, modifie ni supprime de groupe, ne touche pas aux finances ni aux comptes super admin. Ces comptes servent uniquement au back-office, jamais dans l’application.</span></div>
+</section>
+{% if can_manage %}<dialog id="dlg-staff" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="create">
+  <h3>Ajouter un membre de l’équipe</h3>
+  <label class="fld"><span class="fld-l">Nom<em> *</em></span><span class="fld-box"><input name="last_name" required></span></label>
+  <label class="fld"><span class="fld-l">Prénoms<em> *</em></span><span class="fld-box"><input name="first_name" required></span></label>
+  <label class="fld"><span class="fld-l">Téléphone<em> *</em></span><span class="fld-box"><input name="phone" required inputmode="tel" placeholder="6XX XX XX XX"></span><span class="fld-h">Un numéro qui n’a pas de compte dans l’application.</span></label>
+  <label class="fld"><span class="fld-l">Équipe et niveau<em> *</em></span><span class="fld-box"><select name="role" required>{% for slug, name, team, level in roles %}<option value="{{ slug }}">{{ name }}</option>{% endfor %}</select></span></label>
+  <label class="fld"><span class="fld-l">Motif<em> *</em></span><span class="fld-box"><input name="reason" required placeholder="Ex. recrutement de l’équipe support"></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Créer le compte</button></div>
+</form></dialog>{% endif %}
+{% endblock %}

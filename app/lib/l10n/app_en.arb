@@ -417,7 +417,7 @@
   "chefNeedsGuards": "Assign guards to this service first.",
   "statementPdf": "Members' balance statement (PDF)",
   "memberStatementPdf": "Financial statement (PDF)",
-  "errorBackofficeOnly": "Super admin accounts work only in the back-office (web browser), not in the app.",
+  "errorBackofficeOnly": "Back-office accounts (super admin, support, IT and integration teams) work only in the back-office (web browser), not in the app.",
   "requestAccess": "Request access",
   "accessRequestsTitle": "Access requests",
   "accessRole": "Requested role",

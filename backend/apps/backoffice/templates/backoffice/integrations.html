@@ -1,0 +1,12 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Intégrations et services{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme MSG · état des services</div>{% endblock %}
+{% block heading %}Intégrations et services{% endblock %}
+{% block body %}
+<section class="panel">
+  <div class="list">{% for s in services %}<div class="row"><span class="status {% if s.state == 'ok' %}ok{% elif s.state == 'warn' %}warn{% else %}off{% endif %}" style="min-width:110px"><i></i>{% if s.state == 'ok' %}Configuré{% elif s.state == 'warn' %}Local{% else %}En attente{% endif %}</span>
+    <div class="row-main"><div class="row-t">{{ s.name }}</div><div class="row-s">{{ s.what }} · {% if s.link %}<a href="{{ s.link }}" target="_blank" rel="noopener">{{ s.detail }}</a>{% else %}{{ s.detail }}{% endif %}</div></div>
+    {% if s.testable and can_change %}<form method="post" action="{% url 'backoffice:integration_check' %}">{% csrf_token %}<button class="btn btn-secondary btn-sm">Tester maintenant</button></form>{% endif %}</div>{% endfor %}</div>
+  <div class="tbl-f"><span>« Configuré » veut dire que les réglages sont présents ; « Tester maintenant » vérifie le stockage pour de vrai. Aucun secret n’est affiché ici.</span></div>
+</section>
+{% endblock %}

@@ -6,19 +6,21 @@
     <div class="bo-brand"><div class="msg-logo" style="width:36px;height:36px;border-radius:12px;font-size:11px" role="img" aria-label="MSG">MSG</div><div><b>MSG</b><small>Back-office de la plateforme</small></div></div>
     {% platform_groups as all_groups %}{% if request.group %}<form class="bo-group" method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><label><span>Groupe</span><select name="group" onchange="this.form.submit()" aria-label="Groupe en cours">{% for g in all_groups %}<option value="{{ g.pk }}"{% if g.pk == request.group.pk %} selected{% endif %}>{{ g.name }}</option>{% endfor %}</select></label></form>{% endif %}
     {% with p=request.user|perms %}
-    {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'groups' %} on{% endif %}" href="{% url 'backoffice:groups' %}">{% icon 'building-2' %}Groupes{% pending_group_deletions as nd %}{% if nd %}<span class="rb exp" style="margin-left:auto" title="Suppression à confirmer"><i></i>{{ nd }}</span>{% endif %}</a>
-    <a class="bo-nav{% if nav == 'platform' %} on{% endif %}" href="{% url 'backoffice:platform' %}">{% icon 'life-buoy' %}Plateforme · aide</a>
     <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}">{% icon 'layout-dashboard' %}Tableau de bord</a>
-    <a class="bo-nav{% if nav == 'access' %} on{% endif %}" href="{% url 'backoffice:access_requests' %}">{% icon 'user-check' %}Demandes d’accès{% pending_access as n %}{% if n %}<span class="rb sys" style="margin-left:auto"><i></i>{{ n }}</span>{% endif %}</a>
-    <a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>
-    <a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}">{% icon 'shield' %}Rôles et permissions</a>
+    {% if 'backoffice.groups:view' in p %}<a class="bo-nav{% if nav == 'groups' %} on{% endif %}" href="{% url 'backoffice:groups' %}">{% icon 'building-2' %}Groupes{% pending_group_deletions as nd %}{% if nd %}<span class="rb exp" style="margin-left:auto" title="Suppression à confirmer"><i></i>{{ nd }}</span>{% endif %}</a>{% endif %}
+    {% if 'backoffice.access:view' in p %}<a class="bo-nav{% if nav == 'access' %} on{% endif %}" href="{% url 'backoffice:access_requests' %}">{% icon 'user-check' %}Demandes d’accès{% pending_access as n %}{% if n %}<span class="rb sys" style="margin-left:auto"><i></i>{{ n }}</span>{% endif %}</a>{% endif %}
+    {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>{% endif %}
+    {% if 'backoffice.roles:view' in p %}<a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}">{% icon 'shield' %}Rôles et permissions</a>
     <a class="bo-nav{% if nav == 'assign' %} on{% endif %}" href="{% url 'backoffice:assignments' %}">{% icon 'calendar-range' %}Affectations</a>{% endif %}
     {% if 'finances.cashbook:view' in p %}<a class="bo-nav{% if nav == 'finances' %} on{% endif %}" href="{% url 'backoffice:finances' %}">{% icon 'wallet' %}Bilan financier</a>{% endif %}
+    {% if 'backoffice.settings:view' in p %}<a class="bo-nav{% if nav == 'settings' %} on{% endif %}" href="{% url 'backoffice:settings' %}">{% icon 'settings' %}Paramètres du groupe</a>{% endif %}
+    {% if 'backoffice.security:view' in p or 'backoffice.roles:change' in p %}<a class="bo-nav{% if nav == 'staff' %} on{% endif %}" href="{% url 'backoffice:staff' %}">{% icon 'id-card' %}Équipe du back-office</a>{% endif %}
+    {% if 'backoffice.integrations:view' in p %}<a class="bo-nav{% if nav == 'integrations' %} on{% endif %}" href="{% url 'backoffice:integrations' %}">{% icon 'plug' %}Intégrations et services</a>{% endif %}
+    {% if 'backoffice.platform:view' in p %}<a class="bo-nav{% if nav == 'platform' %} on{% endif %}" href="{% url 'backoffice:platform' %}">{% icon 'life-buoy' %}Plateforme · aide</a>{% endif %}
     {% if 'backoffice.audit:view' in p %}<a class="bo-nav{% if nav == 'audit' %} on{% endif %}" href="{% url 'backoffice:audit' %}">{% icon 'scroll-text' %}Journal d’audit</a>{% endif %}
-    {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'settings' %} on{% endif %}" href="{% url 'backoffice:settings' %}">{% icon 'settings' %}Paramètres</a>{% endif %}
     {% endwith %}
     <div class="sp"></div>
-    <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% endif %}</div>
+    <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% else %}{% with sr=request.user.staff_role %}{% if sr %}<span class="rb temp"><i></i>{{ sr.name }}</span>{% endif %}{% endwith %}{% endif %}</div>
       <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
   </aside>
   <main class="bo-main">

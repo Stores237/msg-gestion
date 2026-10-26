@@ -162,7 +162,7 @@ def _finances():
     }
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view(None)
 def dashboard(request):
     today = timezone.localdate()
     active = User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True)
@@ -180,7 +180,10 @@ def dashboard(request):
         "kpi_expiring": soon.count(),
         "kpi_super_admins": super_admins,
         "min_super_admins": registry.MIN_SUPER_ADMINS,
-        "recent": AuditLog.objects.filter(sensitive=True).select_related("actor")[:6],
+        "recent": AuditLog.objects.filter(sensitive=True).select_related("actor")[:6] if request.user.can("backoffice.audit", "view") else [],
+        "can_audit": request.user.can("backoffice.audit", "view"),
+        "can_roles": request.user.can("backoffice.roles", "change"),
+        "can_create_users": request.user.can("backoffice.users", "create"),
         "can_see_finances": request.user.can("finances.cashbook", "view"),
         "fin": _finances() if request.user.can("finances.cashbook", "view") else None,
         "requests": RoleRequest.objects.filter(status=RoleRequest.Status.PENDING).select_related("member", "role", "requested_by")[:10],
@@ -230,7 +233,7 @@ def users(request):
     )
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.roles", "view")
 def roles(request, slug=None):
     all_roles = Role.objects.filter(is_archived=False)
     role = get_object_or_404(Role, slug=slug) if slug else all_roles.first()
@@ -239,7 +242,7 @@ def roles(request, slug=None):
         for r in RoleAssignment.objects.active().values("role").annotate(n=Count("user", distinct=True))
     }
     if request.method == "POST":
-        if not request.user.can("backoffice.users", "change"):
+        if not request.user.can("backoffice.roles", "change"):
             return render(request, "backoffice/forbidden.html", status=403)
         wanted = {tuple(v.split(":", 1)) for v in request.POST.getlist("perm")}
         changes = {}
@@ -283,7 +286,7 @@ def roles(request, slug=None):
             "matrix": matrix,
             "actions": registry.ACTION_LABELS.values(),
             "holders": holders,
-            "can_edit": request.user.can("backoffice.users", "change"),
+            "can_edit": request.user.can("backoffice.roles", "change"),
         },
     )
 

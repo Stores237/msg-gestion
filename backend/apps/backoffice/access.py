@@ -3,8 +3,9 @@ Back-office session rules.
 
 A back-office session is a Django session that has passed *both* factors:
 password, then an SMS code (or a trusted-device cookie less than 30 days
-old). Only a super admin can open one (can_enter): the back-office
-administers the platform, it isn't a tool for a group's officers.
+old). Only a platform account — the super admin or back-office staff — can
+open one (can_enter): the back-office administers the platform, it isn't a
+tool for a group's officers.
 """
 
 from functools import wraps
@@ -41,9 +42,10 @@ def _enter_group(request):
 
 def can_enter(user):
     """The back-office is the platform's administration console: the super
-    admin alone gets in (owner, 2026-10-23). A group's officers — président,
-    trésorier, secrétaire… — work in the app."""
-    return user.is_active and user.is_super_admin
+    admin and the back-office staff teams get in (owner, 2026-10-23 and
+    2026-10-26), each limited to their own areas by their permissions. A
+    group's officers — président, trésorier, secrétaire… — work in the app."""
+    return user.is_active and user.is_platform_account
 
 
 def trust_token(user):

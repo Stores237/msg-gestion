@@ -1504,7 +1504,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorBackofficeOnly =>
-      'Super admin accounts work only in the back-office (web browser), not in the app.';
+      'Back-office accounts (super admin, support, IT and integration teams) work only in the back-office (web browser), not in the app.';
 
   @override
   String get requestAccess => 'Request access';

@@ -17,11 +17,11 @@
 {% endif %}
 <div class="bo-cols">
   <div style="display:flex;flex-direction:column;gap:24px">
-    <section class="panel"><div class="panel-h"><h2>Rôles</h2>{% if can_edit %}<div class="acts"><button class="btn btn-primary btn-sm" onclick="document.getElementById('dlg-assign').showModal()">{% icon 'plus' 16 %}Affecter un rôle</button></div>{% endif %}</div>
+    <section class="panel"><div class="panel-h"><h2>Rôles</h2>{% if can_roles %}<div class="acts"><button class="btn btn-primary btn-sm" onclick="document.getElementById('dlg-assign').showModal()">{% icon 'plus' 16 %}Affecter un rôle</button></div>{% endif %}</div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rôle</th><th>Début</th><th>Fin</th><th>Échéance</th><th></th></tr></thead><tbody>
       {% for r in rows %}<tr{% if not r.active %} style="opacity:.6"{% endif %}><td>{% role_badge r.a.role r.a.ends_on r.a.starts_on %}</td><td class="tnum">{{ r.a.starts_on|date:"d/m/Y" }}</td><td class="tnum">{{ r.a.ends_on|date:"d/m/Y"|default:"sans fin" }}</td>
         <td>{% if r.a.revoked_at %}<span class="status off"><i></i>Retiré le {{ r.a.revoked_at|date:"d/m/Y" }}</span>{% elif r.expired %}<span class="status off"><i></i>Expiré</span>{% elif r.progress is not None %}<div class="timeline" style="min-width:160px"><div class="tl-bar" style="height:10px"><i class="{% if r.left_days is not None and r.left_days <= 30 %}w{% endif %}" style="left:0;width:{{ r.progress }}%"></i></div><div class="tl-l"><span>{{ r.progress }} %</span><span>reste {{ r.left_days }} j</span></div></div>{% else %}<span class="muted">—</span>{% endif %}</td>
-        <td style="text-align:right">{% if can_edit and r.active %}<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('revoke-id').value='{{ r.a.pk }}';document.getElementById('revoke-name').textContent='{{ r.a.role.name|escapejs }}';document.getElementById('dlg-revoke').showModal()">Retirer</button>{% endif %}</td></tr>
+        <td style="text-align:right">{% if can_roles and r.active %}<button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('revoke-id').value='{{ r.a.pk }}';document.getElementById('revoke-name').textContent='{{ r.a.role.name|escapejs }}';document.getElementById('dlg-revoke').showModal()">Retirer</button>{% endif %}</td></tr>
       {% empty %}<tr class="empty-row"><td colspan="5">Aucun rôle.</td></tr>{% endfor %}</tbody></table></div></section>
     <form class="panel" method="post">{% csrf_token %}<input type="hidden" name="action" value="groups"><div class="panel-h"><h2>Groupes</h2>{% if can_edit %}<div class="acts"><button class="btn btn-secondary btn-sm">Enregistrer</button></div>{% endif %}</div>
       <div class="panel-b"><div class="rbs">{% for g in groups %}<label class="fsel{% if g.pk in member_groups %} on{% endif %}"><input type="checkbox" name="groups" value="{{ g.pk }}"{% if g.pk in member_groups %} checked{% endif %}{% if not can_edit %} disabled{% endif %}> {{ g.name }}{% if g.chef_id == member.pk %} · chef{% endif %}</label>{% empty %}<span class="muted">Aucun groupe. Les groupes se créent depuis l’app (Planning).</span>{% endfor %}</div></div></form>
@@ -35,10 +35,10 @@
       <dt>PIN</dt><dd>{% if member.pin_locked_until and member.pin_locked_until > now %}Bloqué{% elif member.pin_must_change %}Provisoire{% else %}Personnel{% endif %}</dd>
     </dl></div></section>
     <section class="panel"><div class="panel-h"><h2>Accès au back-office</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:10px">
-      {% if not member.is_super_admin %}<span class="status off"><i></i>Application seulement</span>
-      <span style="font-size:13px;color:var(--text-secondary)">Le back-office est réservé aux super admins. Pour donner un accès, affectez d’abord le rôle Super admin ; ce compte ne pourra alors plus utiliser l’application.</span>
+      {% if not member.is_platform_account %}<span class="status off"><i></i>Application seulement</span>
+      <span style="font-size:13px;color:var(--text-secondary)">Le back-office est réservé aux super admins et à l’équipe du back-office (support, IT helpdesk, intégrations). Pour donner un accès, utilisez la page « Équipe du back-office » ; ce compte ne pourra alors plus utiliser l’application.</span>
       {% else %}{% if backoffice %}<span class="status ok"><i></i>Mot de passe défini · {{ codes_left }} codes de secours</span>{% else %}<span class="status off"><i></i>Pas encore de mot de passe</span>{% endif %}
-      {% if can_edit %}<form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="password">{% if backoffice %}Nouveau mot de passe provisoire{% else %}Donner un accès (mot de passe provisoire){% endif %}</button></form>{% endif %}{% endif %}
+      {% if request.user.is_super_admin %}<form method="post">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="action" value="password">{% if backoffice %}Nouveau mot de passe provisoire{% else %}Donner un accès (mot de passe provisoire){% endif %}</button></form>{% endif %}{% endif %}
     </div></section>
   </div>
 </div>

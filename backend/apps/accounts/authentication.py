@@ -3,7 +3,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from apps.core.groups import set_current_group
 
-BACKOFFICE_ONLY = "Les comptes super admin s’utilisent uniquement sur le back-office."
+BACKOFFICE_ONLY = "Les comptes du back-office (super admin, équipes support, IT, intégrations) s’utilisent uniquement sur le back-office."
 NOT_IN_GROUP = "Vous n’êtes pas membre de ce groupe."
 NO_GROUP = "Ce compte n’appartient encore à aucun groupe."
 
@@ -39,6 +39,6 @@ class AppJWTAuthentication(JWTAuthentication):
 
     def get_user(self, validated_token):
         user = super().get_user(validated_token)
-        if user.is_super_admin:
+        if user.is_platform_account:
             raise exceptions.PermissionDenied({"detail": BACKOFFICE_ONLY, "code": "backoffice_only"})
         return user

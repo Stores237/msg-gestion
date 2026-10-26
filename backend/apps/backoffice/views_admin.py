@@ -40,7 +40,7 @@ def _deny(request):
 # --- Account security ------------------------------------------------------------
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view(None)
 def security(request):
     """"Sécurité du compte" (design: BSessions): sessions, 2FA, backup codes."""
     me = request.user
@@ -92,9 +92,17 @@ def user_detail(request, pk):
     member = get_object_or_404(User, pk=pk)
     once = None  # secrets shown once after an action
     if request.method == "POST":
-        if not request.user.can("backoffice.users", "change"):
-            return _deny(request)
         action = request.POST.get("action")
+        # Each action needs its own right (owner, 2026-10-26: staff teams):
+        # roles need the roles area; account actions the accounts area; a
+        # back-office password, and anything on a platform account (super
+        # admin, staff), is the super admin's alone.
+        need = ("backoffice.roles", "change") if action in ("assign", "revoke") else ("backoffice.users", "change")
+        superadmin_only = action == "password" or (member.is_platform_account and member.pk != request.user.pk)
+        if not request.user.can(*need) or (superadmin_only and not request.user.is_super_admin):
+            audit.record("Action back-office refusée", actor=request.user, obj=member, request=request, sensitive=True,
+                         refused=True, detail={"action": action or ""})
+            return _deny(request)
         reason = (request.POST.get("reason") or "").strip()
         try:
             if action == "assign":
@@ -124,8 +132,9 @@ def user_detail(request, pk):
                              request=request, sensitive=True, detail={"motif": reason})
                 messages.success(request, "Statut mis à jour.")
             elif action == "password":
-                if not member.is_super_admin:
-                    raise RuleViolation("Le back-office est réservé aux super admins : affectez d’abord le rôle Super admin.")
+                if not member.is_platform_account:
+                    raise RuleViolation("Le back-office est réservé aux super admins et à l’équipe du back-office : "
+                                        "affectez d’abord un de ces rôles.")
                 pw = _random_password()
                 member.set_password(pw)
                 member.save(update_fields=["password"])
@@ -158,7 +167,9 @@ def user_detail(request, pk):
         "nav": "users", "member": member, "rows": rows, "roles": roles,
         "role_ends": {r.slug: (default_end(r, today).isoformat() if r.mandate_months else "") for r in roles},
         "groups": ServiceGroup.objects.all(), "member_groups": set(member.service_groups.values_list("pk", flat=True)),
-        "once": once, "can_edit": request.user.can("backoffice.users", "change"), "today": today,
+        "once": once, "can_edit": request.user.can("backoffice.users", "change")
+        and (request.user.is_super_admin or not member.is_platform_account),
+        "can_roles": request.user.can("backoffice.roles", "change"), "today": today,
         "phone": format_phone(member.phone), "backoffice": member.has_usable_password(),
         "codes_left": BackupCode.remaining(member), "now": timezone.now(),
     })
@@ -371,7 +382,7 @@ def users_import(request):
 # --- Assignments ------------------------------------------------------------------------
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.roles", "view")
 def assignments(request):
     """Design: BAssignments — every dated role, time elapsed, alerts 30
     days before a mandate ends."""
@@ -403,7 +414,7 @@ def assignments(request):
     )
     return render(request, "backoffice/assignments.html", {
         "nav": "assign", "rows": rows, "soon": soon, "horizon": horizon, "upcoming": upcoming, "today": today,
-        "can_edit": request.user.can("backoffice.users", "change"),
+        "can_edit": request.user.can("backoffice.roles", "change"),
         "day_roles": Role.objects.filter(is_archived=False).exclude(slug__in=["membre", registry.SUPER_ADMIN_SLUG]),
         "members": User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True),
     })
@@ -422,7 +433,7 @@ def _assign_for_the_day(member, role, day, *, reason, by, request=None):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.roles", "change")
 def assignment_day(request):
     member = get_object_or_404(User.objects.members(), pk=request.POST.get("member"), gstatus=User.Status.ACTIVE)
     role = get_object_or_404(Role, slug=request.POST.get("role"), is_archived=False)
@@ -439,7 +450,7 @@ def assignment_day(request):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.roles", "change")
 def assignment_renew(request, pk):
     a = get_object_or_404(RoleAssignment.objects.select_related("role", "user"), pk=pk)
     start = (a.ends_on or timezone.localdate()) + timedelta(days=1)
@@ -455,7 +466,7 @@ def assignment_renew(request, pk):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.roles", "change")
 def role_request_decide(request, pk):
     rr = get_object_or_404(RoleRequest.objects.select_related("member", "role"), pk=pk, status=RoleRequest.Status.PENDING)
     if request.POST.get("approve"):
@@ -485,7 +496,7 @@ def role_request_decide(request, pk):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.roles", "change")
 def role_manage(request, slug=None):
     """New / rename / duplicate / archive (design: BRoles toolbar)."""
     from django.utils.text import slugify
@@ -542,11 +553,11 @@ SETTING_FIELDS = ["parish", "welcome_message", "motto", "color", "fee_registrati
                   "assise_time", "vigil_time", "reminder_time", "duty_template"]
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.settings", "view")
 def settings_view(request):
     st = Settings.get()
     if request.method == "POST":
-        if not request.user.can("backoffice.users", "change"):
+        if not request.user.can("backoffice.settings", "change"):
             return _deny(request)
         changed = {}
         name = request.POST.get("name", "").strip()
@@ -592,7 +603,7 @@ def _new_slug(model, name, max_length):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.settings", "change")
 def settings_lists(request):
     """The group's own activity types and dress codes."""
     from apps.events.models import ActivityType, DressCode

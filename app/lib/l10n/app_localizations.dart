@@ -2603,7 +2603,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorBackofficeOnly.
   ///
   /// In fr, this message translates to:
-  /// **'Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.'**
+  /// **'Les comptes du back-office (super admin, équipes support, IT, intégrations) s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.'**
   String get errorBackofficeOnly;
 
   /// No description provided for @requestAccess.

@@ -25,10 +25,10 @@ from apps.core.models import APP_COLORS, Group, Settings
 from .access import SESSION_GROUP, backoffice_view
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.groups", "view")
 def groups(request):
     if request.method == "POST":
-        if not request.user.can("backoffice.users", "create"):
+        if not request.user.can("backoffice.groups", "create"):
             return render(request, "backoffice/forbidden.html", status=403)
         name = request.POST.get("name", "").strip()
         if not name:
@@ -61,7 +61,7 @@ def _refused(request, group, action, err):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "change")
+@backoffice_view("backoffice.groups", "change")
 def group_edit(request, pk):
     g = get_object_or_404(Group, pk=pk)
     try:
@@ -74,7 +74,7 @@ def group_edit(request, pk):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "delete")
+@backoffice_view("backoffice.groups", "delete")
 def group_delete(request, pk):
     """action=request (1st super admin), confirm (another one), cancel;
     restore brings a deleted group back."""
@@ -104,7 +104,7 @@ def group_delete(request, pk):
 
 
 @require_POST
-@backoffice_view("backoffice.users", "view")
+@backoffice_view(None)
 def group_switch(request):
     g = get_object_or_404(Group, pk=request.POST.get("group"), is_active=True)
     request.session[SESSION_GROUP] = g.pk
@@ -117,7 +117,7 @@ def group_switch(request):
 PLATFORM_FIELDS = ["support_phone", "support_whatsapp", "support_email", "website", "privacy_text", "terms_text"]
 
 
-@backoffice_view("backoffice.users", "view")
+@backoffice_view("backoffice.platform", "view")
 def platform(request):
     """The partner's contacts and the legal texts shown in the app's Aide /
     À propos (owner, 2026-10-26)."""
@@ -125,7 +125,7 @@ def platform(request):
 
     p = PlatformSettings.get()
     if request.method == "POST":
-        if not request.user.can("backoffice.users", "change"):
+        if not request.user.can("backoffice.platform", "change"):
             return render(request, "backoffice/forbidden.html", status=403)
         changed = {}
         for f in PLATFORM_FIELDS:

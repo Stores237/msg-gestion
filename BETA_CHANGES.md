@@ -496,3 +496,34 @@ Owner, 2026-10-26.
 
 **Verify.** `pytest -k "bureau or plain_member or platform or storage"`;
 `flutter test test/help_and_roles_test.dart`.
+
+## 24. Back-office staff: support, IT helpdesk, integration ops
+
+Owner, 2026-10-26: the back-office gets staff teams, each with access by role and level.
+
+- **Six platform roles** (`accounts.0013_backoffice_staff`): Support · agent / responsable,
+  IT helpdesk · agent / responsable, Intégrations · agent / responsable. Back-office only, across
+  every group (group switcher), never in the app.
+- **The back-office is split into areas** so each team gets only its part: comptes et membres,
+  demandes d'accès, rôles et affectations, groupes, paramètres des groupes, plateforme · aide,
+  sécurité et sessions, intégrations et services, journal. Every page and menu entry checks its
+  own area. Default access:
+  - Support agent: sees accounts, access requests, roles, groups, settings, platform, journal.
+    Responsable: also resets PINs and suspends, creates accounts, approves access requests,
+    edits group settings and the help page, exports.
+  - IT agent: sees accounts, groups, the team and its sessions, services, journal. Responsable:
+    also resets PINs, closes staff sessions and issues new backup codes, tests services, exports.
+  - Integration agent: sees services, platform, group settings, groups, journal. Responsable:
+    also tests services, edits the help page, exports accounts and journal.
+  The super admin adjusts all of this in Rôles et permissions.
+- **Fixed rules** (`registry.STAFF_LOCKED`): staff never change roles and permissions, never
+  create, change or delete groups, never touch finances or anything outside the back-office, and
+  never act on a super admin's account. Refusals are in the journal.
+- **Équipe du back-office** page: the super admin adds a staff member (name, number without an app
+  account, team and level, reason) and gets a temporary password and 10 backup codes shown once
+  (the backup codes replace the SMS step until Twilio is live); changes level; removes access.
+  The IT helpdesk closes a colleague's sessions and issues new backup codes.
+- **Intégrations et services** page: storage, SMS, push, e-mail, error tracking and API docs,
+  configured or pending, with a live "Tester maintenant" for the file storage. No secret shown.
+
+**Verify.** `pytest apps/backoffice/test_staff.py`.

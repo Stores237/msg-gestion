@@ -971,7 +971,7 @@
   "chefNeedsGuards": "Affectez d’abord des gardes à ce service.",
   "statementPdf": "Bilan général des membres (PDF)",
   "memberStatementPdf": "Bilan financier (PDF)",
-  "errorBackofficeOnly": "Les comptes super admin s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.",
+  "errorBackofficeOnly": "Les comptes du back-office (super admin, équipes support, IT, intégrations) s’utilisent uniquement sur le back-office (navigateur web), pas dans l’application.",
   "requestAccess": "Demander un accès",
   "accessRequestsTitle": "Demandes d’accès",
   "accessRole": "Rôle demandé",
