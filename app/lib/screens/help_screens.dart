@@ -168,11 +168,12 @@ class _HelpRow extends StatelessWidget {
         lead: Container(
           width: 44,
           height: 44,
+          // The app's own colour (group's or the member's choice).
           decoration: BoxDecoration(
-            color: c.warnTint,
+            color: c.primaryTint,
             borderRadius: BorderRadius.circular(MsgRadius.md),
           ),
-          child: Icon(icon, color: c.warn, size: 22),
+          child: Icon(icon, color: c.primaryText, size: 22),
         ),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
         subtitle: off

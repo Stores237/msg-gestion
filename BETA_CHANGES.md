@@ -488,7 +488,8 @@ Owner, 2026-10-26.
   confidentialité, conditions d'utilisation. Contacts and texts are the partner's, edited in the
   back-office → **Plateforme · aide** (`core.PlatformSettings`, `core.0009`; `GET /api/platform/`).
   The two texts start as drafts to be reviewed. A contact not filled in shows "Pas encore
-  disponible". Log out is now red, as in the reference.
+  disponible". Log out is now red, as in the reference. The row icons use the app colour
+  (owner, 2026-10-26), so they follow the group's or the member's choice.
 - **Profile picture upload** failed on staging because the Supabase storage refuses every request
   (403: the S3 access key or its region is no longer valid). Owner action: new S3 access key.
   The API now answers `503 storage_unavailable` with a clear message (app: "le stockage est
