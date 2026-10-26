@@ -542,3 +542,42 @@ Owner, 2026-10-26.
   composer and the event form open pre-filled; deleting asks first.
 
 **Verify.** `pytest -k author_edits`; `flutter test test/owner_edit_test.dart`.
+
+## 26. Conditions of use checkbox at login
+
+Owner, 2026-10-26.
+
+- **App**: the phone-number screen has "J’ai lu et j’accepte les conditions d’utilisation"
+  (EN: "I have read and accept the terms of use"); the link opens the text. Continue without the
+  box says "Cochez la case pour continuer." The version shown is sent with the PIN (and with a
+  PIN reset by SMS).
+- **Server**: login and PIN reset answer `428 terms_required` until the member accepts the
+  current version; acceptance is saved on the account and in the journal. `GET /api/auth/terms/`
+  gives the text before login. The back-office member page shows "Conditions d’utilisation :
+  version N acceptée le …".
+- **Back-office → Plateforme · aide**: changing the terms text raises the version (shown under
+  the field); every member accepts the new text at their next login.
+- Migrations `accounts.0014_terms_acceptance`, `core.0010_terms_acceptance`. Builds before 15
+  can't tick the box, so after this deploy members need build 15 to sign in.
+
+**Verify.** On the phone: Continue without ticking → the red line; tick → PIN → in. Back-office
+→ the member's page shows the version and date. Change the terms text in Plateforme · aide →
+the next login asks again. `pytest apps/accounts/test_terms.py`;
+`flutter test test/terms_login_test.dart`.
+
+## 27. Security check fixes
+
+2026-10-26; full report in SECURITY.md "Security check — 2026-10-26".
+
+- Rate limits and audit addresses use the real client address (`CF-Connecting-IP` behind
+  Cloudflare), so a forged `X-Forwarded-For` no longer gets around them.
+- The phone's offline copy is erased on sign-out (asks first if changes are unsent), after 5
+  wrong PINs, and when another account signs in. Android backup is off.
+- Pillow 13.0.0 (37 published vulnerabilities in 12.3.0).
+- `/api/schema/` and `/api/docs/` need a back-office session; CORS headers only on `/api/`.
+- Back-office → Intégrations shows "Adresse du visiteur": the address the limits key on.
+
+**Verify.** After the deploy, Intégrations → "Adresse du visiteur" shows your own public address
+(green). Opening `/api/docs/` signed out → refused. In the app, sign out with a change waiting
+offline → the warning. `pytest apps/core/test_security.py`;
+`flutter test test/offline_owner_test.dart`.

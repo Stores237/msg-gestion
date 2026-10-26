@@ -1110,5 +1110,17 @@
       }
     }
   },
-  "announcementDeleted": "Annonce supprimée."
+  "announcementDeleted": "Annonce supprimée.",
+  "termsAcceptPrefix": "J’ai lu et j’accepte les ",
+  "termsOfServiceLink": "conditions d’utilisation",
+  "termsRequired": "Les conditions d’utilisation ont changé : revenez en arrière, relisez-les et cochez la case pour continuer.",
+  "termsTickToContinue": "Cochez la case pour continuer.",
+  "logoutPending": "{n, plural, =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}",
+  "@logoutPending": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

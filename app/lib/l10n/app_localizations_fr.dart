@@ -1803,4 +1803,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get announcementDeleted => 'Annonce supprimée.';
+
+  @override
+  String get termsAcceptPrefix => 'J’ai lu et j’accepte les ';
+
+  @override
+  String get termsOfServiceLink => 'conditions d’utilisation';
+
+  @override
+  String get termsRequired =>
+      'Les conditions d’utilisation ont changé : revenez en arrière, relisez-les et cochez la case pour continuer.';
+
+  @override
+  String get termsTickToContinue => 'Cochez la case pour continuer.';
+
+  @override
+  String logoutPending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          '$n modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.',
+      one:
+          '1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.',
+    );
+    return '$_temp0';
+  }
 }

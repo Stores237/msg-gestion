@@ -24,6 +24,35 @@ from .services import check_pin_login, pin_problem
 UNKNOWN_PHONE = "Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire."
 
 
+TERMS_REQUIRED = "Acceptez les conditions d’utilisation pour vous connecter."
+
+
+def _terms_refusal(user, request):
+    """None when the member has accepted the current conditions (the login
+    checkbox, sent as accept_terms + the version it showed); otherwise the
+    428 to answer. A box ticked on a text changed since doesn't count."""
+    from apps.core.models import PlatformSettings
+
+    current = PlatformSettings.get().terms_version
+    if user.terms_version >= current:
+        return None
+    if request.data.get("accept_terms") in (True, "true") and str(request.data.get("terms_version")) == str(current):
+        return None
+    return Response({"detail": TERMS_REQUIRED, "code": "terms_required", "terms_version": current}, status=428)
+
+
+def _record_terms(user, request):
+    from apps.core.models import PlatformSettings
+
+    current = PlatformSettings.get().terms_version
+    if user.terms_version >= current:
+        return
+    user.terms_version = current
+    user.terms_accepted_at = timezone.now()
+    user.save(update_fields=["terms_version", "terms_accepted_at"])
+    audit.record("Conditions d’utilisation acceptées", actor=user, obj=user, request=request, detail={"version": current})
+
+
 def _login_allowed(user):
     return user is not None and user.is_active and user.status not in (User.Status.SUSPENDED, User.Status.ARCHIVED)
 
@@ -47,7 +76,9 @@ class PhoneLookupView(APIView):
         user = User.objects.filter(phone=s.validated_data["phone"]).first()
         if not _login_allowed(user):
             return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
-        return Response({"first_name": user.first_name, "has_pin": user.has_pin})
+        from apps.core.models import PlatformSettings
+
+        return Response({"first_name": user.first_name, "has_pin": user.has_pin, "terms_version": PlatformSettings.get().terms_version})
 
 
 class PinLoginView(APIView):
@@ -87,6 +118,10 @@ class PinLoginView(APIView):
             # which accounts are super admins.
             audit.record("Refus · super admin dans l’application", actor=user, obj=user, request=request, refused=True)
             return Response({"detail": BACKOFFICE_ONLY, "code": "backoffice_only"}, status=status.HTTP_403_FORBIDDEN)
+        # After the PIN, so only the holder learns the terms changed.
+        if refused := _terms_refusal(user, request):
+            return refused
+        _record_terms(user, request)
         refresh = RefreshToken.for_user(result.user)
         User.objects.filter(pk=user.pk).update(last_login=timezone.now())
         return Response({"access": str(refresh.access_token), "refresh": str(refresh), "pin_must_change": result.user.pin_must_change})
@@ -179,6 +214,8 @@ class ForgotPinConfirmView(APIView):
         user = User.objects.filter(phone=s.validated_data["phone"]).first()
         if not _login_allowed(user):
             return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
+        if refused := _terms_refusal(user, request):
+            return refused  # before the SMS code is used up, so the member can tick and retry
         try:
             ok = sms.check_code(user.phone, str(request.data.get("code", "")))
         except sms.SmsUnavailable:
@@ -188,8 +225,24 @@ class ForgotPinConfirmView(APIView):
         user.set_pin(new)
         user.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
         audit.record("PIN réinitialisé par SMS", actor=user, obj=user, request=request)
+        _record_terms(user, request)
         refresh = RefreshToken.for_user(user)
         return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
+
+
+class TermsView(APIView):
+    """GET, before login: the conditions and privacy texts the login
+    checkbox links to, with the version to accept."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_scope = "terms"
+
+    def get(self, request):
+        from apps.core.models import PlatformSettings
+
+        p = PlatformSettings.get()
+        return Response({"terms_version": p.terms_version, "terms_text": p.terms_text, "privacy_text": p.privacy_text})
 
 
 class PreferencesView(APIView):

@@ -40,7 +40,7 @@ void main() {
         'attempts_left': 2,
       });
       await expectLater(
-        repo.loginWithPin(phone: '677452108', pin: '0000'),
+        repo.loginWithPin(phone: '677452108', pin: '0000', acceptedTerms: 1),
         throwsA(
           isA<WrongPin>().having((e) => e.attemptsLeft, 'attemptsLeft', 2),
         ),
@@ -54,19 +54,19 @@ void main() {
         'detail': 'bloqué',
         'code': 'locked',
         'minutes': 12,
-      }).loginWithPin(phone: 'x', pin: '1'),
+      }).loginWithPin(phone: 'x', pin: '1', acceptedTerms: 1),
       throwsA(isA<AccountLocked>().having((e) => e.minutes, 'minutes', 12)),
     );
     await expectLater(
       repoReturning(404, {
         'detail': 'inconnu',
-      }).loginWithPin(phone: 'x', pin: '1'),
+      }).loginWithPin(phone: 'x', pin: '1', acceptedTerms: 1),
       throwsA(isA<UnknownMember>()),
     );
     await expectLater(
       repoReturning(409, {
         'detail': 'pas de PIN',
-      }).loginWithPin(phone: 'x', pin: '1'),
+      }).loginWithPin(phone: 'x', pin: '1', acceptedTerms: 1),
       throwsA(isA<NoPinSet>()),
     );
   });
@@ -76,17 +76,47 @@ void main() {
       repoReturning(403, {
         'detail': 'back-office',
         'code': 'backoffice_only',
-      }).loginWithPin(phone: 'x', pin: '1'),
+      }).loginWithPin(phone: 'x', pin: '1', acceptedTerms: 1),
       throwsA(isA<BackofficeOnly>()),
     );
   });
 
+  test('428 becomes TermsRequired; the box and its version are sent', () async {
+    await expectLater(
+      repoReturning(428, {
+        'detail': 'conditions',
+        'code': 'terms_required',
+        'terms_version': 2,
+      }).loginWithPin(phone: 'x', pin: '1', acceptedTerms: 1),
+      throwsA(isA<TermsRequired>()),
+    );
+    Map<String, dynamic>? sent;
+    final repo = HttpAuthRepository(
+      ApiClient(
+        authSession: AuthSession(storage: InMemoryTokenStorage()),
+        baseUrl: 'http://x/api',
+        httpClient: MockClient((req) async {
+          sent = jsonDecode(req.body) as Map<String, dynamic>;
+          return http.Response(
+            jsonEncode({'access': 'a', 'refresh': 'r'}),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      ),
+    );
+    await repo.loginWithPin(phone: 'x', pin: '1234', acceptedTerms: 3);
+    expect(sent?['accept_terms'], true);
+    expect(sent?['terms_version'], 3);
+  });
+
   test('success stores both tokens', () async {
     final session = AuthSession(storage: InMemoryTokenStorage());
-    await repoReturning(200, {
-      'access': 'a',
-      'refresh': 'r',
-    }, session: session).loginWithPin(phone: 'x', pin: '1234');
+    await repoReturning(
+      200,
+      {'access': 'a', 'refresh': 'r'},
+      session: session,
+    ).loginWithPin(phone: 'x', pin: '1234', acceptedTerms: 1);
     expect(session.accessToken, 'a');
     expect(session.refreshToken, 'r');
   });

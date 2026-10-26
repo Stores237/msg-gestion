@@ -193,9 +193,10 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # Without this, a view's throttle_scope does nothing at all — caught
     # by test_login_is_throttled_with_429_not_500.
-    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.ScopedRateThrottle",),
+    "DEFAULT_THROTTLE_CLASSES": ("apps.core.throttling.ClientIPScopedRateThrottle",),
     "DEFAULT_THROTTLE_RATES": {
         "phone_lookup": "30/hour",
+        "terms": "120/hour",
         "pin_login": "30/hour",
         "pin_forgot": "10/hour",
         "token_refresh": "120/hour",
@@ -220,9 +221,19 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "MSG Gestion API",
     "DESCRIPTION": "Mouvement Garde Suisse, Notre-Dame de Lourdes de Yapoma — membres, caisse, calendrier, annonces.",
     "VERSION": "0.1.0",
+    # Readable from a back-office session only, not by the public.
+    "SERVE_AUTHENTICATION": ["rest_framework.authentication.SessionAuthentication"],
+    "SERVE_PERMISSIONS": ["apps.accounts.permissions.IsPlatformAccount"],
 }
 
+# The header that holds the real client address when a trusted proxy sets
+# it (prod.py: Cloudflare in front of Render). See apps.core.audit.client_ip.
+CLIENT_IP_HEADER = env("CLIENT_IP_HEADER", default="")
+
+# The app isn't a browser, so CORS only matters for web tools reading the
+# API; it never applies to the back-office's cookie-authenticated pages.
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_URLS_REGEX = r"^/api/.*$"
 
 # PIN lockout (design: "Après 3 erreurs, le compte est bloqué 15 min").
 PIN_MAX_ATTEMPTS = env.int("PIN_MAX_ATTEMPTS", default=3)

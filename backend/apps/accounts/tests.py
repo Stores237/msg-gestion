@@ -64,7 +64,7 @@ def test_lookup_returns_first_name(api):
     UserFactory(phone="+237677452108", first_name="Ingrid")
     r = api.post("/api/auth/phone/", {"phone": "6 77 45 21 08"}, format="json")
     assert r.status_code == 200
-    assert r.json() == {"first_name": "Ingrid", "has_pin": True}
+    assert r.json() == {"first_name": "Ingrid", "has_pin": True, "terms_version": 1}
 
 
 def test_lookup_unknown_and_suspended_look_the_same(api):
@@ -84,7 +84,7 @@ def test_lookup_rejects_malformed_number(api):
 
 
 def _login(api, pin, phone="677452108"):
-    return api.post("/api/auth/login/", {"phone": phone, "pin": pin}, format="json")
+    return api.post("/api/auth/login/", {"phone": phone, "pin": pin, "accept_terms": True, "terms_version": 1}, format="json")
 
 
 def test_pin_login_returns_tokens(api):
@@ -418,9 +418,9 @@ def test_change_pin_requires_current_and_rejects_simple_pins(api):
     api.force_authenticate(user)
     assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "1111"}, format="json").json()["code"] == "pin_too_simple"
     assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "1234"}, format="json").json()["code"] == "pin_too_simple"
-    wrong = api.post("/api/auth/pin/change/", {"current_pin": "0000", "new_pin": "7391"}, format="json")
+    wrong = api.post("/api/auth/pin/change/", {"current_pin": "0000", "new_pin": "7391", "accept_terms": True, "terms_version": 1}, format="json")
     assert (wrong.status_code, wrong.json()["attempts_left"]) == (401, 2)
-    assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "7391"}, format="json").status_code == 204
+    assert api.post("/api/auth/pin/change/", {"current_pin": "4821", "new_pin": "7391", "accept_terms": True, "terms_version": 1}, format="json").status_code == 204
     user.refresh_from_db()
     assert user.check_pin("7391") and not user.pin_must_change
 
@@ -482,9 +482,9 @@ def test_forgot_pin_full_flow_with_code(api, monkeypatch):
     monkeypatch.setattr(sms.secrets, "randbelow", capture)
     user = UserFactory(phone="+237677452108", pin="4821")
     assert api.post("/api/auth/pin/forgot/", {"phone": "677452108"}, format="json").status_code == 202
-    bad = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": "000000" if sent["code"] != "000000" else "111111", "new_pin": "7391"}, format="json")
+    bad = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": "000000" if sent["code"] != "000000" else "111111", "new_pin": "7391", "accept_terms": True, "terms_version": 1}, format="json")
     assert bad.json()["code"] == "bad_code"
-    ok = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": sent["code"], "new_pin": "7391"}, format="json")
+    ok = api.post("/api/auth/pin/forgot/confirm/", {"phone": "677452108", "code": sent["code"], "new_pin": "7391", "accept_terms": True, "terms_version": 1}, format="json")
     assert ok.status_code == 200 and "access" in ok.json()
     user.refresh_from_db()
     assert user.check_pin("7391")

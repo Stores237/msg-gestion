@@ -19,6 +19,7 @@ class HttpAuthRepository implements AuthRepository {
         phone: phone,
         firstName: data['first_name'] as String,
         hasPin: data['has_pin'] as bool,
+        termsVersion: (data['terms_version'] as num?)?.toInt() ?? 1,
       );
     } on ApiException catch (e) {
       if (e.statusCode == 404) throw const UnknownMember();
@@ -27,15 +28,31 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<TermsInfo> terms() async {
+    final data = await _api.get('/auth/terms/') as Map<String, dynamic>;
+    return TermsInfo(
+      version: (data['terms_version'] as num).toInt(),
+      termsText: data['terms_text'] as String? ?? '',
+      privacyText: data['privacy_text'] as String? ?? '',
+    );
+  }
+
+  @override
   Future<bool> loginWithPin({
     required String phone,
     required String pin,
+    required int acceptedTerms,
   }) async {
     try {
       final data =
           await _api.post(
                 '/auth/login/',
-                body: {'phone': phone, 'pin': pin},
+                body: {
+                  'phone': phone,
+                  'pin': pin,
+                  'accept_terms': true,
+                  'terms_version': acceptedTerms,
+                },
                 authenticated: false,
               )
               as Map<String, dynamic>;
@@ -56,6 +73,8 @@ class HttpAuthRepository implements AuthRepository {
           throw const NoPinSet();
         case 403 when e.code == 'backoffice_only':
           throw const BackofficeOnly();
+        case 428:
+          throw const TermsRequired();
       }
       rethrow;
     }
@@ -101,11 +120,18 @@ class HttpAuthRepository implements AuthRepository {
     required String phone,
     required String code,
     required String newPin,
+    required int acceptedTerms,
   }) async {
     final data =
         await _api.post(
               '/auth/pin/forgot/confirm/',
-              body: {'phone': phone, 'code': code, 'new_pin': newPin},
+              body: {
+                'phone': phone,
+                'code': code,
+                'new_pin': newPin,
+                'accept_terms': true,
+                'terms_version': acceptedTerms,
+              },
               authenticated: false,
             )
             as Map<String, dynamic>;

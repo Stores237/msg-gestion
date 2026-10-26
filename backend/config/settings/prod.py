@@ -14,6 +14,11 @@ SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
 # /healthz/ is hit over plain HTTP by Render's own health checker.
 SECURE_REDIRECT_EXEMPT = [r"^healthz/$"]
 
+# Render serves through Cloudflare (staging answers "server: cloudflare"),
+# which sets CF-Connecting-IP to the real client address; a client can't
+# forge it through Cloudflare. Rate limits and the audit log key on it.
+CLIENT_IP_HEADER = os.getenv("CLIENT_IP_HEADER", "HTTP_CF_CONNECTING_IP")
+
 # Render assigns the hostname on first deploy; it isn't known before.
 RENDER_HOST = os.getenv("RENDER_EXTERNAL_HOSTNAME")
 if RENDER_HOST:

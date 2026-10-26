@@ -25,7 +25,7 @@ def check_storage():
     return True, "Stockage des fichiers : écriture et suppression réussies."
 
 
-def _services():
+def _services(request=None):
     storage = settings.STORAGES["default"]["BACKEND"]
     s3 = storage.endswith("S3Storage")
     opts = settings.STORAGES["default"].get("OPTIONS", {})
@@ -47,14 +47,30 @@ def _services():
         {"name": "Suivi des erreurs", "what": "Sentry",
          "state": "ok" if os.environ.get("SENTRY_DSN") else "off",
          "detail": "Actif" if os.environ.get("SENTRY_DSN") else "Non configuré"},
-        {"name": "API de l’application", "what": "Documentation pour les futures intégrations",
+        {"name": "API de l’application", "what": "Documentation pour les futures intégrations (back-office connecté)",
          "state": "ok", "detail": "/api/docs/", "link": "/api/docs/"},
+        _client_ip_row(request),
     ]
+
+
+def _client_ip_row(request):
+    """What the rate limits key on: should be your own public address. A
+    Cloudflare or Render address here means CLIENT_IP_HEADER is wrong and
+    everyone shares one login limit (SECURITY.md)."""
+    from apps.core.audit import client_ip
+
+    header = settings.CLIENT_IP_HEADER
+    found = bool(request is not None and header and request.META.get(header))
+    return {"name": "Adresse du visiteur", "what": "Clé des limites de connexion et du journal",
+            "state": "ok" if found or not header else "warn",
+            "detail": f"Le serveur vous voit en {client_ip(request) or '—'}"
+                      + (f" (en-tête {header.removeprefix('HTTP_').replace('_', '-')})" if found else
+                         " (en-tête attendu absent : vérifier CLIENT_IP_HEADER)" if header else "")}
 
 
 @backoffice_view("backoffice.integrations", "view")
 def integrations(request):
     return render(request, "backoffice/integrations.html", {
-        "nav": "integrations", "services": _services(),
+        "nav": "integrations", "services": _services(request),
         "can_change": request.user.can("backoffice.integrations", "change"),
     })

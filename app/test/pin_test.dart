@@ -8,6 +8,8 @@ import 'helpers.dart';
 
 Future<void> enterPhoneAndPin(WidgetTester tester, String pin) async {
   await tester.enterText(find.byKey(const Key('phone-field')), '677452108');
+  await tester.tap(find.byKey(const Key('terms-checkbox')));
+  await tester.pump();
   await tester.tap(find.byKey(const Key('phone-continue')));
   await tester.pumpAndSettle();
   for (final d in pin.split('')) {
@@ -59,6 +61,8 @@ void main() {
       await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
       await tester.pumpAndSettle();
       await tester.enterText(find.byKey(const Key('phone-field')), '677452108');
+      await tester.tap(find.byKey(const Key('terms-checkbox')));
+      await tester.pump();
       await tester.tap(find.byKey(const Key('phone-continue')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('forgot-pin')));
@@ -80,6 +84,8 @@ void main() {
     await tester.pumpWidget(const MsgApp(home: LoginPhoneScreen()));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('phone-field')), '677452108');
+    await tester.tap(find.byKey(const Key('terms-checkbox')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('phone-continue')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('forgot-pin')));

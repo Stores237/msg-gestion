@@ -28,6 +28,8 @@ void main() {
 
   Future<void> enterPhone(WidgetTester tester, String phone) async {
     await tester.enterText(find.byKey(const Key('phone-field')), phone);
+    await tester.tap(find.byKey(const Key('terms-checkbox')));
+    await tester.pump();
     await tester.tap(find.byKey(const Key('phone-continue')));
     await tester.pumpAndSettle();
   }

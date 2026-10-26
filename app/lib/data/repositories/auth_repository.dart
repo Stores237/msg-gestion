@@ -4,10 +4,26 @@ class PhoneLookup {
     required this.phone,
     required this.firstName,
     required this.hasPin,
+    this.termsVersion = 1,
   });
   final String phone;
   final String firstName;
   final bool hasPin;
+
+  /// The conditions version the login checkbox accepts.
+  final int termsVersion;
+}
+
+/// The conditions shown before login (the checkbox links to them).
+class TermsInfo {
+  const TermsInfo({
+    required this.version,
+    required this.termsText,
+    this.privacyText = '',
+  });
+  final int version;
+  final String termsText;
+  final String privacyText;
 }
 
 /// Why a login was refused. Carries numbers, not sentences: screens word
@@ -39,13 +55,26 @@ class BackofficeOnly extends PinFailure {
   const BackofficeOnly();
 }
 
+/// The conditions changed (or weren't accepted): tick the box again.
+class TermsRequired extends PinFailure {
+  const TermsRequired();
+}
+
 abstract class AuthRepository {
   /// Throws [UnknownMember] when the number isn't a member's.
   Future<PhoneLookup> lookupPhone(String phone);
 
+  /// The conditions of use and privacy texts, readable before login.
+  Future<TermsInfo> terms();
+
   /// Stores the tokens in the session on success; throws a [PinFailure].
   /// Returns true when the PIN was temporary and must be changed now.
-  Future<bool> loginWithPin({required String phone, required String pin});
+  /// [acceptedTerms] is the conditions version the member ticked.
+  Future<bool> loginWithPin({
+    required String phone,
+    required String pin,
+    required int acceptedTerms,
+  });
 
   /// Throws [WrongPin]/[AccountLocked] for a wrong current PIN, or an
   /// ApiException with code `pin_too_simple`.
@@ -59,6 +88,7 @@ abstract class AuthRepository {
     required String phone,
     required String code,
     required String newPin,
+    required int acceptedTerms,
   });
 
   Future<void> logout();

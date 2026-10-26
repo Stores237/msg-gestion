@@ -85,6 +85,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     remind_eve = models.BooleanField(default=True, help_text="La veille à 20:00")
     remind_2h = models.BooleanField(default=False, help_text="2 heures avant")
 
+    # Conditions d’utilisation accepted at login (owner, 2026-10-26): the
+    # version from core.PlatformSettings; a new text asks again.
+    terms_version = models.PositiveIntegerField("version des CGU acceptée", default=0)
+    terms_accepted_at = models.DateTimeField("CGU acceptées le", null=True, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, help_text="Accès à l’admin Django (équipe technique).")
     created_at = models.DateTimeField(auto_now_add=True)

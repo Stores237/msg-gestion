@@ -132,7 +132,7 @@ def platform(request):
             if f not in request.POST:
                 continue
             field = PlatformSettings._meta.get_field(f)
-            value = request.POST[f].strip()
+            value = request.POST[f].strip().replace("\r\n", "\n")  # browsers send CRLF; don't count it as a new text
             try:
                 field.run_validators(value) if value else None
             except Exception:
@@ -141,6 +141,9 @@ def platform(request):
             if getattr(p, f) != value:
                 changed[f] = value if f not in ("privacy_text", "terms_text") else "(texte modifié)"
                 setattr(p, f, value)
+        if "terms_text" in changed:
+            p.terms_version += 1  # everyone accepts the new text at their next login
+            changed["terms_version"] = p.terms_version
         p.save()
         if changed:
             audit.record("Réglages de la plateforme modifiés", actor=request.user, request=request, platform=True, detail=changed)

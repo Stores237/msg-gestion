@@ -86,7 +86,7 @@ def test_staff_sign_in_to_the_back_office_never_the_app(login):
         assert hidden not in page, hidden
     agent.set_pin("4821")
     agent.save()
-    r = APIClient().post("/api/auth/login/", {"phone": "690000210", "pin": "4821"}, format="json")
+    r = APIClient().post("/api/auth/login/", {"phone": "690000210", "pin": "4821", "accept_terms": True, "terms_version": 1}, format="json")
     assert r.status_code == 403 and r.json()["code"] == "backoffice_only"
 
 

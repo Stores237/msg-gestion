@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/biometrics.dart';
 import '../data/current_user.dart';
+import '../data/offline.dart';
 import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
@@ -104,6 +105,7 @@ class _LockScreenState extends State<LockScreen> {
   Future<void> _signOut([String? message]) async {
     final repos = RepositoryLocator.instance;
     await repos.authSession.clear();
+    await OfflineState.instance.forget();
     await GroupController.instance.select(null);
     currentUser.value = null;
     if (!mounted) return;

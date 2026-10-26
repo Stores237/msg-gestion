@@ -1798,4 +1798,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get announcementDeleted => 'Announcement deleted.';
+
+  @override
+  String get termsAcceptPrefix => 'I have read and accept the ';
+
+  @override
+  String get termsOfServiceLink => 'terms of use';
+
+  @override
+  String get termsRequired =>
+      'The terms of use have changed: go back, read them again and tick the box to continue.';
+
+  @override
+  String get termsTickToContinue => 'Tick the box to continue.';
+
+  @override
+  String logoutPending(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          '$n changes haven’t been sent yet: they will be lost if you log out now.',
+      one: '1 change hasn’t been sent yet: it will be lost if you log out now.',
+    );
+    return '$_temp0';
+  }
 }

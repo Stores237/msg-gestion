@@ -186,8 +186,15 @@ class _SetPinScreenState extends State<SetPinScreen> {
 /// "Code oublié ?": text a code, then code + new PIN. Until SMS exists the
 /// server answers sms_unavailable and the member is told to ask the secretary.
 class ForgotPinScreen extends StatefulWidget {
-  const ForgotPinScreen({super.key, required this.phone});
+  const ForgotPinScreen({
+    super.key,
+    required this.phone,
+    required this.acceptedTerms,
+  });
   final String phone;
+
+  /// The conditions version ticked on the login screen.
+  final int acceptedTerms;
 
   @override
   State<ForgotPinScreen> createState() => _ForgotPinScreenState();
@@ -238,6 +245,7 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
         phone: widget.phone,
         code: _code.text.trim(),
         newPin: _new.text,
+        acceptedTerms: widget.acceptedTerms,
       );
       // The lock screen checks this PIN from now on.
       await RepositoryLocator.instance.authSession.rememberPin(_new.text);

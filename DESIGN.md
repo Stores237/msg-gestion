@@ -78,4 +78,5 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-26 | Back-office staff: support, IT helpdesk, integration ops × agent/responsable, platform roles with per-area back-office permissions and fixed limits; Équipe and Intégrations pages | Owner |
 | 2026-10-26 | Authors edit and delete their own announcements and events (managers still can for any); Modifier · Supprimer under the item, delete confirmed | Owner |
 | 2026-10-26 | Mon compte → Aide / À propos (FAQ in app; partner contacts and legal texts from back-office → Plateforme); red Log out | Owner’s reference screenshot |
-
+| 2026-10-26 | Conditions of use accepted at login: checkbox on the phone-number screen with a link to the text; enforced by the server per version; a new text is accepted again at the next login | Owner. Unticked Continue explains itself in words rather than greying the button |
+| 2026-10-26 | Security check: real client address for rate limits, offline copy erased on sign-out / account change, Android backup off, API docs for the back-office only | SECURITY.md "Security check — 2026-10-26" |

@@ -182,6 +182,13 @@ def test_platform_help_contacts_and_texts(login, choir):
     p = PlatformSettings.get()
     assert (p.support_phone, p.support_whatsapp, p.support_email, p.website) == ("659802679", "654858138", "aide@example.org", "https://msg.example.org")
     assert AuditLog.objects.filter(action="Réglages de la plateforme modifiés", group__isnull=True).exists()
+    # A new terms text is a new version members accept at their next login;
+    # the same text sent back with the browser's CRLF is not.
+    assert p.terms_version == 2
+    a.post("/bo/plateforme/", {"terms_text": "Conditions relues.\r\nSuite."})
+    a.post("/bo/plateforme/", {"terms_text": "Conditions relues.\r\nSuite."})
+    p.refresh_from_db()
+    assert p.terms_version == 3 and p.terms_text == "Conditions relues.\nSuite."
     r = a.post("/bo/plateforme/", {"website": "pas une adresse"}, follow=True)
     assert "Valeur invalide" in r.content.decode()
     member = UserFactory(membership=Group.objects.order_by("pk").first())

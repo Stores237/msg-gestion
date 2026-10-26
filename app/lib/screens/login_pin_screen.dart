@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/offline.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
@@ -55,6 +56,7 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
       final mustChange = await repos.auth.loginWithPin(
         phone: widget.lookup.phone,
         pin: _pin,
+        acceptedTerms: widget.lookup.termsVersion,
       );
       // The lock screen checks this PIN when the app reopens.
       if (!mustChange) await repos.authSession.rememberPin(_pin);
@@ -67,6 +69,7 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
         );
       }
       final me = await repos.profile.fetchMe();
+      await OfflineState.instance.belongsTo(me.id);
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => ShellScreen(me: me)),
@@ -78,6 +81,7 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
         _locked = true;
       });
     } on PinFailure catch (e) {
+      // TermsRequired: the conditions changed since the box was ticked.
       setState(() => _error = describeError(context, e));
     } catch (e) {
       // Network or server failure: not the member's fault, keep nothing.
@@ -175,11 +179,15 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
               onPressed: () async {
                 final done = await Navigator.of(context).push<bool>(
                   MaterialPageRoute(
-                    builder: (_) => ForgotPinScreen(phone: widget.lookup.phone),
+                    builder: (_) => ForgotPinScreen(
+                      phone: widget.lookup.phone,
+                      acceptedTerms: widget.lookup.termsVersion,
+                    ),
                   ),
                 );
                 if (done != true || !context.mounted) return;
                 final me = await RepositoryLocator.instance.profile.fetchMe();
+                await OfflineState.instance.belongsTo(me.id);
                 if (!context.mounted) return;
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (_) => ShellScreen(me: me)),

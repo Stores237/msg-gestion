@@ -3,6 +3,9 @@
 - [ ] **Owner — storage (blocks photos and attachments on staging, 2026-10-26):** Supabase →
   Storage → S3 Connection: create a new access key, check the region shown there, then set
   `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (and `AWS_S3_REGION_NAME` if different) on Render.
+- [ ] **Owner — after the next deploy (2026-10-26):** install build 15 (older builds can't tick
+  the terms box, so they can't sign in); open back-office → Intégrations and check "Adresse du
+  visiteur" shows your own public address (SECURITY.md "Client address").
 - [ ] **Owner:** fill in back-office → Plateforme · aide (support phone, WhatsApp, e-mail, website)
   and have the privacy policy and terms drafts reviewed.
 
@@ -45,6 +48,12 @@ These need an account, a decision or a person — not code.
 ### Pending on the owner's accounts
 - [ ] SMS (Twilio): "Code oublié ?" and back-office codes by SMS. Everything else works; back-office login uses backup codes meanwhile.
 - [ ] Push notifications (Firebase project): notifications are in-app today; push to the lock screen needs an FCM project.
+
+### Security backlog (SECURITY.md "Security check — 2026-10-26", open items)
+- [ ] Encrypt the phone's offline copy with a key kept in secure storage.
+- [ ] Content-Security-Policy for the back-office (move the inline handlers to scripts first).
+- [ ] 6-digit PIN before opening to the public.
+- [ ] Watch for 429s on login from shared carrier addresses; raise `pin_login` if needed.
 
 ### P0 — before the first tester
 - [ ] PIN setup and reset by SMS (imported members get an SMS to create their PIN; "Code

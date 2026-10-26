@@ -68,19 +68,39 @@ class FakeAuthRepository implements AuthRepository {
     if (phone.replaceAll(' ', '') != '677452108') {
       throw const UnknownMember();
     }
-    return PhoneLookup(phone: phone, firstName: firstName, hasPin: true);
+    return PhoneLookup(
+      phone: phone,
+      firstName: firstName,
+      hasPin: true,
+      termsVersion: termsVersion,
+    );
   }
 
   bool mustChange = false;
   final changed = <String>[];
   bool smsAvailable = false;
 
+  /// Conditions versions sent with each login (the checkbox).
+  final acceptedTerms = <int>[];
+  int termsVersion = 1;
+
+  @override
+  Future<TermsInfo> terms() async => TermsInfo(
+    version: termsVersion,
+    termsText: 'Conditions d’utilisation de test.',
+  );
+
   @override
   Future<bool> loginWithPin({
     required String phone,
     required String pin,
+    required int acceptedTerms,
   }) async {
-    if (pin == this.pin) return mustChange;
+    if (pin == this.pin) {
+      if (acceptedTerms != termsVersion) throw const TermsRequired();
+      this.acceptedTerms.add(acceptedTerms);
+      return mustChange;
+    }
     attemptsLeft -= 1;
     if (attemptsLeft == 0) throw const AccountLocked(15);
     throw WrongPin(attemptsLeft);
@@ -108,6 +128,7 @@ class FakeAuthRepository implements AuthRepository {
     required String phone,
     required String code,
     required String newPin,
+    required int acceptedTerms,
   }) async {
     if (code != '123456') throw ApiException(400, '{"code":"bad_code"}');
     changed.add(newPin);

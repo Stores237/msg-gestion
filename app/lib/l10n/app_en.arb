@@ -504,5 +504,10 @@
   "editAnnouncement": "Edit announcement",
   "announcementUpdated": "Announcement updated.",
   "deleteAnnouncementConfirm": "Delete “{title}”? It disappears for every member.",
-  "announcementDeleted": "Announcement deleted."
+  "announcementDeleted": "Announcement deleted.",
+  "termsAcceptPrefix": "I have read and accept the ",
+  "termsOfServiceLink": "terms of use",
+  "termsRequired": "The terms of use have changed: go back, read them again and tick the box to continue.",
+  "termsTickToContinue": "Tick the box to continue.",
+  "logoutPending": "{n, plural, =1{1 change hasn’t been sent yet: it will be lost if you log out now.} other{{n} changes haven’t been sent yet: they will be lost if you log out now.}}"
 }

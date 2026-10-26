@@ -119,6 +119,8 @@ class PlatformSettings(models.Model):
     website = models.URLField("site web", blank=True)
     privacy_text = models.TextField("politique de confidentialité", default=PRIVACY_DRAFT)
     terms_text = models.TextField("conditions d’utilisation", default=TERMS_DRAFT)
+    # Goes up each time terms_text changes; members accept it again at login.
+    terms_version = models.PositiveIntegerField("version des conditions", default=1)
 
     class Meta:
         verbose_name = "réglages de la plateforme"

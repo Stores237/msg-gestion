@@ -3127,6 +3127,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Annonce supprimée.'**
   String get announcementDeleted;
+
+  /// No description provided for @termsAcceptPrefix.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai lu et j’accepte les '**
+  String get termsAcceptPrefix;
+
+  /// No description provided for @termsOfServiceLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'conditions d’utilisation'**
+  String get termsOfServiceLink;
+
+  /// No description provided for @termsRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les conditions d’utilisation ont changé : revenez en arrière, relisez-les et cochez la case pour continuer.'**
+  String get termsRequired;
+
+  /// No description provided for @termsTickToContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cochez la case pour continuer.'**
+  String get termsTickToContinue;
+
+  /// No description provided for @logoutPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}'**
+  String logoutPending(int n);
 }
 
 class _AppLocalizationsDelegate

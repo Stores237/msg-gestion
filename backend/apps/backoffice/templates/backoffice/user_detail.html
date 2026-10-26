@@ -32,6 +32,7 @@
       <dt>Membre depuis</dt><dd>{{ member.joined_on|date:"l j F Y" }}</dd><dt>Date de naissance</dt><dd>{{ member.birth_date|date:"d/m/Y"|default:"—" }}</dd>
       {% if member.is_diaspora %}<dt>Diaspora</dt><dd>{{ member.city|default:"oui" }}</dd>{% endif %}
       <dt>Dernière connexion</dt><dd>{{ member.last_login|date:"d/m/Y H:i"|default:"jamais" }}</dd>
+      <dt>Conditions d’utilisation</dt><dd>{% if member.terms_accepted_at %}version {{ member.terms_version }} acceptée le {{ member.terms_accepted_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">pas encore acceptées</span>{% endif %}</dd>
       <dt>PIN</dt><dd>{% if member.pin_locked_until and member.pin_locked_until > now %}Bloqué{% elif member.pin_must_change %}Provisoire{% else %}Personnel{% endif %}</dd>
     </dl></div></section>
     <section class="panel"><div class="panel-h"><h2>Accès au back-office</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:10px">

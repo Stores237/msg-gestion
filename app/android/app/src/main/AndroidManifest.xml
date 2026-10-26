@@ -2,7 +2,13 @@
     <!-- Release builds talk to the API; Flutter only adds this to debug/profile. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- No cloud or device-to-device backup: the offline copy holds member
+         data (lists, finances) and the secure-storage keys can't be restored
+         on another phone anyway (SECURITY.md, 2026-10-26). -->
     <application
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:label="MSG"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

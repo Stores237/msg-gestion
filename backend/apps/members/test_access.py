@@ -84,7 +84,7 @@ def test_full_process_request_create_pin_once_then_member_signs_in(partner):
     assert leader_api.post(f"/api/members/access-requests/{rid}/pin/").json()["code"] == "pin_gone"
     assert AuditLog.objects.filter(action="Code provisoire remis au responsable").exists()
     # The member signs in with it and sees their role.
-    login = APIClient().post("/api/auth/login/", {"phone": "690112233", "pin": pin}, format="json").json()
+    login = APIClient().post("/api/auth/login/", {"phone": "690112233", "pin": pin, "accept_terms": True, "terms_version": 1}, format="json").json()
     assert login["pin_must_change"] is True
     me = APIClient()
     me.credentials(HTTP_AUTHORIZATION=f"Bearer {login['access']}")

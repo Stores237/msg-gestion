@@ -15,6 +15,8 @@ String describeError(BuildContext context, Object error) {
     UnknownMember() => l.errorUnknownMember,
     NoPinSet() => l.errorNoPin,
     BackofficeOnly() => l.errorBackofficeOnly,
+    TermsRequired() => l.termsRequired,
+    ApiException(code: 'terms_required') => l.termsRequired,
     ApiException(code: 'backoffice_only') => l.errorBackofficeOnly,
     ApiException(code: 'no_group') => l.errorNoGroup,
     ApiException(code: 'pin_gone') => l.pinGone,

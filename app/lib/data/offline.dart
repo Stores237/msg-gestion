@@ -147,6 +147,30 @@ class OfflineState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // --- whose data it is -------------------------------------------------------
+
+  /// Erases the cached answers and the unsent writes: on sign-out, after
+  /// too many wrong PINs, and when someone else signs in on this phone.
+  /// A phone passed between members must never show the last one's data.
+  Future<void> forget() async {
+    _cache = {};
+    _outbox = [];
+    lastSync = null;
+    lastError = null;
+    await _storage.write(_cacheFile, '{}');
+    await _saveOutbox();
+    notifyListeners();
+  }
+
+  /// Called after a sign-in: data cached for another account is erased.
+  Future<void> belongsTo(int userId) async {
+    await load();
+    final owner = _cache['__owner'];
+    if (owner != null && owner != userId) await forget();
+    _cache['__owner'] = userId;
+    await _storage.write(_cacheFile, jsonEncode(_cache));
+  }
+
   // --- read cache ---------------------------------------------------------
 
   Future<void> remember(String key, Object? data) async {

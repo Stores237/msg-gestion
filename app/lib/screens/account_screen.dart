@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/biometrics.dart';
 import '../data/current_user.dart';
+import '../data/offline.dart';
 import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
@@ -23,7 +24,31 @@ class AccountScreen extends StatelessWidget {
   final Me me;
 
   Future<void> _logout(BuildContext context) async {
+    final pending = OfflineState.instance.pending;
+    if (pending > 0) {
+      // Signing out erases what waits on the phone (it is this member's).
+      final l = AppLocalizations.of(context);
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          content: Text(l.logoutPending(pending)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l.cancel),
+            ),
+            TextButton(
+              key: const Key('logout-confirm'),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l.logout),
+            ),
+          ],
+        ),
+      );
+      if (ok != true) return;
+    }
     await RepositoryLocator.instance.auth.logout();
+    await OfflineState.instance.forget();
     await GroupController.instance.select(null);
     currentUser.value = null;
     if (!context.mounted) return;

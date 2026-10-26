@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,10 +10,13 @@ import '../widgets/errors.dart';
 import '../widgets/language_switch.dart';
 import '../widgets/msg_logo.dart';
 import '../widgets/notice.dart';
+import 'help_screens.dart';
 import 'login_pin_screen.dart';
 
 /// Login step 1 (design: "Connexion · numéro"). The server normalises the
 /// number; the client only rejects input that can't possibly be one.
+/// The member ticks the conditions of use before going on; the server
+/// records the acceptance with the PIN (owner, 2026-10-26).
 class LoginPhoneScreen extends StatefulWidget {
   const LoginPhoneScreen({super.key});
 
@@ -24,11 +28,36 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
   final _controller = TextEditingController();
   String? _error;
   bool _busy = false;
+  bool _accepted = false;
+  bool _termsMissing = false;
+  late final _termsLink = TapGestureRecognizer()..onTap = _openTerms;
 
   @override
   void dispose() {
     _controller.dispose();
+    _termsLink.dispose();
     super.dispose();
+  }
+
+  void _tick(bool value) => setState(() {
+    _accepted = value;
+    if (value) _termsMissing = false;
+  });
+
+  Future<void> _openTerms() async {
+    final l = AppLocalizations.of(context);
+    try {
+      final terms = await RepositoryLocator.instance.auth.terms();
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) =>
+              TextPageScreen(title: l.termsOfService, text: terms.termsText),
+        ),
+      );
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    }
   }
 
   bool _plausible(String raw) {
@@ -39,6 +68,11 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
   Future<void> _submit() async {
     final l = AppLocalizations.of(context);
     final raw = _controller.text.trim();
+    if (!_accepted) {
+      // Said in words rather than a greyed button, so the member knows why.
+      setState(() => _termsMissing = true);
+      return;
+    }
     if (!_plausible(raw)) {
       setState(() => _error = l.phoneInvalid);
       return;
@@ -129,7 +163,57 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            InkWell(
+              key: const Key('terms-accept'),
+              borderRadius: BorderRadius.circular(MsgRadius.md),
+              onTap: () => _tick(!_accepted),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    key: const Key('terms-checkbox'),
+                    value: _accepted,
+                    isError: _termsMissing,
+                    onChanged: (v) => _tick(v ?? false),
+                  ),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        text: l.termsAcceptPrefix,
+                        children: [
+                          TextSpan(
+                            text: l.termsOfServiceLink,
+                            recognizer: _termsLink,
+                            style: TextStyle(
+                              color: c.primaryText,
+                              fontWeight: FontWeight.w700,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
+                      ),
+                      style: const TextStyle(fontSize: 14, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_termsMissing)
+              Padding(
+                padding: const EdgeInsets.only(left: 12, top: 4),
+                child: Text(
+                  l.termsTickToContinue,
+                  key: const Key('terms-missing'),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: c.alert,
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
             FilledButton(
               key: const Key('phone-continue'),
               onPressed: _busy ? null : _submit,

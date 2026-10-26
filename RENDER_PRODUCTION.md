@@ -33,6 +33,10 @@ request leaves no trace anywhere — the situation that turned one Spekooh bug i
 
 - Two super admins exist and can log in with SMS codes.
 - `/healthz/` is green; Sentry receives a test event.
+- Back-office → Intégrations → "Adresse du visiteur" shows your own public address (rate limits
+  depend on it; SECURITY.md "Client address").
+- Plateforme · aide: the reviewed terms of use are in place before members are invited (each
+  member accepts them at their first login).
 - Backups: Supabase daily backups are on for the project (Database → Backups).
 - The release APK is built with `--dart-define=API_BASE_URL=https://<production host>/api`
   and verified (playbook §9).

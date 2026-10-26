@@ -3,11 +3,25 @@ from .models import AuditLog
 
 
 def client_ip(request):
+    """The caller's address, for rate limits and the audit log.
+
+    Never the left part of X-Forwarded-For: the client writes it, so a
+    script could pick a new address per request and walk past every rate
+    limit (security check, 2026-10-26). On Render the request comes
+    through Cloudflare, which sets CF-Connecting-IP itself
+    (CLIENT_IP_HEADER); otherwise the last X-Forwarded-For entry, added
+    by the proxy in front of us; otherwise the socket address.
+    """
+    from django.conf import settings
+
     if request is None:
         return None
+    header = getattr(settings, "CLIENT_IP_HEADER", "")
+    if header and request.META.get(header):
+        return request.META[header].strip()
     forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        return forwarded.split(",")[-1].strip()
     return request.META.get("REMOTE_ADDR")
 
 
