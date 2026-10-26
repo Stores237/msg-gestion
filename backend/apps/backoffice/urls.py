@@ -14,6 +14,7 @@ urlpatterns = [
     path("groupes/choisir/", views_groups.group_switch, name="group_switch"),
     path("groupes/<int:pk>/modifier/", views_groups.group_edit, name="group_edit"),
     path("groupes/<int:pk>/supprimer/", views_groups.group_delete, name="group_delete"),
+    path("plateforme/", views_groups.platform, name="platform"),
     path("demandes-acces/", views_access.access_requests, name="access_requests"),
     path("demandes-acces/<int:pk>/", views_access.access_request_decide, name="access_request"),
     path("utilisateurs/", views.users, name="users"),

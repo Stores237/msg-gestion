@@ -345,9 +345,9 @@ def test_set_role_permissions_diffs_and_logs():
     admin = UserFactory()
     role = Role.objects.get(slug="tresorier")
     diff = set_role_permissions(
-        role, {("announcements.posts", "create"): True, ("calendar.planning", "view"): False}, by=admin, reason="Appels à contribution"
+        role, {("announcements.posts", "delete"): True, ("calendar.planning", "view"): False}, by=admin, reason="Appels à contribution"
     )
-    assert sorted(diff) == [["announcements.posts", "create", False, True], ["calendar.planning", "view", True, False]]
+    assert sorted(diff) == [["announcements.posts", "delete", False, True], ["calendar.planning", "view", True, False]]
     assert AuditLog.objects.get(action="Permission modifiée").detail["motif"] == "Appels à contribution"
 
 

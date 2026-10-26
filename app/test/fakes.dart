@@ -138,6 +138,17 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<void> removeMyPhoto() async => photos.add('removed');
 
+  PlatformInfo platformInfo = const PlatformInfo(
+    supportPhone: '659802679',
+    supportWhatsapp: '654858138',
+    supportEmail: 'aide@example.org',
+    privacyText: 'Vos données restent dans le groupe.',
+    termsText: 'Usage réservé aux membres.',
+  );
+
+  @override
+  Future<PlatformInfo> platform() async => platformInfo;
+
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
 
@@ -390,6 +401,8 @@ class FakeEventsRepository implements EventsRepository {
       dress: e.dress,
       notes: e.notes,
       myAttendance: excused.contains(id) ? 'excuse' : null,
+      createdByName: 'Ewane B.',
+      createdByRole: 'Commissaire aux comptes',
     );
   }
 
@@ -428,6 +441,7 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       body: 'Jeudi 18:00 à l’église.',
       pinned: false,
       authorName: 'Din Y.',
+      authorRole: 'Formateur',
       createdAt: DateTime(2026, 10, 19),
       unread: true,
       attachments: const [

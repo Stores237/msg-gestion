@@ -146,3 +146,36 @@ def test_role_of_the_day_requested_for_an_active_member_without_role():
     on_leave = UserFactory(status="conge")
     assert api.post(f"/api/members/{on_leave.id}/role-requests/", body, format="json").json()["code"] == "not_active"
     assert isinstance(date.fromisoformat(tomorrow), date)
+
+
+@pytest.mark.parametrize("slug,shown", [("tresorier", "Trésorier"), ("commissaire-aux-comptes", "Commissaire aux comptes"),
+                                        ("censeur-general", "Censeur général"), ("vice-president", "Vice-président")])
+def test_every_bureau_member_posts_and_acts_on_the_calendar_with_their_role(slug, shown):
+    """Owner, 2026-10-26: all the bureau make announcements and act on the
+    calendar; their role is shown on what they post."""
+    api, user = client_for("membre", slug)
+    r = api.post("/api/announcements/", {"title": "Collecte", "body": "Samedi"}, format="json")
+    assert r.status_code == 201, r.json()
+    feed = api.get("/api/announcements/").json()
+    item = next(a for a in feed["results"] if a["title"] == "Collecte")
+    assert item["author_role"] == shown
+    start = timezone.now() + timedelta(days=3)
+    r = api.post("/api/events/", {"kind": "assise", "title": "Assise", "starts_at": start.isoformat()}, format="json")
+    assert r.status_code == 201, r.json()
+    assert r.json()["created_by_role"] == shown and r.json()["created_by_name"] == user.short_name
+    eid = r.json()["id"]
+    assert api.patch(f"/api/events/{eid}/", {"place": "Salle paroissiale"}, format="json").status_code == 200
+    assert api.delete(f"/api/events/{eid}/").status_code in (200, 204)
+
+
+def test_plain_member_still_cannot_post_and_role_of_the_day_is_named():
+    api, _ = client_for("membre")
+    assert api.post("/api/announcements/", {"title": "x"}, format="json").status_code == 403
+    assert api.post("/api/events/", {"kind": "assise", "title": "x", "starts_at": timezone.now().isoformat()}, format="json").status_code == 403
+    day = UserFactory()
+    give_role(day, "membre")
+    give_role(day, "president", starts_on=timezone.localdate(), ends_on=timezone.localdate())
+    assert day.display_role() == "Président du jour"
+    censor = UserFactory()
+    give_role(censor, "censeur-du-jour", starts_on=timezone.localdate(), ends_on=timezone.localdate())
+    assert censor.display_role() == "Censeur du jour"

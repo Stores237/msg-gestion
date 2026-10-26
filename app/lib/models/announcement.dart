@@ -34,6 +34,7 @@ class Announcement {
     this.eventStartsAt,
     required this.pinned,
     this.authorName,
+    this.authorRole = '',
     required this.createdAt,
     required this.unread,
     this.readCount,
@@ -52,6 +53,9 @@ class Announcement {
   final DateTime? eventStartsAt;
   final bool pinned;
   final String? authorName;
+
+  /// The author's role when they posted ("Trésorier", "Président du jour").
+  final String authorRole;
   final DateTime createdAt;
   final bool unread;
 
@@ -72,6 +76,7 @@ class Announcement {
     eventStartsAt: eventStartsAt,
     pinned: pinned,
     authorName: authorName,
+    authorRole: authorRole,
     createdAt: createdAt,
     unread: unread ?? this.unread,
     readCount: readCount,
@@ -93,6 +98,7 @@ class Announcement {
           : DateTime.parse(j['event_starts_at'] as String).toLocal(),
       pinned: j['pinned'] as bool,
       authorName: j['author_name'] as String?,
+      authorRole: (j['author_role'] as String?) ?? '',
       createdAt: DateTime.parse(j['created_at'] as String).toLocal(),
       unread: j['unread'] as bool,
       readCount: reads?['read'] as int?,

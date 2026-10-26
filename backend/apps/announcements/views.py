@@ -57,7 +57,7 @@ class AnnouncementListView(APIView):
     def post(self, request):
         s = AnnouncementSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        item = s.save(author=request.user)
+        item = s.save(author=request.user, author_role=request.user.display_role())
         Read.objects.create(announcement=item, member=request.user)  # the author has read it
         notify(
             _audience().exclude(pk=request.user.pk),

@@ -2893,6 +2893,180 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Le code PIN reste toujours possible.'**
   String get biometricHint;
+
+  /// No description provided for @addedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouté par'**
+  String get addedBy;
+
+  /// No description provided for @storageUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’envoi du fichier a échoué : le stockage est indisponible. Réessayez plus tard ; si cela continue, prévenez le partenaire.'**
+  String get storageUnavailable;
+
+  /// No description provided for @helpSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide'**
+  String get helpSection;
+
+  /// No description provided for @aboutSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'À propos'**
+  String get aboutSection;
+
+  /// No description provided for @faq.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions fréquentes'**
+  String get faq;
+
+  /// No description provided for @faqSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponses aux questions courantes'**
+  String get faqSub;
+
+  /// No description provided for @helpSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide et assistance'**
+  String get helpSupport;
+
+  /// No description provided for @helpSupportSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler une vraie personne'**
+  String get helpSupportSub;
+
+  /// No description provided for @whatsappSupport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistance WhatsApp'**
+  String get whatsappSupport;
+
+  /// No description provided for @whatsappSupportSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrivez-nous sur WhatsApp'**
+  String get whatsappSupportSub;
+
+  /// No description provided for @contactUs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nous contacter'**
+  String get contactUs;
+
+  /// No description provided for @contactUsSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions ou suggestions'**
+  String get contactUsSub;
+
+  /// No description provided for @visitWebsite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visiter notre site'**
+  String get visitWebsite;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Politique de confidentialité'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions d’utilisation'**
+  String get termsOfService;
+
+  /// No description provided for @notAvailableYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore disponible'**
+  String get notAvailableYet;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version {v}'**
+  String appVersion(String v);
+
+  /// No description provided for @faqQ1.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai oublié mon code PIN.'**
+  String get faqQ1;
+
+  /// No description provided for @faqA1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur l’écran du code, touchez « Code oublié ? ». Si les SMS ne sont pas disponibles, demandez au responsable de votre groupe : il peut vous donner un code provisoire.'**
+  String get faqA1;
+
+  /// No description provided for @faqQ2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi l’application me demande-t-elle mon code à chaque ouverture ?'**
+  String get faqQ2;
+
+  /// No description provided for @faqA2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour protéger les données du groupe si quelqu’un prend votre téléphone. Vous pouvez déverrouiller avec l’empreinte ou le visage : Mon compte → Déverrouiller avec l’empreinte.'**
+  String get faqA2;
+
+  /// No description provided for @faqQ3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne vois pas l’onglet Finances (ou un autre).'**
+  String get faqQ3;
+
+  /// No description provided for @faqA3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les onglets dépendent de votre rôle dans le groupe. Si votre rôle change, ils s’adaptent à la prochaine ouverture.'**
+  String get faqA3;
+
+  /// No description provided for @faqQ4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment signaler une absence ?'**
+  String get faqQ4;
+
+  /// No description provided for @faqA4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrez l’activité dans le Calendrier et touchez « Prévenir d’une absence », avec le motif.'**
+  String get faqA4;
+
+  /// No description provided for @faqQ5.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qu’est-ce qu’un rôle du jour ?'**
+  String get faqQ5;
+
+  /// No description provided for @faqA5.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un membre actif sans rôle peut recevoir, pour une journée, un rôle comme président, censeur ou trésorier du jour. Il est demandé dans l’application et validé par le partenaire ; il s’arrête le soir même.'**
+  String get faqA5;
+
+  /// No description provided for @faqQ6.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’application marche-t-elle sans internet ?'**
+  String get faqQ6;
+
+  /// No description provided for @faqA6.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut).'**
+  String get faqA6;
 }
 
 class _AppLocalizationsDelegate

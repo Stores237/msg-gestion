@@ -1,5 +1,11 @@
 # TODOs
 
+- [ ] **Owner — storage (blocks photos and attachments on staging, 2026-10-26):** Supabase →
+  Storage → S3 Connection: create a new access key, check the region shown there, then set
+  `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (and `AWS_S3_REGION_NAME` if different) on Render.
+- [ ] **Owner:** fill in back-office → Plateforme · aide (support phone, WhatsApp, e-mail, website)
+  and have the privacy policy and terms drafts reviewed.
+
 ## Owner action items (block the matching engineering work)
 
 These need an account, a decision or a person — not code.

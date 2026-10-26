@@ -59,6 +59,17 @@ class SettingsView(APIView):
         })
 
 
+class PlatformView(APIView):
+    """GET: the partner's contacts and texts for Aide / À propos."""
+
+    def get(self, request):
+        from .models import PlatformSettings
+
+        p = PlatformSettings.get()
+        return Response({f: getattr(p, f) for f in ("support_phone", "support_whatsapp", "support_email", "website",
+                                                     "privacy_text", "terms_text")})
+
+
 class BureauHomeView(APIView):
     """Accueil for the bureau (design: "Accueil · trésorière" → À suivre):
     only the blocks the viewer's roles allow."""

@@ -147,6 +147,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     def role_slugs(self, on=None):
         return {a.role.slug for a in self.active_assignments(on)}
 
+    def display_role(self, on=None):
+        """The role shown next to what the member posts (owner, 2026-10-26):
+        the bureau role first, then any other; "… du jour" for a role of the
+        day; "" for a plain member."""
+        order = {Role.Kind.BUREAU: 0, Role.Kind.TEMPORARY: 1, Role.Kind.STANDARD: 2, Role.Kind.SYSTEM: 3}
+        held = [a for a in self.active_assignments(on) if a.role.slug not in ("membre", registry.SUPER_ADMIN_SLUG)]
+        if not held:
+            return ""
+        a = min(held, key=lambda a: (order.get(a.role.kind, 9), a.role.sort_order))
+        name = a.role.name
+        if a.is_one_day and "du jour" not in name.lower():
+            name = f"{name} du jour"
+        return name
+
     def permission_set(self, on=None):
         """{(resource, action)} granted by every active role, minus locked cells."""
         granted = set()

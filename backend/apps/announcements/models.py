@@ -19,6 +19,8 @@ class Announcement(models.Model):
     event = models.ForeignKey("events.Event", on_delete=models.SET_NULL, null=True, blank=True, related_name="convocations")
     pinned = models.BooleanField(default=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    # The author's role when they posted (owner, 2026-10-26: shown on it).
+    author_role = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")

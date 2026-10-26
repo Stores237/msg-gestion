@@ -5,7 +5,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core.api import BureauHomeView, NotificationListView, NotificationReadView, SettingsView
+from apps.core.api import BureauHomeView, NotificationListView, NotificationReadView, PlatformView, SettingsView
 from apps.core.views import healthz, run_task
 
 urlpatterns = [
@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/announcements/", include("apps.announcements.urls")),
     path("api/finances/", include("apps.finances.urls")),
     path("api/settings/", SettingsView.as_view(), name="settings"),
+    path("api/platform/", PlatformView.as_view(), name="platform"),
     path("api/home/bureau/", BureauHomeView.as_view(), name="home-bureau"),
     path("api/notifications/", NotificationListView.as_view(), name="notifications"),
     path("api/notifications/read/", NotificationReadView.as_view(), name="notifications-read"),

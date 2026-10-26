@@ -123,9 +123,8 @@ def test_attachment_size_limit(settings):
 def test_only_author_or_managers_attach_or_delete():
     sg_api, _ = client_for("secretaire-general")
     trainer_api, _ = client_for("formateur")
-    from apps.accounts.models import Role
-
-    Role.objects.get(slug="formateur").permissions.create(resource="announcements.posts", action="create")
+    # The formateur posts too (every bureau role, 2026-10-26), but only the
+    # author or someone who manages announcements touches the attachments.
     aid = sg_api.post("/api/announcements/", {"title": "AG"}, format="json").json()["id"]
     assert trainer_api.post(f"/api/announcements/{aid}/attachments/", {"file": _pdf()}, format="multipart").status_code == 403
     att = sg_api.post(f"/api/announcements/{aid}/attachments/", {"file": _pdf()}, format="multipart").json()["id"]

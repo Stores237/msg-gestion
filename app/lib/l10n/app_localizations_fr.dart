@@ -1672,4 +1672,101 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get biometricHint => 'Le code PIN reste toujours possible.';
+
+  @override
+  String get addedBy => 'Ajouté par';
+
+  @override
+  String get storageUnavailable =>
+      'L’envoi du fichier a échoué : le stockage est indisponible. Réessayez plus tard ; si cela continue, prévenez le partenaire.';
+
+  @override
+  String get helpSection => 'Aide';
+
+  @override
+  String get aboutSection => 'À propos';
+
+  @override
+  String get faq => 'Questions fréquentes';
+
+  @override
+  String get faqSub => 'Réponses aux questions courantes';
+
+  @override
+  String get helpSupport => 'Aide et assistance';
+
+  @override
+  String get helpSupportSub => 'Appeler une vraie personne';
+
+  @override
+  String get whatsappSupport => 'Assistance WhatsApp';
+
+  @override
+  String get whatsappSupportSub => 'Écrivez-nous sur WhatsApp';
+
+  @override
+  String get contactUs => 'Nous contacter';
+
+  @override
+  String get contactUsSub => 'Questions ou suggestions';
+
+  @override
+  String get visitWebsite => 'Visiter notre site';
+
+  @override
+  String get privacyPolicy => 'Politique de confidentialité';
+
+  @override
+  String get termsOfService => 'Conditions d’utilisation';
+
+  @override
+  String get notAvailableYet => 'Pas encore disponible';
+
+  @override
+  String appVersion(String v) {
+    return 'Version $v';
+  }
+
+  @override
+  String get faqQ1 => 'J’ai oublié mon code PIN.';
+
+  @override
+  String get faqA1 =>
+      'Sur l’écran du code, touchez « Code oublié ? ». Si les SMS ne sont pas disponibles, demandez au responsable de votre groupe : il peut vous donner un code provisoire.';
+
+  @override
+  String get faqQ2 =>
+      'Pourquoi l’application me demande-t-elle mon code à chaque ouverture ?';
+
+  @override
+  String get faqA2 =>
+      'Pour protéger les données du groupe si quelqu’un prend votre téléphone. Vous pouvez déverrouiller avec l’empreinte ou le visage : Mon compte → Déverrouiller avec l’empreinte.';
+
+  @override
+  String get faqQ3 => 'Je ne vois pas l’onglet Finances (ou un autre).';
+
+  @override
+  String get faqA3 =>
+      'Les onglets dépendent de votre rôle dans le groupe. Si votre rôle change, ils s’adaptent à la prochaine ouverture.';
+
+  @override
+  String get faqQ4 => 'Comment signaler une absence ?';
+
+  @override
+  String get faqA4 =>
+      'Ouvrez l’activité dans le Calendrier et touchez « Prévenir d’une absence », avec le motif.';
+
+  @override
+  String get faqQ5 => 'Qu’est-ce qu’un rôle du jour ?';
+
+  @override
+  String get faqA5 =>
+      'Un membre actif sans rôle peut recevoir, pour une journée, un rôle comme président, censeur ou trésorier du jour. Il est demandé dans l’application et validé par le partenaire ; il s’arrête le soir même.';
+
+  @override
+  String get faqQ6 => 'L’application marche-t-elle sans internet ?';
+
+  @override
+  String get faqA6 =>
+      'Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut).';
 }

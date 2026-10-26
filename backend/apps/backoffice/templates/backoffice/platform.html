@@ -1,0 +1,22 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Plateforme{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme MSG · pour tous les groupes</div>{% endblock %}
+{% block heading %}Aide et à propos{% endblock %}
+{% block body %}
+<form method="post">{% csrf_token %}
+<div class="bo-cols half">
+  <section class="panel"><div class="panel-h"><h2>Contacts d’assistance</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+    <div class="notice">{% icon 'info' %}<span>Affichés dans l’application, Mon compte → Aide. Une ligne vide n’apparaît pas comme utilisable.</span></div>
+    <label class="fld"><span class="fld-l">Téléphone (« Aide et assistance »)</span><span class="fld-box"><input name="support_phone" value="{{ p.support_phone }}" inputmode="tel" placeholder="6XX XX XX XX"></span></label>
+    <label class="fld"><span class="fld-l">WhatsApp</span><span class="fld-box"><input name="support_whatsapp" value="{{ p.support_whatsapp }}" inputmode="tel" placeholder="6XX XX XX XX"></span></label>
+    <label class="fld"><span class="fld-l">E-mail (« Nous contacter »)</span><span class="fld-box"><input name="support_email" type="email" value="{{ p.support_email }}"></span></label>
+    <label class="fld"><span class="fld-l">Site web</span><span class="fld-box"><input name="website" type="url" value="{{ p.website }}" placeholder="https://"></span></label>
+  </div></section>
+  <section class="panel"><div class="panel-h"><h2>Textes</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+    <label class="fld"><span class="fld-l">Politique de confidentialité</span><span class="fld-box multi"><textarea name="privacy_text" rows="12">{{ p.privacy_text }}</textarea></span></label>
+    <label class="fld"><span class="fld-l">Conditions d’utilisation</span><span class="fld-box multi"><textarea name="terms_text" rows="10">{{ p.terms_text }}</textarea></span><span class="fld-h">Les textes proposés sont des brouillons : faites-les relire avant l’ouverture au public.</span></label>
+  </div></section>
+</div>
+<div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-primary">Enregistrer</button></div>
+</form>
+{% endblock %}

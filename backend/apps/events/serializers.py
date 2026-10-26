@@ -7,10 +7,23 @@ class EventSerializer(serializers.ModelSerializer):
     my_attendance = serializers.SerializerMethodField()
     kind_name = serializers.SerializerMethodField()
     dress_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+    created_by_role = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
-        fields = ["id", "kind", "kind_name", "title", "starts_at", "ends_at", "place", "dress", "dress_name", "notes", "my_attendance"]
+        fields = ["id", "kind", "kind_name", "title", "starts_at", "ends_at", "place", "dress", "dress_name", "notes", "my_attendance",
+                  "created_by_name", "created_by_role"]
+        read_only_fields = ["created_by_name", "created_by_role"]
+
+    def get_created_by_name(self, event) -> str | None:
+        return event.created_by.short_name if event.created_by else None
+
+    def get_created_by_role(self, event) -> str:
+        # Saved when created; older events show the author's role now.
+        if event.created_by_role or event.created_by is None:
+            return event.created_by_role
+        return event.created_by.display_role()
 
     def _names(self, key, load):
         cache = self.context.setdefault("_names", {})

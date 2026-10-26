@@ -1050,5 +1050,41 @@
   "biometricReason": "Déverrouiller MSG",
   "biometricUnlock": "Déverrouiller avec l’empreinte ou le visage",
   "biometricUnavailable": "Aucune empreinte ni visage enregistré sur ce téléphone.",
-  "biometricHint": "Le code PIN reste toujours possible."
+  "biometricHint": "Le code PIN reste toujours possible.",
+  "addedBy": "Ajouté par",
+  "storageUnavailable": "L’envoi du fichier a échoué : le stockage est indisponible. Réessayez plus tard ; si cela continue, prévenez le partenaire.",
+  "helpSection": "Aide",
+  "aboutSection": "À propos",
+  "faq": "Questions fréquentes",
+  "faqSub": "Réponses aux questions courantes",
+  "helpSupport": "Aide et assistance",
+  "helpSupportSub": "Appeler une vraie personne",
+  "whatsappSupport": "Assistance WhatsApp",
+  "whatsappSupportSub": "Écrivez-nous sur WhatsApp",
+  "contactUs": "Nous contacter",
+  "contactUsSub": "Questions ou suggestions",
+  "visitWebsite": "Visiter notre site",
+  "privacyPolicy": "Politique de confidentialité",
+  "termsOfService": "Conditions d’utilisation",
+  "notAvailableYet": "Pas encore disponible",
+  "appVersion": "Version {v}",
+  "@appVersion": {
+    "placeholders": {
+      "v": {
+        "type": "String"
+      }
+    }
+  },
+  "faqQ1": "J’ai oublié mon code PIN.",
+  "faqA1": "Sur l’écran du code, touchez « Code oublié ? ». Si les SMS ne sont pas disponibles, demandez au responsable de votre groupe : il peut vous donner un code provisoire.",
+  "faqQ2": "Pourquoi l’application me demande-t-elle mon code à chaque ouverture ?",
+  "faqA2": "Pour protéger les données du groupe si quelqu’un prend votre téléphone. Vous pouvez déverrouiller avec l’empreinte ou le visage : Mon compte → Déverrouiller avec l’empreinte.",
+  "faqQ3": "Je ne vois pas l’onglet Finances (ou un autre).",
+  "faqA3": "Les onglets dépendent de votre rôle dans le groupe. Si votre rôle change, ils s’adaptent à la prochaine ouverture.",
+  "faqQ4": "Comment signaler une absence ?",
+  "faqA4": "Ouvrez l’activité dans le Calendrier et touchez « Prévenir d’une absence », avec le motif.",
+  "faqQ5": "Qu’est-ce qu’un rôle du jour ?",
+  "faqA5": "Un membre actif sans rôle peut recevoir, pour une journée, un rôle comme président, censeur ou trésorier du jour. Il est demandé dans l’application et validé par le partenaire ; il s’arrête le soir même.",
+  "faqQ6": "L’application marche-t-elle sans internet ?",
+  "faqA6": "Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut)."
 }

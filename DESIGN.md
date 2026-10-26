@@ -74,4 +74,6 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-23 | Every member sets or removes their own profile picture (Mon compte), shown on Accueil; officers keep setting others' | Owner |
 | 2026-10-23 | Roles of the day requested in the app for an active member with no role (président, censeur, secrétaire, formateur, commissaire, trésorier du jour), approved by the partner; per-role switch `daily` | Owner |
 | 2026-10-23 | App lock: PIN on every reopening and after 2 min in the background, checked offline against a salted hash; fingerprint/face optional (Mon compte); 5 wrong → signed out | Owner |
+| 2026-10-26 | Every bureau role posts announcements and acts on the calendar; the author’s role is saved with the post and shown | Owner |
+| 2026-10-26 | Mon compte → Aide / À propos (FAQ in app; partner contacts and legal texts from back-office → Plateforme); red Log out | Owner’s reference screenshot |
 

@@ -40,14 +40,14 @@ class EventListView(APIView):
         end = parse_date(request.query_params.get("to", "")) or start + timedelta(days=60)
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
-        events = list(Event.objects.filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
+        events = list(Event.objects.select_related("created_by").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
         return Response(EventSerializer(events, many=True, context={"mine": _mine(request.user, events)}).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
     def post(self, request):
         s = EventSerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        event = s.save(created_by=request.user)
+        event = s.save(created_by=request.user, created_by_role=request.user.display_role())
         audit.record("Événement créé", actor=request.user, obj=event, request=request)
         return Response(EventSerializer(event).data, status=status.HTTP_201_CREATED)
 

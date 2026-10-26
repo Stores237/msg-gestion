@@ -24,6 +24,7 @@ String describeError(BuildContext context, Object error) {
     ApiException(code: 'pin_too_simple') => l.pinTooSimple,
     ApiException(code: 'bad_code') => l.badCode,
     ApiException(code: 'sms_unavailable') => l.smsUnavailable,
+    ApiException(code: 'storage_unavailable') => l.storageUnavailable,
     // Server-side validation messages are written for people; show them
     // when there is no code to translate.
     ApiException(:final detail?) => detail,

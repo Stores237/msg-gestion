@@ -28,6 +28,11 @@ class HttpProfileRepository implements ProfileRepository {
   Future<void> removeMyPhoto() async => _api.delete('/me/photo/');
 
   @override
+  Future<PlatformInfo> platform() async => PlatformInfo.fromJson(
+    await _api.get('/platform/') as Map<String, dynamic>,
+  );
+
+  @override
   Future<AppSettings> settings() async {
     final j = await _api.get('/settings/') as Map<String, dynamic>;
     return AppSettings(

@@ -86,6 +86,49 @@ class Membership(models.Model):
         return m
 
 
+PRIVACY_DRAFT = """Politique de confidentialité — brouillon à faire relire.
+
+MSG est une plateforme de gestion de groupes. Elle conserve, pour chaque membre : nom, prénoms, numéro de téléphone, date de naissance, ville, photo de profil (facultative), rôles, présences, contributions et paiements, ainsi que, pour les mineurs, le contact d’un parent.
+
+Ces données servent uniquement à la vie du groupe : liste des membres, calendrier, planning des services, caisse et annonces. Elles ne sont ni vendues ni partagées hors du groupe et du partenaire qui administre la plateforme.
+
+Chacun ne voit que ce que son rôle permet ; les données sensibles (finances, contacts des mineurs) sont réservées aux responsables concernés. Chaque modification importante est enregistrée dans un journal.
+
+Les données sont hébergées chez nos prestataires techniques (base de données et stockage des fichiers). Le code PIN n’est jamais conservé en clair.
+
+Pour consulter, corriger ou supprimer vos données, contactez le responsable de votre groupe ou le partenaire (rubrique Aide)."""
+
+TERMS_DRAFT = """Conditions d’utilisation — brouillon à faire relire.
+
+MSG est réservée aux membres des groupes inscrits sur la plateforme. Votre accès est créé par le partenaire à la demande du responsable de votre groupe.
+
+Votre code PIN est personnel : ne le communiquez à personne. Prévenez le responsable de votre groupe si vous pensez qu’il est connu d’un tiers.
+
+Les informations publiées (annonces, convocations, calendrier) engagent leur auteur et son rôle dans le groupe. Utilisez l’application avec respect et uniquement pour la vie du groupe.
+
+Le partenaire peut suspendre un accès en cas d’usage abusif, à la demande du groupe ou pour la sécurité de la plateforme."""
+
+
+class PlatformSettings(models.Model):
+    """The partner's own details (back-office → Plateforme), shown in the
+    app's Aide / À propos (owner, 2026-10-26). One row for the platform."""
+
+    support_phone = models.CharField("téléphone d’assistance", max_length=20, blank=True)
+    support_whatsapp = models.CharField("WhatsApp d’assistance", max_length=20, blank=True)
+    support_email = models.EmailField("e-mail de contact", blank=True)
+    website = models.URLField("site web", blank=True)
+    privacy_text = models.TextField("politique de confidentialité", default=PRIVACY_DRAFT)
+    terms_text = models.TextField("conditions d’utilisation", default=TERMS_DRAFT)
+
+    class Meta:
+        verbose_name = "réglages de la plateforme"
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 class AuditLog(models.Model):
     """Who did what, to what, when, from which device. Append-only.
 

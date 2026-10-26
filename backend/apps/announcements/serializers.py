@@ -30,17 +30,24 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     event_title = serializers.CharField(source="event.title", read_only=True, default=None)
     event_starts_at = serializers.DateTimeField(source="event.starts_at", read_only=True, default=None)
     author_name = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
     unread = serializers.SerializerMethodField()
     reads = serializers.SerializerMethodField()
     attachments = AttachmentSerializer(many=True, read_only=True)
 
     class Meta:
         model = Announcement
-        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "created_at", "unread", "reads", "attachments"]
+        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "author_role", "created_at", "unread", "reads", "attachments"]
         read_only_fields = ["created_at"]
 
     def get_author_name(self, a) -> str | None:
         return a.author.short_name if a.author else None
+
+    def get_author_role(self, a) -> str:
+        # Saved when posted; older announcements show the author's role now.
+        if a.author_role or a.author is None:
+            return a.author_role
+        return a.author.display_role()
 
     def get_unread(self, a) -> bool:
         return a.pk not in self.context.get("read_ids", set())

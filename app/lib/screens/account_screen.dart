@@ -13,6 +13,7 @@ import '../widgets/language_switch.dart';
 import '../widgets/appearance_sheet.dart';
 import '../widgets/my_photo.dart';
 import '../widgets/ui.dart';
+import 'help_screens.dart';
 import 'login_phone_screen.dart';
 import 'pin_screens.dart';
 
@@ -162,6 +163,8 @@ class AccountScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
+                  const HelpAboutSection(),
+                  const SizedBox(height: 24),
                   OutlinedButton.icon(
                     key: const Key('logout'),
                     onPressed: () => _logout(context),
@@ -170,8 +173,8 @@ class AccountScreen extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                       shape: const StadiumBorder(),
-                      foregroundColor: c.primaryText,
-                      side: BorderSide(color: c.primary, width: 1.5),
+                      foregroundColor: c.alert,
+                      side: BorderSide(color: c.alert, width: 1.5),
                     ),
                   ),
                 ],

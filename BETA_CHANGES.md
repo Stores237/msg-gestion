@@ -471,3 +471,28 @@ Owner, 2026-10-23: the PIN wasn't asked when the app was reopened; biometrics we
 **Verify.** `flutter test test/lock_test.dart` (reopen, wrong PIN count, 5 wrong → signed out,
 old session → sign in again, fingerprint auto-unlock and retry key, background → locked, the
 switch in Mon compte). On a phone: sign in, close the app from recent apps, reopen → PIN.
+
+## 23. Bureau posts and plans with their role shown; Aide / À propos; storage errors
+
+Owner, 2026-10-26.
+
+- **Every bureau role** (all groups) can now post announcements and convocations and create,
+  change and delete calendar events (`accounts.0012_bureau_announcements_calendar`; adjustable in
+  the back-office matrix). Authors still edit only their own announcements unless they manage them.
+- **The author's role is shown**: saved when posting (`Announcement.author_role`,
+  `Event.created_by_role`; `announcements.0004`, `events.0004`), shown as a pill next to the name
+  on announcements and as "Ajouté par … [rôle]" on an event. A role of the day reads "Président du
+  jour". Older posts show the author's current role.
+- **Aide / À propos** in Mon compte (owner's reference): FAQ (in the app, FR/EN), Aide et
+  assistance (call), Assistance WhatsApp, Nous contacter (e-mail); site web, politique de
+  confidentialité, conditions d'utilisation. Contacts and texts are the partner's, edited in the
+  back-office → **Plateforme · aide** (`core.PlatformSettings`, `core.0009`; `GET /api/platform/`).
+  The two texts start as drafts to be reviewed. A contact not filled in shows "Pas encore
+  disponible". Log out is now red, as in the reference.
+- **Profile picture upload** failed on staging because the Supabase storage refuses every request
+  (403: the S3 access key or its region is no longer valid). Owner action: new S3 access key.
+  The API now answers `503 storage_unavailable` with a clear message (app: "le stockage est
+  indisponible") instead of a 500, for every upload.
+
+**Verify.** `pytest -k "bureau or plain_member or platform or storage"`;
+`flutter test test/help_and_roles_test.dart`.

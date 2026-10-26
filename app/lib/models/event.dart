@@ -15,7 +15,13 @@ class CalendarEvent {
     this.attendanceCounts,
     this.kindName,
     this.dressName,
+    this.createdByName,
+    this.createdByRole = '',
   });
+
+  /// Who added it, and their role then (owner, 2026-10-26).
+  final String? createdByName;
+  final String createdByRole;
 
   final String? kindName;
   final String? dressName;
@@ -45,6 +51,8 @@ class CalendarEvent {
     dress: (j['dress'] as String?) ?? '',
     notes: (j['notes'] as String?) ?? '',
     myAttendance: j['my_attendance'] as String?,
+    createdByName: j['created_by_name'] as String?,
+    createdByRole: (j['created_by_role'] as String?) ?? '',
     attendanceCounts: (j['attendance_counts'] as Map<String, dynamic>?)?.map(
       (k, v) => MapEntry(k, v as int),
     ),

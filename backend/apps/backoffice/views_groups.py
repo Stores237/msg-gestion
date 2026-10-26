@@ -112,3 +112,38 @@ def group_switch(request):
     if not url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}):
         nxt = ""
     return redirect(nxt or "backoffice:dashboard")
+
+
+PLATFORM_FIELDS = ["support_phone", "support_whatsapp", "support_email", "website", "privacy_text", "terms_text"]
+
+
+@backoffice_view("backoffice.users", "view")
+def platform(request):
+    """The partner's contacts and the legal texts shown in the app's Aide /
+    À propos (owner, 2026-10-26)."""
+    from apps.core.models import PlatformSettings
+
+    p = PlatformSettings.get()
+    if request.method == "POST":
+        if not request.user.can("backoffice.users", "change"):
+            return render(request, "backoffice/forbidden.html", status=403)
+        changed = {}
+        for f in PLATFORM_FIELDS:
+            if f not in request.POST:
+                continue
+            field = PlatformSettings._meta.get_field(f)
+            value = request.POST[f].strip()
+            try:
+                field.run_validators(value) if value else None
+            except Exception:
+                messages.error(request, f"Valeur invalide : {field.verbose_name}.")
+                return redirect("backoffice:platform")
+            if getattr(p, f) != value:
+                changed[f] = value if f not in ("privacy_text", "terms_text") else "(texte modifié)"
+                setattr(p, f, value)
+        p.save()
+        if changed:
+            audit.record("Réglages de la plateforme modifiés", actor=request.user, request=request, platform=True, detail=changed)
+        messages.success(request, "Enregistré. L’application l’affiche dans Mon compte → Aide.")
+        return redirect("backoffice:platform")
+    return render(request, "backoffice/platform.html", {"nav": "platform", "p": p})

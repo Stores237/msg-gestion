@@ -136,13 +136,13 @@ def test_users_search(logged_in):
 def test_roles_matrix_edit_requires_reason_and_logs(logged_in):
     role = Role.objects.get(slug="tresorier")
     before = set(role.permissions.values_list("resource", "action"))
-    wanted = [f"{r}:{a}" for r, a in before] + ["announcements.posts:create"]
+    wanted = [f"{r}:{a}" for r, a in before] + ["announcements.posts:delete"]
     r = logged_in.post("/bo/roles/tresorier/", {"perm": wanted, "reason": ""}, follow=True)
     assert "Le motif est obligatoire" in r.content.decode()
     assert set(role.permissions.values_list("resource", "action")) == before
 
     logged_in.post("/bo/roles/tresorier/", {"perm": wanted, "reason": "Appels à contribution"})
-    assert ("announcements.posts", "create") in set(role.permissions.values_list("resource", "action"))
+    assert ("announcements.posts", "delete") in set(role.permissions.values_list("resource", "action"))
     assert AuditLog.objects.filter(action="Permission modifiée").count() == 1
 
 

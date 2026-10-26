@@ -80,6 +80,8 @@ class Event(models.Model):
     dress = models.CharField(max_length=12, blank=True)
     notes = models.TextField(blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    # The author's role when they created it (owner, 2026-10-26: shown on it).
+    created_by_role = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")

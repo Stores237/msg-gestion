@@ -169,3 +169,25 @@ def test_login_pages_work_with_several_groups(login, choir):
     Group.objects.filter(pk=choir.pk).update(is_active=False)
     assert Client().get("/bo/connexion/").status_code == 200
     assert a.get("/bo/").status_code == 200
+
+
+def test_platform_help_contacts_and_texts(login, choir):
+    a = login("677000001")
+    assert "Politique de confidentialité" in a.get("/bo/plateforme/").content.decode()
+    a.post("/bo/plateforme/", {"support_phone": "659802679", "support_whatsapp": "654858138",
+                               "support_email": "aide@example.org", "website": "https://msg.example.org",
+                               "privacy_text": "Texte relu.", "terms_text": "Conditions relues."})
+    from apps.core.models import PlatformSettings
+
+    p = PlatformSettings.get()
+    assert (p.support_phone, p.support_whatsapp, p.support_email, p.website) == ("659802679", "654858138", "aide@example.org", "https://msg.example.org")
+    assert AuditLog.objects.filter(action="Réglages de la plateforme modifiés", group__isnull=True).exists()
+    r = a.post("/bo/plateforme/", {"website": "pas une adresse"}, follow=True)
+    assert "Valeur invalide" in r.content.decode()
+    member = UserFactory(membership=Group.objects.order_by("pk").first())
+    data = app_get(member).json()  # /api/me/ works; now the platform view
+    api = APIClient()
+    api.force_authenticate(member)
+    j = api.get("/api/platform/").json()
+    assert j["support_whatsapp"] == "654858138" and j["privacy_text"] == "Texte relu."
+    assert data["id"] == member.pk

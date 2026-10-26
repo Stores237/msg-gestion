@@ -3,6 +3,35 @@ import '../../models/me.dart';
 /// (slug, name) of one of the group's activity types or dress codes.
 typedef NamedItem = (String, String);
 
+/// The partner's contacts and texts (back-office → Plateforme), for Mon
+/// compte → Aide / À propos. Empty = not filled in yet.
+class PlatformInfo {
+  const PlatformInfo({
+    this.supportPhone = '',
+    this.supportWhatsapp = '',
+    this.supportEmail = '',
+    this.website = '',
+    this.privacyText = '',
+    this.termsText = '',
+  });
+
+  final String supportPhone;
+  final String supportWhatsapp;
+  final String supportEmail;
+  final String website;
+  final String privacyText;
+  final String termsText;
+
+  factory PlatformInfo.fromJson(Map<String, dynamic> j) => PlatformInfo(
+    supportPhone: (j['support_phone'] as String?) ?? '',
+    supportWhatsapp: (j['support_whatsapp'] as String?) ?? '',
+    supportEmail: (j['support_email'] as String?) ?? '',
+    website: (j['website'] as String?) ?? '',
+    privacyText: (j['privacy_text'] as String?) ?? '',
+    termsText: (j['terms_text'] as String?) ?? '',
+  );
+}
+
 class AppSettings {
   const AppSettings({
     required this.quickAmounts,
@@ -80,4 +109,6 @@ abstract class ProfileRepository {
     required String filename,
   });
   Future<void> removeMyPhoto();
+
+  Future<PlatformInfo> platform();
 }

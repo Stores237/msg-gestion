@@ -1053,9 +1053,9 @@ class AnnouncementCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        a.authorName ?? '',
-                        style: TextStyle(fontSize: 13, color: c.textSecondary),
+                      child: AuthorLine(
+                        name: a.authorName ?? '',
+                        role: a.authorRole,
                       ),
                     ),
                     if (a.readCount != null)
@@ -1104,4 +1104,43 @@ class FitText extends StatelessWidget {
     fit: BoxFit.scaleDown,
     child: Text(text, maxLines: 1, softWrap: false),
   );
+}
+
+/// "Ewane B. · [Président]": who posted, with their role as a small pill
+/// (owner, 2026-10-26: the staff member's role is seen on what they post).
+class AuthorLine extends StatelessWidget {
+  const AuthorLine({super.key, required this.name, this.role = ''});
+  final String name;
+  final String role;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        if (name.isNotEmpty)
+          Text(name, style: TextStyle(fontSize: 13, color: c.textSecondary)),
+        if (role.isNotEmpty)
+          Container(
+            key: const Key('author-role'),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: c.primaryTint,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Text(
+              role,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: c.primaryText,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

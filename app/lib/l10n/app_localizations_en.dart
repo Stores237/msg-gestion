@@ -1668,4 +1668,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get biometricHint => 'Your PIN always works too.';
+
+  @override
+  String get addedBy => 'Added by';
+
+  @override
+  String get storageUnavailable =>
+      'The file couldn’t be sent: storage is unavailable. Try again later; if it keeps failing, tell the partner.';
+
+  @override
+  String get helpSection => 'Help';
+
+  @override
+  String get aboutSection => 'About';
+
+  @override
+  String get faq => 'FAQ';
+
+  @override
+  String get faqSub => 'Answers to common questions';
+
+  @override
+  String get helpSupport => 'Help & support';
+
+  @override
+  String get helpSupportSub => 'Call a real person';
+
+  @override
+  String get whatsappSupport => 'WhatsApp support';
+
+  @override
+  String get whatsappSupportSub => 'Chat with us on WhatsApp';
+
+  @override
+  String get contactUs => 'Contact us';
+
+  @override
+  String get contactUsSub => 'Questions or feedback';
+
+  @override
+  String get visitWebsite => 'Visit our website';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get notAvailableYet => 'Not available yet';
+
+  @override
+  String appVersion(String v) {
+    return 'Version $v';
+  }
+
+  @override
+  String get faqQ1 => 'I forgot my PIN.';
+
+  @override
+  String get faqA1 =>
+      'On the PIN screen, tap “Forgot PIN?”. If text messages aren’t available, ask your group leader: they can give you a temporary PIN.';
+
+  @override
+  String get faqQ2 => 'Why does the app ask for my PIN every time it opens?';
+
+  @override
+  String get faqA2 =>
+      'To protect the group’s data if someone picks up your phone. You can unlock with your fingerprint or face: My account → Unlock with fingerprint.';
+
+  @override
+  String get faqQ3 => 'I can’t see the Finances tab (or another one).';
+
+  @override
+  String get faqA3 =>
+      'Tabs depend on your role in the group. When your role changes, they adapt the next time you open the app.';
+
+  @override
+  String get faqQ4 => 'How do I report an absence?';
+
+  @override
+  String get faqA4 =>
+      'Open the activity in the Calendar and tap “Report an absence”, with the reason.';
+
+  @override
+  String get faqQ5 => 'What is a role of the day?';
+
+  @override
+  String get faqA5 =>
+      'An active member with no role can be given a role such as president, censor or treasurer for one day. It is requested in the app and approved by the partner; it ends that night.';
+
+  @override
+  String get faqQ6 => 'Does the app work without internet?';
+
+  @override
+  String get faqA6 =>
+      'Yes, to view what was already loaded and for some entries: they are sent as soon as the network is back (“Offline” banner at the top).';
 }

@@ -138,6 +138,11 @@ void main() {
     await typePin(tester, '4821');
     await tester.tap(find.byKey(const Key('open-account')));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('logout')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const Key('logout')));
     await tester.pumpAndSettle();
     expect(auth.logouts, 1);

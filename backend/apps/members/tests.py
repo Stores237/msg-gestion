@@ -161,3 +161,19 @@ def test_every_member_changes_their_own_photo():
     assert api.post("/api/me/photo/", {"photo": pdf}, format="multipart").json()["code"] == "file_type"
     assert api.delete("/api/me/photo/").json() == {"photo": None}
     assert api.get("/api/me/").json()["photo"] is None
+
+
+def test_storage_failure_is_a_clear_503_not_a_500(monkeypatch):
+    """Staging, 2026-10-26: Supabase refused the upload (403); the app saw 500."""
+    from botocore.exceptions import ClientError
+    from django.core.files.storage import default_storage
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    def refuse(*a, **k):
+        raise ClientError({"Error": {"Code": "403", "Message": "Forbidden"}}, "PutObject")
+
+    monkeypatch.setattr(default_storage, "save", refuse)
+    api, _ = client_for("membre")
+    png = SimpleUploadedFile("moi.png", b"\x89PNG\r\n\x1a\n" + b"0" * 32, content_type="image/png")
+    r = api.post("/api/me/photo/", {"photo": png}, format="multipart")
+    assert r.status_code == 503 and r.json()["code"] == "storage_unavailable"

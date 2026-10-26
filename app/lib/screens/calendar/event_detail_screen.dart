@@ -159,6 +159,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               lead: const Icon(Icons.checkroom_outlined),
                               title: Text(dressLabel(l, e.dress, e.dressName)),
                             ),
+                          if (e.createdByName != null)
+                            ListRow(
+                              key: const Key('event-author'),
+                              lead: const Icon(Icons.person_outline),
+                              title: Text(l.addedBy),
+                              subtitle: AuthorLine(
+                                name: e.createdByName!,
+                                role: e.createdByRole,
+                              ),
+                            ),
                         ],
                       ),
                       if (e.notes.isNotEmpty) ...[
