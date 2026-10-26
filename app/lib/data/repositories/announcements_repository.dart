@@ -11,6 +11,18 @@ abstract class AnnouncementsRepository {
     int? eventId,
     bool pinned = false,
   });
+
+  /// The author (or someone who manages announcements) edits or deletes it.
+  Future<Announcement> update(
+    int id, {
+    required String kind,
+    required String title,
+    required String body,
+    int? eventId,
+  });
+  Future<void> delete(int id);
+  Future<Announcement> get(int id);
+
   Future<List<ReadReceipt>> receipts(int id);
 
   /// Upload a PDF/JPEG/PNG (≤ 10 MB) to an announcement you wrote.

@@ -35,6 +35,8 @@ class Announcement {
     required this.pinned,
     this.authorName,
     this.authorRole = '',
+    this.canEdit = false,
+    this.canDelete = false,
     required this.createdAt,
     required this.unread,
     this.readCount,
@@ -56,6 +58,10 @@ class Announcement {
 
   /// The author's role when they posted ("Trésorier", "Président du jour").
   final String authorRole;
+
+  /// The viewer may edit / delete it (their own, or they manage posts).
+  final bool canEdit;
+  final bool canDelete;
   final DateTime createdAt;
   final bool unread;
 
@@ -77,6 +83,8 @@ class Announcement {
     pinned: pinned,
     authorName: authorName,
     authorRole: authorRole,
+    canEdit: canEdit,
+    canDelete: canDelete,
     createdAt: createdAt,
     unread: unread ?? this.unread,
     readCount: readCount,
@@ -99,6 +107,8 @@ class Announcement {
       pinned: j['pinned'] as bool,
       authorName: j['author_name'] as String?,
       authorRole: (j['author_role'] as String?) ?? '',
+      canEdit: (j['can_edit'] as bool?) ?? false,
+      canDelete: (j['can_delete'] as bool?) ?? false,
       createdAt: DateTime.parse(j['created_at'] as String).toLocal(),
       unread: j['unread'] as bool,
       readCount: reads?['read'] as int?,

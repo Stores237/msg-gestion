@@ -41,7 +41,7 @@ class EventListView(APIView):
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
         events = list(Event.objects.select_related("created_by").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
-        return Response(EventSerializer(events, many=True, context={"mine": _mine(request.user, events)}).data)
+        return Response(EventSerializer(events, many=True, context={"mine": _mine(request.user, events), "viewer": request.user}).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
     def post(self, request):
@@ -49,17 +49,19 @@ class EventListView(APIView):
         s.is_valid(raise_exception=True)
         event = s.save(created_by=request.user, created_by_role=request.user.display_role())
         audit.record("Événement créé", actor=request.user, obj=event, request=request)
-        return Response(EventSerializer(event).data, status=status.HTTP_201_CREATED)
+        return Response(EventSerializer(event, context={"viewer": request.user}).data, status=status.HTTP_201_CREATED)
 
 
 class EventDetailView(APIView):
-    def get_permissions(self):
-        return [require("calendar.events", METHOD_ACTION[self.request.method])()]
+    """GET; PATCH and DELETE by whoever added the event, or with the
+    calendar's change / delete rights (owner, 2026-10-26)."""
+
+    permission_classes = [require("calendar.events", "view")]
 
     @extend_schema(responses=EventSerializer)
     def get(self, request, pk):
-        event = get_object_or_404(Event, pk=pk)
-        body = dict(EventSerializer(event, context={"mine": _mine(request.user, [event])}).data)
+        event = get_object_or_404(Event.objects.select_related("created_by"), pk=pk)
+        body = dict(EventSerializer(event, context={"mine": _mine(request.user, [event]), "viewer": request.user}).data)
         if request.user.can("calendar.attendance", "view"):
             counts = {s: 0 for s in Attendance.Status.values}
             for st in event.attendance.values_list("status", flat=True):
@@ -70,15 +72,19 @@ class EventDetailView(APIView):
     @extend_schema(request=EventSerializer, responses=EventSerializer)
     def patch(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
-        s = EventSerializer(event, data=request.data, partial=True)
+        if not (event.created_by_id == request.user.pk or request.user.can("calendar.events", "change")):
+            return Response({"detail": "Seul l’auteur peut modifier cet événement.", "code": "author_only"}, status=403)
+        s = EventSerializer(event, data=request.data, partial=True, context={"viewer": request.user})
         s.is_valid(raise_exception=True)
         s.save()
         audit.record("Événement modifié", actor=request.user, obj=event, request=request, detail={"champs": sorted(request.data)})
-        return Response(EventSerializer(event).data)
+        return Response(EventSerializer(event, context={"viewer": request.user}).data)
 
     def delete(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
-        audit.record("Événement supprimé", actor=request.user, obj=event, request=request)
+        if not (event.created_by_id == request.user.pk or request.user.can("calendar.events", "delete")):
+            return Response({"detail": "Seul l’auteur peut supprimer cet événement.", "code": "author_only"}, status=403)
+        audit.record("Événement supprimé", actor=request.user, obj=event, request=request, detail={"titre": event.title})
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/announcement.dart';
 import '../../models/event.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
@@ -18,9 +19,11 @@ class PickedFile {
 }
 
 /// "Rédiger une annonce": announcement or convocation (linked to an
-/// upcoming event), optionally pinned. Goes to every member.
+/// upcoming event), optionally pinned. Goes to every member. With
+/// [existing], "Modifier l’annonce" (its author, or whoever manages posts).
 class ComposeScreen extends StatefulWidget {
-  const ComposeScreen({super.key});
+  const ComposeScreen({super.key, this.existing});
+  final Announcement? existing;
 
   @override
   State<ComposeScreen> createState() => _ComposeScreenState();
@@ -36,6 +39,31 @@ class _ComposeScreenState extends State<ComposeScreen> {
   bool _busy = false;
   bool _eventMissing = false;
   final List<PickedFile> _files = [];
+
+  bool get _editing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final a = widget.existing;
+    if (a == null) return;
+    _title.text = a.title;
+    _body.text = a.body;
+    _kind = a.isConvocation ? 1 : 0;
+    _pinned = a.pinned;
+    if (a.eventId != null) {
+      // Enough of the linked event to show and keep it.
+      _event = CalendarEvent(
+        id: a.eventId!,
+        kind: '',
+        title: a.eventTitle ?? '',
+        startsAt: a.eventStartsAt ?? a.createdAt,
+        place: '',
+        dress: '',
+        notes: '',
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -123,13 +151,23 @@ class _ComposeScreenState extends State<ComposeScreen> {
     final l = AppLocalizations.of(context);
     try {
       final repo = RepositoryLocator.instance.announcements;
-      final created = await repo.create(
-        kind: _kind == 1 ? 'convocation' : 'annonce',
-        title: _title.text.trim(),
-        body: _body.text.trim(),
-        eventId: _kind == 1 ? _event?.id : null,
-        pinned: _pinned,
-      );
+      final kind = _kind == 1 ? 'convocation' : 'annonce';
+      final eventId = _kind == 1 ? _event?.id : null;
+      final created = _editing
+          ? await repo.update(
+              widget.existing!.id,
+              kind: kind,
+              title: _title.text.trim(),
+              body: _body.text.trim(),
+              eventId: eventId,
+            )
+          : await repo.create(
+              kind: kind,
+              title: _title.text.trim(),
+              body: _body.text.trim(),
+              eventId: eventId,
+              pinned: _pinned,
+            );
       for (final f in _files) {
         try {
           await repo.attach(created.id, bytes: f.bytes, filename: f.name);
@@ -143,9 +181,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
         }
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.announcementSent)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_editing ? l.announcementUpdated : l.announcementSent),
+        ),
+      );
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -181,7 +221,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            ScreenHeader(title: l.newAnnouncement, back: true, small: true),
+            ScreenHeader(
+              title: _editing ? l.editAnnouncement : l.newAnnouncement,
+              back: true,
+              small: true,
+            ),
             Expanded(
               child: Form(
                 key: _form,
@@ -266,14 +310,15 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           ),
                           title: Text(l.recipientsAll),
                         ),
-                        ListRow(
-                          title: Text(l.pinOnTop),
-                          trailing: Switch(
-                            key: const Key('a-pin'),
-                            value: _pinned,
-                            onChanged: (v) => setState(() => _pinned = v),
+                        if (!_editing)
+                          ListRow(
+                            title: Text(l.pinOnTop),
+                            trailing: Switch(
+                              key: const Key('a-pin'),
+                              value: _pinned,
+                              onChanged: (v) => setState(() => _pinned = v),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -293,7 +338,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   onPressed: _busy ? null : _send,
                   icon: const Icon(Icons.send_outlined, size: 18),
                   label: Text(
-                    _kind == 1 ? l.sendConvocation : l.sendAnnouncement,
+                    _editing
+                        ? l.save
+                        : (_kind == 1 ? l.sendConvocation : l.sendAnnouncement),
                   ),
                 ),
               ),

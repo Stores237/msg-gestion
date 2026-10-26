@@ -1769,4 +1769,38 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get faqA6 =>
       'Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut).';
+
+  @override
+  String get editAction => 'Modifier';
+
+  @override
+  String get deleteAction => 'Supprimer';
+
+  @override
+  String get editEvent => 'Modifier l’événement';
+
+  @override
+  String get eventUpdated => 'Événement modifié.';
+
+  @override
+  String deleteEventConfirm(String title) {
+    return 'Supprimer « $title » du calendrier ? Les présences notées seront perdues.';
+  }
+
+  @override
+  String get eventDeleted => 'Événement supprimé.';
+
+  @override
+  String get editAnnouncement => 'Modifier l’annonce';
+
+  @override
+  String get announcementUpdated => 'Annonce modifiée.';
+
+  @override
+  String deleteAnnouncementConfirm(String title) {
+    return 'Supprimer « $title » ? Elle disparaît pour tous les membres.';
+  }
+
+  @override
+  String get announcementDeleted => 'Annonce supprimée.';
 }

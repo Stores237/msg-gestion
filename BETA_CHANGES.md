@@ -527,3 +527,17 @@ Owner, 2026-10-26: the back-office gets staff teams, each with access by role an
   configured or pending, with a live "Tester maintenant" for the file storage. No secret shown.
 
 **Verify.** `pytest apps/backoffice/test_staff.py`.
+
+## 25. Authors edit and delete their own announcements and events
+
+Owner, 2026-10-26.
+
+- **Server**: `PATCH`/`DELETE /api/announcements/<id>/` and `/api/events/<id>/` are allowed to the
+  author, whatever their role's change/delete rights; people with those rights still can for
+  anyone's. Others get `403 author_only`. Each item tells the app `can_edit` / `can_delete`.
+  Pinning stays with whoever manages announcements. Deleting an announcement removes its
+  attachments; every change is in the journal.
+- **App**: "Modifier · Supprimer" under the announcement and the event when allowed; the
+  composer and the event form open pre-filled; deleting asks first.
+
+**Verify.** `pytest -k author_edits`; `flutter test test/owner_edit_test.dart`.

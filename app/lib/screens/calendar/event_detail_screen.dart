@@ -13,6 +13,7 @@ import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 import 'attendance_screen.dart';
+import 'event_form_screen.dart';
 
 /// Event detail (design: "Détail d’un événement"): when, where, dress,
 /// my attendance and "report an absence"; roll call for censors.
@@ -86,6 +87,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       } else {
         showErrorSnack(context, err);
       }
+    } catch (err) {
+      if (mounted) showErrorSnack(context, err);
+    }
+  }
+
+  Future<void> _delete(CalendarEvent e) async {
+    final l = AppLocalizations.of(context);
+    try {
+      await RepositoryLocator.instance.events.delete(e.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.eventDeleted)));
+      Navigator.of(context).pop(true);
     } catch (err) {
       if (mounted) showErrorSnack(context, err);
     }
@@ -170,6 +185,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               ),
                             ),
                         ],
+                      ),
+                      OwnerActions(
+                        canEdit: e.canEdit,
+                        canDelete: e.canDelete,
+                        confirmText: l.deleteEventConfirm(e.title),
+                        onEdit: () async {
+                          final saved = await Navigator.of(context).push<bool>(
+                            MaterialPageRoute(
+                              builder: (_) => EventFormScreen(
+                                initialDay: e.startsAt,
+                                existing: e,
+                              ),
+                            ),
+                          );
+                          if (saved == true) _refresh();
+                        },
+                        onDelete: () => _delete(e),
                       ),
                       if (e.notes.isNotEmpty) ...[
                         const SizedBox(height: 12),

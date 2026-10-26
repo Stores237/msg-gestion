@@ -9,12 +9,24 @@ class EventSerializer(serializers.ModelSerializer):
     dress_name = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
     created_by_role = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "title", "starts_at", "ends_at", "place", "dress", "dress_name", "notes", "my_attendance",
-                  "created_by_name", "created_by_role"]
-        read_only_fields = ["created_by_name", "created_by_role"]
+                  "created_by_name", "created_by_role", "can_edit", "can_delete"]
+        read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete"]
+
+    # Whoever added it edits and deletes it (owner, 2026-10-26); people with
+    # the calendar's change / delete rights can for any event.
+    def get_can_edit(self, event) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and (event.created_by_id == v.pk or v.can("calendar.events", "change"))
+
+    def get_can_delete(self, event) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and (event.created_by_id == v.pk or v.can("calendar.events", "delete"))
 
     def get_created_by_name(self, event) -> str | None:
         return event.created_by.short_name if event.created_by else None

@@ -34,11 +34,24 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     unread = serializers.SerializerMethodField()
     reads = serializers.SerializerMethodField()
     attachments = AttachmentSerializer(many=True, read_only=True)
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
 
     class Meta:
         model = Announcement
-        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "author_role", "created_at", "unread", "reads", "attachments"]
+        fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "author_role", "created_at", "unread", "reads", "attachments",
+                  "can_edit", "can_delete"]
         read_only_fields = ["created_at"]
+
+    # The author edits and deletes their own post (owner, 2026-10-26); people
+    # who manage announcements can for anyone's.
+    def get_can_edit(self, a) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and (a.author_id == v.pk or v.can("announcements.posts", "change"))
+
+    def get_can_delete(self, a) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and (a.author_id == v.pk or v.can("announcements.posts", "delete"))
 
     def get_author_name(self, a) -> str | None:
         return a.author.short_name if a.author else None

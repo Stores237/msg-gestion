@@ -1086,5 +1086,29 @@
   "faqQ5": "Qu’est-ce qu’un rôle du jour ?",
   "faqA5": "Un membre actif sans rôle peut recevoir, pour une journée, un rôle comme président, censeur ou trésorier du jour. Il est demandé dans l’application et validé par le partenaire ; il s’arrête le soir même.",
   "faqQ6": "L’application marche-t-elle sans internet ?",
-  "faqA6": "Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut)."
+  "faqA6": "Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut).",
+  "editAction": "Modifier",
+  "deleteAction": "Supprimer",
+  "editEvent": "Modifier l’événement",
+  "eventUpdated": "Événement modifié.",
+  "deleteEventConfirm": "Supprimer « {title} » du calendrier ? Les présences notées seront perdues.",
+  "@deleteEventConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventDeleted": "Événement supprimé.",
+  "editAnnouncement": "Modifier l’annonce",
+  "announcementUpdated": "Annonce modifiée.",
+  "deleteAnnouncementConfirm": "Supprimer « {title} » ? Elle disparaît pour tous les membres.",
+  "@deleteAnnouncementConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "announcementDeleted": "Annonce supprimée."
 }

@@ -403,13 +403,47 @@ class FakeEventsRepository implements EventsRepository {
       myAttendance: excused.contains(id) ? 'excuse' : null,
       createdByName: 'Ewane B.',
       createdByRole: 'Commissaire aux comptes',
+      canEdit: owner,
+      canDelete: owner,
     );
   }
+
+  /// The viewer added the events (edit / delete shown).
+  bool owner = false;
+  final updated = <String>[];
+  final deleted = <int>[];
 
   @override
   Future<CalendarEvent> create(CalendarEvent draft) async {
     events = [...events, draft];
     return draft;
+  }
+
+  @override
+  Future<CalendarEvent> update(int id, CalendarEvent draft) async {
+    updated.add('$id:${draft.title}:${draft.place}');
+    events = [
+      for (final e in events)
+        e.id == id
+            ? CalendarEvent(
+                id: id,
+                kind: draft.kind,
+                title: draft.title,
+                startsAt: draft.startsAt,
+                endsAt: draft.endsAt,
+                place: draft.place,
+                dress: draft.dress,
+                notes: draft.notes,
+              )
+            : e,
+    ];
+    return draft;
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    deleted.add(id);
+    events = events.where((e) => e.id != id).toList();
   }
 
   @override
@@ -491,10 +525,53 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       pinned: pinned,
       createdAt: DateTime.now(),
       unread: false,
+      canEdit: true, // the author
+      canDelete: true,
     );
     items = [a, ...items];
     return a;
   }
+
+  final updated = <String>[];
+  final deleted = <int>[];
+
+  @override
+  Future<Announcement> update(
+    int id, {
+    required String kind,
+    required String title,
+    required String body,
+    int? eventId,
+  }) async {
+    updated.add('$id:$title');
+    items = [
+      for (final a in items)
+        a.id == id
+            ? Announcement(
+                id: id,
+                kind: kind,
+                title: title,
+                body: body,
+                eventId: eventId,
+                pinned: a.pinned,
+                createdAt: a.createdAt,
+                unread: false,
+                canEdit: true,
+                canDelete: true,
+              )
+            : a,
+    ];
+    return items.firstWhere((a) => a.id == id);
+  }
+
+  @override
+  Future<void> delete(int id) async {
+    deleted.add(id);
+    items = items.where((a) => a.id != id).toList();
+  }
+
+  @override
+  Future<Announcement> get(int id) async => items.firstWhere((a) => a.id == id);
 
   @override
   Future<List<ReadReceipt>> receipts(int id) async => const [];

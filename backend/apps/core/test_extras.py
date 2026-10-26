@@ -179,3 +179,55 @@ def test_plain_member_still_cannot_post_and_role_of_the_day_is_named():
     censor = UserFactory()
     give_role(censor, "censeur-du-jour", starts_on=timezone.localdate(), ends_on=timezone.localdate())
     assert censor.display_role() == "Censeur du jour"
+
+
+def _poster(*perms):
+    """A member whose only role can post (view + create), nothing more."""
+    from apps.accounts.models import Role, RolePermission
+
+    role = Role.objects.create(slug=f"poster-{len(perms)}-{Role.objects.count()}", name="Responsable des annonces")
+    for res in perms:
+        for act in ("view", "create"):
+            RolePermission.objects.create(role=role, resource=res, action=act)
+    api, user = client_for("membre", role.slug)
+    return api, user
+
+
+def test_the_author_edits_and_deletes_their_own_announcement_only():
+    """Owner, 2026-10-26: whoever posts can edit and delete what they posted."""
+    from apps.announcements.models import Announcement
+
+    api, me = _poster("announcements.posts")
+    other_api, _ = _poster("announcements.posts")
+    aid = api.post("/api/announcements/", {"title": "Répétition", "body": "Jeudi"}, format="json").json()["id"]
+    mine = api.get(f"/api/announcements/{aid}/").json()
+    assert mine["can_edit"] and mine["can_delete"]
+    theirs = other_api.get(f"/api/announcements/{aid}/").json()
+    assert not theirs["can_edit"] and not theirs["can_delete"]
+    r = api.patch(f"/api/announcements/{aid}/", {"title": "Répétition déplacée", "body": "Vendredi", "pinned": True}, format="json")
+    assert r.status_code == 200 and r.json()["title"] == "Répétition déplacée"
+    assert not Announcement.objects.get(pk=aid).pinned  # pinning isn't the author's
+    assert other_api.patch(f"/api/announcements/{aid}/", {"title": "x"}, format="json").status_code == 403
+    assert other_api.delete(f"/api/announcements/{aid}/").status_code == 403
+    assert api.delete(f"/api/announcements/{aid}/").status_code == 204
+    assert not Announcement.objects.filter(pk=aid).exists()
+
+
+def test_the_author_edits_and_deletes_their_own_event_only():
+    from apps.events.models import Event
+
+    api, _ = _poster("calendar.events")
+    other_api, _ = _poster("calendar.events")
+    start = timezone.now() + timedelta(days=4)
+    eid = api.post("/api/events/", {"kind": "assise", "title": "Répétition", "starts_at": start.isoformat()}, format="json").json()["id"]
+    assert api.get(f"/api/events/{eid}/").json()["can_edit"]
+    assert not other_api.get(f"/api/events/{eid}/").json()["can_delete"]
+    assert other_api.patch(f"/api/events/{eid}/", {"place": "x"}, format="json").status_code == 403
+    assert api.patch(f"/api/events/{eid}/", {"place": "Salle paroissiale"}, format="json").json()["place"] == "Salle paroissiale"
+    assert other_api.delete(f"/api/events/{eid}/").status_code == 403
+    assert api.delete(f"/api/events/{eid}/").status_code == 204
+    assert not Event.objects.filter(pk=eid).exists()
+    # Someone with the calendar's change right still edits anyone's event.
+    eid = api.post("/api/events/", {"kind": "assise", "title": "Autre", "starts_at": start.isoformat()}, format="json").json()["id"]
+    sg, _ = client_for("secretaire-general")
+    assert sg.patch(f"/api/events/{eid}/", {"title": "Autre (modifié)"}, format="json").status_code == 200

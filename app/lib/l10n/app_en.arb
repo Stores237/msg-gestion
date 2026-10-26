@@ -494,5 +494,15 @@
   "faqQ5": "What is a role of the day?",
   "faqA5": "An active member with no role can be given a role such as president, censor or treasurer for one day. It is requested in the app and approved by the partner; it ends that night.",
   "faqQ6": "Does the app work without internet?",
-  "faqA6": "Yes, to view what was already loaded and for some entries: they are sent as soon as the network is back (“Offline” banner at the top)."
+  "faqA6": "Yes, to view what was already loaded and for some entries: they are sent as soon as the network is back (“Offline” banner at the top).",
+  "editAction": "Edit",
+  "deleteAction": "Delete",
+  "editEvent": "Edit event",
+  "eventUpdated": "Event updated.",
+  "deleteEventConfirm": "Delete “{title}” from the calendar? Any attendance taken will be lost.",
+  "eventDeleted": "Event deleted.",
+  "editAnnouncement": "Edit announcement",
+  "announcementUpdated": "Announcement updated.",
+  "deleteAnnouncementConfirm": "Delete “{title}”? It disappears for every member.",
+  "announcementDeleted": "Announcement deleted."
 }

@@ -1764,4 +1764,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get faqA6 =>
       'Yes, to view what was already loaded and for some entries: they are sent as soon as the network is back (“Offline” banner at the top).';
+
+  @override
+  String get editAction => 'Edit';
+
+  @override
+  String get deleteAction => 'Delete';
+
+  @override
+  String get editEvent => 'Edit event';
+
+  @override
+  String get eventUpdated => 'Event updated.';
+
+  @override
+  String deleteEventConfirm(String title) {
+    return 'Delete “$title” from the calendar? Any attendance taken will be lost.';
+  }
+
+  @override
+  String get eventDeleted => 'Event deleted.';
+
+  @override
+  String get editAnnouncement => 'Edit announcement';
+
+  @override
+  String get announcementUpdated => 'Announcement updated.';
+
+  @override
+  String deleteAnnouncementConfirm(String title) {
+    return 'Delete “$title”? It disappears for every member.';
+  }
+
+  @override
+  String get announcementDeleted => 'Announcement deleted.';
 }

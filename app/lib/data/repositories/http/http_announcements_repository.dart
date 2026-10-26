@@ -52,6 +52,29 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
   );
 
   @override
+  Future<Announcement> update(
+    int id, {
+    required String kind,
+    required String title,
+    required String body,
+    int? eventId,
+  }) async => Announcement.fromJson(
+    await _api.patch(
+          '/announcements/$id/',
+          body: {'kind': kind, 'title': title, 'body': body, 'event': eventId},
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<void> delete(int id) async => _api.delete('/announcements/$id/');
+
+  @override
+  Future<Announcement> get(int id) async => Announcement.fromJson(
+    await _api.get('/announcements/$id/') as Map<String, dynamic>,
+  );
+
+  @override
   Future<List<ReadReceipt>> receipts(int id) async {
     final data =
         await _api.get('/announcements/$id/reads/') as Map<String, dynamic>;

@@ -17,7 +17,13 @@ class CalendarEvent {
     this.dressName,
     this.createdByName,
     this.createdByRole = '',
+    this.canEdit = false,
+    this.canDelete = false,
   });
+
+  /// The viewer may edit / delete it (they added it, or manage the calendar).
+  final bool canEdit;
+  final bool canDelete;
 
   /// Who added it, and their role then (owner, 2026-10-26).
   final String? createdByName;
@@ -53,6 +59,8 @@ class CalendarEvent {
     myAttendance: j['my_attendance'] as String?,
     createdByName: j['created_by_name'] as String?,
     createdByRole: (j['created_by_role'] as String?) ?? '',
+    canEdit: (j['can_edit'] as bool?) ?? false,
+    canDelete: (j['can_delete'] as bool?) ?? false,
     attendanceCounts: (j['attendance_counts'] as Map<String, dynamic>?)?.map(
       (k, v) => MapEntry(k, v as int),
     ),

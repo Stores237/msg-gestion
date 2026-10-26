@@ -3067,6 +3067,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Oui pour consulter ce qui a déjà été chargé et pour certaines saisies : elles partent dès que le réseau revient (bandeau « Hors ligne » en haut).'**
   String get faqA6;
+
+  /// No description provided for @editAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier'**
+  String get editAction;
+
+  /// No description provided for @deleteAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get deleteAction;
+
+  /// No description provided for @editEvent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l’événement'**
+  String get editEvent;
+
+  /// No description provided for @eventUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement modifié.'**
+  String get eventUpdated;
+
+  /// No description provided for @deleteEventConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer « {title} » du calendrier ? Les présences notées seront perdues.'**
+  String deleteEventConfirm(String title);
+
+  /// No description provided for @eventDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement supprimé.'**
+  String get eventDeleted;
+
+  /// No description provided for @editAnnouncement.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l’annonce'**
+  String get editAnnouncement;
+
+  /// No description provided for @announcementUpdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce modifiée.'**
+  String get announcementUpdated;
+
+  /// No description provided for @deleteAnnouncementConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer « {title} » ? Elle disparaît pour tous les membres.'**
+  String deleteAnnouncementConfirm(String title);
+
+  /// No description provided for @announcementDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonce supprimée.'**
+  String get announcementDeleted;
 }
 
 class _AppLocalizationsDelegate

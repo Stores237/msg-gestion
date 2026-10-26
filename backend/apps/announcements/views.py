@@ -72,16 +72,36 @@ class AnnouncementListView(APIView):
 
 
 class AnnouncementDetailView(APIView):
-    def get_permissions(self):
-        return [require("announcements.posts", "delete" if self.request.method == "DELETE" else "view")()]
+    """GET; PATCH and DELETE by the author, or by someone who manages
+    announcements (owner, 2026-10-26)."""
+
+    permission_classes = [require("announcements.posts", "view")]
 
     def get(self, request, pk):
         item = get_object_or_404(Announcement.objects.select_related("author", "event"), pk=pk)
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
 
+    @extend_schema(request=AnnouncementSerializer, responses=AnnouncementSerializer)
+    def patch(self, request, pk):
+        item = get_object_or_404(Announcement.objects.select_related("author", "event"), pk=pk)
+        if not (item.author_id == request.user.pk or request.user.can("announcements.posts", "change")):
+            return Response({"detail": "Seul l’auteur peut modifier cette annonce.", "code": "author_only"}, status=403)
+        data = {k: v for k, v in request.data.items() if k in ("title", "body", "kind", "event", "pinned")}
+        if "pinned" in data and not request.user.can("announcements.posts", "change"):
+            data.pop("pinned")  # pinning stays with whoever manages announcements
+        s = AnnouncementSerializer(item, data=data, partial=True, context=_context(request, [item]))
+        s.is_valid(raise_exception=True)
+        s.save()
+        audit.record("Annonce modifiée", actor=request.user, obj=item, request=request, detail={"champs": sorted(data)})
+        return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
+
     def delete(self, request, pk):
         item = get_object_or_404(Announcement, pk=pk)
-        audit.record("Annonce supprimée", actor=request.user, obj=item, request=request)
+        if not (item.author_id == request.user.pk or request.user.can("announcements.posts", "delete")):
+            return Response({"detail": "Seul l’auteur peut supprimer cette annonce.", "code": "author_only"}, status=403)
+        audit.record("Annonce supprimée", actor=request.user, obj=item, request=request, detail={"titre": item.title})
+        for att in item.attachments.all():
+            att.file.delete(save=False)
         item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

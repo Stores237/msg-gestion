@@ -36,6 +36,16 @@ class HttpEventsRepository implements EventsRepository {
       );
 
   @override
+  Future<CalendarEvent> update(int id, CalendarEvent draft) async =>
+      CalendarEvent.fromJson(
+        await _api.patch('/events/$id/', body: draft.toJson())
+            as Map<String, dynamic>,
+      );
+
+  @override
+  Future<void> delete(int id) async => _api.delete('/events/$id/');
+
+  @override
   Future<void> excuse(int eventId, {String reason = ''}) => _api.sendOrQueue(
     'POST',
     '/events/$eventId/excuse/',

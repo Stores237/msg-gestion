@@ -13,6 +13,10 @@ abstract class EventsRepository {
   });
   Future<CalendarEvent> get(int id);
   Future<CalendarEvent> create(CalendarEvent draft);
+
+  /// Whoever added it (or the calendar's managers) edits or deletes it.
+  Future<CalendarEvent> update(int id, CalendarEvent draft);
+  Future<void> delete(int id);
   Future<void> excuse(int eventId, {String reason = ''});
   Future<AttendanceSheet> attendance(int eventId);
 

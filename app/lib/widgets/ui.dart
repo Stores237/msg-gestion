@@ -1144,3 +1144,90 @@ class AuthorLine extends StatelessWidget {
     );
   }
 }
+
+/// "Modifier · Supprimer" under something the viewer posted (owner,
+/// 2026-10-26: whoever posts an announcement or an event can edit and
+/// delete it). Each button only when allowed; delete asks first.
+class OwnerActions extends StatelessWidget {
+  const OwnerActions({
+    super.key,
+    required this.canEdit,
+    required this.canDelete,
+    required this.onEdit,
+    required this.onDelete,
+    required this.confirmText,
+  });
+
+  final bool canEdit;
+  final bool canDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  /// The question asked before deleting.
+  final String confirmText;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!canEdit && !canDelete) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          if (canEdit)
+            Expanded(
+              child: OutlinedButton.icon(
+                key: const Key('owner-edit'),
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: FitText(l.editAction),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+          if (canEdit && canDelete) const SizedBox(width: 8),
+          if (canDelete)
+            Expanded(
+              child: OutlinedButton.icon(
+                key: const Key('owner-delete'),
+                onPressed: () async {
+                  final ok = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      content: Text(confirmText),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text(l.cancel),
+                        ),
+                        FilledButton(
+                          key: const Key('owner-delete-confirm'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: c.alert,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(l.deleteAction),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (ok == true) onDelete();
+                },
+                icon: Icon(Icons.delete_outline, size: 18, color: c.alert),
+                label: FitText(l.deleteAction),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: const StadiumBorder(),
+                  foregroundColor: c.alert,
+                  side: BorderSide(color: c.alert),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}

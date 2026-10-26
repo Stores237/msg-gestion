@@ -10,10 +10,12 @@ import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 
-/// "Nouvel événement" for roles allowed to create events.
+/// "Nouvel événement" for roles allowed to create events; with [existing],
+/// "Modifier l’événement" (its author, or the calendar's managers).
 class EventFormScreen extends StatefulWidget {
-  const EventFormScreen({super.key, required this.initialDay});
+  const EventFormScreen({super.key, required this.initialDay, this.existing});
   final DateTime initialDay;
+  final CalendarEvent? existing;
 
   @override
   State<EventFormScreen> createState() => _EventFormScreenState();
@@ -37,6 +39,17 @@ class _EventFormScreenState extends State<EventFormScreen> {
   void initState() {
     super.initState();
     _day = widget.initialDay;
+    final e = widget.existing;
+    if (e != null) {
+      _kind = e.kind;
+      _dress = e.dress;
+      _title.text = e.title;
+      _place.text = e.place;
+      _notes.text = e.notes;
+      _day = DateUtils.dateOnly(e.startsAt);
+      _start = TimeOfDay.fromDateTime(e.startsAt);
+      if (e.endsAt != null) _end = TimeOfDay.fromDateTime(e.endsAt!);
+    }
     // The group's own lists; the defaults until they arrive.
     RepositoryLocator.instance.profile
         .settings()
@@ -77,22 +90,30 @@ class _EventFormScreenState extends State<EventFormScreen> {
     setState(() => _busy = true);
     final l = AppLocalizations.of(context);
     try {
-      await RepositoryLocator.instance.events.create(
-        CalendarEvent(
-          id: 0,
-          kind: _kind,
-          title: _title.text.trim(),
-          startsAt: _at(_start),
-          endsAt: _endsAt,
-          place: _place.text.trim(),
-          dress: _dress,
-          notes: _notes.text.trim(),
+      final draft = CalendarEvent(
+        id: widget.existing?.id ?? 0,
+        kind: _kind,
+        title: _title.text.trim(),
+        startsAt: _at(_start),
+        endsAt: _endsAt,
+        place: _place.text.trim(),
+        dress: _dress,
+        notes: _notes.text.trim(),
+      );
+      final repo = RepositoryLocator.instance.events;
+      if (widget.existing == null) {
+        await repo.create(draft);
+      } else {
+        await repo.update(widget.existing!.id, draft);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.existing == null ? l.eventCreated : l.eventUpdated,
+          ),
         ),
       );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.eventCreated)));
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -139,7 +160,11 @@ class _EventFormScreenState extends State<EventFormScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            ScreenHeader(title: l.newEvent, back: true, small: true),
+            ScreenHeader(
+              title: widget.existing == null ? l.newEvent : l.editEvent,
+              back: true,
+              small: true,
+            ),
             Expanded(
               child: Form(
                 key: _form,
