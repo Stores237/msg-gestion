@@ -1210,5 +1210,37 @@
   "reportLateWarning": "Le délai de 24 h est passé : le rapport sera marqué « en retard » et ne pourra plus être modifié.",
   "pdfOnly": "PDF uniquement, 10 Mo maximum",
   "reportHandedIn": "Remis au formateur",
-  "reportHandedInLate": "Remis en retard au formateur"
+  "reportHandedInLate": "Remis en retard au formateur",
+  "reportReadBy": "Ouvert par {name} : ne peut plus être modifié",
+  "@reportReadBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportOpenedOn": "Ouvert par {name} le {date}",
+  "@reportOpenedOn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportReadLocked": "Un membre du bureau a ouvert le rapport : il ne peut plus être modifié.",
+  "reportLockNote": "Dès qu’un membre du bureau ouvre le rapport, il ne peut plus être modifié.",
+  "lineupOnly": "Seuls les gardes alignés pour ce service sont listés, avec leur poste.",
+  "lineupEmpty": "Personne n’est encore aligné pour ce service.",
+  "myPost": "Votre poste : {post}",
+  "@myPost": {
+    "placeholders": {
+      "post": {
+        "type": "String"
+      }
+    }
+  },
+  "notOnDuty": "Vous n’êtes pas de service pour cet événement."
 }

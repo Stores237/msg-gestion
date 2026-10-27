@@ -3391,6 +3391,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Remis en retard au formateur'**
   String get reportHandedInLate;
+
+  /// No description provided for @reportReadBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvert par {name} : ne peut plus être modifié'**
+  String reportReadBy(String name);
+
+  /// No description provided for @reportOpenedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvert par {name} le {date}'**
+  String reportOpenedOn(String name, String date);
+
+  /// No description provided for @reportReadLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un membre du bureau a ouvert le rapport : il ne peut plus être modifié.'**
+  String get reportReadLocked;
+
+  /// No description provided for @reportLockNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dès qu’un membre du bureau ouvre le rapport, il ne peut plus être modifié.'**
+  String get reportLockNote;
+
+  /// No description provided for @lineupOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les gardes alignés pour ce service sont listés, avec leur poste.'**
+  String get lineupOnly;
+
+  /// No description provided for @lineupEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne n’est encore aligné pour ce service.'**
+  String get lineupEmpty;
+
+  /// No description provided for @myPost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre poste : {post}'**
+  String myPost(String post);
+
+  /// No description provided for @notOnDuty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous n’êtes pas de service pour cet événement.'**
+  String get notOnDuty;
 }
 
 class _AppLocalizationsDelegate

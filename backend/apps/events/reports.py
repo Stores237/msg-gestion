@@ -70,13 +70,35 @@ def can_read(user, event):
     return event.chef_id == user.pk or user.can("calendar.reports", "view")
 
 
+def is_read(event):
+    """Opened by a bureau reader: the chef can no longer change it."""
+    return _has_report(event) and event.report.read_at is not None
+
+
 def can_submit(user, event, now=None):
     """The chef, once the event has started. Until the deadline they may
-    hand it in again; after it, only a first (late) report is accepted."""
+    hand it in again, unless a bureau reader has opened it; after the
+    deadline, only a first (late) report is accepted."""
     now = now or timezone.now()
-    if event.chef_id != user.pk or now < event.starts_at:
+    if event.chef_id != user.pk or now < event.starts_at or is_read(event):
         return False
     return not (_has_report(event) and now > event.report_due_at)
+
+
+def mark_read(event, user, request=None):
+    """The first bureau reader to open the report locks it (owner,
+    2026-10-27: no change after a board member has seen it). The chef
+    opening their own report doesn't count."""
+    report = event.report
+    if report.read_at is not None or user.pk == event.chef_id or not user.can("calendar.reports", "view"):
+        return
+    report.read_at, report.read_by = timezone.now(), user
+    report.save(update_fields=["read_at", "read_by"])
+    audit.record("Rapport ouvert", actor=user, obj=event, request=request, detail={"verrouille": True})
+    if event.chef_id:
+        notify([event.chef], "report", f"Rapport lu : {event.title}",
+               f"{user.short_name} a ouvert votre rapport ; il ne peut plus être modifié.",
+               {"type": "event", "id": event.pk})
 
 
 def submit(event, *, by, body, upload=None, request=None):
@@ -85,6 +107,10 @@ def submit(event, *, by, body, upload=None, request=None):
         raise ReportRule("chef_only", "Seul le chef de groupe de l’événement remet le rapport.", status=403)
     if now < event.starts_at:
         raise ReportRule("too_early", "Le rapport se remet une fois l’événement commencé.")
+    if is_read(event):
+        r = event.report
+        who = r.read_by.short_name if r.read_by else "un membre du bureau"
+        raise ReportRule("report_read", f"Le rapport a été ouvert par {who} : il ne peut plus être modifié.", status=409)
     if _has_report(event) and now > event.report_due_at:
         raise ReportRule("report_locked", "Le délai de 24 h est passé : le rapport remis ne peut plus être modifié.", status=409)
     body = (body or "").strip()

@@ -61,6 +61,7 @@ class HttpEventsRepository implements EventsRepository {
       for (final r in data['rows'] as List)
         AttendanceRow.fromJson(r as Map<String, dynamic>),
     ],
+    lineup: (data['lineup'] as bool?) ?? false,
   );
 
   @override

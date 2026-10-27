@@ -548,5 +548,13 @@
   "reportLateWarning": "The 24 h have passed: the report will be marked “late” and can’t be changed afterwards.",
   "pdfOnly": "PDF only, 10 MB maximum",
   "reportHandedIn": "Handed in to the trainer",
-  "reportHandedInLate": "Handed in late to the trainer"
+  "reportHandedInLate": "Handed in late to the trainer",
+  "reportReadBy": "Opened by {name}: can no longer be changed",
+  "reportOpenedOn": "Opened by {name} on {date}",
+  "reportReadLocked": "A board member has opened the report: it can no longer be changed.",
+  "reportLockNote": "Once a board member opens the report, it can no longer be changed.",
+  "lineupOnly": "Only the guards lined up for this service are listed, with their post.",
+  "lineupEmpty": "No one is lined up for this service yet.",
+  "myPost": "Your post: {post}",
+  "notOnDuty": "You are not on duty for this event."
 }

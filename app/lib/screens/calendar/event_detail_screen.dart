@@ -249,7 +249,38 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     ),
                                 ],
                               ),
-                              if (e.myAttendance == null) ...[
+                              // On a lineup: their post, or not on duty.
+                              if (e.hasLineup) ...[
+                                const SizedBox(height: 8),
+                                if (e.myDuty == null)
+                                  Text(
+                                    l.notOnDuty,
+                                    key: const Key('not-on-duty'),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: c.textSecondary,
+                                    ),
+                                  )
+                                else
+                                  Wrap(
+                                    key: const Key('my-duty'),
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      if (e.myDuty!.chef)
+                                        Badge2(
+                                          l.chefDeGroupe,
+                                          tone: Tone.green,
+                                        ),
+                                      if (e.myDuty!.post.isNotEmpty)
+                                        Badge2(
+                                          l.myPost(dutyLabel(l, e.myDuty!)),
+                                        ),
+                                    ],
+                                  ),
+                              ],
+                              if (e.myAttendance == null &&
+                                  (!e.hasLineup || e.myDuty != null)) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   l.presenceNotMarkedSub,
@@ -260,6 +291,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ),
                               ],
                               if (e.myAttendance == null &&
+                                  (!e.hasLineup || e.myDuty != null) &&
                                   e.startsAt.isAfter(
                                     DateTime.now().subtract(
                                       const Duration(hours: 1),

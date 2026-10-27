@@ -14,17 +14,22 @@ from apps.accounts.models import User
 from apps.accounts.permissions import require
 from apps.core import audit
 
-from . import reports
+from . import lineup, reports
 from .models import Attendance, Event
 from .serializers import AttendanceSheetSerializer, EventReportSerializer, EventSerializer, ExcuseSerializer
 
-EVENT_RELATED = ("created_by", "chef", "report")
+EVENT_RELATED = ("created_by", "chef", "report__read_by")
 
 METHOD_ACTION = {"GET": "view", "POST": "create", "PATCH": "change", "DELETE": "delete"}
 
 
 def _mine(user, events):
     return dict(Attendance.objects.filter(member=user, event__in=events).values_list("event_id", "status"))
+
+
+def _context(user, events):
+    with_lineup, duties = lineup.viewer_duties(user, events)
+    return {"mine": _mine(user, events), "viewer": user, "lineups": with_lineup, "duties": duties}
 
 
 def _day_start(d):
@@ -45,7 +50,7 @@ class EventListView(APIView):
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
         events = list(Event.objects.select_related(*EVENT_RELATED).filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
-        return Response(EventSerializer(events, many=True, context={"mine": _mine(request.user, events), "viewer": request.user}).data)
+        return Response(EventSerializer(events, many=True, context=_context(request.user, events)).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
     def post(self, request):
@@ -67,7 +72,7 @@ class EventDetailView(APIView):
     @extend_schema(responses=EventSerializer)
     def get(self, request, pk):
         event = get_object_or_404(Event.objects.select_related(*EVENT_RELATED), pk=pk)
-        body = dict(EventSerializer(event, context={"mine": _mine(request.user, [event]), "viewer": request.user}).data)
+        body = dict(EventSerializer(event, context=_context(request.user, [event])).data)
         if request.user.can("calendar.attendance", "view"):
             counts = {s: 0 for s in Attendance.Status.values}
             for st in event.attendance.values_list("status", flat=True):
@@ -116,6 +121,7 @@ class EventReportView(APIView):
             return Response({"detail": "Réservé au chef de groupe et aux destinataires du rapport.", "code": "report_forbidden"}, status=403)
         if reports.status(event) not in ("submitted", "late"):
             return Response({"detail": "Aucun rapport remis.", "code": "no_report"}, status=404)
+        reports.mark_read(event, request.user, request)
         return Response(EventReportSerializer(event.report, context={"request": request}).data)
 
     def post(self, request, pk):
@@ -144,7 +150,13 @@ class AttendanceView(APIView):
 
     def _sheet(self, event):
         marks = {a.member_id: a for a in event.attendance.all()}
-        members = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
+        duties = lineup.lineup(event)
+        if duties is None:
+            members = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE]).order_by("last_name", "first_name")
+        else:
+            # Only the guards lined up for it, in lineup order (chef first).
+            by_id = {m.pk: m for m in User.objects.members().filter(pk__in=duties)}
+            members = [by_id[i] for i in duties if i in by_id]
         rows = [
             {
                 "member": m.pk,
@@ -152,12 +164,13 @@ class AttendanceView(APIView):
                 "is_diaspora": m.is_diaspora,
                 "status": marks[m.pk].status if m.pk in marks else "",
                 "reason": marks[m.pk].reason if m.pk in marks else "",
+                "duty": duties.get(m.pk) if duties is not None else None,
             }
             for m in members
         ]
         counts = {s: sum(1 for r in rows if r["status"] == s) for s in Attendance.Status.values}
         counts["unmarked"] = sum(1 for r in rows if not r["status"])
-        return {"counts": counts, "rows": rows}
+        return {"counts": counts, "rows": rows, "lineup": duties is not None}
 
     def get(self, request, pk):
         return Response(self._sheet(get_object_or_404(Event, pk=pk)))
@@ -168,6 +181,9 @@ class AttendanceView(APIView):
         s = AttendanceSheetSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         known = set(User.objects.members().filter(pk__in=[m["member"] for m in s.validated_data["marks"]]).values_list("pk", flat=True))
+        duties = lineup.lineup(event)
+        if duties is not None:
+            known &= set(duties)  # only the guards lined up for it
         with transaction.atomic():
             for mark in s.validated_data["marks"]:
                 if mark["member"] not in known:
@@ -193,6 +209,9 @@ class ExcuseView(APIView):
         event = get_object_or_404(Event, pk=pk)
         s = ExcuseSerializer(data=request.data)
         s.is_valid(raise_exception=True)
+        duties = lineup.lineup(event)
+        if duties is not None and request.user.pk not in duties:
+            return Response({"detail": "Vous n’êtes pas de service pour cet événement.", "code": "not_on_duty"}, status=409)
         existing = Attendance.objects.filter(event=event, member=request.user).first()
         if existing and existing.status != Attendance.Status.EXCUSED:
             return Response({"detail": "La présence est déjà marquée par le censeur.", "code": "already_marked"}, status=409)

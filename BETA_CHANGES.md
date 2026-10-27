@@ -629,3 +629,25 @@ waiting, and `migrate` skips the system checks (they run in the tests), saving ~
 **Verify.** Render → Logs after a deploy: `[start …] collectstatic`, `migrate` (with `Applying
 events.0005…` the first time), `ensure_superuser`, `gunicorn on port 10000`, then "Your service
 is live". `curl https://msg-staging.onrender.com/api/events/1/report/` answers 401, not 404.
+
+## 30. Report locked once opened; roll call lists the lineup with each post
+
+Owner, 2026-10-27.
+
+- **Report locked when the bureau opens it**: the first time a reader of reports (formateur,
+  formateur adjoint, secrétaire général, censeur général, vice-censeur; not the chef) opens a
+  report, it is locked: the chef can no longer change it (`409 report_read`), is notified "Rapport
+  lu", and the event shows "Ouvert par … : ne peut plus être modifié". The report shows who
+  opened it and when; the composer says so up front. Migration `events.0007_report_read`.
+- **Roll call for an event with a lineup**: only the guards lined up (and the chef de groupe)
+  are listed, in lineup order with the chef first, each with a chip for what they served as
+  ("Chef de groupe", "Première centrale · Pariso"); the event type line (Messe · Intérieur /
+  Extérieur) heads the list. Marks for anyone else are ignored. Events without a lineup (assise,
+  réunion…) still list every member.
+- **Ma présence**: on an event with a lineup, the member sees their post, or "Vous n’êtes pas de
+  service pour cet événement" with no absence button (the server refuses it: `not_on_duty`).
+
+**Verify.** Open a report as the secrétaire général → the chef's "Modifier le rapport" is gone
+and the event shows the lock line. Take the roll call of a Messe with a lineup → only the lined-up
+guards, each with their post. `pytest apps/events/test_reports.py`;
+`flutter test test/event_chef_report_test.dart`.

@@ -29,6 +29,8 @@ String describeError(BuildContext context, Object error) {
     ApiException(code: 'storage_unavailable') => l.storageUnavailable,
     ApiException(code: 'report_empty') => l.reportEmpty,
     ApiException(code: 'report_locked') => l.reportLocked,
+    ApiException(code: 'report_read') => l.reportReadLocked,
+    ApiException(code: 'not_on_duty') => l.notOnDuty,
     ApiException(code: 'too_early') => l.reportTooEarly,
     // Server-side validation messages are written for people; show them
     // when there is no code to translate.

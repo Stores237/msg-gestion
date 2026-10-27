@@ -7,6 +7,8 @@ import '../../l10n/app_localizations.dart';
 import '../../models/event.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/labels.dart';
+import '../../widgets/notice.dart';
 import '../../widgets/ui.dart';
 
 /// Roll call (design: "Appel · présences"): three 44 dp buttons per row,
@@ -111,6 +113,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   : ListView(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                       children: [
+                        EventTypeLine(event: widget.event),
+                        const SizedBox(height: 8),
+                        if (_sheet!.lineup) ...[
+                          Notice(
+                            key: const Key('lineup-only'),
+                            text: rows.isEmpty ? l.lineupEmpty : l.lineupOnly,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                         GroupCard(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           children: [
@@ -158,7 +169,34 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                                   size: 36,
                                 ),
                                 title: Text(r.fullName),
-                                subtitle: r.isDiaspora
+                                // On a lineup, what they served as (owner,
+                                // 2026-10-27), highlighted like a role chip.
+                                subtitle: r.duty != null
+                                    ? Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Wrap(
+                                          spacing: 6,
+                                          runSpacing: 4,
+                                          children: [
+                                            if (r.duty!.chef)
+                                              Badge2(
+                                                l.chefDeGroupe,
+                                                key: Key(
+                                                  'att-${r.member}-chef',
+                                                ),
+                                                tone: Tone.green,
+                                              ),
+                                            if (r.duty!.post.isNotEmpty)
+                                              Badge2(
+                                                dutyLabel(l, r.duty!),
+                                                key: Key(
+                                                  'att-${r.member}-post',
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      )
+                                    : r.isDiaspora
                                     ? Text(l.remote)
                                     : (r.reason.isNotEmpty
                                           ? Text(r.reason)

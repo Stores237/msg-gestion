@@ -143,6 +143,10 @@ class EventReport(models.Model):
     file_name = models.CharField(max_length=160, blank=True)
     submitted_at = models.DateTimeField()
     updated_at = models.DateTimeField(auto_now=True)
+    # The first time a bureau reader (not the chef) opened it; from then on
+    # the chef can no longer change it (owner, 2026-10-27).
+    read_at = models.DateTimeField(null=True, blank=True)
+    read_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
 
     objects = scoped("event__group")
     all_groups = models.Manager()

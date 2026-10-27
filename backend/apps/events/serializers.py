@@ -20,18 +20,35 @@ class EventSerializer(serializers.ModelSerializer):
     report_status = serializers.SerializerMethodField()
     can_report = serializers.SerializerMethodField()
     can_read_report = serializers.SerializerMethodField()
+    report_read_by = serializers.SerializerMethodField()
+    has_lineup = serializers.SerializerMethodField()
+    my_duty = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "dress", "dress_name",
                   "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete",
-                  "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report"]
+                  "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
+                  "has_lineup", "my_duty"]
         read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # The chef is one of this group's active members.
         self.fields["chef"].queryset = User.objects.members().filter(is_active=True, gstatus=User.Status.ACTIVE)
+
+    def get_report_read_by(self, event) -> str | None:
+        """Who opened the report first (it is locked from then on)."""
+        if not reports.is_read(event):
+            return None
+        return event.report.read_by.short_name if event.report.read_by else ""
+
+    def get_has_lineup(self, event) -> bool:
+        return event.pk in self.context.get("lineups", ())
+
+    def get_my_duty(self, event) -> dict | None:
+        """The viewer's post at this event (and chef), if they serve."""
+        return self.context.get("duties", {}).get(event.pk)
 
     def get_chef_name(self, event) -> str | None:
         return event.chef.short_name if event.chef else None
@@ -130,10 +147,14 @@ class EventReportSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
     late = serializers.BooleanField(read_only=True)
+    read_by_name = serializers.SerializerMethodField()
 
     class Meta:
         model = EventReport
-        fields = ["body", "file_name", "file_url", "author_name", "submitted_at", "late"]
+        fields = ["body", "file_name", "file_url", "author_name", "submitted_at", "late", "read_at", "read_by_name"]
+
+    def get_read_by_name(self, r) -> str | None:
+        return r.read_by.short_name if r.read_by else None
 
     def get_author_name(self, r) -> str | None:
         return r.author.short_name if r.author else None

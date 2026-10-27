@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:msg_gestion/main.dart';
 import 'package:msg_gestion/models/event.dart';
+import 'package:msg_gestion/screens/calendar/attendance_screen.dart';
 import 'package:msg_gestion/screens/calendar/event_detail_screen.dart';
 import 'package:msg_gestion/screens/calendar/event_form_screen.dart';
 import 'package:msg_gestion/widgets/ui.dart';
@@ -169,5 +170,109 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('RAS. 8 gardes présents.'), findsOneWidget);
     expect(find.text('Par Ingrid N., chef de groupe'), findsOneWidget);
+  });
+
+  lineupAndLockTests();
+}
+
+void lineupAndLockTests() {
+  CalendarEvent mass({Duty? myDuty, String? readBy, bool canReport = false}) =>
+      CalendarEvent(
+        id: 1,
+        kind: 'messe',
+        title: 'Messe dominicale',
+        startsAt: DateTime.now().add(const Duration(hours: 3)),
+        place: '',
+        dress: '',
+        notes: '',
+        scope: 'interieur',
+        chefId: 7,
+        chefName: 'Ateba S.',
+        reportStatus: readBy == null ? 'pending' : 'submitted',
+        reportDueAt: DateTime.now().add(const Duration(days: 1)),
+        reportReadBy: readBy,
+        canReport: canReport,
+        hasLineup: true,
+        myDuty: myDuty,
+      );
+
+  testWidgets('roll call lists the lineup with each post highlighted', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.events.lineup = true;
+    f.events.sheet
+      ..clear()
+      ..addAll([
+        AttendanceRow(
+          member: 7,
+          fullName: 'Ateba Sandrine',
+          isDiaspora: false,
+          status: '',
+          reason: '',
+          duty: const Duty(chef: true),
+        ),
+        AttendanceRow(
+          member: 10,
+          fullName: 'Eboa Lionel',
+          isDiaspora: false,
+          status: '',
+          reason: '',
+          duty: const Duty(post: 'premiere_centrale', side: 'pariso'),
+        ),
+      ]);
+    await tester.pumpWidget(MsgApp(home: AttendanceScreen(event: mass())));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('lineup-only')), findsOneWidget);
+    expect(find.byKey(const Key('att-7-chef')), findsOneWidget);
+    expect(find.text('PREMIÈRE CENTRALE · PARISO'), findsOneWidget);
+    expect(find.text('INTÉRIEUR'), findsOneWidget);
+  });
+
+  testWidgets('my presence: my post, or not on duty without the absence '
+      'button', (tester) async {
+    final f = await setUpApp(tester);
+    f.events.events = [
+      mass(
+        myDuty: const Duty(post: 'controle', side: 'yapoma'),
+      ),
+    ];
+    await tester.pumpWidget(
+      MsgApp(home: EventDetailScreen(eventId: 1, me: fakeMe())),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byKey(const Key('my-duty')), 200);
+    expect(find.textContaining('VOTRE POSTE'), findsOneWidget);
+    expect(find.byKey(const Key('warn-absence')), findsOneWidget);
+
+    f.events.events = [mass()];
+    await tester.pumpWidget(
+      MsgApp(
+        home: EventDetailScreen(key: UniqueKey(), eventId: 1, me: fakeMe()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.byKey(const Key('not-on-duty')), 200);
+    expect(find.byKey(const Key('warn-absence')), findsNothing);
+  });
+
+  testWidgets('a report opened by the bureau shows it is locked', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.events.events = [mass(readBy: 'Nyobe C.')];
+    await tester.pumpWidget(
+      MsgApp(home: EventDetailScreen(eventId: 1, me: fakeMe())),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('report-locked')),
+      200,
+    );
+    expect(
+      find.text('Ouvert par Nyobe C. : ne peut plus être modifié'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('report-write')), findsNothing);
   });
 }

@@ -1959,4 +1959,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportHandedInLate => 'Handed in late to the trainer';
+
+  @override
+  String reportReadBy(String name) {
+    return 'Opened by $name: can no longer be changed';
+  }
+
+  @override
+  String reportOpenedOn(String name, String date) {
+    return 'Opened by $name on $date';
+  }
+
+  @override
+  String get reportReadLocked =>
+      'A board member has opened the report: it can no longer be changed.';
+
+  @override
+  String get reportLockNote =>
+      'Once a board member opens the report, it can no longer be changed.';
+
+  @override
+  String get lineupOnly =>
+      'Only the guards lined up for this service are listed, with their post.';
+
+  @override
+  String get lineupEmpty => 'No one is lined up for this service yet.';
+
+  @override
+  String myPost(String post) {
+    return 'Your post: $post';
+  }
+
+  @override
+  String get notOnDuty => 'You are not on duty for this event.';
 }

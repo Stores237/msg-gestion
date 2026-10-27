@@ -120,6 +120,11 @@ String postLabel(AppLocalizations l, String post) => switch (post) {
 String sideLabel(AppLocalizations l, String side) =>
     side == 'yapoma' ? l.sideYapoma : l.sidePariso;
 
+/// "Première centrale · Pariso"; "Chef de groupe" for a chef without a post.
+String dutyLabel(AppLocalizations l, Duty d) => d.post.isEmpty
+    ? l.chefDeGroupe
+    : '${postLabel(l, d.post)} · ${sideLabel(l, d.side)}';
+
 String dutyStatusLabel(AppLocalizations l, String s) => switch (s) {
   'conf' => l.dutyConfirmed,
   'swap' => l.dutySwap,

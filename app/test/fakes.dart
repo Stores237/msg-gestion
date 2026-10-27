@@ -444,6 +444,9 @@ class FakeEventsRepository implements EventsRepository {
       reportStatus: savedReport != null ? 'submitted' : e.reportStatus,
       canReport: e.canReport,
       canReadReport: savedReport != null || e.canReadReport,
+      reportReadBy: e.reportReadBy,
+      hasLineup: e.hasLineup,
+      myDuty: e.myDuty,
     );
   }
 
@@ -524,7 +527,10 @@ class FakeEventsRepository implements EventsRepository {
 
   @override
   Future<AttendanceSheet> attendance(int eventId) async =>
-      AttendanceSheet(counts: const {}, rows: sheet);
+      AttendanceSheet(counts: const {}, rows: sheet, lineup: lineup);
+
+  /// The event has a service lineup (rows carry their post).
+  bool lineup = false;
 
   @override
   Future<AttendanceSheet> saveAttendance(
@@ -532,7 +538,7 @@ class FakeEventsRepository implements EventsRepository {
     Map<int, String> marks,
   ) async {
     saved = marks;
-    return AttendanceSheet(counts: const {}, rows: sheet);
+    return AttendanceSheet(counts: const {}, rows: sheet, lineup: lineup);
   }
 }
 

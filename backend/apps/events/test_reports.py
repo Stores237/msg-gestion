@@ -143,3 +143,68 @@ def test_job_reminds_the_chef_then_tells_the_formateur_once():
     late = Notification.objects.filter(user=readers["formateur"], title__startswith="Rapport non remis")
     assert late.count() == 1 and late.get().target["id"] == overdue.pk
     assert Notification.objects.filter(user=readers["vice-censeur"], title__startswith="Rapport non remis").count() == 1
+
+
+def test_once_a_bureau_member_opens_the_report_the_chef_cannot_change_it():
+    """Owner, 2026-10-27: no change after a board member has opened it."""
+    readers = _readers()
+    chef_api, chef = client_for("membre")
+    e = _ended_event(chef)
+    chef_api.post(f"/api/events/{e.pk}/report/", {"body": "Première version."})
+    # The chef reading their own report doesn't lock it.
+    chef_api.get(f"/api/events/{e.pk}/report/")
+    assert chef_api.post(f"/api/events/{e.pk}/report/", {"body": "Deuxième version."}).status_code == 201
+    sec = client_for("membre")[0]
+    sec.force_authenticate(readers["secretaire-general"])
+    r = sec.get(f"/api/events/{e.pk}/report/").json()
+    assert r["body"] == "Deuxième version." and r["read_by_name"] == readers["secretaire-general"].short_name
+    body = chef_api.get(f"/api/events/{e.pk}/").json()
+    assert not body["can_report"] and body["report_read_by"] == readers["secretaire-general"].short_name
+    r = chef_api.post(f"/api/events/{e.pk}/report/", {"body": "Trop tard."})
+    assert r.status_code == 409 and r.json()["code"] == "report_read"
+    assert Notification.objects.filter(user=chef, title="Rapport lu : Assise").count() == 1
+    # A second reader doesn't change who opened it first.
+    form = client_for("membre")[0]
+    form.force_authenticate(readers["formateur"])
+    assert form.get(f"/api/events/{e.pk}/report/").json()["read_by_name"] == readers["secretaire-general"].short_name
+    assert AuditLog.objects.filter(action="Rapport ouvert").count() == 1
+
+
+def test_roll_call_lists_only_the_lineup_with_each_post():
+    """Owner, 2026-10-27: for an event with a lineup, only those lined up are
+    on the presence list, with what they served as."""
+    from apps.planning.models import Assignment, Service
+
+    censor_api, _ = client_for("censeur-general")
+    guard_a, guard_b, chef, outsider = UserFactory(), UserFactory(), UserFactory(), UserFactory()
+    for u in (guard_a, outsider):
+        give_role(u, "membre")
+    start = timezone.now() + timedelta(hours=1)
+    mass = Event.objects.create(kind="messe", scope="exterieur", title="Messe", starts_at=start, chef=chef)
+    s = Service.objects.create(event=mass, size=2)
+    Assignment.objects.create(service=s, post="premiere_centrale", side="yapoma", member=guard_b)
+    Assignment.objects.create(service=s, post="premiere_centrale", side="pariso", member=guard_a)
+    sheet = censor_api.get(f"/api/events/{mass.pk}/attendance/").json()
+    assert sheet["lineup"]
+    assert [(r["member"], r["duty"]) for r in sheet["rows"]] == [
+        (chef.pk, {"post": "", "side": "", "chef": True}),
+        (guard_a.pk, {"post": "premiere_centrale", "side": "pariso", "chef": False}),
+        (guard_b.pk, {"post": "premiere_centrale", "side": "yapoma", "chef": False}),
+    ]
+    # Marks for someone not lined up are ignored.
+    r = censor_api.put(f"/api/events/{mass.pk}/attendance/", {"marks": [
+        {"member": guard_a.pk, "status": "present"}, {"member": outsider.pk, "status": "present"}]}, format="json")
+    assert r.json()["counts"]["present"] == 1
+    # An assise without a lineup still lists everyone.
+    assise = Event.objects.create(kind="assise", title="Assise", starts_at=start, chef=chef)
+    rows = censor_api.get(f"/api/events/{assise.pk}/attendance/").json()["rows"]
+    assert outsider.pk in {r["member"] for r in rows} and all(r["duty"] is None for r in rows)
+    # Each one sees their own post; someone not serving can't excuse themselves.
+    guard_api = client_for("membre")[0]
+    guard_api.force_authenticate(guard_a)
+    body = guard_api.get(f"/api/events/{mass.pk}/").json()
+    assert body["has_lineup"] and body["my_duty"] == {"post": "premiere_centrale", "side": "pariso"}
+    out_api = client_for("membre")[0]
+    out_api.force_authenticate(outsider)
+    assert out_api.get(f"/api/events/{mass.pk}/").json()["my_duty"] is None
+    assert out_api.post(f"/api/events/{mass.pk}/excuse/", {}, format="json").json()["code"] == "not_on_duty"

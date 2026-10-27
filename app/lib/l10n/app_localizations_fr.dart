@@ -1965,4 +1965,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportHandedInLate => 'Remis en retard au formateur';
+
+  @override
+  String reportReadBy(String name) {
+    return 'Ouvert par $name : ne peut plus être modifié';
+  }
+
+  @override
+  String reportOpenedOn(String name, String date) {
+    return 'Ouvert par $name le $date';
+  }
+
+  @override
+  String get reportReadLocked =>
+      'Un membre du bureau a ouvert le rapport : il ne peut plus être modifié.';
+
+  @override
+  String get reportLockNote =>
+      'Dès qu’un membre du bureau ouvre le rapport, il ne peut plus être modifié.';
+
+  @override
+  String get lineupOnly =>
+      'Seuls les gardes alignés pour ce service sont listés, avec leur poste.';
+
+  @override
+  String get lineupEmpty => 'Personne n’est encore aligné pour ce service.';
+
+  @override
+  String myPost(String post) {
+    return 'Votre poste : $post';
+  }
+
+  @override
+  String get notOnDuty => 'Vous n’êtes pas de service pour cet événement.';
 }

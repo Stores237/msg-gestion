@@ -1,9 +1,16 @@
 import '../../models/event.dart';
 
 class AttendanceSheet {
-  const AttendanceSheet({required this.counts, required this.rows});
+  const AttendanceSheet({
+    required this.counts,
+    required this.rows,
+    this.lineup = false,
+  });
   final Map<String, int> counts;
   final List<AttendanceRow> rows;
+
+  /// Only the guards lined up for the event are listed, with their post.
+  final bool lineup;
 }
 
 abstract class EventsRepository {

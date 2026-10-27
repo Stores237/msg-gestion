@@ -71,6 +71,22 @@ class ReportSection extends StatelessWidget {
               lead: IconChip(Icons.assignment_outlined, tone: tone),
               // The chef is named in the card above; this row is the status.
               title: Text(line),
+              subtitle: e.reportReadBy == null
+                  ? null
+                  : Row(
+                      key: const Key('report-locked'),
+                      children: [
+                        const Icon(Icons.lock_outline, size: 14),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            l.reportReadBy(
+                              e.reportReadBy!.isEmpty ? '—' : e.reportReadBy!,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
               trailing: Badge2(badge, tone: tone),
             ),
             if (e.canReadReport)
@@ -150,6 +166,17 @@ class ReportViewScreen extends StatelessWidget {
                             ),
                             trailing: Badge2(badge, tone: tone),
                           ),
+                          if (r.readAt != null)
+                            ListRow(
+                              key: const Key('report-opened'),
+                              lead: const Icon(Icons.lock_outline),
+                              title: Text(
+                                l.reportOpenedOn(
+                                  r.readByName ?? '—',
+                                  d.fullDateTime(r.readAt!),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                       if (r.body.isNotEmpty) ...[
@@ -408,6 +435,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
                           tone: Tone.neutral,
                         ),
                         title: Text(l.reportRecipients),
+                        subtitle: Text(l.reportLockNote),
                       ),
                     ],
                   ),

@@ -27,7 +27,18 @@ class CalendarEvent {
     this.reportStatus = '',
     this.canReport = false,
     this.canReadReport = false,
+    this.reportReadBy,
+    this.hasLineup = false,
+    this.myDuty,
   });
+
+  /// Who opened the report first; from then on the chef can't change it.
+  final String? reportReadBy;
+
+  /// The event has a service lineup: only those lined up are on the roll
+  /// call, and [myDuty] is the viewer's post (null: not serving).
+  final bool hasLineup;
+  final Duty? myDuty;
 
   /// With kind "autre": the type in the author's words (owner, 2026-10-27).
   final String kindOther;
@@ -95,6 +106,11 @@ class CalendarEvent {
     reportStatus: (j['report_status'] as String?) ?? '',
     canReport: (j['can_report'] as bool?) ?? false,
     canReadReport: (j['can_read_report'] as bool?) ?? false,
+    reportReadBy: j['report_read_by'] as String?,
+    hasLineup: (j['has_lineup'] as bool?) ?? false,
+    myDuty: j['my_duty'] == null
+        ? null
+        : Duty.fromJson(j['my_duty'] as Map<String, dynamic>),
     attendanceCounts: (j['attendance_counts'] as Map<String, dynamic>?)?.map(
       (k, v) => MapEntry(k, v as int),
     ),
@@ -123,7 +139,13 @@ class EventReport {
     this.authorName,
     required this.submittedAt,
     this.late = false,
+    this.readAt,
+    this.readByName,
   });
+
+  /// First opened by a bureau reader: locked from then on.
+  final DateTime? readAt;
+  final String? readByName;
   final String body;
   final String fileName;
   final String? fileUrl;
@@ -138,6 +160,25 @@ class EventReport {
     authorName: j['author_name'] as String?,
     submittedAt: DateTime.parse(j['submitted_at'] as String).toLocal(),
     late: (j['late'] as bool?) ?? false,
+    readAt: j['read_at'] == null
+        ? null
+        : DateTime.parse(j['read_at'] as String).toLocal(),
+    readByName: j['read_by_name'] as String?,
+  );
+}
+
+/// What someone serves as at an event: a post and side of the lineup,
+/// and/or chef de groupe (post '' when only chef).
+class Duty {
+  const Duty({this.post = '', this.side = '', this.chef = false});
+  final String post;
+  final String side;
+  final bool chef;
+
+  factory Duty.fromJson(Map<String, dynamic> j) => Duty(
+    post: (j['post'] as String?) ?? '',
+    side: (j['side'] as String?) ?? '',
+    chef: (j['chef'] as bool?) ?? false,
   );
 }
 
@@ -148,6 +189,7 @@ class AttendanceRow {
     required this.isDiaspora,
     required this.status,
     required this.reason,
+    this.duty,
   });
   final int member;
   final String fullName;
@@ -155,11 +197,17 @@ class AttendanceRow {
   String status;
   final String reason;
 
+  /// Their post when the event has a lineup (owner, 2026-10-27).
+  final Duty? duty;
+
   factory AttendanceRow.fromJson(Map<String, dynamic> j) => AttendanceRow(
     member: j['member'] as int,
     fullName: j['full_name'] as String,
     isDiaspora: j['is_diaspora'] as bool,
     status: j['status'] as String,
     reason: (j['reason'] as String?) ?? '',
+    duty: j['duty'] == null
+        ? null
+        : Duty.fromJson(j['duty'] as Map<String, dynamic>),
   );
 }
