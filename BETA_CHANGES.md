@@ -493,7 +493,8 @@ Owner, 2026-10-26.
 - **Profile picture upload** failed on staging because the Supabase storage refuses every request
   (403: the S3 access key or its region is no longer valid). Owner action: new S3 access key.
   The API now answers `503 storage_unavailable` with a clear message (app: "le stockage est
-  indisponible") instead of a 500, for every upload.
+  indisponible") instead of a 500, for every upload. Resolved: the owner set a new S3 key on
+  Render (2026-10-27).
 
 **Verify.** `pytest -k "bureau or plain_member or platform or storage"`;
 `flutter test test/help_and_roles_test.dart`.

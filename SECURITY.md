@@ -189,5 +189,5 @@ offline cache and the Android manifest; the staging response headers (one `/heal
   secure storage is in the engineering backlog.
 - **No Content-Security-Policy on the back-office**: the templates use inline handlers; a CSP
   needs them moved to scripts first. Backlog.
-- **Owner**: revoke the tokens pasted in chat on 2026-10-20 (TODOS.md); new Supabase S3 key;
+- **Owner**: revoke the tokens pasted in chat on 2026-10-20 (TODOS.md);
   have the terms and privacy drafts reviewed; confirm "Adresse du visiteur" after the next deploy.

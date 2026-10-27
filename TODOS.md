@@ -1,15 +1,13 @@
 # TODOs
 
-- [ ] **Owner — storage (blocks photos and attachments on staging, 2026-10-26):** Supabase →
-  Storage → S3 Connection: create a new access key, check the region shown there, then set
-  `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` (and `AWS_S3_REGION_NAME` if different) on Render.
+- [x] **Owner — storage (2026-10-26):** new Supabase S3 access key set on Render and deployed
+  (owner, 2026-10-27); photos, attachments and PDF reports use it.
 - [ ] **Owner — after the next deploy (2026-10-26):** install build 15 (older builds can't tick
   the terms box, so they can't sign in); open back-office → Intégrations and check "Adresse du
   visiteur" shows your own public address (SECURITY.md "Client address").
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
-  and "Chef" switches in Paramètres → Types d’activités. PDF reports need the Supabase storage
-  key (above).
+  and "Chef" switches in Paramètres → Types d’activités.
 - [ ] **Owner:** fill in back-office → Plateforme · aide (support phone, WhatsApp, e-mail, website)
   and have the privacy policy and terms drafts reviewed.
 
