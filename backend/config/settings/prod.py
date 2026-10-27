@@ -46,3 +46,6 @@ DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 # transaction-mode pooler the next run can land on a different backend
 # connection that never saw it ("prepared statement does not exist").
 DATABASES["default"].setdefault("OPTIONS", {})["prepare_threshold"] = None
+# Fail in 10 s rather than hang when the pooler can't hand out a connection
+# (a stuck boot showed nothing in the logs for 15 min, 2026-10-27).
+DATABASES["default"]["OPTIONS"].setdefault("connect_timeout", 10)

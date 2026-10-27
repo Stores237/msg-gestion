@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# collectstatic/migrate/ensure_superuser run at container *start*: the
-# real env vars (DATABASE_URL, secrets) only exist once Render runs the
+# collectstatic/migrate/ensure_superuser run at container *start* (start.sh):
+# the real env vars (DATABASE_URL, secrets) only exist once Render runs the
 # container, never during `docker build`. All three are idempotent.
-# `exec` makes gunicorn PID 1 so it gets Render's SIGTERM directly.
-CMD ["sh", "-c", "python manage.py collectstatic --no-input && python manage.py migrate && python manage.py ensure_superuser && exec gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers ${WEB_CONCURRENCY:-2} --timeout 60"]
+# start.sh `exec`s gunicorn so it is PID 1 and gets Render's SIGTERM directly.
+CMD ["sh", "start.sh"]

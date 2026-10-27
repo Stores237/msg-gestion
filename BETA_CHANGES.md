@@ -618,3 +618,14 @@ shows the amber Extérieur chip. After the event, the chef opens it → "Rédige
 text and/or PDF → the formateur gets "Rapport : …", the four copies "Copie · Rapport : …", and
 "Lire le rapport" shows it. `pytest apps/events/test_reports.py`;
 `flutter test test/event_chef_report_test.dart`.
+
+## 29. Startup that shows where it stops
+
+2026-10-27. The event update's first deploy hung before its migrations and never opened its
+port; Render kept the previous version. The container now starts with `start.sh`, which prints
+a timestamped marker before each step. The database connection gives up after 10 s instead of
+waiting, and `migrate` skips the system checks (they run in the tests), saving ~20 s of boot.
+
+**Verify.** Render → Logs after a deploy: `[start …] collectstatic`, `migrate` (with `Applying
+events.0005…` the first time), `ensure_superuser`, `gunicorn on port 10000`, then "Your service
+is live". `curl https://msg-staging.onrender.com/api/events/1/report/` answers 401, not 404.

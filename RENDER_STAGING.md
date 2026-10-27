@@ -69,3 +69,17 @@ command instead (`render.yaml`), never the HTTP endpoint.
    not debuggable, the URL present in `libapp.so`, `sha256sum`).
 
 Free tier sleeps after 15 minutes idle; the first request after that takes about a minute.
+
+## 5. Reading a deploy that doesn't come up
+
+Startup is `backend/start.sh`: it prints `[start HH:MM:SS] <step>` before collectstatic, migrate,
+ensure_superuser and gunicorn. In the service's **Logs** tab, the last marker is where it
+stopped. "Port scan timeout reached, no open ports detected" means gunicorn never started; Render
+then keeps (or restarts) the previous version, which still answers, so the site looks up while
+running the old code.
+
+2026-10-27: build 9f103e0 stopped before migrate printed anything for 15 min, and Render
+restarted the previous image (its log says "No migrations to apply"). The migrations run in
+about a second locally from the previous state. The database connection now times out after
+10 s (`connect_timeout`), so a stuck connection fails the boot visibly. Fix: deploy again and
+read the markers.
