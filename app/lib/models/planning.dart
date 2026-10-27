@@ -134,6 +134,7 @@ class PlanningAlert {
     this.filled,
     this.size,
     this.member,
+    this.until,
   });
   final String code;
   final int? serviceId;
@@ -141,12 +142,16 @@ class PlanningAlert {
   final int? size;
   final String? member;
 
+  /// on_leave: the last day of leave, when known.
+  final DateTime? until;
+
   factory PlanningAlert.fromJson(Map<String, dynamic> j) => PlanningAlert(
     code: j['code'] as String,
     serviceId: j['service'] as int?,
     filled: j['filled'] as int?,
     size: j['size'] as int?,
     member: j['member'] as String?,
+    until: j['until'] == null ? null : DateTime.parse(j['until'] as String),
   );
 }
 
@@ -206,6 +211,7 @@ class Candidate {
     required this.fullName,
     this.servicesThisMonth = 0,
     this.flag,
+    this.leaveUntil,
   });
   final int memberId;
   final String fullName;
@@ -214,11 +220,17 @@ class Candidate {
   /// null | busy_same_day | on_leave | many_this_month
   final String? flag;
 
+  /// on_leave: the last day of leave (design: "En congé jusqu’au 15 novembre").
+  final DateTime? leaveUntil;
+
   factory Candidate.fromJson(Map<String, dynamic> j) => Candidate(
     memberId: j['member'] as int,
     fullName: j['full_name'] as String,
     servicesThisMonth: (j['services_this_month'] as int?) ?? 0,
     flag: j['flag'] as String?,
+    leaveUntil: j['leave_until'] == null
+        ? null
+        : DateTime.parse(j['leave_until'] as String),
   );
 }
 
@@ -228,17 +240,20 @@ class ServiceGroupInfo {
     required this.name,
     required this.members,
     required this.available,
+    this.onLeave = 0,
   });
   final int id;
   final String name;
   final int members;
   final int available;
+  final int onLeave;
 
   factory ServiceGroupInfo.fromJson(Map<String, dynamic> j) => ServiceGroupInfo(
     id: j['id'] as int,
     name: j['name'] as String,
     members: (j['members'] as List).length,
     available: j['available'] as int,
+    onLeave: (j['on_leave'] as int?) ?? 0,
   );
 }
 

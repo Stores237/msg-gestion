@@ -3439,6 +3439,96 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vous n’êtes pas de service pour cet événement.'**
   String get notOnDuty;
+
+  /// No description provided for @flagLeaveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'En congé jusqu’au {date}'**
+  String flagLeaveUntil(String date);
+
+  /// No description provided for @alertOnLeaveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} est en congé jusqu’au {date}'**
+  String alertOnLeaveUntil(String name, String date);
+
+  /// No description provided for @groupOnLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} en congé'**
+  String groupOnLeave(int n);
+
+  /// No description provided for @groupSheetNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · {n} postes. Les postes libres sont pris par les membres disponibles du groupe ; les autres sont exclus et les cases restantes signalées.'**
+  String groupSheetNotice(String title, int n);
+
+  /// No description provided for @keepDraft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon'**
+  String get keepDraft;
+
+  /// No description provided for @draftKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon : personne n’est notifié tant que vous ne publiez pas.'**
+  String get draftKept;
+
+  /// No description provided for @dragHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maintenez un nom pour le glisser vers une autre case.'**
+  String get dragHint;
+
+  /// No description provided for @dropHere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déposer ici'**
+  String get dropHere;
+
+  /// No description provided for @swapValidation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validation : {name}, chef de groupe'**
+  String swapValidation(String name);
+
+  /// No description provided for @swapValidationPlanners.
+  ///
+  /// In fr, this message translates to:
+  /// **'Validation : les responsables du planning'**
+  String get swapValidationPlanners;
+
+  /// No description provided for @draftSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon enregistré sur ce téléphone.'**
+  String get draftSaved;
+
+  /// No description provided for @draftRestored.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon repris.'**
+  String get draftRestored;
+
+  /// No description provided for @placeDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précision du lieu (facultatif)'**
+  String get placeDetail;
+
+  /// No description provided for @placeDetailHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quartier, ville'**
+  String get placeDetailHint;
+
+  /// No description provided for @memberLeaveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'En congé jusqu’au {date}'**
+  String memberLeaveUntil(String date);
 }
 
 class _AppLocalizationsDelegate

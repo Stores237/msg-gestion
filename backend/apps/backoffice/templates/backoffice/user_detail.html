@@ -6,7 +6,10 @@
   <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="reset_pin">{% icon 'key-round' %}Réinitialiser le PIN</button></form>
   {% if member.group_status == 'suspendu' %}
   <button class="btn btn-outline" onclick="document.getElementById('dlg-status').showModal()">Réactiver</button>
+  {% elif member.group_status == 'conge' %}
+  <button class="btn btn-outline" onclick="document.getElementById('dlg-status').showModal()">Fin du congé</button>
   {% else %}
+  <button class="btn btn-outline" onclick="document.getElementById('dlg-leave').showModal()">Mettre en congé</button>
   <button class="btn btn-danger" onclick="document.getElementById('dlg-status').showModal()">Suspendre</button>
   {% endif %}
 {% endif %}{% endblock %}
@@ -28,7 +31,7 @@
   </div>
   <div style="display:flex;flex-direction:column;gap:24px">
     <section class="panel"><div class="panel-h"><h2>Identité</h2></div><div class="panel-b"><dl class="dl">
-      <dt>Téléphone</dt><dd class="tnum">{{ phone }}</dd><dt>Statut</dt><dd>{% status member %}</dd>
+      <dt>Téléphone</dt><dd class="tnum">{{ phone }}</dd><dt>Statut</dt><dd>{% status member %}{% if member.group_status == 'conge' and leave_until %} <span class="muted">jusqu’au {{ leave_until|date:"d/m/Y" }}</span>{% endif %}</dd>
       <dt>Membre depuis</dt><dd>{{ member.joined_on|date:"l j F Y" }}</dd><dt>Date de naissance</dt><dd>{{ member.birth_date|date:"d/m/Y"|default:"—" }}</dd>
       {% if member.is_diaspora %}<dt>Diaspora</dt><dd>{{ member.city|default:"oui" }}</dd>{% endif %}
       <dt>Dernière connexion</dt><dd>{{ member.last_login|date:"d/m/Y H:i"|default:"jamais" }}</dd>
@@ -63,9 +66,16 @@
   <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
   <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Retirer</button></div>
 </form></dialog>
-<dialog id="dlg-status" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="{% if member.group_status == 'suspendu' %}reactivate{% else %}suspend{% endif %}">
-  <h3>{% if member.group_status == 'suspendu' %}Réactiver{% else %}Suspendre{% endif %} {{ member.short_name }} ?</h3>
-  <p>{% if member.group_status == 'suspendu' %}Le membre retrouvera ce groupe dans l’application.{% else %}Le membre n’aura plus accès à ce groupe dans l’application ; ses autres groupes ne changent pas.{% endif %}</p>
+<dialog id="dlg-status" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="{% if member.group_status == 'suspendu' or member.group_status == 'conge' %}reactivate{% else %}suspend{% endif %}">
+  <h3>{% if member.group_status == 'suspendu' %}Réactiver{% elif member.group_status == 'conge' %}Fin du congé pour{% else %}Suspendre{% endif %} {{ member.short_name }} ?</h3>
+  <p>{% if member.group_status == 'suspendu' %}Le membre retrouvera ce groupe dans l’application.{% elif member.group_status == 'conge' %}Le membre redevient actif dans ce groupe et peut de nouveau être affecté au planning.{% else %}Le membre n’aura plus accès à ce groupe dans l’application ; ses autres groupes ne changent pas.{% endif %}</p>
+  <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
+  <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Confirmer</button></div>
+</form></dialog>
+<dialog id="dlg-leave" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="leave">
+  <h3>Mettre {{ member.short_name }} en congé ?</h3>
+  <p>Dans ce groupe seulement. Le membre garde l’accès à l’application mais n’est plus proposé au planning ; il redevient actif le lendemain de la date de fin.</p>
+  <label class="fld"><span class="fld-l">Jusqu’au (facultatif)</span><span class="fld-box"><input type="date" name="until" min="{{ today|date:'Y-m-d' }}"></span></label>
   <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required></span></label>
   <div class="acts"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Confirmer</button></div>
 </form></dialog>

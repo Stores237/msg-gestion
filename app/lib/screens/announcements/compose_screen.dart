@@ -1,6 +1,8 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/group_controller.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/announcement.dart';
@@ -42,11 +44,64 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   bool get _editing => widget.existing != null;
 
+  // "Brouillon" (design: new announcement → Brouillon): kept on this phone,
+  // one per group, until it is sent.
+  String get _draftKey =>
+      'announcement_draft_g${GroupController.instance.id ?? 0}';
+
+  Future<void> _restoreDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final t = prefs.getString('$_draftKey.title') ?? '';
+      final b = prefs.getString('$_draftKey.body') ?? '';
+      if ((t.isEmpty && b.isEmpty) || !mounted) return;
+      setState(() {
+        _title.text = t;
+        _body.text = b;
+        _kind = prefs.getInt('$_draftKey.kind') ?? 0;
+      });
+      final l = AppLocalizations.of(context);
+      // Replaces "Brouillon enregistré" if it is still showing.
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.draftRestored)));
+    } catch (_) {
+      // No local storage: start empty.
+    }
+  }
+
+  Future<void> _saveDraft() async {
+    final l = AppLocalizations.of(context);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('$_draftKey.title', _title.text);
+      await prefs.setString('$_draftKey.body', _body.text);
+      await prefs.setInt('$_draftKey.kind', _kind);
+    } catch (_) {}
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l.draftSaved)));
+    Navigator.of(context).pop(false);
+  }
+
+  Future<void> _clearDraft() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      for (final k in ['title', 'body', 'kind']) {
+        await prefs.remove('$_draftKey.$k');
+      }
+    } catch (_) {}
+  }
+
   @override
   void initState() {
     super.initState();
     final a = widget.existing;
-    if (a == null) return;
+    if (a == null) {
+      _restoreDraft();
+      return;
+    }
     _title.text = a.title;
     _body.text = a.body;
     _kind = a.isConvocation ? 1 : 0;
@@ -186,6 +241,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
           content: Text(_editing ? l.announcementUpdated : l.announcementSent),
         ),
       );
+      if (!_editing) await _clearDraft();
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -225,6 +282,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
               title: _editing ? l.editAnnouncement : l.newAnnouncement,
               back: true,
               small: true,
+              actions: [
+                if (!_editing)
+                  TextButton(
+                    key: const Key('a-draft'),
+                    onPressed: _busy ? null : _saveDraft,
+                    child: Text(l.keepDraft),
+                  ),
+              ],
             ),
             Expanded(
               child: Form(

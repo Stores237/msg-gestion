@@ -1242,5 +1242,68 @@
       }
     }
   },
-  "notOnDuty": "Vous n’êtes pas de service pour cet événement."
+  "notOnDuty": "Vous n’êtes pas de service pour cet événement.",
+  "flagLeaveUntil": "En congé jusqu’au {date}",
+  "@flagLeaveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "alertOnLeaveUntil": "{name} est en congé jusqu’au {date}",
+  "@alertOnLeaveUntil": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupOnLeave": "{n} en congé",
+  "@groupOnLeave": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "groupSheetNotice": "{title} · {n} postes. Les postes libres sont pris par les membres disponibles du groupe ; les autres sont exclus et les cases restantes signalées.",
+  "@groupSheetNotice": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "keepDraft": "Brouillon",
+  "draftKept": "Brouillon : personne n’est notifié tant que vous ne publiez pas.",
+  "dragHint": "Maintenez un nom pour le glisser vers une autre case.",
+  "dropHere": "Déposer ici",
+  "swapValidation": "Validation : {name}, chef de groupe",
+  "@swapValidation": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "swapValidationPlanners": "Validation : les responsables du planning",
+  "draftSaved": "Brouillon enregistré sur ce téléphone.",
+  "draftRestored": "Brouillon repris.",
+  "placeDetail": "Précision du lieu (facultatif)",
+  "placeDetailHint": "Quartier, ville",
+  "memberLeaveUntil": "En congé jusqu’au {date}",
+  "@memberLeaveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

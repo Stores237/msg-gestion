@@ -651,3 +651,39 @@ Owner, 2026-10-27.
 and the event shows the lock line. Take the roll call of a Messe with a lineup → only the lined-up
 guards, each with their post. `pytest apps/events/test_reports.py`;
 `flutter test test/event_chef_report_test.dart`.
+
+## 31. Design features that were missing (planning, leave, event details, drafts)
+
+Owner, 2026-10-27, from the design screenshots. Group-neutral throughout: every list and text
+below belongs to the group (Paramètres, memberships), none names one group's habits.
+
+- **Drag and drop in the planning**: hold a name and drag it to another cell ("Maintenir pour
+  glisser ; la case cible s’éclaire"). A free cell takes the guard; a filled cell of the same
+  service swaps the two; another service checks it like a new assignment (double service →
+  "Quand même"). One transaction (`PUT /api/planning/assignments/<id>/move/`). Guards of a
+  published plan are told their new post.
+- **Leave with an end date, per group**: back-office → member → "Mettre en congé" (optional
+  "jusqu’au", reason journalled) and "Fin du congé". Shown as "En congé jusqu’au …" on the
+  candidates, the planning alerts and the member's profile; a guard on leave shows red in the
+  grid (design: "Rouge : conflit (double service, congé)"). The evening job makes the member
+  active again after the date and tells them. Migration `core.0012_membership_leave_until`.
+- **Fix (multi-group)**: the planning read the account-wide status instead of the status in the
+  group being planned, so leave in one group blocked service in another.
+- **Swaps validated by the event's chef de groupe** (design: "Validation : …, chef de groupe"):
+  the chef is told "Échange à valider", sees it in Demandes (also reachable from Mes services) and
+  can approve or fill an absence, for their own events only; the lineup makers still can for all.
+  The swap sheet says who validates and shows each colleague's services this month.
+- **Planning**: "Brouillon" next to "Publier et notifier"; the group sheet shows who is on leave
+  and what happens; the chef is changed from the planning with the member picker (any active
+  member — the chef belongs to the event since §28).
+- **Event details**: a second line under the place ("Quartier, ville"), and under the dress
+  what it means in the group — each group writes it in back-office → Paramètres → Tenues →
+  Détail. Migration `events.0008_dress_description_place_detail`.
+- **Announcement draft**: "Brouillon" in the composer keeps title and text on the phone (one per
+  group) and brings them back next time, until sent.
+
+**Verify.** Planning: hold a name, drag it to a free cell → it moves; onto a filled cell of the
+same service → they swap. Back-office: put a member on leave until a date → the planning shows
+"En congé jusqu’au …". Paramètres → Tenues → fill a Détail → it shows under the dress on the
+event. `pytest apps/planning/test_design_gaps.py`; `flutter test test/planning_test.dart
+test/design_details_test.dart`.

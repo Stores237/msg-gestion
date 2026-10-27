@@ -447,6 +447,8 @@ class FakeEventsRepository implements EventsRepository {
       reportReadBy: e.reportReadBy,
       hasLineup: e.hasLineup,
       myDuty: e.myDuty,
+      placeDetail: e.placeDetail,
+      dressDetail: e.dressDetail,
     );
   }
 
@@ -987,14 +989,38 @@ class FakePlanningRepository implements PlanningRepository {
   }
 
   @override
-  Future<List<Candidate>> candidates(int serviceId) async => const [
-    Candidate(memberId: 30, fullName: 'Bilong Steve', servicesThisMonth: 1),
-    Candidate(memberId: 31, fullName: 'Mbella Grâce', flag: 'on_leave'),
+  Future<void> move(
+    int assignmentId, {
+    required int serviceId,
+    required Slot slot,
+    bool force = false,
+  }) async =>
+      calls.add('move:$assignmentId:$serviceId:${slot.post}:${slot.side}');
+
+  @override
+  Future<List<Candidate>> candidates(int serviceId) async => [
+    const Candidate(
+      memberId: 30,
+      fullName: 'Bilong Steve',
+      servicesThisMonth: 1,
+    ),
+    Candidate(
+      memberId: 31,
+      fullName: 'Mbella Grâce',
+      flag: 'on_leave',
+      leaveUntil: DateTime(2026, 11, 15),
+    ),
   ];
 
   @override
   Future<List<ServiceGroupInfo>> groups() async => const [
-    ServiceGroupInfo(id: 1, name: 'Saint-Michel', members: 7, available: 7),
+    ServiceGroupInfo(
+      id: 1,
+      name: 'Saint-Michel',
+      members: 9,
+      available: 7,
+      onLeave: 2,
+    ),
   ];
 
   @override

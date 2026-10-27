@@ -10,6 +10,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
+import '../../widgets/member_picker.dart';
 import '../../widgets/notice.dart';
 import '../../widgets/ui.dart';
 import 'albs_screen.dart';
@@ -17,7 +18,8 @@ import 'duty_widgets.dart';
 import 'requests_screen.dart';
 
 /// "Planning · semaine" (design): one column per service, horizontal
-/// scroll; alerts on top; tap a free cell for candidates; publish.
+/// scroll; alerts on top; tap a free cell for candidates; hold a name to
+/// drag it to another cell; publish.
 class PlanningWeekView extends StatefulWidget {
   const PlanningWeekView({super.key, required this.me, required this.header});
   final Me me;
@@ -84,6 +86,51 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
     await _assign(s, slot, picked.memberId, force: picked.force);
   }
 
+  /// Dropped [a] on [slot] of [target] (design: "Maintenir pour glisser").
+  Future<void> _move(
+    DutyAssignment a,
+    PlannedService target,
+    Slot slot, {
+    bool force = false,
+  }) async {
+    final l = AppLocalizations.of(context);
+    try {
+      await RepositoryLocator.instance.planning.move(
+        a.id,
+        serviceId: target.id,
+        slot: slot,
+        force: force,
+      );
+      await _load();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'double_service') {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: Text(e.detail ?? l.flagBusy),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l.cancel),
+              ),
+              FilledButton(
+                key: const Key('force-move'),
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l.assignAnyway),
+              ),
+            ],
+          ),
+        );
+        if (ok == true) await _move(a, target, slot, force: true);
+      } else {
+        showErrorSnack(context, e);
+      }
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    }
+  }
+
   Future<void> _assign(
     PlannedService s,
     Slot slot,
@@ -128,68 +175,13 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
     }
   }
 
-  /// The chef de groupe is chosen for each service, among its guards
-  /// (anyone can be chef). Only whoever makes the lineup sees this.
+  /// The event's chef de groupe (owner, 2026-10-27: designated with the
+  /// event, any active member); the planning can change it.
   Future<void> _chooseChef(PlannedService s) async {
-    final l = AppLocalizations.of(context);
-    final guards = s.assignments
-        .where((a) => a.status != 'repl' && a.status != 'absent')
-        .toList();
-    if (guards.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.chefNeedsGuards)));
-      return;
-    }
-    // Wrapped so "remove" (null) differs from dismissing the sheet.
-    final choice = await showModalBottomSheet<({int? id})>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: [
-            Text(
-              l.designateChef,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Text(l.chefSheetHint),
-            const SizedBox(height: 12),
-            GroupCard(
-              children: [
-                for (final a in guards)
-                  ListRow(
-                    key: Key('chef-${a.memberId}'),
-                    lead: MemberAvatar(name: a.memberName, size: 36),
-                    title: Text(a.memberName),
-                    subtitle: Text(
-                      '${postLabel(l, a.slot.post)} · ${sideLabel(l, a.slot.side)}',
-                    ),
-                    trailing: a.memberId == s.chefId
-                        ? const Icon(Icons.flag)
-                        : null,
-                    onTap: () => Navigator.of(context).pop((id: a.memberId)),
-                  ),
-              ],
-            ),
-            if (s.chefId != null) ...[
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const Key('remove-chef'),
-                onPressed: () => Navigator.of(context).pop((id: null)),
-                icon: const Icon(Icons.outlined_flag),
-                label: Text(l.removeChef),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-    if (choice == null || choice.id == s.chefId) return;
+    final m = await pickMember(context, activeOnly: true);
+    if (m == null || m.id == s.chefId || !mounted) return;
     try {
-      await RepositoryLocator.instance.planning.setChef(s.id, choice.id);
+      await RepositoryLocator.instance.planning.setChef(s.id, m.id);
       await _load();
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -221,12 +213,17 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                   key: Key('group-${g.id}'),
                   title: Text(g.name),
                   subtitle: Text(
-                    [l.groupMembersInfo(g.members, g.available)].join('\n'),
+                    [
+                      l.groupMembersInfo(g.members, g.available),
+                      if (g.onLeave > 0) l.groupOnLeave(g.onLeave),
+                    ].join(' · '),
                   ),
                   onTap: () => Navigator.of(context).pop(g),
                 ),
             ],
           ),
+          const SizedBox(height: 12),
+          Notice(text: l.groupSheetNotice(s.title, s.size)),
         ],
       ),
     );
@@ -312,7 +309,12 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
       case 'double_service':
         return l.alertDouble(a.member ?? '');
       default:
-        return l.alertOnLeave(a.member ?? '');
+        return a.until == null
+            ? l.alertOnLeave(a.member ?? '')
+            : l.alertOnLeaveUntil(
+                a.member ?? '',
+                Dates(context).dayMonth(a.until!),
+              );
     }
   }
 
@@ -410,6 +412,14 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                     ),
                     const SizedBox(height: 12),
                   ],
+                  if (_canEdit && w.services.isNotEmpty) ...[
+                    Text(
+                      l.dragHint,
+                      key: const Key('drag-hint'),
+                      style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                   if (w.services.isEmpty && w.unplanned.isEmpty)
                     EmptyState(
                       icon: Icons.event_busy_outlined,
@@ -431,6 +441,9 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                                     ? () => _assignGroup(s)
                                     : null,
                                 onChef: _canEdit ? () => _chooseChef(s) : null,
+                                onDrop: _canEdit
+                                    ? (a, slot) => _move(a, s, slot)
+                                    : null,
                               ),
                             ),
                         ],
@@ -473,11 +486,29 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                       icon: const Icon(Icons.check),
                       label: Text(l.published),
                     )
-                  : FilledButton.icon(
-                      key: const Key('publish'),
-                      onPressed: _busy ? null : _publish,
-                      icon: const Icon(Icons.send_outlined, size: 18),
-                      label: Text(l.publishAndNotify),
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            key: const Key('keep-draft'),
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(l.draftKept)),
+                                ),
+                            child: Text(l.keepDraft),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: FilledButton.icon(
+                            key: const Key('publish'),
+                            onPressed: _busy ? null : _publish,
+                            icon: const Icon(Icons.send_outlined, size: 18),
+                            label: FitText(l.publishAndNotify),
+                          ),
+                        ),
+                      ],
                     ),
             ),
           ),
@@ -492,10 +523,14 @@ class _Column extends StatelessWidget {
     required this.onTap,
     this.onGroup,
     this.onChef,
+    this.onDrop,
   });
   final PlannedService service;
   final ValueChanged<Slot> onTap;
   final VoidCallback? onGroup;
+
+  /// A guard dropped on a cell of this service (null: can't edit).
+  final void Function(DutyAssignment, Slot)? onDrop;
   final VoidCallback? onChef;
 
   @override
@@ -597,11 +632,14 @@ class _Column extends StatelessWidget {
                   children: [
                     for (final side in const ['pariso', 'yapoma']) ...[
                       Expanded(
-                        child: PlanCell(
+                        child: DraggableCell(
                           key: Key('cell-${s.id}-$post-$side-$idx'),
+                          serviceId: s.id,
                           side: side,
+                          slot: Slot(post, side, idx),
                           assignment: s.at(Slot(post, side, idx)),
                           onTap: () => onTap(Slot(post, side, idx)),
+                          onDrop: onDrop,
                         ),
                       ),
                       if (side == 'pariso') const SizedBox(width: 4),
@@ -689,6 +727,10 @@ class _CandidateSheet extends StatelessWidget {
                     subtitle: Text(
                       switch (cand.flag) {
                         'busy_same_day' => l.flagBusy,
+                        'on_leave' when cand.leaveUntil != null =>
+                          l.flagLeaveUntil(
+                            Dates(context).dayMonth(cand.leaveUntil!),
+                          ),
                         'on_leave' => l.flagLeave,
                         'many_this_month' => l.flagMany,
                         _ => l.servicesThisMonth(cand.servicesThisMonth),

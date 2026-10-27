@@ -4,7 +4,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
-from django.db.models import F, FilteredRelation, Q
+from django.db.models import DateField, F, FilteredRelation, Q, Value
 from django.utils import timezone
 
 from apps.core.groups import current_group_id, default_group_id, scoped
@@ -29,11 +29,11 @@ class UserManager(BaseUserManager):
         Accounts are platform-wide; a Membership puts one in a group."""
         gid = current_group_id()
         if gid is None:
-            return self.annotate(gstatus=F("status"))
+            return self.annotate(gstatus=F("status"), gleave_until=Value(None, output_field=DateField()))
         return (
             self.annotate(m=FilteredRelation("memberships", condition=Q(memberships__group_id=gid)))
             .filter(m__isnull=False, m__is_active=True)
-            .annotate(gstatus=F("m__status"))
+            .annotate(gstatus=F("m__status"), gleave_until=F("m__leave_until"))
         )
 
     def create_superuser(self, phone, password, **extra):

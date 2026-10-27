@@ -1998,4 +1998,64 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notOnDuty => 'Vous n’êtes pas de service pour cet événement.';
+
+  @override
+  String flagLeaveUntil(String date) {
+    return 'En congé jusqu’au $date';
+  }
+
+  @override
+  String alertOnLeaveUntil(String name, String date) {
+    return '$name est en congé jusqu’au $date';
+  }
+
+  @override
+  String groupOnLeave(int n) {
+    return '$n en congé';
+  }
+
+  @override
+  String groupSheetNotice(String title, int n) {
+    return '$title · $n postes. Les postes libres sont pris par les membres disponibles du groupe ; les autres sont exclus et les cases restantes signalées.';
+  }
+
+  @override
+  String get keepDraft => 'Brouillon';
+
+  @override
+  String get draftKept =>
+      'Brouillon : personne n’est notifié tant que vous ne publiez pas.';
+
+  @override
+  String get dragHint =>
+      'Maintenez un nom pour le glisser vers une autre case.';
+
+  @override
+  String get dropHere => 'Déposer ici';
+
+  @override
+  String swapValidation(String name) {
+    return 'Validation : $name, chef de groupe';
+  }
+
+  @override
+  String get swapValidationPlanners =>
+      'Validation : les responsables du planning';
+
+  @override
+  String get draftSaved => 'Brouillon enregistré sur ce téléphone.';
+
+  @override
+  String get draftRestored => 'Brouillon repris.';
+
+  @override
+  String get placeDetail => 'Précision du lieu (facultatif)';
+
+  @override
+  String get placeDetailHint => 'Quartier, ville';
+
+  @override
+  String memberLeaveUntil(String date) {
+    return 'En congé jusqu’au $date';
+  }
 }

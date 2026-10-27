@@ -25,6 +25,7 @@ class Command(BaseCommand):
                 self.run_for_group()
 
     def run_for_group(self):
+        self.end_leaves()
         tomorrow = timezone.localdate() + timedelta(days=1)
         lo = timezone.make_aware(datetime.combine(tomorrow, time.min))
         events = Event.objects.filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1))
@@ -39,3 +40,19 @@ class Command(BaseCommand):
             body = " · ".join(x for x in [dresses.get(e.dress, "") if e.dress else "", e.place] if x)
             sent += notify(members, "reminder", f"Rappel : {e.title} demain {when:%H:%M}", body, {"type": "event", "id": e.pk})
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")
+
+    def end_leaves(self):
+        """A member whose leave ended (Membership.leave_until in the past)
+        is active again in this group; they and the audit log are told."""
+        from apps.core import audit
+        from apps.core.models import Membership
+
+        today = timezone.localdate()
+        ended = list(Membership.objects.filter(status=User.Status.LEAVE, leave_until__lt=today).select_related("user"))
+        for m in ended:
+            m.status, m.leave_until = User.Status.ACTIVE, None
+            m.save(update_fields=["status", "leave_until"])
+            audit.record("Retour de congé", obj=m.user, detail={"automatique": True})
+            notify([m.user], "member", "Retour de congé", "Votre congé est terminé : vous êtes de nouveau actif dans le groupe.")
+        if ended:
+            self.stdout.write(f"{len(ended)} leave(s) ended.")

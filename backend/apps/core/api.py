@@ -56,7 +56,8 @@ class SettingsView(APIView):
             "activity_types": [{"slug": a.slug, "name": a.name, "needs_lineup": a.needs_lineup,
                                 "has_scope": a.has_scope, "needs_chef": a.needs_chef}
                                for a in ActivityType.objects.filter(is_archived=False)],
-            "dress_codes": [{"slug": d.slug, "name": d.name} for d in DressCode.objects.filter(is_archived=False)],
+            "dress_codes": [{"slug": d.slug, "name": d.name, "description": d.description}
+                            for d in DressCode.objects.filter(is_archived=False)],
         })
 
 

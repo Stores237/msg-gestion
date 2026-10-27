@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -72,7 +73,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(
-        find.text('En congé'),
+        find.textContaining('En congé jusqu’au'),
         findsOneWidget,
       ); // on leave: locked, no assign button
       expect(find.byKey(const Key('assign-31')), findsNothing);
@@ -130,7 +131,7 @@ void main() {
     expect(f.planning.calls, contains('group:5:1'));
   });
 
-  testWidgets('formateur: designates the chef de groupe among the guards', (
+  testWidgets('formateur: changes the chef de groupe (any active member)', (
     tester,
   ) async {
     final f = await setUpApp(tester);
@@ -141,10 +142,12 @@ void main() {
     await openThirdView(tester);
     await tester.tap(find.byKey(const Key('chef-btn-5')));
     await tester.pumpAndSettle();
-    expect(find.text('Désigner le chef de groupe'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('chef-4')));
+    // The member picker, active members only (the chef belongs to the
+    // event, owner 2026-10-27): the one on leave isn't offered.
+    expect(find.byKey(const Key('pick-member-2')), findsNothing);
+    await tester.tap(find.byKey(const Key('pick-member-3')));
     await tester.pumpAndSettle();
-    expect(f.planning.calls, contains('chef:5:4'));
+    expect(f.planning.calls, contains('chef:5:3'));
   });
 
   testWidgets('member without lineup rights cannot change the chef', (
@@ -164,7 +167,7 @@ void main() {
     await openThirdView(tester);
     await tester.tap(find.byKey(const Key('chef-btn-5')));
     await tester.pumpAndSettle();
-    expect(find.text('Désigner le chef de groupe'), findsNothing);
+    expect(find.byKey(const Key('pick-member-3')), findsNothing);
   });
 
   testWidgets(
@@ -225,5 +228,68 @@ void main() {
     await tester.tap(find.byTooltip('Retour'));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('bell-dot')), findsNothing);
+  });
+
+  // --- Design features added 2026-10-27 -------------------------------------------
+
+  testWidgets('formateur: hold a name and drag it to a free cell', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
+    );
+    await openThirdView(tester);
+    expect(find.byKey(const Key('drag-hint')), findsOneWidget);
+    final from = find.byKey(const Key('cell-5-premiere_centrale-pariso-0'));
+    final to = find.byKey(const Key('cell-5-deuxieme_centrale-pariso-0'));
+    await tester.ensureVisible(from);
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(from));
+    await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+    await gesture.moveTo(tester.getCenter(to));
+    await tester.pump();
+    expect(find.text('Déposer ici'), findsOneWidget); // the target lights up
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(f.planning.calls, contains('move:1:5:deuxieme_centrale:pariso'));
+  });
+
+  testWidgets('formateur: leave end date, group sheet, Brouillon', (
+    tester,
+  ) async {
+    await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(tabs: const ['accueil', 'calendrier'], permissions: _formateur),
+    );
+    await openThirdView(tester);
+    await tester.tap(find.byKey(const Key('group-btn-5')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2 en congé'), findsOneWidget);
+    expect(find.textContaining('Grand-messe · 4 postes'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10)); // close the sheet
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('keep-draft')));
+    await tester.pump();
+    expect(
+      find.text(
+        'Brouillon : personne n’est notifié tant que vous ne publiez pas.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('member: the swap sheet says who validates; a chef reaches '
+      'the requests', (tester) async {
+    await setUpApp(tester);
+    await pumpShell(tester, fakeMe(tabs: const ['accueil', 'calendrier']));
+    await openThirdView(tester);
+    expect(find.byKey(const Key('chef-requests')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('swap-1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('swap-validation')), findsOneWidget);
+    expect(find.textContaining('ce mois'), findsWidgets);
   });
 }

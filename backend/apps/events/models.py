@@ -44,6 +44,8 @@ class DressCode(models.Model):
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
     slug = models.SlugField(max_length=12)
     name = models.CharField(max_length=60)
+    # What it means in this group (design: "Aube blanche, cordon, chaussures noires").
+    description = models.CharField(max_length=140, blank=True)
     sort_order = models.PositiveSmallIntegerField(default=100)
     is_archived = models.BooleanField(default=False)
 
@@ -97,6 +99,8 @@ class Event(models.Model):
     starts_at = models.DateTimeField(db_index=True)
     ends_at = models.DateTimeField(null=True, blank=True)
     place = models.CharField(max_length=140, blank=True)
+    # Second line under the place (design: "Yapoma, Douala").
+    place_detail = models.CharField(max_length=140, blank=True)
     # The slug of one of the group's DressCode, or empty.
     dress = models.CharField(max_length=12, blank=True)
     notes = models.TextField(blank=True)
@@ -182,3 +186,7 @@ def kind_names():
 
 def dress_names():
     return dict(DressCode.objects.values_list("slug", "name"))
+
+
+def dress_descriptions():
+    return dict(DressCode.objects.exclude(description="").values_list("slug", "description"))

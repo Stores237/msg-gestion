@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/current_user.dart';
 
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 import 'duty_widgets.dart';
+import 'requests_screen.dart';
 
 /// One duty card (design: "Mes services"): when, post, chef, dress;
 /// Confirmer / Échanger.
@@ -175,6 +177,28 @@ class MyDutiesView extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           children: [
             header,
+            // A chef de groupe validates the swaps and absences of their
+            // events (design: "Vue chef de groupe / censeur").
+            if (duties.any((a) => a.isChef) && currentUser.value != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: GroupCard(
+                  children: [
+                    ListRow(
+                      key: const Key('chef-requests'),
+                      lead: const IconChip(Icons.swap_horiz, tone: Tone.amber),
+                      title: Text(l.requests),
+                      chevron: true,
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              RequestsScreen(me: currentUser.value!),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             if (duties.isEmpty)
               EmptyState(
                 icon: Icons.event_available_outlined,
@@ -292,8 +316,30 @@ class _SwapSheetState extends State<_SwapSheet> {
                     color: c.primary,
                   ),
                   title: Text(cand.fullName),
+                  subtitle: Text(l.servicesThisMonth(cand.servicesThisMonth)),
                   onTap: () => setState(() => _target = cand),
                 ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Who will approve (design: "Validation : …, chef de groupe").
+          Row(
+            key: const Key('swap-validation'),
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                size: 14,
+                color: c.textSecondary,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  widget.duty.chef != null && !widget.duty.isChef
+                      ? l.swapValidation(widget.duty.chef!)
+                      : l.swapValidationPlanners,
+                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),

@@ -26,9 +26,13 @@ class MemberSummary {
     required this.joinedYear,
     required this.roles,
     this.photo,
+    this.leaveUntil,
   });
 
   final String? photo;
+
+  /// On leave in this group: the last day, when known.
+  final DateTime? leaveUntil;
   final int id;
   final String lastName;
   final String firstName;
@@ -47,6 +51,9 @@ class MemberSummary {
     firstName: j['first_name'] as String,
     fullName: j['full_name'] as String,
     status: j['status'] as String,
+    leaveUntil: j['leave_until'] == null
+        ? null
+        : DateTime.parse(j['leave_until'] as String),
     isDiaspora: j['is_diaspora'] as bool,
     city: (j['city'] as String?) ?? '',
     age: j['age'] as int?,

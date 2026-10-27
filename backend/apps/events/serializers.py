@@ -3,13 +3,14 @@ from rest_framework import serializers
 from apps.accounts.models import User
 
 from . import reports
-from .models import ActivityType, Attendance, DressCode, Event, EventReport, dress_names, kind_names
+from .models import ActivityType, Attendance, DressCode, Event, EventReport, dress_descriptions, dress_names, kind_names
 
 
 class EventSerializer(serializers.ModelSerializer):
     my_attendance = serializers.SerializerMethodField()
     kind_name = serializers.SerializerMethodField()
     dress_name = serializers.SerializerMethodField()
+    dress_detail = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
     created_by_role = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
@@ -26,7 +27,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "dress", "dress_name",
+        fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "place_detail", "dress", "dress_name", "dress_detail",
                   "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete",
                   "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
                   "has_lineup", "my_duty"]
@@ -94,6 +95,10 @@ class EventSerializer(serializers.ModelSerializer):
 
     def get_kind_name(self, event) -> str:
         return self._names("kinds", kind_names).get(event.kind, event.kind)
+
+    def get_dress_detail(self, event) -> str:
+        """What the dress means in this group (Paramètres → Tenues)."""
+        return self._names("dress_details", dress_descriptions).get(event.dress, "") if event.dress else ""
 
     def get_dress_name(self, event) -> str:
         return self._names("dresses", dress_names).get(event.dress, event.dress) if event.dress else ""

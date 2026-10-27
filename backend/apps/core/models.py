@@ -63,6 +63,9 @@ class Membership(models.Model):
     # 2026-10-23: one person can be on leave in one group, active in another).
     status = models.CharField(max_length=10, default="actif", choices=[
         ("actif", "Actif"), ("conge", "En congé"), ("classe", "Classé"), ("suspendu", "Suspendu"), ("archive", "Archivé")])
+    # With "en congé": the last day of leave, if known (design: "En congé
+    # jusqu’au 15 novembre"). The daily job makes the member active again after it.
+    leave_until = models.DateField("en congé jusqu’au", null=True, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

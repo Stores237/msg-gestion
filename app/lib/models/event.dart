@@ -30,7 +30,15 @@ class CalendarEvent {
     this.reportReadBy,
     this.hasLineup = false,
     this.myDuty,
+    this.placeDetail = '',
+    this.dressDetail = '',
   });
+
+  /// Second line under the place ("Quartier, ville").
+  final String placeDetail;
+
+  /// What the dress means in this group (Paramètres → Tenues).
+  final String dressDetail;
 
   /// Who opened the report first; from then on the chef can't change it.
   final String? reportReadBy;
@@ -107,6 +115,8 @@ class CalendarEvent {
     canReport: (j['can_report'] as bool?) ?? false,
     canReadReport: (j['can_read_report'] as bool?) ?? false,
     reportReadBy: j['report_read_by'] as String?,
+    placeDetail: (j['place_detail'] as String?) ?? '',
+    dressDetail: (j['dress_detail'] as String?) ?? '',
     hasLineup: (j['has_lineup'] as bool?) ?? false,
     myDuty: j['my_duty'] == null
         ? null
@@ -122,6 +132,7 @@ class CalendarEvent {
     'starts_at': startsAt.toUtc().toIso8601String(),
     'ends_at': endsAt?.toUtc().toIso8601String(),
     'place': place,
+    'place_detail': placeDetail,
     'dress': dress,
     'notes': notes,
     'kind_other': kindOther,

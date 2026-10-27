@@ -114,6 +114,23 @@ class SlotView(APIView):
         return Response(_assignment_json(a))
 
 
+class MoveView(APIView):
+    """PUT {service, post, side, index, force?}: drag a guard to another
+    cell; a filled cell of the same service swaps the two."""
+
+    permission_classes = [require("calendar.planning", "change")]
+
+    def put(self, request, pk):
+        a = get_object_or_404(Assignment.objects.select_related("service__event", "member"), pk=pk)
+        target = get_object_or_404(Service.objects.select_related("event"), pk=request.data.get("service") or a.service_id)
+        try:
+            moved = services.move(a, target, request.data.get("post"), request.data.get("side"), int(request.data.get("index") or 0),
+                                  by=request.user, force=bool(request.data.get("force")), request=request)
+        except services.PlanningRule as e:
+            return _rule(e)
+        return Response(_assignment_json(moved))
+
+
 class CandidatesView(APIView):
     permission_classes = [require("calendar.planning", "change")]
 
@@ -244,7 +261,10 @@ class RequestsView(APIView):
     def get(self, request):
         base = Request.objects.select_related("assignment__service__event", "requester", "target")
         mine = base.filter(target=request.user, status=Request.Status.PROPOSED)
-        decide = base.filter(status=Request.Status.ACCEPTED) if request.user.can("calendar.planning", "change") else base.none()
+        decide = base.filter(status=Request.Status.ACCEPTED)
+        if not request.user.can("calendar.planning", "change"):
+            # The chef de groupe decides for their own events.
+            decide = decide.filter(assignment__service__event__chef=request.user)
         return Response({"for_me": [_request_json(r) for r in mine], "to_decide": [_request_json(r) for r in decide]})
 
 
@@ -261,10 +281,13 @@ class AnswerView(APIView):
 
 
 class DecideView(APIView):
-    permission_classes = [require("calendar.planning", "change")]
+    """The lineup makers, or the event's chef de groupe (design: "le chef de
+    groupe ou le censeur valide")."""
 
     def post(self, request, pk):
         r = get_object_or_404(Request.objects.select_related("assignment__service__event", "requester", "target"), pk=pk)
+        if not services.can_decide(request.user, r):
+            return Response({"detail": "Réservé au chef de groupe et aux responsables du planning.", "code": "not_decider"}, status=403)
         replacement = get_object_or_404(User.objects.members(), pk=request.data["replacement"]) if request.data.get("replacement") else None
         try:
             services.decide(r, by=request.user, approve=bool(request.data.get("approve")), replacement=replacement, request=request)
@@ -274,10 +297,10 @@ class DecideView(APIView):
 
 
 class ReplacementCandidatesView(APIView):
-    permission_classes = [require("calendar.planning", "change")]
-
     def get(self, request, pk):
         r = get_object_or_404(Request.objects.select_related("assignment__service__event"), pk=pk)
+        if not services.can_decide(request.user, r):
+            return Response({"detail": "Réservé au chef de groupe et aux responsables du planning.", "code": "not_decider"}, status=403)
         return Response(services.candidates(r.assignment.service))
 
 

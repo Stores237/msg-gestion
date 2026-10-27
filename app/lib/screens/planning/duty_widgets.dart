@@ -28,12 +28,96 @@ class DutyChip extends StatelessWidget {
   }
 }
 
+/// What is being dragged: a guard's assignment and the service it is in.
+class CellDrag {
+  const CellDrag(this.assignment, this.serviceId);
+  final DutyAssignment assignment;
+  final int serviceId;
+}
+
+/// A planning cell that can be dragged (hold a name) and dropped on
+/// (design: "Maintenir pour glisser ; la case cible s’éclaire"). A free
+/// cell takes the guard; a filled cell of the same service swaps the two;
+/// a filled cell of another service doesn't accept the drop.
+class DraggableCell extends StatelessWidget {
+  const DraggableCell({
+    super.key,
+    required this.serviceId,
+    required this.side,
+    required this.slot,
+    this.assignment,
+    this.onTap,
+    this.onDrop,
+  });
+  final int serviceId;
+  final String side;
+  final Slot slot;
+  final DutyAssignment? assignment;
+  final VoidCallback? onTap;
+  final void Function(DutyAssignment, Slot)? onDrop;
+
+  @override
+  Widget build(BuildContext context) {
+    final cell = PlanCell(side: side, assignment: assignment, onTap: onTap);
+    final drop = onDrop;
+    if (drop == null) return cell;
+    final a = assignment;
+    return DragTarget<CellDrag>(
+      onWillAcceptWithDetails: (d) {
+        final from = d.data;
+        if (from.assignment.id == a?.id) return false;
+        return a == null || from.serviceId == serviceId;
+      },
+      onAcceptWithDetails: (d) => drop(d.data.assignment, slot),
+      builder: (context, hovering, _) {
+        final target = PlanCell(
+          side: side,
+          assignment: a,
+          onTap: onTap,
+          highlight: hovering.isNotEmpty,
+        );
+        if (a == null) return target;
+        return LongPressDraggable<CellDrag>(
+          data: CellDrag(a, serviceId),
+          // The lifted name, under the finger (design: tilted card).
+          feedback: Transform.rotate(
+            angle: -0.03,
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                width: 84,
+                child: PlanCell(side: side, assignment: a, lifted: true),
+              ),
+            ),
+          ),
+          childWhenDragging: Opacity(opacity: 0.35, child: target),
+          child: target,
+        );
+      },
+    );
+  }
+}
+
 /// One planning cell (design: .pcell): name + status mark, or "+ Libre".
 class PlanCell extends StatelessWidget {
-  const PlanCell({super.key, this.assignment, required this.side, this.onTap});
+  const PlanCell({
+    super.key,
+    this.assignment,
+    required this.side,
+    this.onTap,
+    this.highlight = false,
+    this.lifted = false,
+  });
   final DutyAssignment? assignment;
   final String side;
   final VoidCallback? onTap;
+
+  /// A dragged name is over this cell: "Déposer ici", lit in the app colour.
+  final bool highlight;
+
+  /// Drawn under the finger while dragging.
+  final bool lifted;
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +127,18 @@ class PlanCell extends StatelessWidget {
     final conflict = a?.conflict ?? false;
     final empty = a == null;
     return Material(
-      color: empty
+      color: highlight
+          ? c.primaryTint
+          : lifted
+          ? c.surfaceCard
+          : empty
           ? Colors.transparent
           : (conflict ? c.alertTint : c.surfaceSunken),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: empty
+        side: highlight || lifted
+            ? BorderSide(color: c.primary, width: 2)
+            : empty
             ? BorderSide(color: c.borderStrong, width: 1.5)
             : (conflict
                   ? BorderSide(color: c.alert, width: 2)
@@ -78,7 +168,9 @@ class PlanCell extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        empty ? l.freeSlot : a.memberName,
+                        highlight && empty
+                            ? l.dropHere
+                            : (empty ? l.freeSlot : a.memberName),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

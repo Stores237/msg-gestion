@@ -121,15 +121,21 @@ def user_detail(request, pk):
                 messages.success(request, f"Rôle « {a.role.name} » retiré.")
             elif action == "reset_pin":
                 once = {"label": "Nouveau code PIN provisoire", "value": reset_pin(member, by=request.user, request=request)}
-            elif action in ("suspend", "reactivate"):
+            elif action in ("suspend", "reactivate", "leave"):
                 if not reason:
                     raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
+                until = None
+                if action == "leave" and request.POST.get("until"):
+                    until = parse_date(request.POST["until"])
+                    if until is None or until < date.today():
+                        raise RuleViolation("La date de fin de congé doit être aujourd’hui ou plus tard.")
+                status = {"suspend": User.Status.SUSPENDED, "reactivate": User.Status.ACTIVE, "leave": User.Status.LEAVE}[action]
                 # In the group being worked on; the person's other groups are untouched.
                 Membership.join(member, request.group.pk)
-                Membership.objects.filter(user=member).update(
-                    status=User.Status.SUSPENDED if action == "suspend" else User.Status.ACTIVE)
-                audit.record("Utilisateur suspendu" if action == "suspend" else "Utilisateur réactivé", actor=request.user, obj=member,
-                             request=request, sensitive=True, detail={"motif": reason})
+                Membership.objects.filter(user=member).update(status=status, leave_until=until)
+                label = {"suspend": "Utilisateur suspendu", "reactivate": "Utilisateur réactivé", "leave": "Mis en congé"}[action]
+                audit.record(label, actor=request.user, obj=member, request=request, sensitive=True,
+                             detail={"motif": reason, **({"jusqu_au": until.isoformat()} if until else {})})
                 messages.success(request, "Statut mis à jour.")
             elif action == "password":
                 if not member.is_platform_account:
@@ -170,6 +176,7 @@ def user_detail(request, pk):
         "once": once, "can_edit": request.user.can("backoffice.users", "change")
         and (request.user.is_super_admin or not member.is_platform_account),
         "can_roles": request.user.can("backoffice.roles", "change"), "today": today,
+        "leave_until": Membership.objects.filter(user=member).values_list("leave_until", flat=True).first(),
         "phone": format_phone(member.phone), "backoffice": member.has_usable_password(),
         "codes_left": BackupCode.remaining(member), "now": timezone.now(),
     })
@@ -626,14 +633,16 @@ def settings_lists(request):
         changed.append(name)
     for d in DressCode.objects.all():
         k = f"d{d.pk}"
-        new = (P.get(f"{k}_name", d.name).strip() or d.name, bool(P.get(f"{k}_archived")))
-        if new != (d.name, d.is_archived):
-            d.name, d.is_archived = new
+        new = (P.get(f"{k}_name", d.name).strip() or d.name, P.get(f"{k}_desc", d.description).strip()[:140],
+               bool(P.get(f"{k}_archived")))
+        if new != (d.name, d.description, d.is_archived):
+            d.name, d.description, d.is_archived = new
             d.save()
             changed.append(d.name)
     if P.get("d_new_name", "").strip():
         name = P["d_new_name"].strip()[:60]
-        DressCode.objects.create(slug=_new_slug(DressCode, name, 12), name=name, sort_order=DressCode.objects.count() * 10)
+        DressCode.objects.create(slug=_new_slug(DressCode, name, 12), name=name, description=P.get("d_new_desc", "").strip()[:140],
+                                 sort_order=DressCode.objects.count() * 10)
         changed.append(name)
     if changed:
         audit.record("Listes du groupe modifiées", actor=request.user, request=request, detail={"elements": ", ".join(changed)[:300]})

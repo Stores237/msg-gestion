@@ -1992,4 +1992,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notOnDuty => 'You are not on duty for this event.';
+
+  @override
+  String flagLeaveUntil(String date) {
+    return 'On leave until $date';
+  }
+
+  @override
+  String alertOnLeaveUntil(String name, String date) {
+    return '$name is on leave until $date';
+  }
+
+  @override
+  String groupOnLeave(int n) {
+    return '$n on leave';
+  }
+
+  @override
+  String groupSheetNotice(String title, int n) {
+    return '$title · $n posts. Free posts go to the group’s available members; the others are left out and the remaining cells flagged.';
+  }
+
+  @override
+  String get keepDraft => 'Draft';
+
+  @override
+  String get draftKept => 'Draft: no one is notified until you publish.';
+
+  @override
+  String get dragHint => 'Hold a name to drag it to another cell.';
+
+  @override
+  String get dropHere => 'Drop here';
+
+  @override
+  String swapValidation(String name) {
+    return 'Approved by: $name, group leader';
+  }
+
+  @override
+  String get swapValidationPlanners => 'Approved by: the planning team';
+
+  @override
+  String get draftSaved => 'Draft saved on this phone.';
+
+  @override
+  String get draftRestored => 'Draft restored.';
+
+  @override
+  String get placeDetail => 'Place details (optional)';
+
+  @override
+  String get placeDetailHint => 'Area, town';
+
+  @override
+  String memberLeaveUntil(String date) {
+    return 'On leave until $date';
+  }
 }

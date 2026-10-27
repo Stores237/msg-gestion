@@ -161,11 +161,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             ListRow(
                               lead: const Icon(Icons.place_outlined),
                               title: Text(e.place),
+                              subtitle: e.placeDetail.isEmpty
+                                  ? null
+                                  : Text(e.placeDetail),
                             ),
                           if (e.dress.isNotEmpty)
                             ListRow(
+                              key: const Key('event-dress'),
                               lead: const Icon(Icons.checkroom_outlined),
                               title: Text(dressLabel(l, e.dress, e.dressName)),
+                              subtitle: e.dressDetail.isEmpty
+                                  ? null
+                                  : Text(e.dressDetail),
                             ),
                           if (e.chefName != null)
                             ListRow(

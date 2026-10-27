@@ -59,11 +59,14 @@
     </tbody></table></div>
     <div class="tbl-f"><span>« Planning » : un tableau de service est préparé pour ce type. « Présences » : il compte dans le résumé des présences d’un membre. « Int./Ext. » : chaque événement précise intérieur ou extérieur (la messe). « Chef » : un chef de groupe est désigné à la création et remet un rapport au formateur dans les 24 h (pas pour les réunions). Un type retiré reste sur les événements passés.</span></div></section>
   <section class="panel"><div class="panel-h"><h2>Tenues</h2></div>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Retirée</th></tr></thead><tbody>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Détail</th><th>Retirée</th></tr></thead><tbody>
       {% for d in dress_codes %}<tr><td><span class="fld-box" style="min-height:40px"><input name="d{{ d.pk }}_name" value="{{ d.name }}" maxlength="60" aria-label="Nom"></span></td>
+        <td><span class="fld-box" style="min-height:40px"><input name="d{{ d.pk }}_desc" value="{{ d.description }}" maxlength="140" placeholder="Ce qu’elle comprend" aria-label="Détail de {{ d.name }}"></span></td>
         <td><input type="checkbox" name="d{{ d.pk }}_archived"{% if d.is_archived %} checked{% endif %} aria-label="Retirer {{ d.name }}"></td></tr>{% endfor %}
-      <tr><td><span class="fld-box" style="min-height:40px"><input name="d_new_name" maxlength="60" placeholder="Nouvelle tenue" aria-label="Nouvelle tenue"></span></td><td></td></tr>
-    </tbody></table></div></section>
+      <tr><td><span class="fld-box" style="min-height:40px"><input name="d_new_name" maxlength="60" placeholder="Nouvelle tenue" aria-label="Nouvelle tenue"></span></td>
+        <td><span class="fld-box" style="min-height:40px"><input name="d_new_desc" maxlength="140" placeholder="Ce qu’elle comprend" aria-label="Détail de la nouvelle tenue"></span></td><td></td></tr>
+    </tbody></table></div>
+    <div class="tbl-f"><span>« Détail » s’affiche sous la tenue dans l’événement (ce que la tenue comprend dans ce groupe).</span></div></section>
 </div>
 <div style="margin-top:16px"><button class="btn btn-primary">Enregistrer les listes</button></div>
 </form>

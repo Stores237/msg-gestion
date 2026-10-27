@@ -13,6 +13,16 @@ abstract class PlanningRepository {
     bool force = false,
   });
   Future<List<Candidate>> candidates(int serviceId);
+
+  /// Drag a guard to another cell (this service or another); a filled cell
+  /// of the same service swaps the two. ApiException double_service (409)
+  /// unless [force], slot_taken (409) for a filled cell elsewhere.
+  Future<void> move(
+    int assignmentId, {
+    required int serviceId,
+    required Slot slot,
+    bool force = false,
+  });
   Future<List<ServiceGroupInfo>> groups();
   Future<(int, int)> assignGroup(int serviceId, int groupId);
 

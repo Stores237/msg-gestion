@@ -51,6 +51,14 @@ These need an account, a decision or a person — not code.
 - [ ] SMS (Twilio): "Code oublié ?" and back-office codes by SMS. Everything else works; back-office login uses backup codes meanwhile.
 - [ ] Push notifications (Firebase project): notifications are in-app today; push to the lock screen needs an FCM project.
 
+### Multi-group (found 2026-10-27, needs an owner decision)
+- [ ] **Planning posts and sides are fixed in code** (`planning.models.POSTS`: première centrale,
+  deuxième centrale, contrôle, petites portes, mésanie; `SIDES`: Pariso, Yapoma). They are this
+  parish's layout; another group can't plan its own. Proposal: per-group posts and sides in
+  Paramètres (the current ones copied for the first group), lineup sizes derived from them.
+- [ ] App wording says "gardes" in a few planning strings (7 in `app_fr.arb`); neutral "membres"
+  or a per-group term from Paramètres.
+
 ### Security backlog (SECURITY.md "Security check — 2026-10-26", open items)
 - [ ] Encrypt the phone's offline copy with a key kept in secure storage.
 - [ ] Content-Security-Policy for the back-office (move the inline handlers to scripts first).

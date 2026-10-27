@@ -45,7 +45,8 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
                                            counts_presence=a.counts_presence, has_scope=a.has_scope,
                                            needs_chef=a.needs_chef, sort_order=a.sort_order)
         for d in DressCode.all_groups.filter(group=template, is_archived=False):
-            DressCode.all_groups.create(group=group, slug=d.slug, name=d.name, sort_order=d.sort_order)
+            DressCode.all_groups.create(group=group, slug=d.slug, name=d.name, description=d.description,
+                                        sort_order=d.sort_order)
     audit.record("Groupe créé", actor=by, obj=group, request=request, sensitive=True, platform=True,
                  detail={"nom": group.name, "roles": roles})
     return group

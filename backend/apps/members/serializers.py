@@ -29,10 +29,16 @@ class MemberListSerializer(serializers.ModelSerializer):
     is_minor = serializers.BooleanField(read_only=True)
     joined_year = serializers.SerializerMethodField()
     photo = serializers.SerializerMethodField()
+    leave_until = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "last_name", "first_name", "full_name", "status", "is_diaspora", "city", "age", "is_minor", "joined_year", "roles", "photo"]
+        fields = ["id", "last_name", "first_name", "full_name", "status", "is_diaspora", "city", "age", "is_minor", "joined_year", "roles",
+                  "photo", "leave_until"]
+
+    def get_leave_until(self, user):
+        """On leave in this group: the last day, when known."""
+        return getattr(user, "gleave_until", None) if user.group_status == User.Status.LEAVE else None
 
     def get_photo(self, user) -> str | None:
         if not user.photo:

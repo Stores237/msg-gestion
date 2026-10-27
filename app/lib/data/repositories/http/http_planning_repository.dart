@@ -42,6 +42,23 @@ class HttpPlanningRepository implements PlanningRepository {
   );
 
   @override
+  Future<void> move(
+    int assignmentId, {
+    required int serviceId,
+    required Slot slot,
+    bool force = false,
+  }) => _api.put(
+    '/planning/assignments/$assignmentId/move/',
+    body: {
+      'service': serviceId,
+      'post': slot.post,
+      'side': slot.side,
+      'index': slot.index,
+      'force': force,
+    },
+  );
+
+  @override
   Future<List<Candidate>> candidates(int serviceId) async =>
       _cands(await _api.get('/planning/services/$serviceId/candidates/'));
 

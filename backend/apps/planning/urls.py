@@ -12,6 +12,7 @@ urlpatterns = [
     path("publish/", views.PublishView.as_view(), name="planning-publish"),
     path("groups/", views.GroupsView.as_view(), name="planning-groups"),
     path("mine/", views.MineView.as_view(), name="planning-mine"),
+    path("assignments/<int:pk>/move/", views.MoveView.as_view(), name="planning-move"),
     path("assignments/<int:pk>/confirm/", views.ConfirmView.as_view(), name="planning-confirm"),
     path("assignments/<int:pk>/swap/", views.SwapView.as_view(), name="planning-swap"),
     path("assignments/<int:pk>/swap-candidates/", views.SwapCandidatesView.as_view(), name="planning-swap-candidates"),

@@ -28,6 +28,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
   final _form = GlobalKey<FormState>();
   final _title = TextEditingController();
   final _place = TextEditingController();
+  final _placeDetail = TextEditingController();
   final _notes = TextEditingController();
   final _kindOther = TextEditingController();
   String _kind = 'assise';
@@ -55,6 +56,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
       _dress = e.dress;
       _title.text = e.title;
       _place.text = e.place;
+      _placeDetail.text = e.placeDetail;
       _notes.text = e.notes;
       _kindOther.text = e.kindOther;
       _scope = e.scope;
@@ -86,6 +88,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
   void dispose() {
     _title.dispose();
     _place.dispose();
+    _placeDetail.dispose();
     _notes.dispose();
     _kindOther.dispose();
     super.dispose();
@@ -121,6 +124,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
         startsAt: _at(_start),
         endsAt: _endsAt,
         place: _place.text.trim(),
+        placeDetail: _placeDetail.text.trim(),
         dress: _dress,
         notes: _notes.text.trim(),
         kindOther: _kind == 'autre' ? _kindOther.text.trim() : '',
@@ -369,6 +373,17 @@ class _EventFormScreenState extends State<EventFormScreen> {
                       controller: _place,
                       decoration: deco(
                         prefix: const Icon(Icons.place_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      key: const Key('f-place-detail'),
+                      controller: _placeDetail,
+                      maxLength: 140,
+                      decoration: deco().copyWith(
+                        labelText: l.placeDetail,
+                        hintText: l.placeDetailHint,
+                        counterText: '',
                       ),
                     ),
                     label(l.eventDress),

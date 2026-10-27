@@ -556,5 +556,20 @@
   "lineupOnly": "Only the guards lined up for this service are listed, with their post.",
   "lineupEmpty": "No one is lined up for this service yet.",
   "myPost": "Your post: {post}",
-  "notOnDuty": "You are not on duty for this event."
+  "notOnDuty": "You are not on duty for this event.",
+  "flagLeaveUntil": "On leave until {date}",
+  "alertOnLeaveUntil": "{name} is on leave until {date}",
+  "groupOnLeave": "{n} on leave",
+  "groupSheetNotice": "{title} · {n} posts. Free posts go to the group’s available members; the others are left out and the remaining cells flagged.",
+  "keepDraft": "Draft",
+  "draftKept": "Draft: no one is notified until you publish.",
+  "dragHint": "Hold a name to drag it to another cell.",
+  "dropHere": "Drop here",
+  "swapValidation": "Approved by: {name}, group leader",
+  "swapValidationPlanners": "Approved by: the planning team",
+  "draftSaved": "Draft saved on this phone.",
+  "draftRestored": "Draft restored.",
+  "placeDetail": "Place details (optional)",
+  "placeDetailHint": "Area, town",
+  "memberLeaveUntil": "On leave until {date}"
 }

@@ -227,7 +227,12 @@ class _ProfileBody extends StatelessWidget {
                     runSpacing: 6,
                     children: [
                       Badge2(
-                        memberStatusLabel(l, s.status),
+                        s.status == 'conge' && s.leaveUntil != null
+                            ? l.memberLeaveUntil(
+                                Dates(context).dayMonth(s.leaveUntil!),
+                              )
+                            : memberStatusLabel(l, s.status),
+                        key: const Key('member-status'),
                         tone: statusTone(s.status),
                       ),
                       if (s.isMinor) Badge2(l.minor),

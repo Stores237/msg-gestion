@@ -21,6 +21,19 @@ class PlanningRule(Exception):
         self.status = status
 
 
+def _group_status(member_ids):
+    """member id → (status, leave_until) in the current group: someone on
+    leave in one group may serve in another (multi-group, 2026-10-23)."""
+    from apps.core.models import Membership
+
+    return {m: (st, until) for m, st, until in
+            Membership.objects.filter(user_id__in=member_ids).values_list("user_id", "status", "leave_until")}
+
+
+def _leave_text(name, until):
+    return f"{name} est en congé jusqu’au {until:%d/%m}." if until else f"{name} est en congé."
+
+
 def _day_bounds(d):
     start = timezone.make_aware(datetime.combine(d, time.min))
     return start, start + timedelta(days=1)
@@ -105,7 +118,8 @@ def candidates(service):
                 flag = "busy_same_day"
             elif counts.get(m.pk, 0) >= MONTHLY_SOFT_LIMIT:
                 flag = "many_this_month"
-        out.append({"member": m.pk, "full_name": m.full_name, "services_this_month": counts.get(m.pk, 0), "flag": flag})
+        out.append({"member": m.pk, "full_name": m.full_name, "services_this_month": counts.get(m.pk, 0), "flag": flag,
+                    "leave_until": m.gleave_until if flag == "on_leave" else None})
     order = {None: 0, "many_this_month": 1, "busy_same_day": 2, "on_leave": 3}
     out.sort(key=lambda c: (order[c["flag"]], c["services_this_month"], c["full_name"]))
     return out
@@ -114,9 +128,10 @@ def candidates(service):
 def assign(service, post, side, index, member, *, by, force=False, request=None):
     if (post, side, index) not in slots_for(service.size):
         raise PlanningRule("bad_slot", "Ce poste n’existe pas pour cette taille de service.")
-    if member.status == User.Status.LEAVE:
-        raise PlanningRule("on_leave", f"{member.short_name} est en congé.")
-    if member.status != User.Status.ACTIVE:
+    status, until = _group_status([member.pk]).get(member.pk, (member.status, None))
+    if status == User.Status.LEAVE:
+        raise PlanningRule("on_leave", _leave_text(member.short_name, until))
+    if status != User.Status.ACTIVE:
         raise PlanningRule("not_active", f"{member.short_name} n’est pas actif.")
     if service.assignments.filter(member=member).exclude(post=post, side=side, index=index).exists():
         raise PlanningRule("already_in_service", f"{member.short_name} a déjà un poste dans ce service.")
@@ -192,6 +207,7 @@ def alerts(services):
     a deux services le dimanche 25")."""
     out = []
     by_day = {}
+    statuses = _group_status({a.member_id for s in services for a in s.assignments.all()})
     for s in services:
         active = [a for a in s.assignments.all() if a.status not in (Assignment.Status.REPLACED, Assignment.Status.ABSENT)]
         if len(active) < s.size:
@@ -199,8 +215,9 @@ def alerts(services):
         day = timezone.localtime(s.event.starts_at).date()
         for a in active:
             by_day.setdefault((day, a.member_id), []).append((s, a))
-            if a.member.status == User.Status.LEAVE:
-                out.append({"code": "on_leave", "service": s.pk, "member": a.member.short_name})
+            status, until = statuses.get(a.member_id, (a.member.status, None))
+            if status == User.Status.LEAVE:
+                out.append({"code": "on_leave", "service": s.pk, "member": a.member.short_name, "until": until})
     for (day, _), items in by_day.items():
         if len(items) > 1:
             out.append({"code": "double_service", "day": day, "member": items[0][1].member.short_name,
@@ -209,15 +226,62 @@ def alerts(services):
 
 
 def conflicts(services):
-    """Assignment ids that are in conflict (two services the same day)."""
+    """Assignment ids that are in conflict: two services the same day, or a
+    guard on leave in this group (design: "Rouge : conflit (double service,
+    congé)")."""
     by_day = {}
+    statuses = _group_status({a.member_id for s in services for a in s.assignments.all()})
+    on_leave = set()
     for s in services:
         day = timezone.localtime(s.event.starts_at).date()
         for a in s.assignments.all():
             if a.status in (Assignment.Status.REPLACED, Assignment.Status.ABSENT):
                 continue
             by_day.setdefault((day, a.member_id), []).append(a.pk)
-    return {aid for ids in by_day.values() if len(ids) > 1 for aid in ids}
+            if statuses.get(a.member_id, ("",))[0] == User.Status.LEAVE:
+                on_leave.add(a.pk)
+    return on_leave | {aid for ids in by_day.values() if len(ids) > 1 for aid in ids}
+
+
+def move(assignment, service, post, side, index, *, by, force=False, request=None):
+    """Drag a guard to another cell (design: "Maintenir pour glisser").
+    A free cell takes them; a filled cell of the same service swaps the
+    two. One transaction: a refused move changes nothing."""
+    if (post, side, index) not in slots_for(service.size):
+        raise PlanningRule("bad_slot", "Ce poste n’existe pas pour cette taille de service.")
+    source = assignment.service
+    with transaction.atomic():
+        target = service.assignments.filter(post=post, side=side, index=index).select_for_update().first()
+        if target is not None and target.pk == assignment.pk:
+            return assignment
+        if target is not None and service.pk != source.pk:
+            raise PlanningRule("slot_taken", "Ce poste est déjà pris dans l’autre service.", status=409)
+        if target is not None:
+            # Same service: the two guards trade places (no new conflict).
+            a_slot, t_slot = (assignment.post, assignment.side, assignment.index), (target.post, target.side, target.index)
+            target.post, target.side, target.index = "_", "_", 99  # free the unique slot first
+            target.save(update_fields=["post", "side", "index"])
+            assignment.post, assignment.side, assignment.index = t_slot
+            assignment.save(update_fields=["post", "side", "index"])
+            target.post, target.side, target.index = a_slot
+            target.save(update_fields=["post", "side", "index"])
+            note_exceptional(by, "échange de postes", service, request,
+                             postes=f"{_post_label(assignment)} ↔ {_post_label(target)}")
+            if service.published_at:
+                _notify_duty([assignment, target])
+            return assignment
+        if service.pk == source.pk:
+            assignment.post, assignment.side, assignment.index = post, side, index
+            assignment.save(update_fields=["post", "side", "index"])
+            note_exceptional(by, "poste déplacé", service, request, poste=_post_label(assignment))
+            if service.published_at:
+                _notify_duty([assignment])
+            return assignment
+        # Another service: the same checks as a new assignment.
+        member = assignment.member
+        assignment.delete()
+        moved = assign(service, post, side, index, member, by=by, force=force, request=request)
+    return moved
 
 
 def _post_label(a):
@@ -292,7 +356,19 @@ def target_answer(req, *, by, accept):
         req.assignment.status = Assignment.Status.PENDING
         req.assignment.save(update_fields=["status"])
     notify([req.requester], "request", "Échange accepté" if accept else "Échange refusé", by.short_name, {"type": "request", "id": req.pk})
+    if accept:
+        # Waits for a decision: the event's chef de groupe validates (design:
+        # "Validation : …, chef de groupe"), or whoever makes the lineup.
+        a = req.assignment
+        chef = a.service.event.chef
+        notify([chef, *lineup_makers()], "request", "Échange à valider",
+               f"{req.requester.short_name} ⇄ {by.short_name} · {_post_label(a)}", {"type": "request", "id": req.pk})
     return req
+
+
+def can_decide(user, req):
+    """The lineup makers, and the chef de groupe of the request's event."""
+    return user.can("calendar.planning", "change") or req.assignment.service.event.chef_id == user.pk
 
 
 def decide(req, *, by, approve, replacement=None, request=None):

@@ -124,6 +124,10 @@ Each refusal is written to the audit log.
 
 ## Data visible by role
 
+Swap and absence requests are decided by the lineup makers (calendar.planning change) for any
+event, and by an event's chef de groupe for that event only (`planning.services.can_decide`);
+others get `403 not_decider`.
+
 Chef de groupe reports (owner, 2026-10-27) are read by the event's chef and by roles with
 "Rapports des chefs de groupe" (formateur, formateur adjoint, secrétaire général, censeur
 général, vice-censeur by default); others get `403 report_forbidden`. Only the event's chef hands
