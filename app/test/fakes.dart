@@ -380,6 +380,16 @@ class FakeEventsRepository implements EventsRepository {
         place: 'Salle paroissiale',
         dress: 'interieure',
         notes: '',
+        chefId: 10,
+        chefName: 'Eboa L.',
+        reportStatus: 'pending',
+        reportDueAt: DateTime(
+          now.year,
+          now.month,
+          now.day,
+          23,
+          59,
+        ).add(const Duration(days: 3)),
       ),
     ];
   }
@@ -426,6 +436,41 @@ class FakeEventsRepository implements EventsRepository {
       createdByRole: 'Commissaire aux comptes',
       canEdit: owner,
       canDelete: owner,
+      kindOther: e.kindOther,
+      scope: e.scope,
+      chefId: e.chefId,
+      chefName: e.chefName,
+      reportDueAt: e.reportDueAt,
+      reportStatus: savedReport != null ? 'submitted' : e.reportStatus,
+      canReport: e.canReport,
+      canReadReport: savedReport != null || e.canReadReport,
+    );
+  }
+
+  /// The chef de groupe's report (owner, 2026-10-27).
+  EventReport? savedReport;
+  final submitted = <(int, String, String?)>[];
+
+  @override
+  Future<EventReport> report(int eventId) async =>
+      savedReport ?? (throw ApiException(404, '{"code":"no_report"}'));
+
+  @override
+  Future<EventReport> submitReport(
+    int eventId, {
+    required String body,
+    (String, List<int>)? pdf,
+  }) async {
+    if (body.isEmpty && pdf == null) {
+      throw ApiException(400, '{"code":"report_empty"}');
+    }
+    submitted.add((eventId, body, pdf?.$1));
+    return savedReport = EventReport(
+      body: body,
+      fileName: pdf?.$1 ?? '',
+      fileUrl: pdf == null ? null : 'https://example.org/r.pdf',
+      authorName: 'Ingrid N.',
+      submittedAt: DateTime.now(),
     );
   }
 
@@ -455,6 +500,12 @@ class FakeEventsRepository implements EventsRepository {
                 place: draft.place,
                 dress: draft.dress,
                 notes: draft.notes,
+                kindOther: draft.kindOther,
+                scope: draft.scope,
+                chefId: draft.chefId,
+                chefName: e.chefName,
+                reportStatus: e.reportStatus,
+                reportDueAt: e.reportDueAt,
               )
             : e,
     ];

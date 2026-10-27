@@ -71,9 +71,12 @@ def test_member_on_leave_cannot_be_assigned():
 def test_candidates_least_solicited_first():
     api, _ = client_for("formateur")
     busy, fresh = UserFactory(last_name="Aaa"), UserFactory(last_name="Zzz")
-    for d in (1, 2):
+    # The count is per calendar month: keep all three in one (mid next month).
+    today = timezone.localdate()
+    mid = ((today.replace(day=1) + timedelta(days=32)).replace(day=15) - today).days
+    for d in (mid - 2, mid - 1):
         Assignment.objects.create(service=service(days=d, hour=18), post="premiere_centrale", side="pariso", member=busy)
-    s = service(days=5)
+    s = service(days=mid)
     order = [c["member"] for c in api.get(f"/api/planning/services/{s.id}/candidates/").json()]
     assert order.index(fresh.id) < order.index(busy.id)
 
@@ -233,24 +236,30 @@ def test_president_changes_are_recorded_as_exceptional():
     assert Notification.objects.filter(user=formateur, title="Planning publié par le bureau").exists()
 
 
-def test_chef_is_designated_among_the_guards_of_the_service():
+def test_chef_belongs_to_the_event_and_the_planning_can_change_it():
+    """Owner, 2026-10-27: the chef de groupe is designated with the event
+    (any active member) and told at once; the planning can change it."""
     api, _ = client_for("formateur")
     guard_api, guard = client_for("membre")
-    outsider = UserFactory()
+    other = UserFactory()
     s = service(days=4)
     api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": guard.id}, format="json")
-    r = api.put(f"/api/planning/services/{s.id}/chef/", {"member": outsider.id}, format="json")
-    assert r.json()["code"] == "chef_not_on_duty"
+    r = api.put(f"/api/planning/services/{s.id}/chef/", {"member": other.id}, format="json").json()
+    assert r["chef_id"] == other.id
     r = api.put(f"/api/planning/services/{s.id}/chef/", {"member": guard.id}, format="json").json()
     assert r["chef_id"] == guard.id and r["chef"] == guard.short_name
+    assert "chef de groupe" in Notification.objects.filter(user=guard, kind="duty").latest("pk").body
+    s.event.refresh_from_db()
+    assert s.event.chef_id == guard.id
     api.post("/api/planning/publish/", {"day": (timezone.localdate() + timedelta(days=4)).isoformat()}, format="json")
-    assert "chef de groupe" in Notification.objects.get(user=guard, kind="duty").body
     duty = guard_api.get("/api/planning/mine/").json()[0]
     assert duty["is_chef"] and duty["chef"] == guard.full_name
-    # Freeing the chef's post removes the designation.
+    # Freeing the chef's post keeps them chef of the event.
     api.put(f"/api/planning/services/{s.id}/slot/", {"post": "premiere_centrale", "side": "pariso", "member": None}, format="json")
-    s.refresh_from_db()
-    assert s.chef is None
+    s.event.refresh_from_db()
+    assert s.event.chef_id == guard.id
+    # A mass needs a chef: it can be changed, not removed.
+    assert api.put(f"/api/planning/services/{s.id}/chef/", {"member": None}, format="json").json()["code"] == "chef_required"
 
 
 def test_absence_goes_to_formateurs_and_the_days_chef():
@@ -261,7 +270,7 @@ def test_absence_goes_to_formateurs_and_the_days_chef():
     s = service(days=4)
     a = Assignment.objects.create(service=s, post="controle", side="pariso", member=me)
     Assignment.objects.create(service=s, post="controle", side="yapoma", member=chef)
-    s.chef = chef
-    s.save()
+    s.event.chef = chef
+    s.event.save()
     me_api.post(f"/api/planning/assignments/{a.id}/swap/", {"absence": True, "reason": "Malade"}, format="json")
     assert set(Notification.objects.filter(title="Absence déclarée").values_list("user", flat=True)) == {formateur.id, chef.id}

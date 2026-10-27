@@ -35,15 +35,29 @@ class HttpProfileRepository implements ProfileRepository {
   @override
   Future<AppSettings> settings() async {
     final j = await _api.get('/settings/') as Map<String, dynamic>;
+    final types = ((j['activity_types'] as List?) ?? const [])
+        .cast<Map<String, dynamic>>();
     return AppSettings(
       quickAmounts: List<int>.from(j['quick_amounts'] as List),
       fees: (j['fees'] as Map<String, dynamic>).map(
         (k, v) => MapEntry(k, v as int),
       ),
       activityTypes: [
-        for (final a in (j['activity_types'] as List?) ?? const [])
-          (a['slug'] as String, a['name'] as String),
+        for (final a in types) (a['slug'] as String, a['name'] as String),
       ],
+      // Older servers don't send the switches: keep the defaults.
+      scopedTypes: types.isEmpty || !types.first.containsKey('has_scope')
+          ? AppSettings.defaultScopedTypes
+          : {
+              for (final a in types)
+                if (a['has_scope'] == true) a['slug'] as String,
+            },
+      typesWithoutChef: types.isEmpty || !types.first.containsKey('needs_chef')
+          ? AppSettings.defaultTypesWithoutChef
+          : {
+              for (final a in types)
+                if (a['needs_chef'] == false) a['slug'] as String,
+            },
       dressCodes: [
         for (final d in (j['dress_codes'] as List?) ?? const [])
           (d['slug'] as String, d['name'] as String),

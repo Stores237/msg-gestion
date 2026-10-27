@@ -22,4 +22,14 @@ abstract class EventsRepository {
 
   /// marks: member id → present | absent | excuse | '' (clear).
   Future<AttendanceSheet> saveAttendance(int eventId, Map<int, String> marks);
+
+  /// The chef de groupe's report (the chef and the formateur's circle).
+  Future<EventReport> report(int eventId);
+
+  /// By the chef: the text, and a PDF if [pdf] is given (name, bytes).
+  Future<EventReport> submitReport(
+    int eventId, {
+    required String body,
+    (String, List<int>)? pdf,
+  });
 }

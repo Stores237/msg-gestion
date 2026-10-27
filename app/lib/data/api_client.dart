@@ -147,16 +147,18 @@ class ApiClient {
 
   Future<dynamic> delete(String path) => _send('DELETE', _uri(path));
 
-  /// Multipart upload of one file field (attachments). Retries once after
-  /// a token refresh, like every other call.
+  /// Multipart upload of one file field (attachments), with optional text
+  /// [fields]. Retries once after a token refresh, like every other call.
   Future<dynamic> postFile(
     String path, {
     required String field,
     required List<int> bytes,
     required String filename,
+    Map<String, String> fields = const {},
     bool isRetry = false,
   }) async {
     final request = http.MultipartRequest('POST', _uri(path))
+      ..fields.addAll(fields)
       ..files.add(
         http.MultipartFile.fromBytes(field, bytes, filename: filename),
       );
@@ -186,6 +188,7 @@ class ApiClient {
         field: field,
         bytes: bytes,
         filename: filename,
+        fields: fields,
         isRetry: true,
       );
     }

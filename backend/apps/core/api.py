@@ -53,7 +53,8 @@ class SettingsView(APIView):
             "fees": {"inscription": st.fee_registration, "medaille": st.fee_medal, "maladie": st.fee_illness, "deces": st.fee_death},
             "quick_amounts": st.quick_amounts(), "installments": st.installments,
             # The group's own lists (back-office → Paramètres).
-            "activity_types": [{"slug": a.slug, "name": a.name, "needs_lineup": a.needs_lineup}
+            "activity_types": [{"slug": a.slug, "name": a.name, "needs_lineup": a.needs_lineup,
+                                "has_scope": a.has_scope, "needs_chef": a.needs_chef}
                                for a in ActivityType.objects.filter(is_archived=False)],
             "dress_codes": [{"slug": d.slug, "name": d.name} for d in DressCode.objects.filter(is_archived=False)],
         })

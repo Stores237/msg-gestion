@@ -14,6 +14,7 @@ import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 import 'attendance_screen.dart';
 import 'event_form_screen.dart';
+import 'report_screens.dart';
 
 /// Event detail (design: "Détail d’un événement"): when, where, dress,
 /// my attendance and "report an absence"; roll call for censors.
@@ -131,15 +132,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     children: [
-                      Text(
-                        eventKindLabel(l, e.kind, e.kindName).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.7,
-                          color: c.primaryText,
-                        ),
-                      ),
+                      EventTypeLine(event: e),
                       const SizedBox(height: 4),
                       Text(
                         e.title,
@@ -173,6 +166,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             ListRow(
                               lead: const Icon(Icons.checkroom_outlined),
                               title: Text(dressLabel(l, e.dress, e.dressName)),
+                            ),
+                          if (e.chefName != null)
+                            ListRow(
+                              key: const Key('event-chef'),
+                              lead: const Icon(Icons.shield_outlined),
+                              title: Text(l.chefDeGroupe),
+                              subtitle: Text(e.chefName!),
                             ),
                           if (e.createdByName != null)
                             ListRow(
@@ -213,6 +213,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             color: c.textSecondary,
                           ),
                         ),
+                      ],
+                      if (e.reportStatus.isNotEmpty) ...[
+                        const SizedBox(height: 20),
+                        ReportSection(event: e, onDone: _refresh),
                       ],
                       const SizedBox(height: 20),
                       SectionLabel(l.myPresence),

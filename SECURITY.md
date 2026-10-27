@@ -124,6 +124,11 @@ Each refusal is written to the audit log.
 
 ## Data visible by role
 
+Chef de groupe reports (owner, 2026-10-27) are read by the event's chef and by roles with
+"Rapports des chefs de groupe" (formateur, formateur adjoint, secrétaire général, censeur
+général, vice-censeur by default); others get `403 report_forbidden`. Only the event's chef hands
+one in; a PDF is checked on its bytes, 10 MB at most, and served by signed URL.
+
 Minors' parent contacts are a separate resource (`members.minor_contacts`), granted to the
 président and the secrétaire général only by default. Data a role can't see must never be sent
 to that role's app; filter on the server, not in the UI.

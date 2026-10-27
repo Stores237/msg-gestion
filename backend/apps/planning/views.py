@@ -48,7 +48,7 @@ def _week_services(start, end):
     hi = lo + (end - start)
     return list(
         Service.objects.filter(event__starts_at__gte=lo, event__starts_at__lt=hi)
-        .select_related("event", "group", "chef")
+        .select_related("event__chef", "group")
         .prefetch_related("assignments__member")
         .order_by("event__starts_at")
     )
@@ -90,11 +90,8 @@ class ServiceCreateView(APIView):
             return Response({"detail": "Taille invalide.", "code": "bad_size"}, status=400)
         s, _ = Service.objects.update_or_create(event=event, defaults={"size": size})
         s.assignments.exclude(pk__in=[a.pk for a in s.assignments.all() if (a.post, a.side, a.index) in slots_for(size)]).delete()
-        if s.chef_id and not s.assignments.filter(member_id=s.chef_id).exists():
-            s.chef = None
-            s.save(update_fields=["chef"])
         services.note_exceptional(request.user, "taille du service", s, request, taille=size)
-        return Response(_service_json(Service.objects.select_related("event", "group", "chef").get(pk=s.pk)), status=201)
+        return Response(_service_json(Service.objects.select_related("event__chef", "group").get(pk=s.pk)), status=201)
 
 
 class SlotView(APIView):
@@ -135,19 +132,19 @@ class AssignGroupView(APIView):
 
 
 class ChefView(APIView):
-    """PUT {member} to designate the service's chef de groupe among its
-    guards; member null removes the designation."""
+    """PUT {member} to change the event's chef de groupe from the planning
+    (any active member, as when the event is created)."""
 
     permission_classes = [require("calendar.planning", "change")]
 
     def put(self, request, pk):
-        s = get_object_or_404(Service.objects.select_related("event", "group", "chef"), pk=pk)
+        s = get_object_or_404(Service.objects.select_related("event__chef", "group"), pk=pk)
         member = get_object_or_404(User.objects.members(), pk=request.data["member"]) if request.data.get("member") else None
         try:
             services.set_chef(s, member, by=request.user, request=request)
         except services.PlanningRule as e:
             return _rule(e)
-        s = Service.objects.select_related("event", "group", "chef").prefetch_related("assignments__member").get(pk=pk)
+        s = Service.objects.select_related("event__chef", "group").prefetch_related("assignments__member").get(pk=pk)
         return Response(_service_json(s))
 
 
@@ -195,7 +192,7 @@ class MineView(APIView):
         qs = (
             Assignment.objects.filter(member=request.user, service__published_at__isnull=False, service__event__starts_at__gte=now)
             .exclude(status=Assignment.Status.REPLACED)
-            .select_related("service__event", "service__chef")
+            .select_related("service__event__chef")
             .order_by("service__event__starts_at")
         )
         return Response([{
@@ -218,7 +215,7 @@ class SwapView(APIView):
     """POST {target, reason} → ask a colleague; or {absence: true, reason}."""
 
     def post(self, request, pk):
-        a = get_object_or_404(Assignment.objects.select_related("service__event", "service__chef"), pk=pk)
+        a = get_object_or_404(Assignment.objects.select_related("service__event__chef"), pk=pk)
         try:
             if request.data.get("absence"):
                 r = services.declare_absence(a, by=request.user, reason=request.data.get("reason", ""))

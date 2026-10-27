@@ -5,8 +5,12 @@ import '../l10n/app_localizations.dart';
 import '../models/member.dart';
 import 'ui.dart';
 
-/// Bottom sheet to pick one member, with search.
-Future<MemberSummary?> pickMember(BuildContext context) {
+/// Bottom sheet to pick one member, with search. [activeOnly] leaves out
+/// members on leave, retired or suspended (a chef de groupe must be active).
+Future<MemberSummary?> pickMember(
+  BuildContext context, {
+  bool activeOnly = false,
+}) {
   return showModalBottomSheet<MemberSummary>(
     context: context,
     isScrollControlled: true,
@@ -14,14 +18,16 @@ Future<MemberSummary?> pickMember(BuildContext context) {
     builder: (context) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.8,
-      builder: (context, scroll) => _Picker(scroll: scroll),
+      builder: (context, scroll) =>
+          _Picker(scroll: scroll, activeOnly: activeOnly),
     ),
   );
 }
 
 class _Picker extends StatefulWidget {
-  const _Picker({required this.scroll});
+  const _Picker({required this.scroll, this.activeOnly = false});
   final ScrollController scroll;
+  final bool activeOnly;
 
   @override
   State<_Picker> createState() => _PickerState();
@@ -48,6 +54,7 @@ class _PickerState extends State<_Picker> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final shown = (_all ?? const <MemberSummary>[])
+        .where((m) => !widget.activeOnly || m.status == 'actif')
         .where((m) => m.fullName.toLowerCase().contains(_q.toLowerCase()))
         .toList();
     return ListView(

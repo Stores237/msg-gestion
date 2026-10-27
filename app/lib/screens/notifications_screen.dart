@@ -76,11 +76,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     'payment' => Icons.check_circle_outline,
     'member' => Icons.person_add_alt,
     'request' => Icons.swap_horiz,
+    'report' => Icons.assignment_outlined,
     _ => Icons.notifications_outlined,
   };
 
   Tone _tone(String kind) => switch (kind) {
-    'reminder' || 'request' => Tone.amber,
+    'reminder' || 'request' || 'report' => Tone.amber,
     'member' => Tone.neutral,
     _ => Tone.green,
   };

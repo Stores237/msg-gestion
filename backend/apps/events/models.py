@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
 
@@ -16,6 +18,12 @@ class ActivityType(models.Model):
     needs_lineup = models.BooleanField(default=False)
     # Counts in a member's presence summary (the weekly meeting).
     counts_presence = models.BooleanField(default=False)
+    # Held inside or outside (owner, 2026-10-27: Messe intérieure /
+    # extérieure, which replaced "Service extérieur"); each event says which.
+    has_scope = models.BooleanField("intérieur / extérieur", default=False)
+    # A chef de groupe is designated when the event is created, coordinates
+    # it and reports to the formateur (owner, 2026-10-27; not for meetings).
+    needs_chef = models.BooleanField("chef de groupe", default=True)
     sort_order = models.PositiveSmallIntegerField(default=100)
     is_archived = models.BooleanField(default=False)
 
@@ -50,6 +58,10 @@ class DressCode(models.Model):
         return self.name
 
 
+# Hours after an event ends for its chef de groupe to hand in the report.
+REPORT_HOURS = 24
+
+
 class Event(models.Model):
     """Anything on the movement's calendar: assises, masses, services,
     night vigils, meetings. Kind and dress are fixed lists the app
@@ -63,6 +75,11 @@ class Event(models.Model):
         MEETING = "reunion", "Réunion"
         OTHER = "autre", "Autre"
 
+    class Scope(models.TextChoices):
+        NONE = "", "—"
+        INSIDE = "interieur", "Intérieur"
+        OUTSIDE = "exterieur", "Extérieur"
+
     class Dress(models.TextChoices):
         NONE = "", "—"
         INSIDE = "interieure", "Tenue intérieure"
@@ -72,6 +89,10 @@ class Event(models.Model):
 
     # The slug of one of the group's ActivityType (Kind: the defaults).
     kind = models.CharField(max_length=20)
+    # With kind "autre": what it is, in the author's words.
+    kind_other = models.CharField(max_length=60, blank=True)
+    # For a type with has_scope: inside or outside.
+    scope = models.CharField(max_length=10, choices=Scope.choices, blank=True)
     title = models.CharField(max_length=140)
     starts_at = models.DateTimeField(db_index=True)
     ends_at = models.DateTimeField(null=True, blank=True)
@@ -83,10 +104,19 @@ class Event(models.Model):
     # The author's role when they created it (owner, 2026-10-26: shown on it).
     created_by_role = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Coordinates the event and reports on it within REPORT_HOURS of its end.
+    chef = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="led_events")
+    # Set by send_soon_reminders so each reminder goes once.
+    report_reminded_at = models.DateTimeField(null=True, blank=True)
+    report_overdue_at = models.DateTimeField(null=True, blank=True)
 
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
     objects = scoped()
     all_groups = models.Manager()
+
+    @property
+    def report_due_at(self):
+        return (self.ends_at or self.starts_at) + timedelta(hours=REPORT_HOURS)
 
     class Meta:
         ordering = ["starts_at"]
@@ -99,6 +129,27 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.starts_at:%Y-%m-%d %H:%M})"
+
+
+class EventReport(models.Model):
+    """The chef de groupe's report on an event: written in the app, a PDF,
+    or both. Goes to the formateur, with the formateur adjoint, the
+    secrétaire général, the censeur général and the vice-censeur in copy."""
+
+    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="report")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    body = models.TextField(blank=True)
+    file = models.FileField(upload_to="reports/", null=True, blank=True)
+    file_name = models.CharField(max_length=160, blank=True)
+    submitted_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = scoped("event__group")
+    all_groups = models.Manager()
+
+    @property
+    def late(self):
+        return self.submitted_at > self.event.report_due_at
 
 
 class Attendance(models.Model):

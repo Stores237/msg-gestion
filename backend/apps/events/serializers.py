@@ -1,6 +1,9 @@
 from rest_framework import serializers
 
-from .models import ActivityType, Attendance, DressCode, Event, dress_names, kind_names
+from apps.accounts.models import User
+
+from . import reports
+from .models import ActivityType, Attendance, DressCode, Event, EventReport, dress_names, kind_names
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -11,12 +14,41 @@ class EventSerializer(serializers.ModelSerializer):
     created_by_role = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
+    chef = serializers.PrimaryKeyRelatedField(queryset=User.objects.none(), allow_null=True, required=False)
+    chef_name = serializers.SerializerMethodField()
+    report_due_at = serializers.SerializerMethodField()
+    report_status = serializers.SerializerMethodField()
+    can_report = serializers.SerializerMethodField()
+    can_read_report = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
-        fields = ["id", "kind", "kind_name", "title", "starts_at", "ends_at", "place", "dress", "dress_name", "notes", "my_attendance",
-                  "created_by_name", "created_by_role", "can_edit", "can_delete"]
+        fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "dress", "dress_name",
+                  "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete",
+                  "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report"]
         read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # The chef is one of this group's active members.
+        self.fields["chef"].queryset = User.objects.members().filter(is_active=True, gstatus=User.Status.ACTIVE)
+
+    def get_chef_name(self, event) -> str | None:
+        return event.chef.short_name if event.chef else None
+
+    def get_report_due_at(self, event):
+        return event.report_due_at if event.chef_id else None
+
+    def get_report_status(self, event) -> str:
+        return reports.status(event)
+
+    def get_can_report(self, event) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and reports.can_submit(v, event)
+
+    def get_can_read_report(self, event) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and reports.status(event) in ("submitted", "late") and reports.can_read(v, event)
 
     # Whoever added it edits and deletes it (owner, 2026-10-26); people with
     # the calendar's change / delete rights can for any event.
@@ -68,7 +100,50 @@ class EventSerializer(serializers.ModelSerializer):
         ends = data.get("ends_at", getattr(self.instance, "ends_at", None))
         if starts and ends and ends <= starts:
             raise serializers.ValidationError({"ends_at": serializers.ErrorDetail("La fin doit être après le début.", code="ends_before_start")})
+        kind = data.get("kind", getattr(self.instance, "kind", None))
+        activity = ActivityType.objects.filter(slug=kind).first()
+        errors = {}
+        # "Autre": the author says what it is.
+        other = data.get("kind_other", getattr(self.instance, "kind_other", "")).strip()
+        if kind == Event.Kind.OTHER and not other:
+            errors["kind_other"] = serializers.ErrorDetail("Précisez le type d’événement.", code="kind_other_required")
+        data["kind_other"] = other if kind == Event.Kind.OTHER else ""
+        # Intérieur / extérieur for the types that have it (Messe).
+        scope = data.get("scope", getattr(self.instance, "scope", ""))
+        if activity is not None and activity.has_scope:
+            if scope not in (Event.Scope.INSIDE, Event.Scope.OUTSIDE):
+                errors["scope"] = serializers.ErrorDetail("Choisissez intérieur ou extérieur.", code="scope_required")
+        else:
+            data["scope"] = ""
+        # A chef de groupe for every type that has one (not meetings).
+        chef = data["chef"] if "chef" in data else getattr(self.instance, "chef", None)
+        if activity is not None and not activity.needs_chef:
+            data["chef"] = None
+        elif chef is None and activity is not None:
+            errors["chef"] = serializers.ErrorDetail("Désignez le chef de groupe.", code="chef_required")
+        if errors:
+            raise serializers.ValidationError(errors)
         return data
+
+
+class EventReportSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
+    late = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = EventReport
+        fields = ["body", "file_name", "file_url", "author_name", "submitted_at", "late"]
+
+    def get_author_name(self, r) -> str | None:
+        return r.author.short_name if r.author else None
+
+    def get_file_url(self, r) -> str | None:
+        if not r.file:
+            return None
+        url = r.file.url  # signed on Supabase Storage
+        request = self.context.get("request")
+        return request.build_absolute_uri(url) if request and url.startswith("/") else url
 
 
 class MarkSerializer(serializers.Serializer):

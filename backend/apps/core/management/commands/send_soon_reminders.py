@@ -13,9 +13,11 @@ from apps.events.models import Event
 class Command(BaseCommand):
     """"2 heures avant" reminders, for members who switched them on. Run
     every 30 minutes; covers events starting 1h30–2h30 from now, and never
-    reminds the same event twice."""
+    reminds the same event twice. Also the chefs de groupe's reports: a
+    reminder when the event ends, and the formateur and copies told when
+    the 24 h pass without one (apps.events.reports.remind)."""
 
-    help = "Create 2-hours-before reminder notifications."
+    help = "Create 2-hours-before reminders and chef de groupe report reminders."
 
     def handle(self, *args, **options):
         # Once per group: each group's events go to its own members.
@@ -34,3 +36,10 @@ class Command(BaseCommand):
             when = timezone.localtime(e.starts_at)
             sent += notify(members, "reminder", f"Rappel : {e.title} à {when:%H:%M}", e.place, {"type": "event", "id": e.pk, "when": "2h"})
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")
+        from apps.events import reports
+
+        # Events of the last few days with a chef: ended, or past the 24 h.
+        recent = Event.objects.select_related("chef", "report").filter(
+            chef__isnull=False, starts_at__gte=now - timedelta(days=7), starts_at__lte=now,
+        )
+        self.stdout.write(f"{reports.remind(recent, now)} report notification(s).")

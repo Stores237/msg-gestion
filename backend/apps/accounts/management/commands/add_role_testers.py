@@ -18,10 +18,11 @@ ROLE_TESTERS = [
     ("650300107", "Atangana", "Serge", ["censeur-general"]),
     ("650300108", "Biyong", "Aline", ["formateur"]),
     ("650300109", "Owono", "Paul", ["conseiller"]),
-    # A plain member: the chef de groupe is designated per service now.
+    # A plain member: the chef de groupe is designated per event now.
     ("650300110", "Essama", "Joseph", []),
     ("650300111", "Mendo", "Rosine", ["censeur-du-jour"]),
     ("650300112", "Ndzana", "Thérèse", ["formateur-adjoint"]),
+    ("650300113", "Abena", "Cyrille", ["vice-censeur"]),
 ]
 
 

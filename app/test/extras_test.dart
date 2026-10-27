@@ -30,6 +30,8 @@ void main() {
       100,
       scrollable: _vertical,
     );
+    await tester.ensureVisible(find.byKey(const Key('remind-2h')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('remind-2h')));
     await tester.pumpAndSettle();
     final profile = RepositoryLocator.instance.profile as FakeProfileRepository;

@@ -1122,5 +1122,93 @@
         "type": "int"
       }
     }
-  }
+  },
+  "scopeInside": "Intérieur",
+  "scopeOutside": "Extérieur",
+  "eventScope": "Service intérieur ou extérieur",
+  "scopeRequired": "Choisissez intérieur ou extérieur.",
+  "eventKindOther": "Précisez le type",
+  "eventKindOtherHint": "Ex. kermesse, retraite, pèlerinage…",
+  "chefDeGroupe": "Chef de groupe",
+  "chooseChef": "Choisir le chef de groupe",
+  "chefHelp": "Il coordonne l’événement et remet un rapport au formateur dans les 24 h qui suivent la fin.",
+  "chefRequired": "Désignez le chef de groupe.",
+  "chefLine": "Chef de groupe : {name}",
+  "@chefLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSection": "Rapport du chef de groupe",
+  "reportDue": "À remettre avant le {date}",
+  "@reportDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportSubmittedOn": "Remis le {date}",
+  "@reportSubmittedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportLateOn": "Remis en retard le {date}",
+  "@reportLateOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportMissingSince": "Non remis : le délai a expiré le {date}",
+  "@reportMissingSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportBadgePending": "Attendu",
+  "reportBadgeSubmitted": "Remis",
+  "reportBadgeLate": "En retard",
+  "reportBadgeMissing": "Non remis",
+  "reportChefBefore": "Vous êtes chef de groupe. Le rapport se remet après l’événement, avant le {date}.",
+  "@reportChefBefore": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "writeReport": "Rédiger le rapport",
+  "editReport": "Modifier le rapport",
+  "readReport": "Lire le rapport",
+  "reportTitle": "Rapport",
+  "reportBodyLabel": "Compte rendu",
+  "reportBodyHint": "Déroulement, présences, incidents, remarques…",
+  "reportAttachPdf": "Joindre un rapport PDF",
+  "reportRecipients": "Envoyé au formateur ; en copie : formateur adjoint, secrétaire général, censeur général et vice-censeur.",
+  "sendReport": "Envoyer le rapport",
+  "reportSent": "Rapport envoyé au formateur.",
+  "reportEmpty": "Écrivez le rapport ou joignez un PDF.",
+  "reportLocked": "Le délai de 24 h est passé : le rapport remis ne peut plus être modifié.",
+  "reportTooEarly": "Le rapport se remet une fois l’événement commencé.",
+  "reportBy": "Par {name}, chef de groupe",
+  "@reportBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reportLateWarning": "Le délai de 24 h est passé : le rapport sera marqué « en retard » et ne pourra plus être modifié.",
+  "pdfOnly": "PDF uniquement, 10 Mo maximum",
+  "reportHandedIn": "Remis au formateur",
+  "reportHandedInLate": "Remis en retard au formateur"
 }

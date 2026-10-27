@@ -173,6 +173,7 @@ class Notification(models.Model):
         MEMBER = "member", "Membre"
         REQUEST = "request", "Demande"
         REMINDER = "reminder", "Rappel"
+        REPORT = "report", "Rapport"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     group = models.ForeignKey(Group, on_delete=models.CASCADE, default=default_group_id, related_name="+")

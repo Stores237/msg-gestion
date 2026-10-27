@@ -160,7 +160,7 @@ def test_every_bureau_member_posts_and_acts_on_the_calendar_with_their_role(slug
     item = next(a for a in feed["results"] if a["title"] == "Collecte")
     assert item["author_role"] == shown
     start = timezone.now() + timedelta(days=3)
-    r = api.post("/api/events/", {"kind": "assise", "title": "Assise", "starts_at": start.isoformat()}, format="json")
+    r = api.post("/api/events/", {"kind": "assise", "title": "Assise", "starts_at": start.isoformat(), "chef": user.pk}, format="json")
     assert r.status_code == 201, r.json()
     assert r.json()["created_by_role"] == shown and r.json()["created_by_name"] == user.short_name
     eid = r.json()["id"]
@@ -216,10 +216,10 @@ def test_the_author_edits_and_deletes_their_own_announcement_only():
 def test_the_author_edits_and_deletes_their_own_event_only():
     from apps.events.models import Event
 
-    api, _ = _poster("calendar.events")
+    api, me = _poster("calendar.events")
     other_api, _ = _poster("calendar.events")
     start = timezone.now() + timedelta(days=4)
-    eid = api.post("/api/events/", {"kind": "assise", "title": "Répétition", "starts_at": start.isoformat()}, format="json").json()["id"]
+    eid = api.post("/api/events/", {"kind": "assise", "title": "Répétition", "starts_at": start.isoformat(), "chef": me.pk}, format="json").json()["id"]
     assert api.get(f"/api/events/{eid}/").json()["can_edit"]
     assert not other_api.get(f"/api/events/{eid}/").json()["can_delete"]
     assert other_api.patch(f"/api/events/{eid}/", {"place": "x"}, format="json").status_code == 403
@@ -228,6 +228,6 @@ def test_the_author_edits_and_deletes_their_own_event_only():
     assert api.delete(f"/api/events/{eid}/").status_code == 204
     assert not Event.objects.filter(pk=eid).exists()
     # Someone with the calendar's change right still edits anyone's event.
-    eid = api.post("/api/events/", {"kind": "assise", "title": "Autre", "starts_at": start.isoformat()}, format="json").json()["id"]
+    eid = api.post("/api/events/", {"kind": "assise", "title": "Autre", "starts_at": start.isoformat(), "chef": me.pk}, format="json").json()["id"]
     sg, _ = client_for("secretaire-general")
     assert sg.patch(f"/api/events/{eid}/", {"title": "Autre (modifié)"}, format="json").status_code == 200

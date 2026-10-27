@@ -8,10 +8,13 @@ import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
+import '../../widgets/member_picker.dart';
 import '../../widgets/ui.dart';
 
 /// "Nouvel événement" for roles allowed to create events; with [existing],
 /// "Modifier l’événement" (its author, or the calendar's managers).
+/// Owner, 2026-10-27: "Autre" is named by the author; Messe says intérieur
+/// or extérieur; a chef de groupe is designated (not for meetings).
 class EventFormScreen extends StatefulWidget {
   const EventFormScreen({super.key, required this.initialDay, this.existing});
   final DateTime initialDay;
@@ -26,7 +29,14 @@ class _EventFormScreenState extends State<EventFormScreen> {
   final _title = TextEditingController();
   final _place = TextEditingController();
   final _notes = TextEditingController();
+  final _kindOther = TextEditingController();
   String _kind = 'assise';
+  String _scope = '';
+  (int, String)? _chef;
+  bool _scopeMissing = false;
+  bool _chefMissing = false;
+  Set<String> _scoped = AppSettings.defaultScopedTypes;
+  Set<String> _noChef = AppSettings.defaultTypesWithoutChef;
   String _dress = 'interieure';
   late DateTime _day;
   TimeOfDay _start = const TimeOfDay(hour: 15, minute: 0);
@@ -46,6 +56,9 @@ class _EventFormScreenState extends State<EventFormScreen> {
       _title.text = e.title;
       _place.text = e.place;
       _notes.text = e.notes;
+      _kindOther.text = e.kindOther;
+      _scope = e.scope;
+      if (e.chefId != null) _chef = (e.chefId!, e.chefName ?? '');
       _day = DateUtils.dateOnly(e.startsAt);
       _start = TimeOfDay.fromDateTime(e.startsAt);
       if (e.endsAt != null) _end = TimeOfDay.fromDateTime(e.endsAt!);
@@ -58,6 +71,8 @@ class _EventFormScreenState extends State<EventFormScreen> {
           setState(() {
             if (s.activityTypes.isNotEmpty) _kinds = s.activityTypes;
             if (s.dressCodes.isNotEmpty) _dresses = s.dressCodes;
+            _scoped = s.scopedTypes;
+            _noChef = s.typesWithoutChef;
             if (!_kinds.any((k) => k.$1 == _kind)) _kind = _kinds.first.$1;
             if (_dress.isNotEmpty && !_dresses.any((d) => d.$1 == _dress)) {
               _dress = '';
@@ -72,8 +87,12 @@ class _EventFormScreenState extends State<EventFormScreen> {
     _title.dispose();
     _place.dispose();
     _notes.dispose();
+    _kindOther.dispose();
     super.dispose();
   }
+
+  bool get _hasScope => _scoped.contains(_kind);
+  bool get _needsChef => !_noChef.contains(_kind);
 
   DateTime _at(TimeOfDay t) =>
       DateTime(_day.year, _day.month, _day.day, t.hour, t.minute);
@@ -86,7 +105,12 @@ class _EventFormScreenState extends State<EventFormScreen> {
   }
 
   Future<void> _save() async {
-    if (!_form.currentState!.validate()) return;
+    final formOk = _form.currentState!.validate();
+    setState(() {
+      _scopeMissing = _hasScope && _scope.isEmpty;
+      _chefMissing = _needsChef && _chef == null;
+    });
+    if (!formOk || _scopeMissing || _chefMissing) return;
     setState(() => _busy = true);
     final l = AppLocalizations.of(context);
     try {
@@ -99,6 +123,9 @@ class _EventFormScreenState extends State<EventFormScreen> {
         place: _place.text.trim(),
         dress: _dress,
         notes: _notes.text.trim(),
+        kindOther: _kind == 'autre' ? _kindOther.text.trim() : '',
+        scope: _hasScope ? _scope : '',
+        chefId: _needsChef ? _chef?.$1 : null,
       );
       final repo = RepositoryLocator.instance.events;
       if (widget.existing == null) {
@@ -190,6 +217,49 @@ class _EventFormScreenState extends State<EventFormScreen> {
                         }
                       }),
                     ),
+                    if (_kind == 'autre') ...[
+                      label(l.eventKindOther),
+                      TextFormField(
+                        key: const Key('f-kind-other'),
+                        controller: _kindOther,
+                        maxLength: 60,
+                        validator: (v) =>
+                            (v ?? '').trim().isEmpty ? l.required : null,
+                        decoration: deco().copyWith(
+                          hintText: l.eventKindOtherHint,
+                        ),
+                      ),
+                    ],
+                    if (_hasScope) ...[
+                      label(l.eventScope),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final sc in const ['interieur', 'exterieur'])
+                            ChoiceChip(
+                              key: Key('f-scope-$sc'),
+                              label: Text(scopeLabel(l, sc)),
+                              selected: _scope == sc,
+                              onSelected: (_) => setState(() {
+                                _scope = sc;
+                                _scopeMissing = false;
+                              }),
+                            ),
+                        ],
+                      ),
+                      if (_scopeMissing)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            l.scopeRequired,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: c.alert,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                    ],
                     label(l.eventTitle),
                     TextFormField(
                       key: const Key('f-title'),
@@ -198,6 +268,45 @@ class _EventFormScreenState extends State<EventFormScreen> {
                           (v ?? '').trim().isEmpty ? l.required : null,
                       decoration: deco(),
                     ),
+                    if (_needsChef) ...[
+                      label(l.chefDeGroupe),
+                      GroupCard(
+                        children: [
+                          ListRow(
+                            key: const Key('f-chef'),
+                            lead: const Icon(Icons.shield_outlined),
+                            title: Text(_chef?.$2 ?? l.chooseChef),
+                            chevron: true,
+                            onTap: () async {
+                              final m = await pickMember(
+                                context,
+                                activeOnly: true,
+                              );
+                              if (m != null) {
+                                setState(() {
+                                  _chef = (m.id, m.fullName);
+                                  _chefMissing = false;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          _chefMissing ? l.chefRequired : l.chefHelp,
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.4,
+                            color: _chefMissing ? c.alert : c.textSecondary,
+                            fontWeight: _chefMissing
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
                     label(l.eventDate),
                     picker(
                       d.fullDate(_day),

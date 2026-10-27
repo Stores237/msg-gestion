@@ -123,7 +123,7 @@ def test_each_group_has_its_own_activity_types(two_groups):
     give(leader, second, "secretaire-general")
     api = app_client(leader, second)
     start = (timezone.now() + timedelta(days=3)).isoformat()
-    r = api.post("/api/events/", {"kind": "repetition", "title": "Répétition", "starts_at": start}, format="json")
+    r = api.post("/api/events/", {"kind": "repetition", "title": "Répétition", "starts_at": start, "chef": leader.pk}, format="json")
     assert r.status_code == 201, r.json()
     assert r.json()["kind_name"] == "Répétition"
     kinds = {k["slug"] for k in api.get("/api/settings/").json()["activity_types"]}

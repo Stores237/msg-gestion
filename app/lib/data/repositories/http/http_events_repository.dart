@@ -86,4 +86,28 @@ class HttpEventsRepository implements EventsRepository {
         )
         as Map<String, dynamic>,
   );
+
+  @override
+  Future<EventReport> report(int eventId) async => EventReport.fromJson(
+    await _api.get('/events/$eventId/report/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<EventReport> submitReport(
+    int eventId, {
+    required String body,
+    (String, List<int>)? pdf,
+  }) async {
+    final path = '/events/$eventId/report/';
+    final data = pdf == null
+        ? await _api.post(path, body: {'body': body})
+        : await _api.postFile(
+            path,
+            field: 'file',
+            bytes: pdf.$2,
+            filename: pdf.$1,
+            fields: {'body': body},
+          );
+    return EventReport.fromJson(data as Map<String, dynamic>);
+  }
 }

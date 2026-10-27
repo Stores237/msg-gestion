@@ -36,6 +36,9 @@ RESOURCES = {
     "calendar.events": ("calendar", "Événements", [VIEW, CREATE, CHANGE, DELETE, EXPORT], False),
     "calendar.attendance": ("calendar", "Appel des présences", [VIEW, CHANGE, EXPORT], False),
     "calendar.planning": ("calendar", "Planning des services", ACTIONS, False),
+    # The chef de groupe's report on an event (owner, 2026-10-27); the chef
+    # always reads their own.
+    "calendar.reports": ("calendar", "Rapports des chefs de groupe", [VIEW], False),
     "announcements.posts": ("announcements", "Annonces et convocations", [VIEW, CREATE, CHANGE, DELETE], False),
     # The back-office, area by area, so each staff team gets only its part
     # (owner, 2026-10-26).

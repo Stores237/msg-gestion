@@ -24,7 +24,7 @@ def slots_for(size):
 
 class ServiceGroup(models.Model):
     """A standing team (Saint-Michel, Sainte-Agnès…). It has no fixed chef:
-    the chef de groupe is designated for each service (Service.chef)."""
+    the chef de groupe is designated for each event (Event.chef)."""
 
     name = models.CharField(max_length=80)
     members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="service_groups", blank=True)
@@ -42,20 +42,25 @@ class ServiceGroup(models.Model):
 
 
 class Service(models.Model):
-    """The duty side of a calendar event: how many guards, which group,
-    who is chef de groupe for it, and whether the plan was published.
-
-    The chef is chosen among the service's guards when the lineup is made
-    (owner, 2026-10-23: "everyone can be chef de groupe")."""
+    """The duty side of a calendar event: how many guards, which group, and
+    whether the plan was published. The chef de groupe belongs to the event
+    (owner, 2026-10-27: designated when the event is created)."""
 
     event = models.OneToOneField("events.Event", on_delete=models.CASCADE, related_name="service")
     size = models.PositiveSmallIntegerField()
     group = models.ForeignKey(ServiceGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="services")
-    chef = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="led_services")
     published_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.event} · {self.size}"
+
+    @property
+    def chef(self):
+        return self.event.chef
+
+    @property
+    def chef_id(self):
+        return self.event.chef_id
 
     objects = scoped("event__group")
     all_groups = models.Manager()

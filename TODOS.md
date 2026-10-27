@@ -6,6 +6,10 @@
 - [ ] **Owner — after the next deploy (2026-10-26):** install build 15 (older builds can't tick
   the terms box, so they can't sign in); open back-office → Intégrations and check "Adresse du
   visiteur" shows your own public address (SECURITY.md "Client address").
+- [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
+  Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
+  and "Chef" switches in Paramètres → Types d’activités. PDF reports need the Supabase storage
+  key (above).
 - [ ] **Owner:** fill in back-office → Plateforme · aide (support phone, WhatsApp, e-mail, website)
   and have the privacy policy and terms drafts reviewed.
 

@@ -581,3 +581,39 @@ the next login asks again. `pytest apps/accounts/test_terms.py`;
 (green). Opening `/api/docs/` signed out → refused. In the app, sign out with a change waiting
 offline → the warning. `pytest apps/core/test_security.py`;
 `flutter test test/offline_owner_test.dart`.
+
+## 28. Event types, chef de groupe and the report
+
+Owner, 2026-10-27. There was no design for these screens: they reuse the event form's fields,
+the event detail's cards and chips, the member picker and the announcement composer.
+
+- **Autre**: choosing "Autre" asks "Précisez le type" (required); the event then shows the
+  author's words instead of "Autre".
+- **Messe intérieure / extérieure**: a Messe says which, with two chips in the form (required).
+  "Service extérieur" is retired: its events became Messe · Extérieur, existing masses are
+  Intérieur. On cards and on the event, Extérieur has an amber chip and an amber date box.
+  Back-office → Paramètres → Types d’activités has a new "Int./Ext." switch per type.
+- **Chef de groupe**: chosen when the event is created (required for every type except Réunion;
+  back-office switch "Chef" per type), among active members. They are notified at once, with the
+  report deadline. The planning's chef is now the event's chef (`planning.Service.chef` moved to
+  `events.Event.chef`); the formateur can still change it from the planning.
+- **Report**: on the event, "Rapport du chef de groupe" shows the deadline (24 h after the end)
+  and the status (Attendu / Remis / En retard / Non remis). The chef writes it in the app and/or
+  attaches a PDF (≤ 10 MB) once the event has started; until the deadline they can send it
+  again. After the deadline a first report is still accepted, marked "en retard", and can't be
+  changed. It goes to the formateur, with the formateur adjoint, secrétaire général, censeur
+  général and vice-censeur in copy (notifications; they read it on the event). The chef gets a
+  reminder when the event ends; if 24 h pass with no report, the formateur, the copies and the
+  chef are told (the `send_soon_reminders` job, every 30 min).
+- New role **Vice-censeur** in every group (the censeur général's rights). New permission
+  "Rapports des chefs de groupe" (read), given to those five roles.
+- Migrations: `events.0005`, `events.0006`, `planning.0004`, `accounts.0015`, `accounts.0016`,
+  `core.0011`. Builds before 16 can't create events for types that need a chef (the server now
+  requires one).
+
+**Verify.** Create a Messe without choosing intérieur/extérieur or a chef → both are asked.
+Create one as Extérieur with a chef → the chef gets "Chef de groupe" with the deadline; the card
+shows the amber Extérieur chip. After the event, the chef opens it → "Rédiger le rapport" →
+text and/or PDF → the formateur gets "Rapport : …", the four copies "Copie · Rapport : …", and
+"Lire le rapport" shows it. `pytest apps/events/test_reports.py`;
+`flutter test test/event_chef_report_test.dart`.

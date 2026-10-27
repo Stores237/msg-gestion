@@ -48,7 +48,7 @@ def test_secretary_creates_updates_deletes_with_audit():
     api, sg = client_for("secretaire-general")
     start = timezone.now() + timedelta(days=11)
     r = api.post("/api/events/", {"kind": "grande_veillee", "title": "Veillée de la Toussaint", "starts_at": start.isoformat(),
-                                  "ends_at": (start + timedelta(hours=7)).isoformat(), "place": "Église", "dress": "interieure"}, format="json")
+                                  "ends_at": (start + timedelta(hours=7)).isoformat(), "place": "Église", "dress": "interieure", "chef": sg.pk}, format="json")
     assert r.status_code == 201, r.json()
     eid = r.json()["id"]
     assert api.patch(f"/api/events/{eid}/", {"place": "Cathédrale"}, format="json").json()["place"] == "Cathédrale"

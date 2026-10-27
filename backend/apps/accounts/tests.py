@@ -495,6 +495,8 @@ def test_add_role_testers_covers_every_staff_role():
 
     from django.core.management import call_command
 
+    from apps.accounts.management.commands.add_role_testers import ROLE_TESTERS
+
     out = StringIO()
     call_command("add_role_testers", stdout=out)
     staff = set(Role.objects.filter(is_archived=False).exclude(slug__in=["membre", "super-admin"]).exclude(kind="plateforme").values_list("slug", flat=True))
@@ -505,4 +507,4 @@ def test_add_role_testers_covers_every_staff_role():
     assert vp.can("members.profile", "create") and not vp.can("finances.report", "validate")
     again = StringIO()
     call_command("add_role_testers", stdout=again)
-    assert again.getvalue().count("skipped") == 12
+    assert again.getvalue().count("skipped") == len(ROLE_TESTERS)

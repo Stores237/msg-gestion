@@ -1,5 +1,6 @@
 import '../data/repositories/profile_repository.dart';
 import '../l10n/app_localizations.dart';
+import '../models/event.dart';
 
 /// Role names come from the server in French (the back-office edits them);
 /// the seeded roles are translated here by slug. A role created later in
@@ -47,6 +48,18 @@ String eventKindLabel(AppLocalizations l, String kind, [String? name]) {
     _ => name ?? kind,
   };
 }
+
+/// What an event is: the author's words for "Autre", otherwise the type.
+String eventTypeName(AppLocalizations l, CalendarEvent e) =>
+    e.kind == 'autre' && e.kindOther.isNotEmpty
+    ? e.kindOther
+    : eventKindLabel(l, e.kind, e.kindName);
+
+String scopeLabel(AppLocalizations l, String scope) => switch (scope) {
+  'interieur' => l.scopeInside,
+  'exterieur' => l.scopeOutside,
+  _ => '',
+};
 
 String dressLabel(AppLocalizations l, String dress, [String? name]) {
   final fallback = _defaultName(AppSettings.defaultDressCodes, dress);

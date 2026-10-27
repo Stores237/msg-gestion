@@ -1823,4 +1823,140 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get scopeInside => 'Inside';
+
+  @override
+  String get scopeOutside => 'Outside';
+
+  @override
+  String get eventScope => 'Inside or outside service';
+
+  @override
+  String get scopeRequired => 'Choose inside or outside.';
+
+  @override
+  String get eventKindOther => 'Specify the type';
+
+  @override
+  String get eventKindOtherHint => 'E.g. fair, retreat, pilgrimage…';
+
+  @override
+  String get chefDeGroupe => 'Group leader';
+
+  @override
+  String get chooseChef => 'Choose the group leader';
+
+  @override
+  String get chefHelp =>
+      'They coordinate the event and hand a report to the trainer within 24 h of its end.';
+
+  @override
+  String get chefRequired => 'Choose the group leader.';
+
+  @override
+  String chefLine(String name) {
+    return 'Group leader: $name';
+  }
+
+  @override
+  String get reportSection => 'Group leader’s report';
+
+  @override
+  String reportDue(String date) {
+    return 'Due by $date';
+  }
+
+  @override
+  String reportSubmittedOn(String date) {
+    return 'Handed in on $date';
+  }
+
+  @override
+  String reportLateOn(String date) {
+    return 'Handed in late on $date';
+  }
+
+  @override
+  String reportMissingSince(String date) {
+    return 'Not handed in: the deadline passed on $date';
+  }
+
+  @override
+  String get reportBadgePending => 'Due';
+
+  @override
+  String get reportBadgeSubmitted => 'Handed in';
+
+  @override
+  String get reportBadgeLate => 'Late';
+
+  @override
+  String get reportBadgeMissing => 'Missing';
+
+  @override
+  String reportChefBefore(String date) {
+    return 'You are the group leader. Hand in the report after the event, by $date.';
+  }
+
+  @override
+  String get writeReport => 'Write the report';
+
+  @override
+  String get editReport => 'Edit the report';
+
+  @override
+  String get readReport => 'Read the report';
+
+  @override
+  String get reportTitle => 'Report';
+
+  @override
+  String get reportBodyLabel => 'Account of the event';
+
+  @override
+  String get reportBodyHint => 'How it went, attendance, incidents, remarks…';
+
+  @override
+  String get reportAttachPdf => 'Attach a PDF report';
+
+  @override
+  String get reportRecipients =>
+      'Sent to the trainer; copied to the deputy trainer, general secretary, general censor and vice-censor.';
+
+  @override
+  String get sendReport => 'Send the report';
+
+  @override
+  String get reportSent => 'Report sent to the trainer.';
+
+  @override
+  String get reportEmpty => 'Write the report or attach a PDF.';
+
+  @override
+  String get reportLocked =>
+      'The 24 h have passed: the report handed in can no longer be changed.';
+
+  @override
+  String get reportTooEarly =>
+      'The report is handed in once the event has started.';
+
+  @override
+  String reportBy(String name) {
+    return 'By $name, group leader';
+  }
+
+  @override
+  String get reportLateWarning =>
+      'The 24 h have passed: the report will be marked “late” and can’t be changed afterwards.';
+
+  @override
+  String get pdfOnly => 'PDF only, 10 MB maximum';
+
+  @override
+  String get reportHandedIn => 'Handed in to the trainer';
+
+  @override
+  String get reportHandedInLate => 'Handed in late to the trainer';
 }

@@ -612,15 +612,17 @@ def settings_lists(request):
     changed = []
     for a in ActivityType.objects.all():
         k = f"a{a.pk}"
-        new = (P.get(f"{k}_name", a.name).strip() or a.name, bool(P.get(f"{k}_lineup")), bool(P.get(f"{k}_presence")), bool(P.get(f"{k}_archived")))
-        if new != (a.name, a.needs_lineup, a.counts_presence, a.is_archived):
-            a.name, a.needs_lineup, a.counts_presence, a.is_archived = new
+        new = (P.get(f"{k}_name", a.name).strip() or a.name, bool(P.get(f"{k}_lineup")), bool(P.get(f"{k}_presence")),
+               bool(P.get(f"{k}_scope")), bool(P.get(f"{k}_chef")), bool(P.get(f"{k}_archived")))
+        if new != (a.name, a.needs_lineup, a.counts_presence, a.has_scope, a.needs_chef, a.is_archived):
+            a.name, a.needs_lineup, a.counts_presence, a.has_scope, a.needs_chef, a.is_archived = new
             a.save()
             changed.append(a.name)
     if P.get("a_new_name", "").strip():
         name = P["a_new_name"].strip()[:60]
         ActivityType.objects.create(slug=_new_slug(ActivityType, name, 20), name=name, needs_lineup=bool(P.get("a_new_lineup")),
-                                    counts_presence=bool(P.get("a_new_presence")), sort_order=ActivityType.objects.count() * 10)
+                                    counts_presence=bool(P.get("a_new_presence")), has_scope=bool(P.get("a_new_scope")),
+                                    needs_chef=bool(P.get("a_new_chef")), sort_order=ActivityType.objects.count() * 10)
         changed.append(name)
     for d in DressCode.objects.all():
         k = f"d{d.pk}"

@@ -256,6 +256,12 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Assise hebdomadaire'));
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('roll-call')),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('roll-call')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('att-10-present')));

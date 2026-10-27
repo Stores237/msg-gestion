@@ -1829,4 +1829,140 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get scopeInside => 'Intérieur';
+
+  @override
+  String get scopeOutside => 'Extérieur';
+
+  @override
+  String get eventScope => 'Service intérieur ou extérieur';
+
+  @override
+  String get scopeRequired => 'Choisissez intérieur ou extérieur.';
+
+  @override
+  String get eventKindOther => 'Précisez le type';
+
+  @override
+  String get eventKindOtherHint => 'Ex. kermesse, retraite, pèlerinage…';
+
+  @override
+  String get chefDeGroupe => 'Chef de groupe';
+
+  @override
+  String get chooseChef => 'Choisir le chef de groupe';
+
+  @override
+  String get chefHelp =>
+      'Il coordonne l’événement et remet un rapport au formateur dans les 24 h qui suivent la fin.';
+
+  @override
+  String get chefRequired => 'Désignez le chef de groupe.';
+
+  @override
+  String chefLine(String name) {
+    return 'Chef de groupe : $name';
+  }
+
+  @override
+  String get reportSection => 'Rapport du chef de groupe';
+
+  @override
+  String reportDue(String date) {
+    return 'À remettre avant le $date';
+  }
+
+  @override
+  String reportSubmittedOn(String date) {
+    return 'Remis le $date';
+  }
+
+  @override
+  String reportLateOn(String date) {
+    return 'Remis en retard le $date';
+  }
+
+  @override
+  String reportMissingSince(String date) {
+    return 'Non remis : le délai a expiré le $date';
+  }
+
+  @override
+  String get reportBadgePending => 'Attendu';
+
+  @override
+  String get reportBadgeSubmitted => 'Remis';
+
+  @override
+  String get reportBadgeLate => 'En retard';
+
+  @override
+  String get reportBadgeMissing => 'Non remis';
+
+  @override
+  String reportChefBefore(String date) {
+    return 'Vous êtes chef de groupe. Le rapport se remet après l’événement, avant le $date.';
+  }
+
+  @override
+  String get writeReport => 'Rédiger le rapport';
+
+  @override
+  String get editReport => 'Modifier le rapport';
+
+  @override
+  String get readReport => 'Lire le rapport';
+
+  @override
+  String get reportTitle => 'Rapport';
+
+  @override
+  String get reportBodyLabel => 'Compte rendu';
+
+  @override
+  String get reportBodyHint => 'Déroulement, présences, incidents, remarques…';
+
+  @override
+  String get reportAttachPdf => 'Joindre un rapport PDF';
+
+  @override
+  String get reportRecipients =>
+      'Envoyé au formateur ; en copie : formateur adjoint, secrétaire général, censeur général et vice-censeur.';
+
+  @override
+  String get sendReport => 'Envoyer le rapport';
+
+  @override
+  String get reportSent => 'Rapport envoyé au formateur.';
+
+  @override
+  String get reportEmpty => 'Écrivez le rapport ou joignez un PDF.';
+
+  @override
+  String get reportLocked =>
+      'Le délai de 24 h est passé : le rapport remis ne peut plus être modifié.';
+
+  @override
+  String get reportTooEarly =>
+      'Le rapport se remet une fois l’événement commencé.';
+
+  @override
+  String reportBy(String name) {
+    return 'Par $name, chef de groupe';
+  }
+
+  @override
+  String get reportLateWarning =>
+      'Le délai de 24 h est passé : le rapport sera marqué « en retard » et ne pourra plus être modifié.';
+
+  @override
+  String get pdfOnly => 'PDF uniquement, 10 Mo maximum';
+
+  @override
+  String get reportHandedIn => 'Remis au formateur';
+
+  @override
+  String get reportHandedInLate => 'Remis en retard au formateur';
 }

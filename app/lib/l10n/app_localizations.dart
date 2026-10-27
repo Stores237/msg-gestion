@@ -3157,6 +3157,240 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n, plural, =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}'**
   String logoutPending(int n);
+
+  /// No description provided for @scopeInside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intérieur'**
+  String get scopeInside;
+
+  /// No description provided for @scopeOutside.
+  ///
+  /// In fr, this message translates to:
+  /// **'Extérieur'**
+  String get scopeOutside;
+
+  /// No description provided for @eventScope.
+  ///
+  /// In fr, this message translates to:
+  /// **'Service intérieur ou extérieur'**
+  String get eventScope;
+
+  /// No description provided for @scopeRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez intérieur ou extérieur.'**
+  String get scopeRequired;
+
+  /// No description provided for @eventKindOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Précisez le type'**
+  String get eventKindOther;
+
+  /// No description provided for @eventKindOtherHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. kermesse, retraite, pèlerinage…'**
+  String get eventKindOtherHint;
+
+  /// No description provided for @chefDeGroupe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chef de groupe'**
+  String get chefDeGroupe;
+
+  /// No description provided for @chooseChef.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir le chef de groupe'**
+  String get chooseChef;
+
+  /// No description provided for @chefHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il coordonne l’événement et remet un rapport au formateur dans les 24 h qui suivent la fin.'**
+  String get chefHelp;
+
+  /// No description provided for @chefRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désignez le chef de groupe.'**
+  String get chefRequired;
+
+  /// No description provided for @chefLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chef de groupe : {name}'**
+  String chefLine(String name);
+
+  /// No description provided for @reportSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport du chef de groupe'**
+  String get reportSection;
+
+  /// No description provided for @reportDue.
+  ///
+  /// In fr, this message translates to:
+  /// **'À remettre avant le {date}'**
+  String reportDue(String date);
+
+  /// No description provided for @reportSubmittedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis le {date}'**
+  String reportSubmittedOn(String date);
+
+  /// No description provided for @reportLateOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis en retard le {date}'**
+  String reportLateOn(String date);
+
+  /// No description provided for @reportMissingSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non remis : le délai a expiré le {date}'**
+  String reportMissingSince(String date);
+
+  /// No description provided for @reportBadgePending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attendu'**
+  String get reportBadgePending;
+
+  /// No description provided for @reportBadgeSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis'**
+  String get reportBadgeSubmitted;
+
+  /// No description provided for @reportBadgeLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get reportBadgeLate;
+
+  /// No description provided for @reportBadgeMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non remis'**
+  String get reportBadgeMissing;
+
+  /// No description provided for @reportChefBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes chef de groupe. Le rapport se remet après l’événement, avant le {date}.'**
+  String reportChefBefore(String date);
+
+  /// No description provided for @writeReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rédiger le rapport'**
+  String get writeReport;
+
+  /// No description provided for @editReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier le rapport'**
+  String get editReport;
+
+  /// No description provided for @readReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire le rapport'**
+  String get readReport;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport'**
+  String get reportTitle;
+
+  /// No description provided for @reportBodyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compte rendu'**
+  String get reportBodyLabel;
+
+  /// No description provided for @reportBodyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déroulement, présences, incidents, remarques…'**
+  String get reportBodyHint;
+
+  /// No description provided for @reportAttachPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre un rapport PDF'**
+  String get reportAttachPdf;
+
+  /// No description provided for @reportRecipients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyé au formateur ; en copie : formateur adjoint, secrétaire général, censeur général et vice-censeur.'**
+  String get reportRecipients;
+
+  /// No description provided for @sendReport.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer le rapport'**
+  String get sendReport;
+
+  /// No description provided for @reportSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport envoyé au formateur.'**
+  String get reportSent;
+
+  /// No description provided for @reportEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrivez le rapport ou joignez un PDF.'**
+  String get reportEmpty;
+
+  /// No description provided for @reportLocked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le délai de 24 h est passé : le rapport remis ne peut plus être modifié.'**
+  String get reportLocked;
+
+  /// No description provided for @reportTooEarly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le rapport se remet une fois l’événement commencé.'**
+  String get reportTooEarly;
+
+  /// No description provided for @reportBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par {name}, chef de groupe'**
+  String reportBy(String name);
+
+  /// No description provided for @reportLateWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le délai de 24 h est passé : le rapport sera marqué « en retard » et ne pourra plus être modifié.'**
+  String get reportLateWarning;
+
+  /// No description provided for @pdfOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF uniquement, 10 Mo maximum'**
+  String get pdfOnly;
+
+  /// No description provided for @reportHandedIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis au formateur'**
+  String get reportHandedIn;
+
+  /// No description provided for @reportHandedInLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remis en retard au formateur'**
+  String get reportHandedInLate;
 }
 
 class _AppLocalizationsDelegate

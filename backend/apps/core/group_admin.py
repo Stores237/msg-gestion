@@ -42,7 +42,8 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
 
         for a in ActivityType.all_groups.filter(group=template, is_archived=False):
             ActivityType.all_groups.create(group=group, slug=a.slug, name=a.name, needs_lineup=a.needs_lineup,
-                                           counts_presence=a.counts_presence, sort_order=a.sort_order)
+                                           counts_presence=a.counts_presence, has_scope=a.has_scope,
+                                           needs_chef=a.needs_chef, sort_order=a.sort_order)
         for d in DressCode.all_groups.filter(group=template, is_archived=False):
             DressCode.all_groups.create(group=group, slug=d.slug, name=d.name, sort_order=d.sort_order)
     audit.record("Groupe créé", actor=by, obj=group, request=request, sensitive=True, platform=True,

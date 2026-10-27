@@ -47,15 +47,17 @@
 <form method="post" action="{% url 'backoffice:settings_lists' %}" style="margin-top:32px">{% csrf_token %}
 <div class="bo-cols half">
   <section class="panel"><div class="panel-h"><h2>Types d’activités</h2></div>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Planning</th><th>Présences</th><th>Retiré</th></tr></thead><tbody>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Planning</th><th>Présences</th><th>Int./Ext.</th><th>Chef</th><th>Retiré</th></tr></thead><tbody>
       {% for a in activity_types %}<tr><td><span class="fld-box" style="min-height:40px"><input name="a{{ a.pk }}_name" value="{{ a.name }}" maxlength="60" aria-label="Nom"></span></td>
         <td><input type="checkbox" name="a{{ a.pk }}_lineup"{% if a.needs_lineup %} checked{% endif %} aria-label="Planning des services pour {{ a.name }}"></td>
         <td><input type="checkbox" name="a{{ a.pk }}_presence"{% if a.counts_presence %} checked{% endif %} aria-label="Compte dans les présences : {{ a.name }}"></td>
+        <td><input type="checkbox" name="a{{ a.pk }}_scope"{% if a.has_scope %} checked{% endif %} aria-label="Intérieur ou extérieur : {{ a.name }}"></td>
+        <td><input type="checkbox" name="a{{ a.pk }}_chef"{% if a.needs_chef %} checked{% endif %} aria-label="Chef de groupe et rapport : {{ a.name }}"></td>
         <td><input type="checkbox" name="a{{ a.pk }}_archived"{% if a.is_archived %} checked{% endif %} aria-label="Retirer {{ a.name }}"></td></tr>{% endfor %}
       <tr><td><span class="fld-box" style="min-height:40px"><input name="a_new_name" maxlength="60" placeholder="Nouveau type (ex. Répétition)" aria-label="Nouveau type"></span></td>
-        <td><input type="checkbox" name="a_new_lineup" aria-label="Planning des services"></td><td><input type="checkbox" name="a_new_presence" aria-label="Compte dans les présences"></td><td></td></tr>
+        <td><input type="checkbox" name="a_new_lineup" aria-label="Planning des services"></td><td><input type="checkbox" name="a_new_presence" aria-label="Compte dans les présences"></td><td><input type="checkbox" name="a_new_scope" aria-label="Intérieur ou extérieur"></td><td><input type="checkbox" name="a_new_chef" checked aria-label="Chef de groupe et rapport"></td><td></td></tr>
     </tbody></table></div>
-    <div class="tbl-f"><span>« Planning » : un tableau de service est préparé pour ce type. « Présences » : il compte dans le résumé des présences d’un membre. Un type retiré reste sur les événements passés.</span></div></section>
+    <div class="tbl-f"><span>« Planning » : un tableau de service est préparé pour ce type. « Présences » : il compte dans le résumé des présences d’un membre. « Int./Ext. » : chaque événement précise intérieur ou extérieur (la messe). « Chef » : un chef de groupe est désigné à la création et remet un rapport au formateur dans les 24 h (pas pour les réunions). Un type retiré reste sur les événements passés.</span></div></section>
   <section class="panel"><div class="panel-h"><h2>Tenues</h2></div>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Nom</th><th>Retirée</th></tr></thead><tbody>
       {% for d in dress_codes %}<tr><td><span class="fld-box" style="min-height:40px"><input name="d{{ d.pk }}_name" value="{{ d.name }}" maxlength="60" aria-label="Nom"></span></td>

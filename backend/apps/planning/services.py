@@ -137,31 +137,33 @@ def clear(service, post, side, index, *, by=None, request=None):
     gone = service.assignments.filter(post=post, side=side, index=index).first()
     if gone is None:
         return
-    if service.chef_id == gone.member_id:
-        service.chef = None
-        service.save(update_fields=["chef"])
     gone.delete()
     note_exceptional(by, "poste libéré", service, request, poste=_post_label(gone))
 
 
 def set_chef(service, member, *, by, request=None):
-    """Designate the chef de groupe for this service, among its guards
-    (None removes the designation)."""
-    if member is not None:
-        on_duty = service.assignments.filter(member=member).exclude(
-            status__in=[Assignment.Status.REPLACED, Assignment.Status.ABSENT]
-        ).exists()
-        if not on_duty:
-            raise PlanningRule("chef_not_on_duty", "Le chef de groupe doit faire partie du service.")
-    previous = service.chef
-    service.chef = member
-    service.save(update_fields=["chef"])
+    """Change the event's chef de groupe from the planning (owner,
+    2026-10-27: the chef belongs to the event, designated when it is
+    created; None removes it). The new chef is told at once."""
+    from apps.events import reports
+
+    event = service.event
+    if member is None and not _chef_optional(event):
+        raise PlanningRule("chef_required", "Cet événement a besoin d’un chef de groupe.")
+    previous = event.chef_id
+    event.chef = member
+    event.save(update_fields=["chef"])
     note_exceptional(by, "chef de groupe", service, request, chef=member.short_name if member else None)
-    if service.published_at and member is not None and member != previous:
-        when = timezone.localtime(service.event.starts_at)
-        notify([member], "duty", "Chef de groupe", f"Vous êtes chef de groupe pour {service.event.title} le {when:%d/%m} à {when:%H:%M}.",
-               {"type": "duty", "service": service.pk})
+    if member is not None and member.pk != previous:
+        reports.tell_chef(event)
     return service
+
+
+def _chef_optional(event):
+    from apps.events.models import ActivityType
+
+    t = ActivityType.objects.filter(slug=event.kind).first()
+    return t is None or not t.needs_chef
 
 
 def assign_group(service, group, *, by, request=None):
@@ -309,10 +311,6 @@ def decide(req, *, by, approve, replacement=None, request=None):
                 raise PlanningRule("replacement_required", "Choisissez un remplaçant.")
             if busy_same_day(new_member.pk, a.service):
                 raise PlanningRule("double_service", f"{new_member.short_name} a déjà un service ce jour-là.", status=409)
-            if a.service.chef_id == a.member_id:
-                # The chef is leaving this service: the lineup maker designates another.
-                a.service.chef = None
-                a.service.save(update_fields=["chef"])
             a.member = new_member
             a.status = Assignment.Status.CONFIRMED if req.kind == Request.Kind.SWAP else Assignment.Status.PENDING
             req.status = Request.Status.APPROVED

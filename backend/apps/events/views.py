@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,8 +14,11 @@ from apps.accounts.models import User
 from apps.accounts.permissions import require
 from apps.core import audit
 
+from . import reports
 from .models import Attendance, Event
-from .serializers import AttendanceSheetSerializer, EventSerializer, ExcuseSerializer
+from .serializers import AttendanceSheetSerializer, EventReportSerializer, EventSerializer, ExcuseSerializer
+
+EVENT_RELATED = ("created_by", "chef", "report")
 
 METHOD_ACTION = {"GET": "view", "POST": "create", "PATCH": "change", "DELETE": "delete"}
 
@@ -40,7 +44,7 @@ class EventListView(APIView):
         end = parse_date(request.query_params.get("to", "")) or start + timedelta(days=60)
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
-        events = list(Event.objects.select_related("created_by").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
+        events = list(Event.objects.select_related(*EVENT_RELATED).filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
         return Response(EventSerializer(events, many=True, context={"mine": _mine(request.user, events), "viewer": request.user}).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
@@ -48,7 +52,9 @@ class EventListView(APIView):
         s = EventSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         event = s.save(created_by=request.user, created_by_role=request.user.display_role())
-        audit.record("Événement créé", actor=request.user, obj=event, request=request)
+        audit.record("Événement créé", actor=request.user, obj=event, request=request,
+                     detail={"chef": event.chef.short_name} if event.chef else None)
+        reports.tell_chef(event)
         return Response(EventSerializer(event, context={"viewer": request.user}).data, status=status.HTTP_201_CREATED)
 
 
@@ -60,7 +66,7 @@ class EventDetailView(APIView):
 
     @extend_schema(responses=EventSerializer)
     def get(self, request, pk):
-        event = get_object_or_404(Event.objects.select_related("created_by"), pk=pk)
+        event = get_object_or_404(Event.objects.select_related(*EVENT_RELATED), pk=pk)
         body = dict(EventSerializer(event, context={"mine": _mine(request.user, [event]), "viewer": request.user}).data)
         if request.user.can("calendar.attendance", "view"):
             counts = {s: 0 for s in Attendance.Status.values}
@@ -74,10 +80,13 @@ class EventDetailView(APIView):
         event = get_object_or_404(Event, pk=pk)
         if not (event.created_by_id == request.user.pk or request.user.can("calendar.events", "change")):
             return Response({"detail": "Seul l’auteur peut modifier cet événement.", "code": "author_only"}, status=403)
+        previous_chef = event.chef_id
         s = EventSerializer(event, data=request.data, partial=True, context={"viewer": request.user})
         s.is_valid(raise_exception=True)
         s.save()
         audit.record("Événement modifié", actor=request.user, obj=event, request=request, detail={"champs": sorted(request.data)})
+        if event.chef_id and event.chef_id != previous_chef:
+            reports.tell_chef(event)
         return Response(EventSerializer(event, context={"viewer": request.user}).data)
 
     def delete(self, request, pk):
@@ -87,6 +96,43 @@ class EventDetailView(APIView):
         audit.record("Événement supprimé", actor=request.user, obj=event, request=request, detail={"titre": event.title})
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EventReportView(APIView):
+    """GET the chef de groupe's report (the chef, and the roles that read
+    reports); POST it, multipart `body` and/or `file` (PDF ≤ 10 MB), by the
+    chef within 24 h of the event's end (owner, 2026-10-27)."""
+
+    permission_classes = [require("calendar.events", "view")]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def _event(self, pk):
+        return get_object_or_404(Event.objects.select_related(*EVENT_RELATED), pk=pk)
+
+    @extend_schema(responses=EventReportSerializer)
+    def get(self, request, pk):
+        event = self._event(pk)
+        if not reports.can_read(request.user, event):
+            return Response({"detail": "Réservé au chef de groupe et aux destinataires du rapport.", "code": "report_forbidden"}, status=403)
+        if reports.status(event) not in ("submitted", "late"):
+            return Response({"detail": "Aucun rapport remis.", "code": "no_report"}, status=404)
+        return Response(EventReportSerializer(event.report, context={"request": request}).data)
+
+    def post(self, request, pk):
+        from apps.announcements.files import MAX_BYTES, sniff
+
+        event = self._event(pk)
+        upload = request.FILES.get("file")
+        if upload is not None:
+            if upload.size > MAX_BYTES:
+                return Response({"detail": "Fichier trop lourd (10 Mo maximum).", "code": "file_too_large"}, status=400)
+            if sniff(upload) != "application/pdf":
+                return Response({"detail": "Le rapport joint doit être un PDF.", "code": "file_type"}, status=400)
+        try:
+            report = reports.submit(event, by=request.user, body=request.data.get("body", ""), upload=upload, request=request)
+        except reports.ReportRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response(EventReportSerializer(report, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
 class AttendanceView(APIView):

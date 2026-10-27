@@ -38,7 +38,17 @@ class AppSettings {
     required this.fees,
     this.activityTypes = defaultActivityTypes,
     this.dressCodes = defaultDressCodes,
+    this.scopedTypes = defaultScopedTypes,
+    this.typesWithoutChef = defaultTypesWithoutChef,
   });
+
+  /// Types whose events say intérieur or extérieur (Messe).
+  final Set<String> scopedTypes;
+
+  /// Types with no chef de groupe (Réunion); every other type has one.
+  final Set<String> typesWithoutChef;
+  static const defaultScopedTypes = {'messe'};
+  static const defaultTypesWithoutChef = {'reunion'};
   final List<int> quickAmounts;
 
   /// The group's own lists (back-office → Paramètres).
@@ -48,7 +58,6 @@ class AppSettings {
   static const defaultActivityTypes = <NamedItem>[
     ('assise', 'Assise du samedi'),
     ('messe', 'Messe'),
-    ('service_exterieur', 'Service extérieur'),
     ('grande_veillee', 'Grande veillée'),
     ('reunion', 'Réunion'),
     ('autre', 'Autre'),

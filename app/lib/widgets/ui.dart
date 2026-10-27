@@ -821,7 +821,10 @@ class EventCard extends StatelessWidget {
                   width: 56,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: c.surfaceSunken,
+                    // Messe extérieure stands out (owner, 2026-10-27).
+                    color: e.scope == 'exterieur'
+                        ? c.warnTint
+                        : c.surfaceSunken,
                     borderRadius: BorderRadius.circular(MsgRadius.md),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -865,15 +868,7 @@ class EventCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        eventKindLabel(l, e.kind, e.kindName).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.7,
-                          color: c.primaryText,
-                        ),
-                      ),
+                      EventTypeLine(event: e),
                       const SizedBox(height: 2),
                       Text(
                         e.title,
@@ -896,6 +891,8 @@ class EventCard extends StatelessWidget {
                           Icons.checkroom_outlined,
                           dressLabel(l, e.dress, e.dressName),
                         ),
+                      if (e.chefName != null)
+                        meta(Icons.shield_outlined, l.chefLine(e.chefName!)),
                     ],
                   ),
                 ),
@@ -903,6 +900,41 @@ class EventCard extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+/// The event's type in small caps, with an Intérieur / Extérieur chip for
+/// types that have it; Extérieur in amber so it is told apart at a glance.
+class EventTypeLine extends StatelessWidget {
+  const EventTypeLine({super.key, required this.event});
+  final CalendarEvent event;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    final l = AppLocalizations.of(context);
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          eventTypeName(l, event).toUpperCase(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.7,
+            color: c.primaryText,
+          ),
+        ),
+        if (event.scope.isNotEmpty)
+          Badge2(
+            scopeLabel(l, event.scope),
+            key: const Key('event-scope'),
+            tone: event.scope == 'exterieur' ? Tone.amber : Tone.neutral,
+          ),
       ],
     );
   }
