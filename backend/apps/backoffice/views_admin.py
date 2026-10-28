@@ -74,6 +74,50 @@ def security(request):
     })
 
 
+@backoffice_view(None)
+def password_change(request):
+    """"Changer le mot de passe" (owner, 2026-10-28, account menu). The current
+    password first; the new one meets the password rules. This session stays
+    open; every other session and trusted device of the account ends (both
+    are tied to the password hash)."""
+    from django.contrib.auth import update_session_auth_hash
+    from django.contrib.auth.password_validation import validate_password
+    from django.core.exceptions import ValidationError
+
+    me = request.user
+    errors = {}
+    if request.method == "POST":
+        current = request.POST.get("current", "")
+        new, again = request.POST.get("new", ""), request.POST.get("again", "")
+        if not me.check_password(current):
+            errors["current"] = "Mot de passe actuel incorrect."
+            audit.record("Changement de mot de passe refusé", actor=me, obj=me, request=request, refused=True)
+        elif new != again:
+            errors["again"] = "Les deux saisies ne correspondent pas."
+        elif new == current:
+            errors["new"] = "Choisissez un mot de passe différent de l’actuel."
+        else:
+            try:
+                validate_password(new, me)
+            except ValidationError as e:
+                errors["new"] = " ".join(e.messages)
+        if not errors:
+            me.set_password(new)
+            me.save(update_fields=["password"])
+            # Other sessions end; this one is renewed under a new key
+            # (update_session_auth_hash cycles it), so its record follows.
+            mine = request.session.session_key
+            others = BackofficeSession.objects.filter(user=me).exclude(session_key=mine)
+            Session.objects.filter(session_key__in=others.values_list("session_key", flat=True)).delete()
+            others.delete()
+            update_session_auth_hash(request, me)
+            BackofficeSession.objects.filter(session_key=mine).update(session_key=request.session.session_key)
+            audit.record("Mot de passe modifié", actor=me, obj=me, request=request, sensitive=True)
+            messages.success(request, "Mot de passe modifié. Vos autres sessions et appareils de confiance sont déconnectés.")
+            return redirect("backoffice:dashboard")
+    return render(request, "backoffice/password.html", {"nav": "", "errors": errors}, status=400 if errors else 200)
+
+
 # --- Users ---------------------------------------------------------------------------
 
 

@@ -10,6 +10,7 @@ urlpatterns = [
     path("connexion/code/", views.otp_view, name="otp"),
     path("deconnexion/", views.logout_view, name="logout"),
     path("securite/", views_admin.security, name="security"),
+    path("mot-de-passe/", views_admin.password_change, name="password"),
     path("groupes/", views_groups.groups, name="groups"),
     path("groupes/choisir/", views_groups.group_switch, name="group_switch"),
     path("groupes/<int:pk>/modifier/", views_groups.group_edit, name="group_edit"),

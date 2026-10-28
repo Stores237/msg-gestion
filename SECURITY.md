@@ -63,6 +63,9 @@
 - Without Twilio configured, codes are only logged, and only when `SMS_DEV_FALLBACK` is on
   (dev settings). Otherwise login fails with a clear error instead of pretending a code was sent.
 - The HTML forms have their own per-address rate limit (20/h) in the same Redis.
+- A back-office account changes its own password from the account menu (`/bo/mot-de-passe/`):
+  current password required, Django's password validators, the other sessions and trusted
+  devices end (the session renews its key and stays). Changes and wrong attempts are audited.
 - The API schema and docs (`/api/schema/`, `/api/docs/`) open only in a signed-in back-office
   session (`IsPlatformAccount`), not to the public.
 

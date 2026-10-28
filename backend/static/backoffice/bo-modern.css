@@ -118,3 +118,28 @@ dialog.bo-cmd[open]{animation:bo-pop .16s ease-out}
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   @view-transition{navigation:none}
 }
+/* Account menu (owner, 2026-10-28): the account row opens a small panel
+   above it: theme, site, password, sessions, log out (in red). */
+.bo-acct{position:relative;padding-top:10px}
+.bo-me{width:100%;border:none;background:transparent;font:inherit;color:inherit;text-align:left;cursor:pointer;border-radius:14px;padding:8px;gap:10px;transition:background .15s ease}
+.bo-me:hover,.bo-me[aria-expanded=true]{background:var(--surface-sunken)}
+.bo-me:focus-visible{outline:2px solid var(--msg-green-500);outline-offset:2px}
+.bo-me-who{flex:1;min-width:0;display:flex;flex-direction:column}
+.bo-me-who b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo-me-who small{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo-me-chev{color:var(--text-secondary);display:inline-flex}
+.bo-acct-menu{position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;box-shadow:0 12px 32px rgba(38,36,32,.16);padding:6px;z-index:65;display:flex;flex-direction:column;gap:2px;animation:bo-pop .14s ease-out}
+.bo-acct-menu[hidden]{display:none}
+.bo-acct-menu a,.bo-acct-menu .bo-logout{display:flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border-radius:10px;color:var(--text-primary);font:inherit;font-size:14px;font-weight:600;text-decoration:none;border:none;background:transparent;width:100%;cursor:pointer;text-align:left}
+.bo-acct-menu a svg{color:var(--text-secondary)}
+.bo-acct-menu a:hover,.bo-acct-menu a:focus-visible,.bo-acct-menu .bo-logout:hover,.bo-acct-menu .bo-logout:focus-visible{background:var(--surface-sunken);outline:none}
+.bo-acct-menu form{margin:0;border-top:1px solid var(--border-subtle);padding-top:4px;margin-top:2px}
+.bo-acct-menu .bo-logout{color:var(--red-500);justify-content:space-between}
+.bo-theme{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:2px 2px 6px;margin-bottom:2px;border-bottom:1px solid var(--border-subtle)}
+.bo-theme button{height:36px;border:none;border-radius:10px;background:transparent;color:var(--text-secondary);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.bo-theme button:hover{background:var(--surface-sunken);color:var(--text-primary)}
+.bo-theme button[aria-checked=true]{background:var(--msg-green-100);color:var(--msg-green-700)}
+.bo-theme button:focus-visible{outline:2px solid var(--msg-green-500);outline-offset:1px}
+/* On the rail the account row is the avatar; its menu opens to the side. */
+.side-min .bo-me{justify-content:center;padding:6px 0}
+.side-min .bo-acct-menu{left:calc(100% + 8px);right:auto;bottom:0;width:240px}

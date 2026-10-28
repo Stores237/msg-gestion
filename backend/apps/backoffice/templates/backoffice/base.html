@@ -26,7 +26,13 @@
 </head>
 <body class="theme-light">
 <script>
-  try { if (matchMedia('(prefers-color-scheme: dark)').matches) document.body.className = 'theme-dark'; } catch (e) {}
+  /* Theme: the account menu's choice (light / dark), else the device's. */
+  function boApplyTheme() {
+    var t; try { t = localStorage.getItem('bo-theme') || 'system'; } catch (e) { t = 'system'; }
+    var dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.body.className = dark ? 'theme-dark' : 'theme-light';
+  }
+  try { boApplyTheme(); matchMedia('(prefers-color-scheme: dark)').addEventListener('change', boApplyTheme); } catch (e) {}
 </script>
 <div class="bo">{% block frame %}{% endblock %}</div>
 <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>

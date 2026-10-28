@@ -793,3 +793,20 @@ bar is now nearly opaque so scrolled rows don't show behind the title.
 
 **Verify.** Back-office → Utilisateurs (a long list) → scroll down: the menu and the title bar
 don't move.
+
+## 37. Back-office account menu; change your own password
+
+Owner, 2026-10-28 (reference screenshot: an account menu at the foot of the sidebar).
+
+- The account row (avatar, name, role, ↕) opens a menu above it — beside it on the folded rail:
+  **theme** (Clair · Sombre · Comme l’appareil, kept in this browser), **Voir le site** (the
+  website from Plateforme · aide, when set), **Changer le mot de passe**, **Sécurité du compte**
+  (sessions, backup codes) and **Se déconnecter** in red. Escape or a click outside closes it.
+- **Changer le mot de passe** (`/bo/mot-de-passe/`): current password, new one twice; the
+  platform's password rules (10 characters, not common, not only digits). This browser stays
+  signed in; every other session and every trusted computer of the account is signed out. Both
+  the change and a wrong current password go to the audit log.
+
+**Verify.** Back-office → click your name at the bottom of the menu → Sombre: the page turns
+dark and stays dark after a reload. Changer le mot de passe → wrong current one → refused; a good
+one → "Mot de passe modifié", still signed in. `pytest apps/backoffice/test_shell.py`.

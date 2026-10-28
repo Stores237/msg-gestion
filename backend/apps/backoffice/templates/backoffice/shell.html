@@ -43,8 +43,25 @@
     {% endwith %}
     </nav>
     <div class="bo-foot">
-      <div class="bo-me">{% avatar request.user 36 %}<div class="lbl" style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% else %}{% with sr=request.user.staff_role %}{% if sr %}<span class="rb temp"><i></i>{{ sr.name }}</span>{% endif %}{% endwith %}{% endif %}</div>
-        <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
+      {# Account menu (owner, 2026-10-28): theme, site, password, sessions, log out. #}
+      <div class="bo-acct">
+        <div class="bo-acct-menu" id="bo-acct-menu" role="menu" aria-label="Mon compte" hidden>
+          <div class="bo-theme" role="group" aria-label="Thème">
+            <button type="button" role="menuitemradio" data-theme="light" aria-label="Clair" title="Clair">{% icon 'sun' 18 %}</button>
+            <button type="button" role="menuitemradio" data-theme="dark" aria-label="Sombre" title="Sombre">{% icon 'moon' 18 %}</button>
+            <button type="button" role="menuitemradio" data-theme="system" aria-label="Comme l’appareil" title="Comme l’appareil">{% icon 'monitor' 18 %}</button>
+          </div>
+          {% if platform_site %}<a role="menuitem" href="{{ platform_site }}" target="_blank" rel="noopener">{% icon 'external-link' 18 %}Voir le site</a>{% endif %}
+          <a role="menuitem" href="{% url 'backoffice:password' %}">{% icon 'key-round' 18 %}Changer le mot de passe</a>
+          <a role="menuitem" href="{% url 'backoffice:security' %}">{% icon 'shield-check' 18 %}Sécurité du compte</a>
+          <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button role="menuitem" class="bo-logout">Se déconnecter{% icon 'log-out' 18 %}</button></form>
+        </div>
+        <button type="button" class="bo-me" id="bo-acct-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="bo-acct-menu" data-tip="{{ request.user.short_name }}">
+          {% avatar request.user 36 %}
+          <span class="lbl bo-me-who"><b>{{ request.user.short_name }}</b><small>{% if request.user.is_super_admin %}Super admin{% else %}{% with sr=request.user.staff_role %}{% if sr %}{{ sr.name }}{% endif %}{% endwith %}{% endif %}</small></span>
+          <span class="lbl bo-me-chev">{% icon 'chevrons-up-down' 16 %}</span>
+        </button>
+      </div>
       <div class="lbl">{% include "backoffice/_powered.html" %}</div>
     </div>
   </aside>
@@ -76,6 +93,26 @@
     b.setAttribute('aria-label', min ? 'Déplier le menu' : 'Réduire le menu');
     b.title = b.getAttribute('aria-label');
   }
+  /* Account menu: opens above the account row, closes on Escape or a click outside. */
+  (function () {
+    var btn = document.getElementById('bo-acct-btn'), menu = document.getElementById('bo-acct-menu');
+    function set(open) { menu.hidden = !open; btn.setAttribute('aria-expanded', open); if (open) { var f = menu.querySelector('[aria-checked=true]') || menu.querySelector('a,button'); f && f.focus(); } }
+    btn.addEventListener('click', function () { set(menu.hidden); });
+    document.addEventListener('click', function (e) { if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) set(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !menu.hidden) { set(false); btn.focus(); } });
+    /* Theme: light, dark, or as the device (kept in this browser). */
+    function mark() {
+      var t; try { t = localStorage.getItem('bo-theme') || 'system'; } catch (e) { t = 'system'; }
+      menu.querySelectorAll('[data-theme]').forEach(function (b) { b.setAttribute('aria-checked', b.dataset.theme === t); });
+    }
+    menu.querySelectorAll('[data-theme]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        try { localStorage.setItem('bo-theme', b.dataset.theme); } catch (e) {}
+        window.boApplyTheme && boApplyTheme(); mark();
+      });
+    });
+    mark();
+  })();
   /* On the rail the group switcher is an icon: a tap unfolds the menu. */
   var boGroup = document.querySelector('.bo-group label');
   if (boGroup) boGroup.addEventListener('click', function (e) {
