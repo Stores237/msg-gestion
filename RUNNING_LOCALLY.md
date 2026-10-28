@@ -25,7 +25,8 @@ back-office password `msg-demo-2026!`. It refuses to run with `DEBUG` off.
 - Back-office: <http://localhost:8000/bo/> — log in with `677000001` (Tchakounté Alain, super
   admin). Without Twilio configured, the SMS code is printed in the `runserver` output
   (`DEV ONLY — code de vérification …`).
-- API docs: <http://localhost:8000/api/docs/>
+- API docs: <http://localhost:8000/api/docs/> — open them in the same browser after logging in
+  to the back-office (they need a back-office session since the security check).
 - Django admin (technical team): <http://localhost:8000/admin/>; create an account with
   `createsuperuser` (phone + password).
 
