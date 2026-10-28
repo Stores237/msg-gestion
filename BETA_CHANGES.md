@@ -782,3 +782,14 @@ Owner, 2026-10-28. Same design tokens; `static/backoffice/bo-modern.css` (loaded
 **Verify.** Back-office: Ctrl K → type "rol" → Enter opens Rôles. Fold the menu with the button
 by the logo, reload: it stays folded. Save a setting: the toast fades. `pytest
 apps/backoffice/test_shell.py`.
+
+## 36. Back-office sidebar stays in place
+
+Owner, 2026-10-28: "the side bar has to be static". The sidebar and the top bar were meant to stay
+put while a page scrolls, but the page frame used `overflow:hidden`, which made it its own
+scroll container, so both scrolled away with the page. The frame now uses `overflow:clip`
+(clips the same, scrolls nothing): measured scrolled 700 px down, both stay at the top. The top
+bar is now nearly opaque so scrolled rows don't show behind the title.
+
+**Verify.** Back-office → Utilisateurs (a long list) → scroll down: the menu and the title bar
+don't move.

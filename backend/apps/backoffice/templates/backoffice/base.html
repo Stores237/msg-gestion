@@ -13,7 +13,10 @@
   /* Full-page back-office: the frame (.bo) fills the window instead of
      sitting in a mock browser, as it does in the design document. */
   body{min-height:100vh}
-  .bo{border-radius:0;box-shadow:none;min-height:100vh}
+  /* overflow:clip, not hidden: "hidden" makes .bo a scroll container, and the
+     sidebar and top bar then scroll away with the page instead of staying put
+     (owner, 2026-10-28: "the sidebar has to be static"). */
+  .bo{border-radius:0;box-shadow:none;min-height:100vh;overflow:clip}
   .bo-shell,.bo-center{min-height:100vh}
   /* The menu scrolls when the window is short; the account, log-out and
      signature stay pinned at the bottom (2026-10-28: they were cut off
