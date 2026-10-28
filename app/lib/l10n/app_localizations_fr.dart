@@ -1723,8 +1723,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notAvailableYet => 'Pas encore disponible';
 
   @override
-  String appVersion(String v) {
-    return 'Version $v';
+  String appVersion(String version, String build) {
+    return 'Version $version ($build)';
   }
 
   @override
@@ -2058,4 +2058,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String memberLeaveUntil(String date) {
     return 'En congé jusqu’au $date';
   }
+
+  @override
+  String get poweredBy => 'Propulsé par';
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:msg_gestion/data/auth_session.dart';
@@ -34,6 +35,13 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   LocaleController.debugSetInstance(LocaleController());
   SharedPreferences.setMockInitialValues({});
+  PackageInfo.setMockInitialValues(
+    appName: 'MSG',
+    packageName: 'cm.msg.gestion',
+    version: '0.1.0',
+    buildNumber: '18',
+    buildSignature: '',
+  );
   GroupController.debugSetInstance(GroupController());
   ThemeController.debugSetInstance(ThemeController());
   OfflineState.debugSetInstance(OfflineState(storage: MemoryOfflineStorage()));

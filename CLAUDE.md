@@ -53,4 +53,12 @@ Built on the Spekooh architecture playbook (`app-architecture-playbook` skill). 
 
 `BETA_CHANGES.md` (one numbered section per change, with how to verify), `DESIGN.md` (dated
 decision log), `TODOS.md` (owner actions vs. engineering), `RENDER_STAGING.md` /
-`RENDER_PRODUCTION.md`, `RUNNING_LOCALLY.md`, `SECURITY.md`.
+`RENDER_PRODUCTION.md`, `RUNNING_LOCALLY.md`, `SECURITY.md`, `RELEASING.md` (version numbers,
+building and publishing an APK).
+
+## Versioning and signature
+
+MSG is developed and powered by STORES ("Propulsé par STORES", mark: "S" — `StoresLogo` /
+`.stores-mark`, in the text colour, never a group's). One version for app and server:
+`app/pubspec.yaml` `X.Y.Z+BUILD` and `backend/config/version.py` `X.Y.Z`, bumped together
+(`test_version` checks). Every APK gets the next build number. See `RELEASING.md`.

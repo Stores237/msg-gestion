@@ -10,6 +10,7 @@ import '../widgets/errors.dart';
 import '../widgets/language_switch.dart';
 import '../widgets/msg_logo.dart';
 import '../widgets/notice.dart';
+import '../widgets/powered_by.dart';
 import 'help_screens.dart';
 import 'login_pin_screen.dart';
 
@@ -230,6 +231,8 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
             ),
             const SizedBox(height: 24),
             Notice(text: l.noAccountNotice),
+            const SizedBox(height: 32),
+            const Center(child: PoweredBy()),
           ],
         ),
       ),

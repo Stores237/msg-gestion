@@ -16,9 +16,13 @@ def healthz(request):
     """Render's health check. Touches the database so a broken
     DATABASE_URL shows up as an unhealthy deploy, not a healthy-looking
     service that 500s on every real request."""
+    from config.version import VERSION, commit
+
     with connection.cursor() as cur:
         cur.execute("SELECT 1")
-    return JsonResponse({"status": "ok"})
+    # The version and commit say which deploy answers (2026-10-27: a deploy
+    # that never started left the previous version live, unnoticed).
+    return JsonResponse({"status": "ok", "version": VERSION, "commit": commit()})
 
 
 @csrf_exempt

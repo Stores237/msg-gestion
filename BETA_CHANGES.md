@@ -687,3 +687,21 @@ same service → they swap. Back-office: put a member on leave until a date → 
 "En congé jusqu’au …". Paramètres → Tenues → fill a Détail → it shows under the dress on the
 event. `pytest apps/planning/test_design_gaps.py`; `flutter test test/planning_test.dart
 test/design_details_test.dart`.
+
+## 32. Version and developer signature (from build 18)
+
+Owner, 2026-10-28: "Propulsé par STORES" with the S mark, and a visible version.
+
+- **App**: login screen and the bottom of Mon compte show "Propulsé par [S] STORES" and
+  "Version 0.1.0 (18)", read from the build (`package_info_plus`).
+- **Back-office**: the sidebar (under the account) and the login page show the signature and
+  "MSG 0.1.0 · <commit>".
+- **Server**: `/healthz/` answers `{"status": "ok", "version": "0.1.0", "commit": "<short
+  sha>"}` (Render's `RENDER_GIT_COMMIT`), so a deploy that didn't start is visible at once.
+- **Versioning**: the version lives in `app/pubspec.yaml` (`0.1.0+18`) and
+  `backend/config/version.py` (`0.1.0`), checked equal by a test; builds no longer pass
+  `--build-number`. Process in `RELEASING.md`.
+
+**Verify.** App: login screen bottom → "Version 0.1.0 (18)". Back-office sidebar → "MSG 0.1.0 ·
+…". `curl …/healthz/` → version and commit. `pytest apps/core/test_version.py`;
+`flutter test test/powered_by_test.dart`.

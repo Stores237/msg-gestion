@@ -88,3 +88,4 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-27 | Leave per group with an optional end date (back-office), shown wherever leave shows; automatic return after it | Design ("En congé jusqu’au 15 novembre"); per group because status is per group |
 | 2026-10-27 | Swaps and absences validated by the event's chef de groupe (own events) as well as the lineup makers | Design ("Validation : …, chef de groupe"; "le chef de groupe ou le censeur valide") |
 | 2026-10-27 | Dress "Détail" and place detail written by each group, no default text | Design shows one group's wording ("Aube blanche, cordon…"); the platform serves several groups |
+| 2026-10-28 | "Propulsé par STORES" with an "S" mark in the text colour (inverted in dark mode), small, at the foot of login, Mon compte and the back-office sidebar, with the version | Owner. Kept out of the group's colour so it never reads as a group's identity |

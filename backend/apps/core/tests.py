@@ -6,8 +6,11 @@ from apps.core import views
 pytestmark = pytest.mark.django_db
 
 
-def test_healthz_touches_the_database(client):
-    assert client.get("/healthz/").json() == {"status": "ok"}
+def test_healthz_touches_the_database(client, monkeypatch):
+    from config.version import VERSION
+
+    monkeypatch.setenv("RENDER_GIT_COMMIT", "9f103e0ef9c03a7aea266fe8e139a966e6c6250f")
+    assert client.get("/healthz/").json() == {"status": "ok", "version": VERSION, "commit": "9f103e0"}
 
 
 def test_task_endpoint_is_404_without_a_configured_token(client):

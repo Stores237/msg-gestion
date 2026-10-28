@@ -8,6 +8,7 @@ import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
+import '../widgets/powered_by.dart';
 import '../widgets/dates.dart';
 import '../widgets/labels.dart';
 import '../widgets/language_switch.dart';
@@ -202,6 +203,8 @@ class AccountScreen extends StatelessWidget {
                       side: BorderSide(color: c.alert, width: 1.5),
                     ),
                   ),
+                  const SizedBox(height: 28),
+                  const Center(child: PoweredBy()),
                 ],
               ),
             ),

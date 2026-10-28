@@ -2993,8 +2993,8 @@ abstract class AppLocalizations {
   /// No description provided for @appVersion.
   ///
   /// In fr, this message translates to:
-  /// **'Version {v}'**
-  String appVersion(String v);
+  /// **'Version {version} ({build})'**
+  String appVersion(String version, String build);
 
   /// No description provided for @faqQ1.
   ///
@@ -3529,6 +3529,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'En congé jusqu’au {date}'**
   String memberLeaveUntil(String date);
+
+  /// No description provided for @poweredBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Propulsé par'**
+  String get poweredBy;
 }
 
 class _AppLocalizationsDelegate

@@ -482,7 +482,7 @@
   "privacyPolicy": "Privacy policy",
   "termsOfService": "Terms of Service",
   "notAvailableYet": "Not available yet",
-  "appVersion": "Version {v}",
+  "appVersion": "Version {version} ({build})",
   "faqQ1": "I forgot my PIN.",
   "faqA1": "On the PIN screen, tap “Forgot PIN?”. If text messages aren’t available, ask your group leader: they can give you a temporary PIN.",
   "faqQ2": "Why does the app ask for my PIN every time it opens?",
@@ -571,5 +571,6 @@
   "draftRestored": "Draft restored.",
   "placeDetail": "Place details (optional)",
   "placeDetailHint": "Area, town",
-  "memberLeaveUntil": "On leave until {date}"
+  "memberLeaveUntil": "On leave until {date}",
+  "poweredBy": "Powered by"
 }

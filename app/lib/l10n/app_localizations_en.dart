@@ -1719,8 +1719,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notAvailableYet => 'Not available yet';
 
   @override
-  String appVersion(String v) {
-    return 'Version $v';
+  String appVersion(String version, String build) {
+    return 'Version $version ($build)';
   }
 
   @override
@@ -2049,4 +2049,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String memberLeaveUntil(String date) {
     return 'On leave until $date';
   }
+
+  @override
+  String get poweredBy => 'Powered by';
 }
