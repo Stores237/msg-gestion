@@ -1,38 +1,66 @@
 {% extends "backoffice/base.html" %}{% load bo %}
 {% block frame %}
 <div class="bo-shell" id="bo-shell">
+  {# The rail state is applied before first paint, so the page doesn't jump. #}
+  <script>try { if (localStorage.getItem('bo-side-min') === '1') document.getElementById('bo-shell').classList.add('side-min'); } catch (e) {}</script>
   <div class="bo-scrim" onclick="boNav(false)"></div>
   <aside class="bo-side" id="bo-side" aria-label="Menu">
-    <div class="bo-brand"><div class="msg-logo" style="width:36px;height:36px;border-radius:12px;font-size:11px" role="img" aria-label="MSG">MSG</div><div><b>MSG</b><small>Back-office de la plateforme</small></div></div>
-    {% platform_groups as all_groups %}{% if request.group %}<form class="bo-group" method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><label><span>Groupe</span><select name="group" onchange="this.form.submit()" aria-label="Groupe en cours">{% for g in all_groups %}<option value="{{ g.pk }}"{% if g.pk == request.group.pk %} selected{% endif %}>{{ g.name }}</option>{% endfor %}</select></label></form>{% endif %}
+    <div class="bo-brand">
+      <div class="msg-logo" style="width:36px;height:36px;border-radius:12px;font-size:11px" role="img" aria-label="MSG">MSG</div>
+      <div class="lbl"><b>MSG</b><small>Back-office de la plateforme</small></div>
+      <button type="button" class="iconbtn bo-collapse" onclick="boRail()" aria-label="Réduire le menu" title="Réduire le menu">{% icon 'panel-left-close' 20 %}</button>
+    </div>
+    {% platform_groups as all_groups %}{% if request.group %}
+    <form class="bo-group" method="post" action="{% url 'backoffice:group_switch' %}" data-tip="{{ request.group.name }}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <label>{% icon 'building-2' 18 %}<span class="lbl"><small>Groupe en cours</small><select name="group" onchange="this.form.submit()" aria-label="Groupe en cours">{% for g in all_groups %}<option value="{{ g.pk }}"{% if g.pk == request.group.pk %} selected{% endif %}>{{ g.name }}</option>{% endfor %}</select></span></label>
+    </form>{% endif %}
+    <nav class="bo-navs" aria-label="Pages">
     {% with p=request.user|perms %}
-    <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}">{% icon 'layout-dashboard' %}Tableau de bord</a>
-    {% if 'backoffice.groups:view' in p %}<a class="bo-nav{% if nav == 'groups' %} on{% endif %}" href="{% url 'backoffice:groups' %}">{% icon 'building-2' %}Groupes{% pending_group_deletions as nd %}{% if nd %}<span class="rb exp" style="margin-left:auto" title="Suppression à confirmer"><i></i>{{ nd }}</span>{% endif %}</a>{% endif %}
-    {% if 'backoffice.access:view' in p %}<a class="bo-nav{% if nav == 'access' %} on{% endif %}" href="{% url 'backoffice:access_requests' %}">{% icon 'user-check' %}Demandes d’accès{% pending_access as n %}{% if n %}<span class="rb sys" style="margin-left:auto"><i></i>{{ n }}</span>{% endif %}</a>{% endif %}
-    {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}">{% icon 'users' %}Utilisateurs</a>{% endif %}
-    {% if 'backoffice.roles:view' in p %}<a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}">{% icon 'shield' %}Rôles et permissions</a>
-    <a class="bo-nav{% if nav == 'assign' %} on{% endif %}" href="{% url 'backoffice:assignments' %}">{% icon 'calendar-range' %}Affectations</a>{% endif %}
-    {% if 'finances.cashbook:view' in p %}<a class="bo-nav{% if nav == 'finances' %} on{% endif %}" href="{% url 'backoffice:finances' %}">{% icon 'wallet' %}Bilan financier</a>{% endif %}
-    {% if 'backoffice.settings:view' in p %}<a class="bo-nav{% if nav == 'settings' %} on{% endif %}" href="{% url 'backoffice:settings' %}">{% icon 'settings' %}Paramètres du groupe</a>{% endif %}
-    {% if 'backoffice.security:view' in p or 'backoffice.roles:change' in p %}<a class="bo-nav{% if nav == 'staff' %} on{% endif %}" href="{% url 'backoffice:staff' %}">{% icon 'id-card' %}Équipe du back-office</a>{% endif %}
-    {% if 'backoffice.integrations:view' in p %}<a class="bo-nav{% if nav == 'integrations' %} on{% endif %}" href="{% url 'backoffice:integrations' %}">{% icon 'plug' %}Intégrations et services</a>{% endif %}
-    {% if 'backoffice.platform:view' in p %}<a class="bo-nav{% if nav == 'platform' %} on{% endif %}" href="{% url 'backoffice:platform' %}">{% icon 'life-buoy' %}Plateforme · aide</a>{% endif %}
-    {% if 'backoffice.audit:view' in p %}<a class="bo-nav{% if nav == 'audit' %} on{% endif %}" href="{% url 'backoffice:audit' %}">{% icon 'scroll-text' %}Journal d’audit</a>{% endif %}
+      <a class="bo-nav{% if nav == 'dash' %} on{% endif %}" href="{% url 'backoffice:dashboard' %}" data-tip="Tableau de bord"{% if nav == 'dash' %} aria-current="page"{% endif %}>{% icon 'layout-dashboard' %}<span class="lbl">Tableau de bord</span></a>
+
+      {% if 'backoffice.access:view' in p or 'backoffice.users:view' in p or 'backoffice.roles:view' in p %}
+      <div class="bo-sec"><span class="lbl">Membres</span></div>
+      {% if 'backoffice.access:view' in p %}<a class="bo-nav{% if nav == 'access' %} on{% endif %}" href="{% url 'backoffice:access_requests' %}" data-tip="Demandes d’accès"{% if nav == 'access' %} aria-current="page"{% endif %}>{% icon 'user-check' %}<span class="lbl">Demandes d’accès</span>{% pending_access as n %}{% if n %}<span class="bo-count" title="{{ n }} en attente">{{ n }}</span>{% endif %}</a>{% endif %}
+      {% if 'backoffice.users:view' in p %}<a class="bo-nav{% if nav == 'users' %} on{% endif %}" href="{% url 'backoffice:users' %}" data-tip="Utilisateurs"{% if nav == 'users' %} aria-current="page"{% endif %}>{% icon 'users' %}<span class="lbl">Utilisateurs</span></a>{% endif %}
+      {% if 'backoffice.roles:view' in p %}<a class="bo-nav{% if nav == 'roles' %} on{% endif %}" href="{% url 'backoffice:roles' %}" data-tip="Rôles et permissions"{% if nav == 'roles' %} aria-current="page"{% endif %}>{% icon 'shield' %}<span class="lbl">Rôles et permissions</span></a>
+      <a class="bo-nav{% if nav == 'assign' %} on{% endif %}" href="{% url 'backoffice:assignments' %}" data-tip="Affectations"{% if nav == 'assign' %} aria-current="page"{% endif %}>{% icon 'calendar-range' %}<span class="lbl">Affectations</span></a>{% endif %}
+      {% endif %}
+
+      {% if 'finances.cashbook:view' in p or 'backoffice.settings:view' in p %}
+      <div class="bo-sec"><span class="lbl">Groupe</span></div>
+      {% if 'finances.cashbook:view' in p %}<a class="bo-nav{% if nav == 'finances' %} on{% endif %}" href="{% url 'backoffice:finances' %}" data-tip="Bilan financier"{% if nav == 'finances' %} aria-current="page"{% endif %}>{% icon 'wallet' %}<span class="lbl">Bilan financier</span></a>{% endif %}
+      {% if 'backoffice.settings:view' in p %}<a class="bo-nav{% if nav == 'settings' %} on{% endif %}" href="{% url 'backoffice:settings' %}" data-tip="Paramètres du groupe"{% if nav == 'settings' %} aria-current="page"{% endif %}>{% icon 'settings' %}<span class="lbl">Paramètres du groupe</span></a>{% endif %}
+      {% endif %}
+
+      {% if 'backoffice.groups:view' in p or 'backoffice.security:view' in p or 'backoffice.roles:change' in p or 'backoffice.integrations:view' in p or 'backoffice.platform:view' in p or 'backoffice.audit:view' in p %}
+      <div class="bo-sec"><span class="lbl">Plateforme</span></div>
+      {% if 'backoffice.groups:view' in p %}<a class="bo-nav{% if nav == 'groups' %} on{% endif %}" href="{% url 'backoffice:groups' %}" data-tip="Groupes"{% if nav == 'groups' %} aria-current="page"{% endif %}>{% icon 'building-2' %}<span class="lbl">Groupes</span>{% pending_group_deletions as nd %}{% if nd %}<span class="bo-count warn" title="Suppression à confirmer">{{ nd }}</span>{% endif %}</a>{% endif %}
+      {% if 'backoffice.security:view' in p or 'backoffice.roles:change' in p %}<a class="bo-nav{% if nav == 'staff' %} on{% endif %}" href="{% url 'backoffice:staff' %}" data-tip="Équipe du back-office"{% if nav == 'staff' %} aria-current="page"{% endif %}>{% icon 'id-card' %}<span class="lbl">Équipe du back-office</span></a>{% endif %}
+      {% if 'backoffice.integrations:view' in p %}<a class="bo-nav{% if nav == 'integrations' %} on{% endif %}" href="{% url 'backoffice:integrations' %}" data-tip="Intégrations et services"{% if nav == 'integrations' %} aria-current="page"{% endif %}>{% icon 'plug' %}<span class="lbl">Intégrations et services</span></a>{% endif %}
+      {% if 'backoffice.platform:view' in p %}<a class="bo-nav{% if nav == 'platform' %} on{% endif %}" href="{% url 'backoffice:platform' %}" data-tip="Plateforme · aide"{% if nav == 'platform' %} aria-current="page"{% endif %}>{% icon 'life-buoy' %}<span class="lbl">Plateforme · aide</span></a>{% endif %}
+      {% if 'backoffice.audit:view' in p %}<a class="bo-nav{% if nav == 'audit' %} on{% endif %}" href="{% url 'backoffice:audit' %}" data-tip="Journal d’audit"{% if nav == 'audit' %} aria-current="page"{% endif %}>{% icon 'scroll-text' %}<span class="lbl">Journal d’audit</span></a>{% endif %}
+      {% endif %}
     {% endwith %}
-    <div class="sp"></div>
+    </nav>
     <div class="bo-foot">
-    <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% else %}{% with sr=request.user.staff_role %}{% if sr %}<span class="rb temp"><i></i>{{ sr.name }}</span>{% endif %}{% endwith %}{% endif %}</div>
-      <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
-      {% include "backoffice/_powered.html" %}
+      <div class="bo-me">{% avatar request.user 36 %}<div class="lbl" style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% else %}{% with sr=request.user.staff_role %}{% if sr %}<span class="rb temp"><i></i>{{ sr.name }}</span>{% endif %}{% endwith %}{% endif %}</div>
+        <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
+      <div class="lbl">{% include "backoffice/_powered.html" %}</div>
     </div>
   </aside>
   <main class="bo-main">
-    <div class="bo-top"><button type="button" class="iconbtn bo-menu" aria-label="Menu" aria-controls="bo-side" aria-expanded="false" onclick="boNav(true)">{% icon 'menu' 22 %}</button><div class="bo-title">{% block crumb %}{% endblock %}<h1>{% block heading %}{% endblock %}</h1></div><div class="acts">{% block acts %}{% endblock %}</div></div>
+    <div class="bo-top"><button type="button" class="iconbtn bo-menu" aria-label="Menu" aria-controls="bo-side" aria-expanded="false" onclick="boNav(true)">{% icon 'menu' 22 %}</button><div class="bo-title">{% block crumb %}{% endblock %}<h1>{% block heading %}{% endblock %}</h1></div>
+      <button type="button" class="bo-search" onclick="boCmd()" aria-label="Rechercher une page" aria-keyshortcuts="Control+K">{% icon 'search' 16 %}<span>Rechercher…</span><kbd>Ctrl K</kbd></button>
+      <div class="acts">{% block acts %}{% endblock %}</div></div>
     <div class="bo-body">
-      {% if messages %}<div class="msgs">{% for m in messages %}<div class="notice {% if m.level_tag == 'error' %}alert{% else %}ok{% endif %}">{% if m.level_tag == 'error' %}{% icon 'circle-alert' %}{% else %}{% icon 'circle-check' %}{% endif %}<span>{{ m }}</span></div>{% endfor %}</div>{% endif %}
+      {% if messages %}<div class="msgs" role="status" aria-live="polite">{% for m in messages %}<div class="notice bo-toast {% if m.level_tag == 'error' %}alert{% else %}ok{% endif %}">{% if m.level_tag == 'error' %}{% icon 'circle-alert' %}{% else %}{% icon 'circle-check' %}{% endif %}<span>{{ m }}</span><button type="button" class="bo-toast-x" aria-label="Fermer" onclick="this.parentNode.remove()">{% icon 'x' 16 %}</button></div>{% endfor %}</div>{% endif %}
       {% block body %}{% endblock %}
     </div>
   </main>
+  <dialog class="bo-cmd" id="bo-cmd" aria-label="Aller à une page">
+    <div class="bo-cmd-in">{% icon 'search' 18 %}<input id="bo-cmd-q" type="search" placeholder="Aller à… (tapez le nom d’une page)" autocomplete="off" aria-controls="bo-cmd-list"><kbd>Échap</kbd></div>
+    <ul id="bo-cmd-list" role="listbox"></ul>
+  </dialog>
 </div>
 <script>
   /* Phones and narrow windows: the sidebar opens as a drawer. */
@@ -40,6 +68,82 @@
     document.getElementById('bo-shell').classList.toggle('nav-open', open);
     document.querySelector('.bo-menu').setAttribute('aria-expanded', open);
   }
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') boNav(false); });
+  /* Wide windows: the sidebar folds to an icon rail; remembered here. */
+  function boRail() {
+    var min = document.getElementById('bo-shell').classList.toggle('side-min');
+    try { localStorage.setItem('bo-side-min', min ? '1' : '0'); } catch (e) {}
+    var b = document.querySelector('.bo-collapse');
+    b.setAttribute('aria-label', min ? 'Déplier le menu' : 'Réduire le menu');
+    b.title = b.getAttribute('aria-label');
+  }
+  /* On the rail the group switcher is an icon: a tap unfolds the menu. */
+  var boGroup = document.querySelector('.bo-group label');
+  if (boGroup) boGroup.addEventListener('click', function (e) {
+    if (document.getElementById('bo-shell').classList.contains('side-min')) { e.preventDefault(); boRail(); }
+  });
+  /* "Aller à…" (Ctrl/⌘ K or /): the pages this account can open, filtered as you type. */
+  var boPages = Array.prototype.map.call(document.querySelectorAll('.bo-nav'), function (a) {
+    return { href: a.getAttribute('href'), label: a.dataset.tip, icon: a.querySelector('svg, i') };
+  });
+  function boCmd() {
+    var d = document.getElementById('bo-cmd'), q = document.getElementById('bo-cmd-q');
+    q.value = ''; boCmdList(''); d.showModal(); q.focus();
+  }
+  function boCmdList(text) {
+    var list = document.getElementById('bo-cmd-list'), t = text.trim().toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '');
+    list.innerHTML = '';
+    boPages.filter(function (p) {
+      return p.label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(t) !== -1;
+    }).forEach(function (p, i) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = p.href; a.setAttribute('role', 'option');
+      if (p.icon) a.appendChild(p.icon.cloneNode(true));
+      a.appendChild(document.createTextNode(p.label));
+      if (i === 0) a.classList.add('on');
+      li.appendChild(a); list.appendChild(li);
+    });
+    if (!list.children.length) list.innerHTML = '<li class="none">Aucune page de ce nom.</li>';
+    if (window.lucide) lucide.createIcons();  /* the copied icons */
+  }
+  document.getElementById('bo-cmd-q').addEventListener('input', function () { boCmdList(this.value); });
+  document.getElementById('bo-cmd').addEventListener('keydown', function (e) {
+    var items = Array.prototype.slice.call(this.querySelectorAll('a')), cur = items.findIndex(function (a) { return a.classList.contains('on'); });
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault(); if (!items.length) return;
+      if (cur >= 0) items[cur].classList.remove('on');
+      var next = (cur + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+      items[next].classList.add('on'); items[next].scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter' && cur >= 0) { e.preventDefault(); location.href = items[cur].href; }
+  });
+  document.getElementById('bo-cmd').addEventListener('click', function (e) { if (e.target === this) this.close(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') boNav(false);
+    var typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || document.activeElement.isContentEditable;
+    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !typing)) { e.preventDefault(); boCmd(); }
+  });
+  /* Messages: a confirmation fades after a few seconds; an error stays until closed. */
+  document.querySelectorAll('.bo-toast.ok').forEach(function (t) {
+    setTimeout(function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 400); }, 5000);
+  });
+  /* A clicked button shows it is working and the form can't go twice. Not
+     disabled (its name/value must still be sent), just marked busy. */
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (e.defaultPrevented || f.method === 'get' || f.target) return;
+    if (f.dataset.busy) { e.preventDefault(); return; }
+    f.dataset.busy = '1';
+    var b = e.submitter || f.querySelector('button[type=submit], button:not([type])');
+    if (b) { b.classList.add('is-busy'); b.setAttribute('aria-busy', 'true'); }
+  });
+  /* Back button (page restored from cache): forms usable again. */
+  window.addEventListener('pageshow', function () {
+    document.querySelectorAll('form[data-busy]').forEach(function (f) { delete f.dataset.busy; });
+    document.querySelectorAll('.is-busy').forEach(function (b) { b.classList.remove('is-busy'); b.removeAttribute('aria-busy'); });
+  });
+  /* The top bar gets a shadow once the page scrolls under it. */
+  window.addEventListener('scroll', function () {
+    document.querySelector('.bo-top').classList.toggle('scrolled', window.scrollY > 4);
+  }, { passive: true });
 </script>
 {% endblock %}

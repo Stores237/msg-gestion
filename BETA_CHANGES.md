@@ -757,3 +757,28 @@ Owner, 2026-10-28.
 landscape; move it, Utiliser cette photo → send → the card shows the photo. A past event in the
 calendar shows EXPIRÉ. `pytest apps/announcements/test_photos.py`;
 `flutter test test/announcement_photo_test.dart test/design_details_test.dart`.
+
+## 35. Back-office: a more modern, smoother shell
+
+Owner, 2026-10-28. Same design tokens; `static/backoffice/bo-modern.css` (loaded last) and
+`shell.html`. Server-only: live after a Render deploy.
+
+- **Sidebar**: sections (Membres · Groupe · Plateforme, each only when the account has something
+  in it); hover state, a green bar on the current page (`aria-current`), visible keyboard focus;
+  counts as pills; the group switcher as a card. **Icon rail**: the button next to the logo folds
+  the sidebar to icons (labels as tooltips, still read by screen readers); remembered on this
+  computer; on the rail, the group card unfolds the menu.
+- **"Aller à…"**: a search button in the top bar, or **Ctrl/⌘ K** or **/**, finds any page the
+  account can open as you type (accents ignored), arrows + Enter.
+- **Messages as toasts** (top right; bottom on phones): confirmations fade after 5 s, errors stay
+  until closed.
+- **Busy buttons**: a clicked button shows a spinner and the form can't be sent twice (the
+  button's value is still sent); reset when coming back with the browser's back button.
+- **Smoothness**: the top bar stays in view with a soft shadow once the page scrolls; table rows
+  highlight under the pointer; pages fade into each other (browsers that support it); the phone
+  drawer slides in. Everything honours "reduce motion".
+- **Phones**: search beside the title, action buttons wrap instead of overflowing.
+
+**Verify.** Back-office: Ctrl K → type "rol" → Enter opens Rôles. Fold the menu with the button
+by the logo, reload: it stays folded. Save a setting: the toast fades. `pytest
+apps/backoffice/test_shell.py`.

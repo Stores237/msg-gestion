@@ -137,3 +137,4 @@
 .powered b{color:var(--text-primary);letter-spacing:.06em}
 .powered .pv{flex-basis:100%;font-variant-numeric:tabular-nums}
 .stores-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;width:18px;height:18px;border-radius:5px;background:var(--text-primary);color:var(--surface-card);font-weight:800;font-size:11px;line-height:18px}
+
