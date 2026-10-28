@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../data/current_user.dart';
+import '../../data/data_settings.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/member.dart';
@@ -51,10 +52,11 @@ class _ProfileBody extends StatelessWidget {
 
   Future<void> _pickPhoto(BuildContext context) async {
     final l = AppLocalizations.of(context);
+    final (side, quality) = DataSettings.instance.uploadSize;
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      maxWidth: 1024,
-      imageQuality: 85,
+      maxWidth: side,
+      imageQuality: quality,
     );
     if (picked == null || !context.mounted) return;
     try {

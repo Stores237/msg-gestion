@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../data/data_settings.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
@@ -379,7 +380,9 @@ class MemberAvatar extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: c.surfaceCard, width: 2),
             ),
-            child: photo == null
+            // Photos load by themselves unless Stockage et données says
+            // otherwise for this network; the initials stand in.
+            child: photo == null || !DataSettings.instance.autoPhotos
                 ? Text(
                     initials,
                     style: TextStyle(

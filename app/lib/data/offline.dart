@@ -162,6 +162,22 @@ class OfflineState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Bytes kept on the phone: (cached answers, unsent changes).
+  (int, int) get sizes => (
+    utf8.encode(jsonEncode(_cache)).length,
+    utf8.encode(jsonEncode([for (final i in _outbox) i.toJson()])).length,
+  );
+
+  /// Mon compte → Stockage et données: drops the cached answers (they come
+  /// back from the server), keeps the unsent changes and whose data it is.
+  Future<void> clearCache() async {
+    final owner = _cache['__owner'];
+    _cache = {'__owner': ?owner};
+    lastSync = null;
+    await _storage.write(_cacheFile, jsonEncode(_cache));
+    notifyListeners();
+  }
+
   /// Called after a sign-in: data cached for another account is erased.
   Future<void> belongsTo(int userId) async {
     await load();

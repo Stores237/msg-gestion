@@ -20,9 +20,11 @@
     {% if 'backoffice.audit:view' in p %}<a class="bo-nav{% if nav == 'audit' %} on{% endif %}" href="{% url 'backoffice:audit' %}">{% icon 'scroll-text' %}Journal d’audit</a>{% endif %}
     {% endwith %}
     <div class="sp"></div>
+    <div class="bo-foot">
     <div class="bo-me">{% avatar request.user 36 %}<div style="flex:1;min-width:0"><a href="{% url 'backoffice:security' %}" style="color:inherit"><b>{{ request.user.short_name }}</b></a>{% if request.user.is_super_admin %}<span class="rb sys"><i></i>Super admin</span>{% else %}{% with sr=request.user.staff_role %}{% if sr %}<span class="rb temp"><i></i>{{ sr.name }}</span>{% endif %}{% endwith %}{% endif %}</div>
       <form method="post" action="{% url 'backoffice:logout' %}">{% csrf_token %}<button class="iconbtn" aria-label="Se déconnecter" title="Se déconnecter">{% icon 'log-out' 20 %}</button></form></div>
-    {% include "backoffice/_powered.html" %}
+      {% include "backoffice/_powered.html" %}
+    </div>
   </aside>
   <main class="bo-main">
     <div class="bo-top"><button type="button" class="iconbtn bo-menu" aria-label="Menu" aria-controls="bo-side" aria-expanded="false" onclick="boNav(true)">{% icon 'menu' 22 %}</button><div class="bo-title">{% block crumb %}{% endblock %}<h1>{% block heading %}{% endblock %}</h1></div><div class="acts">{% block acts %}{% endblock %}</div></div>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'data/data_settings.dart';
 import 'data/group_controller.dart';
 import 'data/locale_controller.dart';
 import 'data/offline.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
   await ThemeController.instance.load();
   await initializeDateFormatting();
   await OfflineState.instance.load();
+  await DataSettings.instance.load();
   runApp(const MsgApp());
 }
 

@@ -16,6 +16,7 @@ import '../widgets/appearance_sheet.dart';
 import '../widgets/my_photo.dart';
 import '../widgets/ui.dart';
 import 'help_screens.dart';
+import 'storage_screen.dart';
 import 'login_phone_screen.dart';
 import 'pin_screens.dart';
 
@@ -175,6 +176,17 @@ class AccountScreen extends StatelessWidget {
                         onTap: () => showAppearanceSheet(context),
                       ),
                       const _BiometricRow(),
+                      ListRow(
+                        key: const Key('open-storage'),
+                        lead: const Icon(Icons.data_usage_outlined),
+                        title: Text(l.storageAndData),
+                        chevron: true,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const StorageDataScreen(),
+                          ),
+                        ),
+                      ),
                       ListRow(
                         key: const Key('change-pin'),
                         lead: const Icon(Icons.pin_outlined),

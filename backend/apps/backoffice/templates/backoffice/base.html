@@ -14,7 +14,10 @@
   body{min-height:100vh}
   .bo{border-radius:0;box-shadow:none;min-height:100vh}
   .bo-shell,.bo-center{min-height:100vh}
-  .bo-side{position:sticky;top:0;height:100vh}
+  /* The menu scrolls when the window is short; the account, log-out and
+     signature stay pinned at the bottom (2026-10-28: they were cut off
+     below ~900 px). */
+  .bo-side{position:sticky;top:0;height:100vh;overflow-y:auto}
 </style>
 </head>
 <body class="theme-light">

@@ -2052,4 +2052,118 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get poweredBy => 'Powered by';
+
+  @override
+  String get storageAndData => 'Storage and data';
+
+  @override
+  String get manageStorage => 'Manage storage';
+
+  @override
+  String storageUsed(String size) {
+    return '$size used on this phone';
+  }
+
+  @override
+  String get networkUsage => 'Network usage';
+
+  @override
+  String trafficSentReceived(String sent, String received) {
+    return '$sent sent • $received received';
+  }
+
+  @override
+  String trafficSince(String date) {
+    return 'Since $date';
+  }
+
+  @override
+  String get resetTrafficConfirm => 'Reset the data counters?';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get dataSaver => 'Use less mobile data';
+
+  @override
+  String get dataSaverHint =>
+      'On mobile data: no automatic photos, photos sent in standard quality';
+
+  @override
+  String get uploadQuality => 'Photo upload quality';
+
+  @override
+  String get qualityStandard => 'Standard quality';
+
+  @override
+  String get qualityStandardHint => 'Faster, less data (up to 1024 px)';
+
+  @override
+  String get qualityHigh => 'High quality';
+
+  @override
+  String get qualityHighHint => 'Sharper, more data (up to 2048 px)';
+
+  @override
+  String get autoDownload => 'Media auto-download';
+
+  @override
+  String get autoDownloadHint =>
+      'Attachments download only when you open them.';
+
+  @override
+  String get onMobileData => 'When using mobile data';
+
+  @override
+  String get onWifi => 'When connected on Wi-Fi';
+
+  @override
+  String get memberPhotos => 'Member photos';
+
+  @override
+  String get noMedia => 'No media';
+
+  @override
+  String get autoOffBySaver => 'Off: using less data';
+
+  @override
+  String currentNetwork(String network) {
+    return 'Current connection: $network';
+  }
+
+  @override
+  String get networkWifi => 'Wi-Fi';
+
+  @override
+  String get networkMobile => 'mobile data';
+
+  @override
+  String get networkNone => 'offline';
+
+  @override
+  String get networkUnknown => 'unknown';
+
+  @override
+  String get offlineData => 'Offline data';
+
+  @override
+  String get offlineDataHint => 'reloaded from the server';
+
+  @override
+  String get unsentChanges => 'Unsent changes';
+
+  @override
+  String get unsentKept => 'kept until sent';
+
+  @override
+  String get imagesInMemory => 'Images in memory';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String sizeGb(String n) {
+    return '$n GB';
+  }
 }

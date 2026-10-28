@@ -705,3 +705,30 @@ Owner, 2026-10-28: "Propulsé par STORES" with the S mark, and a visible version
 **Verify.** App: login screen bottom → "Version 0.1.0 (18)". Back-office sidebar → "MSG 0.1.0 ·
 …". `curl …/healthz/` → version and commit. `pytest apps/core/test_version.py`;
 `flutter test test/powered_by_test.dart`.
+
+## 33. Stockage et données; back-office sidebar footer (build 19)
+
+Owner, 2026-10-28 (after the phone's own "Storage and data" screen).
+
+- **Mon compte → Stockage et données**:
+  - *Gérer le stockage*: what the app keeps on the phone (offline data, unsent changes, images in
+    memory), with "Vider" for the offline data (reloaded from the server; unsent changes kept)
+    and the images.
+  - *Utilisation du réseau*: what the app sent and received through its API, since a date;
+    tap to reset.
+  - *Économiser les données mobiles*: on mobile data, no automatic member photos and photos sent
+    in standard quality.
+  - *Qualité d’envoi des photos*: standard (≤ 1024 px) or high (≤ 2048 px); profile photos use
+    it.
+  - *Téléchargement automatique*: member photos on mobile data / on Wi-Fi (off shows the
+    initials). Attachments still download only when opened. Proxy and roaming left out (a phone
+    setting / not detectable).
+  - Settings and counters are kept on the phone (`DataSettings`); the network type comes from
+    `connectivity_plus`.
+- **Back-office**: the sidebar's menu now scrolls; the account, log-out and the "Propulsé par
+  STORES · MSG x.y.z · commit" footer stay pinned at the bottom (they were cut off on windows
+  under ~900 px tall). On the login page the signature sits under "Plateforme MSG", aligned.
+
+**Verify.** App: Mon compte → Stockage et données; turn on the saver → "Sur données mobiles" says
+"Désactivé : économie de données". Back-office on a short window: log-out and signature visible.
+`flutter test test/storage_data_test.dart`.

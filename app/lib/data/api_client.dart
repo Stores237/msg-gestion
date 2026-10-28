@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'auth_session.dart';
+import 'data_settings.dart';
 import 'group_controller.dart';
 import 'locale_controller.dart';
 import 'offline.dart';
@@ -169,8 +170,11 @@ class ApiClient {
     if (group != null) request.headers['X-Group'] = '$group';
     final http.Response response;
     try {
-      response = await http.Response.fromStream(
-        await _client.send(request).timeout(const Duration(seconds: 120)),
+      response = await _counted(
+        bytes.length,
+        http.Response.fromStream(
+          await _client.send(request).timeout(const Duration(seconds: 120)),
+        ),
       );
     } on SocketException catch (e) {
       throw NetworkException(e);
@@ -258,6 +262,31 @@ class ApiClient {
     Object? body,
   ) {
     final encoded = body == null ? null : jsonEncode(body);
+    return _counted(
+      utf8.encode(encoded ?? '').length,
+      _dispatch(method, uri, headers, encoded),
+    );
+  }
+
+  /// Counts what was sent and received (Mon compte → Stockage et données).
+  Future<http.Response> _counted(
+    int sent,
+    Future<http.Response> response,
+  ) async {
+    final r = await response;
+    DataSettings.instance.countTraffic(
+      sent: sent,
+      received: r.bodyBytes.length,
+    );
+    return r;
+  }
+
+  Future<http.Response> _dispatch(
+    String method,
+    Uri uri,
+    Map<String, String> headers,
+    String? encoded,
+  ) {
     switch (method) {
       case 'GET':
         return _client.get(uri, headers: headers).timeout(_requestTimeout);

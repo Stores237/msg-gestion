@@ -3535,6 +3535,210 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Propulsé par'**
   String get poweredBy;
+
+  /// No description provided for @storageAndData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Stockage et données'**
+  String get storageAndData;
+
+  /// No description provided for @manageStorage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gérer le stockage'**
+  String get manageStorage;
+
+  /// No description provided for @storageUsed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{size} utilisés sur ce téléphone'**
+  String storageUsed(String size);
+
+  /// No description provided for @networkUsage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisation du réseau'**
+  String get networkUsage;
+
+  /// No description provided for @trafficSentReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'{sent} envoyés • {received} reçus'**
+  String trafficSentReceived(String sent, String received);
+
+  /// No description provided for @trafficSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis le {date}'**
+  String trafficSince(String date);
+
+  /// No description provided for @resetTrafficConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre à zéro les compteurs de données ?'**
+  String get resetTrafficConfirm;
+
+  /// No description provided for @reset.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remettre à zéro'**
+  String get reset;
+
+  /// No description provided for @dataSaver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Économiser les données mobiles'**
+  String get dataSaver;
+
+  /// No description provided for @dataSaverHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur données mobiles : pas de photos automatiques, photos envoyées en qualité standard'**
+  String get dataSaverHint;
+
+  /// No description provided for @uploadQuality.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qualité d’envoi des photos'**
+  String get uploadQuality;
+
+  /// No description provided for @qualityStandard.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qualité standard'**
+  String get qualityStandard;
+
+  /// No description provided for @qualityStandardHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus rapide, moins de données (jusqu’à 1024 px)'**
+  String get qualityStandardHint;
+
+  /// No description provided for @qualityHigh.
+  ///
+  /// In fr, this message translates to:
+  /// **'Haute qualité'**
+  String get qualityHigh;
+
+  /// No description provided for @qualityHighHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus nette, plus de données (jusqu’à 2048 px)'**
+  String get qualityHighHint;
+
+  /// No description provided for @autoDownload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargement automatique des médias'**
+  String get autoDownload;
+
+  /// No description provided for @autoDownloadHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les pièces jointes ne se téléchargent que lorsque vous les ouvrez.'**
+  String get autoDownloadHint;
+
+  /// No description provided for @onMobileData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sur données mobiles'**
+  String get onMobileData;
+
+  /// No description provided for @onWifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'En Wi-Fi'**
+  String get onWifi;
+
+  /// No description provided for @memberPhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos des membres'**
+  String get memberPhotos;
+
+  /// No description provided for @noMedia.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun média'**
+  String get noMedia;
+
+  /// No description provided for @autoOffBySaver.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactivé : économie de données'**
+  String get autoOffBySaver;
+
+  /// No description provided for @currentNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion actuelle : {network}'**
+  String currentNetwork(String network);
+
+  /// No description provided for @networkWifi.
+  ///
+  /// In fr, this message translates to:
+  /// **'Wi-Fi'**
+  String get networkWifi;
+
+  /// No description provided for @networkMobile.
+  ///
+  /// In fr, this message translates to:
+  /// **'données mobiles'**
+  String get networkMobile;
+
+  /// No description provided for @networkNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'hors ligne'**
+  String get networkNone;
+
+  /// No description provided for @networkUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'inconnue'**
+  String get networkUnknown;
+
+  /// No description provided for @offlineData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données hors ligne'**
+  String get offlineData;
+
+  /// No description provided for @offlineDataHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'rechargées depuis le serveur'**
+  String get offlineDataHint;
+
+  /// No description provided for @unsentChanges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifications non envoyées'**
+  String get unsentChanges;
+
+  /// No description provided for @unsentKept.
+  ///
+  /// In fr, this message translates to:
+  /// **'conservées jusqu’à l’envoi'**
+  String get unsentKept;
+
+  /// No description provided for @imagesInMemory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Images en mémoire'**
+  String get imagesInMemory;
+
+  /// No description provided for @clear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vider'**
+  String get clear;
+
+  /// No description provided for @sizeGb.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} Go'**
+  String sizeGb(String n);
 }
 
 class _AppLocalizationsDelegate

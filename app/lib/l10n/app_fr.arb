@@ -1309,5 +1309,77 @@
       }
     }
   },
-  "poweredBy": "Propulsé par"
+  "poweredBy": "Propulsé par",
+  "storageAndData": "Stockage et données",
+  "manageStorage": "Gérer le stockage",
+  "storageUsed": "{size} utilisés sur ce téléphone",
+  "@storageUsed": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "networkUsage": "Utilisation du réseau",
+  "trafficSentReceived": "{sent} envoyés • {received} reçus",
+  "@trafficSentReceived": {
+    "placeholders": {
+      "sent": {
+        "type": "String"
+      },
+      "received": {
+        "type": "String"
+      }
+    }
+  },
+  "trafficSince": "Depuis le {date}",
+  "@trafficSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "resetTrafficConfirm": "Remettre à zéro les compteurs de données ?",
+  "reset": "Remettre à zéro",
+  "dataSaver": "Économiser les données mobiles",
+  "dataSaverHint": "Sur données mobiles : pas de photos automatiques, photos envoyées en qualité standard",
+  "uploadQuality": "Qualité d’envoi des photos",
+  "qualityStandard": "Qualité standard",
+  "qualityStandardHint": "Plus rapide, moins de données (jusqu’à 1024 px)",
+  "qualityHigh": "Haute qualité",
+  "qualityHighHint": "Plus nette, plus de données (jusqu’à 2048 px)",
+  "autoDownload": "Téléchargement automatique des médias",
+  "autoDownloadHint": "Les pièces jointes ne se téléchargent que lorsque vous les ouvrez.",
+  "onMobileData": "Sur données mobiles",
+  "onWifi": "En Wi-Fi",
+  "memberPhotos": "Photos des membres",
+  "noMedia": "Aucun média",
+  "autoOffBySaver": "Désactivé : économie de données",
+  "currentNetwork": "Connexion actuelle : {network}",
+  "@currentNetwork": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      }
+    }
+  },
+  "networkWifi": "Wi-Fi",
+  "networkMobile": "données mobiles",
+  "networkNone": "hors ligne",
+  "networkUnknown": "inconnue",
+  "offlineData": "Données hors ligne",
+  "offlineDataHint": "rechargées depuis le serveur",
+  "unsentChanges": "Modifications non envoyées",
+  "unsentKept": "conservées jusqu’à l’envoi",
+  "imagesInMemory": "Images en mémoire",
+  "clear": "Vider",
+  "sizeGb": "{n} Go",
+  "@sizeGb": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  }
 }

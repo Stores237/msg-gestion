@@ -89,3 +89,5 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-27 | Swaps and absences validated by the event's chef de groupe (own events) as well as the lineup makers | Design ("Validation : …, chef de groupe"; "le chef de groupe ou le censeur valide") |
 | 2026-10-27 | Dress "Détail" and place detail written by each group, no default text | Design shows one group's wording ("Aube blanche, cordon…"); the platform serves several groups |
 | 2026-10-28 | "Propulsé par STORES" with an "S" mark in the text colour (inverted in dark mode), small, at the foot of login, Mon compte and the back-office sidebar, with the version | Owner. Kept out of the group's colour so it never reads as a group's identity |
+| 2026-10-28 | Mon compte → Stockage et données (storage, network usage, data saver, photo quality, auto-download per network), only what applies to MSG | Owner's reference: the phone's Storage and data screen. Proxy and roaming left out |
+| 2026-10-28 | Back-office sidebar: menu scrolls, account + signature pinned at the bottom | Rendered check: the footer (and log-out) was cut off under ~900 px |

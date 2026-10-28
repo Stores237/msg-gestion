@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../data/current_user.dart';
+import '../data/data_settings.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import 'errors.dart';
@@ -78,14 +79,16 @@ Future<void> changeMyPhoto(BuildContext context) async {
   }
 }
 
-/// Square-ish, ≤ 1024 px, JPEG quality 85: well under the server's 5 MB.
+/// Size and quality from Mon compte → Stockage et données (standard: ≤ 1024
+/// px, JPEG 85; high: ≤ 2048 px, JPEG 92), always under the server's 5 MB.
 /// Replaced in tests (no camera or gallery there).
 Future<(List<int>, String)?> Function(ImageSource) pickPhoto = (source) async {
+  final (side, quality) = DataSettings.instance.uploadSize;
   final f = await ImagePicker().pickImage(
     source: source,
-    maxWidth: 1024,
-    maxHeight: 1024,
-    imageQuality: 85,
+    maxWidth: side,
+    maxHeight: side,
+    imageQuality: quality,
     preferredCameraDevice: CameraDevice.front,
   );
   return f == null ? null : (await f.readAsBytes(), f.name);

@@ -2061,4 +2061,120 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get poweredBy => 'Propulsé par';
+
+  @override
+  String get storageAndData => 'Stockage et données';
+
+  @override
+  String get manageStorage => 'Gérer le stockage';
+
+  @override
+  String storageUsed(String size) {
+    return '$size utilisés sur ce téléphone';
+  }
+
+  @override
+  String get networkUsage => 'Utilisation du réseau';
+
+  @override
+  String trafficSentReceived(String sent, String received) {
+    return '$sent envoyés • $received reçus';
+  }
+
+  @override
+  String trafficSince(String date) {
+    return 'Depuis le $date';
+  }
+
+  @override
+  String get resetTrafficConfirm =>
+      'Remettre à zéro les compteurs de données ?';
+
+  @override
+  String get reset => 'Remettre à zéro';
+
+  @override
+  String get dataSaver => 'Économiser les données mobiles';
+
+  @override
+  String get dataSaverHint =>
+      'Sur données mobiles : pas de photos automatiques, photos envoyées en qualité standard';
+
+  @override
+  String get uploadQuality => 'Qualité d’envoi des photos';
+
+  @override
+  String get qualityStandard => 'Qualité standard';
+
+  @override
+  String get qualityStandardHint =>
+      'Plus rapide, moins de données (jusqu’à 1024 px)';
+
+  @override
+  String get qualityHigh => 'Haute qualité';
+
+  @override
+  String get qualityHighHint => 'Plus nette, plus de données (jusqu’à 2048 px)';
+
+  @override
+  String get autoDownload => 'Téléchargement automatique des médias';
+
+  @override
+  String get autoDownloadHint =>
+      'Les pièces jointes ne se téléchargent que lorsque vous les ouvrez.';
+
+  @override
+  String get onMobileData => 'Sur données mobiles';
+
+  @override
+  String get onWifi => 'En Wi-Fi';
+
+  @override
+  String get memberPhotos => 'Photos des membres';
+
+  @override
+  String get noMedia => 'Aucun média';
+
+  @override
+  String get autoOffBySaver => 'Désactivé : économie de données';
+
+  @override
+  String currentNetwork(String network) {
+    return 'Connexion actuelle : $network';
+  }
+
+  @override
+  String get networkWifi => 'Wi-Fi';
+
+  @override
+  String get networkMobile => 'données mobiles';
+
+  @override
+  String get networkNone => 'hors ligne';
+
+  @override
+  String get networkUnknown => 'inconnue';
+
+  @override
+  String get offlineData => 'Données hors ligne';
+
+  @override
+  String get offlineDataHint => 'rechargées depuis le serveur';
+
+  @override
+  String get unsentChanges => 'Modifications non envoyées';
+
+  @override
+  String get unsentKept => 'conservées jusqu’à l’envoi';
+
+  @override
+  String get imagesInMemory => 'Images en mémoire';
+
+  @override
+  String get clear => 'Vider';
+
+  @override
+  String sizeGb(String n) {
+    return '$n Go';
+  }
 }
