@@ -810,3 +810,28 @@ Owner, 2026-10-28 (reference screenshot: an account menu at the foot of the side
 **Verify.** Back-office → click your name at the bottom of the menu → Sombre: the page turns
 dark and stays dark after a reload. Changer le mot de passe → wrong current one → refused; a good
 one → "Mot de passe modifié", still signed in. `pytest apps/backoffice/test_shell.py`.
+
+## 38. Edit a person's details in the back-office
+
+Owner, 2026-10-28 ("why is it that we couldn't edit user infos at back office"). The user page
+showed the identity read-only, as in the design; there was no way to correct a name or a number.
+
+- **Identité → Modifier** opens a form: last name, first names, birth date, member since,
+  diaspora and city, parent or guardian (name, relation, phone), photo (replace, JPEG/PNG ≤ 5 MB,
+  or remove). Same rules as creating a member: names required, no date in the future, a minor
+  needs a parent's phone. A refused form reopens with what was typed and changes nothing (a bad
+  photo doesn't save the rest either). The audit log gets "Identité modifiée" with the old and
+  new value of each field changed.
+- **Téléphone → ✎ (Changer le numéro)**, apart because the number is the login: valid, unique
+  across the platform, mandatory reason. The person's phones are signed out (refresh tokens
+  blacklisted; the 15-minute access token runs out) and they sign in with the new number and the
+  same PIN. For a back-office account, its other back-office sessions end too. Journaled with old
+  number, new number and reason; a number already in use is refused and journaled.
+- Who: "Utilisateurs › Modifier" for members (super admin, support responsable); a super admin
+  or back-office staff account only by a super admin. Rules in `accounts/services.py`
+  (`update_identity`, `change_phone`).
+
+**Verify.** Back-office → Utilisateurs → a member → Identité → Modifier → fix the name →
+Enregistrer: the page shows it, Journal d'audit shows "Identité modifiée" with before/after.
+✎ next to the phone → another member's number → refused; a new number with a reason → the
+member's app asks to sign in again, with the new number. `pytest apps/backoffice/test_identity.py`.

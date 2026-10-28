@@ -23,7 +23,16 @@ from django.views.decorators.http import require_POST
 from apps.accounts import registry
 from apps.accounts.models import Role, RoleAssignment, RolePermission, RoleRequest, User
 from apps.accounts.phone import InvalidPhone, format_phone, normalize_phone
-from apps.accounts.services import RuleViolation, assign_role, default_end, reset_pin, revoke_assignment, temporary_pin
+from apps.accounts.services import (
+    RuleViolation,
+    assign_role,
+    change_phone,
+    default_end,
+    reset_pin,
+    revoke_assignment,
+    temporary_pin,
+    update_identity,
+)
 from apps.core import audit
 from apps.core.models import APP_COLORS, AuditLog, Membership, Settings
 from apps.core.notify import notify
@@ -135,6 +144,7 @@ def _active_roles(user):
 def user_detail(request, pk):
     member = get_object_or_404(User, pk=pk)
     once = None  # secrets shown once after an action
+    dialog = None  # (dialog id, error) to reopen with what was typed
     if request.method == "POST":
         action = request.POST.get("action")
         # Each action needs its own right (owner, 2026-10-26: staff teams):
@@ -191,6 +201,36 @@ def user_detail(request, pk):
                 audit.record("Mot de passe back-office défini", actor=request.user, obj=member, request=request, sensitive=True)
                 codes = BackupCode.regenerate(member)
                 once = {"label": "Mot de passe provisoire et codes de secours", "value": pw, "codes": codes}
+            elif action == "identity":
+                try:
+                    changes = _identity_changes(request.POST)
+                    _photo_check(request.FILES.get("photo"))
+                except RuleViolation as e:
+                    dialog = ("dlg-identity", str(e))
+                else:
+                    try:
+                        changed = update_identity(member, changes, by=request.user, request=request)
+                        photo = _identity_photo(request, member)
+                    except RuleViolation as e:
+                        dialog = ("dlg-identity", str(e))
+                    else:
+                        changed += photo
+                        messages.success(request, "Identité mise à jour : " + ", ".join(changed).lower() + "." if changed
+                                         else "Aucun changement.")
+            elif action == "phone":
+                try:
+                    phone = normalize_phone(request.POST.get("phone"))
+                    change_phone(member, phone, by=request.user, reason=reason, request=request)
+                except (InvalidPhone, RuleViolation) as e:
+                    dialog = ("dlg-phone", str(e))
+                else:
+                    if member.is_platform_account:
+                        # Their other back-office sessions end too (not the one making the change).
+                        others = BackofficeSession.objects.filter(user=member).exclude(session_key=request.session.session_key)
+                        Session.objects.filter(session_key__in=others.values_list("session_key", flat=True)).delete()
+                        others.delete()
+                    messages.success(request, f"Numéro modifié : {format_phone(phone)}. Les téléphones de {member.short_name} "
+                                     "sont déconnectés ; la connexion se fait maintenant avec ce numéro.")
             elif action == "groups":
                 ids = [int(x) for x in request.POST.getlist("groups")]
                 for g in ServiceGroup.objects.all():
@@ -198,7 +238,7 @@ def user_detail(request, pk):
                 messages.success(request, "Groupes mis à jour.")
         except RuleViolation as e:
             messages.error(request, str(e))
-        if once is None:
+        if once is None and dialog is None:
             return redirect("backoffice:user", pk=member.pk)
     assignments = member.assignments.select_related("role").order_by("revoked_at", "-starts_on")
     today = timezone.localdate()
@@ -223,7 +263,69 @@ def user_detail(request, pk):
         "leave_until": Membership.objects.filter(user=member).values_list("leave_until", flat=True).first(),
         "phone": format_phone(member.phone), "backoffice": member.has_usable_password(),
         "codes_left": BackupCode.remaining(member), "now": timezone.now(),
-    })
+        "dialog": dialog, "form": request.POST if dialog else None,
+    }, status=400 if dialog else 200)
+
+
+def _identity_changes(post):
+    """The identity form, parsed; a bad date or phone is a RuleViolation."""
+    def day(name, label):
+        raw = (post.get(name) or "").strip()
+        if not raw:
+            return None
+        d = parse_date(raw)
+        if d is None:
+            raise RuleViolation(f"{label} : date invalide.")
+        return d
+
+    parent_phone = (post.get("parent_phone") or "").strip()
+    if parent_phone:
+        try:
+            parent_phone = normalize_phone(parent_phone)
+        except InvalidPhone as e:
+            raise RuleViolation(f"Téléphone du parent : {e}") from e
+    joined = day("joined_on", "Membre depuis")
+    if joined is None:
+        raise RuleViolation("La date d’adhésion est obligatoire.")
+    return {
+        "last_name": (post.get("last_name") or "").strip()[:80],
+        "first_name": (post.get("first_name") or "").strip()[:80],
+        "birth_date": day("birth_date", "Date de naissance"),
+        "joined_on": joined,
+        "is_diaspora": bool(post.get("is_diaspora")),
+        "city": (post.get("city") or "").strip()[:80],
+        "parent_name": (post.get("parent_name") or "").strip()[:120],
+        "parent_relation": (post.get("parent_relation") or "").strip()[:40],
+        "parent_phone": parent_phone,
+    }
+
+
+def _photo_check(upload):
+    """The app's rule for a profile picture: JPEG/PNG, 5 MB at most."""
+    from apps.announcements.files import sniff
+
+    if upload is None:
+        return
+    if upload.size > 5 * 1024 * 1024:
+        raise RuleViolation("Photo trop lourde (5 Mo maximum).")
+    if sniff(upload) not in ("image/jpeg", "image/png"):
+        raise RuleViolation("Photo : JPEG ou PNG uniquement.")
+
+
+def _identity_photo(request, member):
+    """Replace (already checked by _photo_check) or remove the photo."""
+    upload = request.FILES.get("photo")
+    if upload is not None:
+        if member.photo:
+            member.photo.delete(save=False)
+        member.photo.save(f"{member.pk}-{upload.name.rsplit('/', 1)[-1]}", upload, save=True)
+        audit.record("Photo modifiée", actor=request.user, obj=member, request=request)
+        return ["Photo"]
+    if request.POST.get("remove_photo") and member.photo:
+        member.photo.delete(save=True)
+        audit.record("Photo retirée", actor=request.user, obj=member, request=request)
+        return ["Photo"]
+    return []
 
 
 @backoffice_view("backoffice.users", "create")

@@ -66,6 +66,10 @@
 - A back-office account changes its own password from the account menu (`/bo/mot-de-passe/`):
   current password required, Django's password validators, the other sessions and trusted
   devices end (the session renews its key and stays). Changes and wrong attempts are audited.
+- A member's phone number (their login) is changed only in the back-office, with a reason, by
+  "Utilisateurs › Modifier" (a platform account's only by a super admin); it must be unique, the
+  person's refresh tokens are blacklisted so their phones are signed out, and the old and new
+  numbers are audited. Identity edits are audited field by field (before/after).
 - The API schema and docs (`/api/schema/`, `/api/docs/`) open only in a signed-in back-office
   session (`IsPlatformAccount`), not to the public.
 

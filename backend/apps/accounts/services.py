@@ -210,3 +210,79 @@ def set_role_permissions(role, changes, *, by, reason, request=None):
     if diff:
         audit.record("Permission modifiée", actor=by, obj=role, request=request, sensitive=True, detail={"diff": diff, "motif": reason.strip()})
     return diff
+
+
+# --- Identity (back-office "Modifier") -----------------------------------------
+
+IDENTITY_FIELDS = {
+    "last_name": "Nom",
+    "first_name": "Prénoms",
+    "birth_date": "Date de naissance",
+    "joined_on": "Membre depuis",
+    "is_diaspora": "Diaspora",
+    "city": "Ville",
+    "parent_name": "Parent ou tuteur",
+    "parent_relation": "Lien",
+    "parent_phone": "Téléphone du parent",
+}
+
+
+def _age(birth, today):
+    return today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+
+
+def update_identity(member, changes, *, by, request=None):
+    """Corrects a person's details (owner, 2026-10-28). `changes` holds the
+    fields of IDENTITY_FIELDS, already parsed; only those that differ are
+    saved and journaled, each with its old and new value. Returns the labels
+    of the fields changed."""
+    today = timezone.localdate()
+    data = {f: getattr(member, f) for f in IDENTITY_FIELDS} | changes
+    if not (data["last_name"] or "").strip() or not (data["first_name"] or "").strip():
+        raise RuleViolation("Nom et prénoms sont obligatoires.")
+    if data["birth_date"] and data["birth_date"] > today:
+        raise RuleViolation("La date de naissance est dans le futur.")
+    if data["joined_on"] and data["joined_on"] > today:
+        raise RuleViolation("La date d’adhésion est dans le futur.")
+    if data["birth_date"] and _age(data["birth_date"], today) < 18 and not data["parent_phone"]:
+        raise RuleViolation("Le téléphone d’un parent est obligatoire pour un mineur.")
+    if not data["is_diaspora"]:
+        data["city"] = ""
+    diff = {f: (getattr(member, f), data[f]) for f in IDENTITY_FIELDS if getattr(member, f) != data[f]}
+    if not diff:
+        return []
+    for f, (_, new) in diff.items():
+        setattr(member, f, new)
+    member.save(update_fields=list(diff))
+
+    def show(v):
+        return "" if v is None else str(v)
+
+    audit.record("Identité modifiée", actor=by, obj=member, request=request,
+                 detail={IDENTITY_FIELDS[f]: {"avant": show(old), "apres": show(new)} for f, (old, new) in diff.items()})
+    return [IDENTITY_FIELDS[f] for f in diff]
+
+
+def change_phone(member, phone, *, by, reason, request=None):
+    """The phone number is the login: it must stay unique, the change is
+    journaled with its reason, and the person's phones are signed out (their
+    refresh tokens are blacklisted; the 15-minute access token runs out).
+    `phone` is already normalised (E.164)."""
+    if not reason or not reason.strip():
+        raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
+    if phone == member.phone:
+        raise RuleViolation("C’est déjà le numéro de cette personne.")
+    if User.objects.filter(phone=phone).exclude(pk=member.pk).exists():
+        audit.record("Changement de numéro refusé", actor=by, obj=member, request=request, sensitive=True, refused=True,
+                     detail={"motif": "numéro déjà utilisé"})
+        raise RuleViolation("Ce numéro est déjà celui d’un autre compte.")
+    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+    old = member.phone
+    with transaction.atomic():
+        member.phone = phone
+        member.save(update_fields=["phone"])
+        live = OutstandingToken.objects.filter(user=member).exclude(blacklistedtoken__isnull=False)
+        BlacklistedToken.objects.bulk_create([BlacklistedToken(token=t) for t in live], ignore_conflicts=True)
+        audit.record("Numéro de téléphone modifié", actor=by, obj=member, request=request, sensitive=True,
+                     detail={"avant": old, "apres": phone, "motif": reason.strip()})

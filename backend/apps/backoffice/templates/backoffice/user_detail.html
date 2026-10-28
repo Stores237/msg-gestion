@@ -30,10 +30,13 @@
       <div class="panel-b"><div class="rbs">{% for g in groups %}<label class="fsel{% if g.pk in member_groups %} on{% endif %}"><input type="checkbox" name="groups" value="{{ g.pk }}"{% if g.pk in member_groups %} checked{% endif %}{% if not can_edit %} disabled{% endif %}> {{ g.name }}{% if g.chef_id == member.pk %} · chef{% endif %}</label>{% empty %}<span class="muted">Aucun groupe. Les groupes se créent depuis l’app (Planning).</span>{% endfor %}</div></div></form>
   </div>
   <div style="display:flex;flex-direction:column;gap:24px">
-    <section class="panel"><div class="panel-h"><h2>Identité</h2></div><div class="panel-b"><dl class="dl">
-      <dt>Téléphone</dt><dd class="tnum">{{ phone }}</dd><dt>Statut</dt><dd>{% status member %}{% if member.group_status == 'conge' and leave_until %} <span class="muted">jusqu’au {{ leave_until|date:"d/m/Y" }}</span>{% endif %}</dd>
+    <section class="panel"><div class="panel-h"><h2>Identité</h2>{% if can_edit %}<div class="acts"><button type="button" class="btn btn-secondary btn-sm" id="edit-identity" onclick="document.getElementById('dlg-identity').showModal()">{% icon 'pencil' 16 %}Modifier</button></div>{% endif %}</div><div class="panel-b">
+      {% if member.photo %}<img src="{{ member.photo.url }}" alt="Photo de {{ member.full_name }}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin-bottom:12px">{% endif %}
+      <dl class="dl">
+      <dt>Téléphone</dt><dd class="tnum" style="display:flex;align-items:center;gap:4px;white-space:nowrap">{{ phone }}{% if can_edit %}<button type="button" class="btn btn-ghost btn-sm" id="edit-phone" title="Changer le numéro" aria-label="Changer le numéro" style="padding:4px;min-height:0;height:auto" onclick="document.getElementById('dlg-phone').showModal()">{% icon 'pencil' 14 %}</button>{% endif %}</dd><dt>Statut</dt><dd>{% status member %}{% if member.group_status == 'conge' and leave_until %} <span class="muted">jusqu’au {{ leave_until|date:"d/m/Y" }}</span>{% endif %}</dd>
       <dt>Membre depuis</dt><dd>{{ member.joined_on|date:"l j F Y" }}</dd><dt>Date de naissance</dt><dd>{{ member.birth_date|date:"d/m/Y"|default:"—" }}</dd>
       {% if member.is_diaspora %}<dt>Diaspora</dt><dd>{{ member.city|default:"oui" }}</dd>{% endif %}
+      {% if member.parent_name or member.parent_phone %}<dt>Parent ou tuteur</dt><dd>{{ member.parent_name|default:"—" }}{% if member.parent_relation %} ({{ member.parent_relation }}){% endif %}{% if member.parent_phone %} · <span class="tnum">{{ member.parent_phone|phone }}</span>{% endif %}</dd>{% endif %}
       <dt>Dernière connexion</dt><dd>{{ member.last_login|date:"d/m/Y H:i"|default:"jamais" }}</dd>
       <dt>Conditions d’utilisation</dt><dd>{% if member.terms_accepted_at %}version {{ member.terms_version }} acceptée le {{ member.terms_accepted_at|date:"d/m/Y H:i" }}{% else %}<span class="muted">pas encore acceptées</span>{% endif %}</dd>
       <dt>PIN</dt><dd>{% if member.pin_locked_until and member.pin_locked_until > now %}Bloqué{% elif member.pin_must_change %}Provisoire{% else %}Personnel{% endif %}</dd>
@@ -47,6 +50,37 @@
   </div>
 </div>
 {% if can_edit %}
+<dialog id="dlg-identity" class="dialog wide" style="border:none;padding:24px;max-width:640px"><form method="post" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="identity">
+  <h2 style="margin:0">Modifier l’identité</h2>
+  {% if dialog.0 == 'dlg-identity' %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ dialog.1 }}</span></div>{% endif %}
+  {% with f=form %}
+  <div class="form-grid">
+    <label class="fld"><span class="fld-l">Nom<em> *</em></span><span class="fld-box"><input name="last_name" required maxlength="80" value="{% if f %}{{ f.last_name }}{% else %}{{ member.last_name }}{% endif %}"></span></label>
+    <label class="fld"><span class="fld-l">Prénoms<em> *</em></span><span class="fld-box"><input name="first_name" required maxlength="80" value="{% if f %}{{ f.first_name }}{% else %}{{ member.first_name }}{% endif %}"></span></label>
+    <label class="fld"><span class="fld-l">Date de naissance</span><span class="fld-box"><input type="date" name="birth_date" max="{{ today|date:'Y-m-d' }}" value="{% if f %}{{ f.birth_date }}{% else %}{{ member.birth_date|date:'Y-m-d' }}{% endif %}"></span></label>
+    <label class="fld"><span class="fld-l">Membre depuis<em> *</em></span><span class="fld-box"><input type="date" name="joined_on" required max="{{ today|date:'Y-m-d' }}" value="{% if f %}{{ f.joined_on }}{% else %}{{ member.joined_on|date:'Y-m-d' }}{% endif %}"></span></label>
+    <label style="display:flex;gap:10px;align-items:center;grid-column:1/-1"><input type="checkbox" class="toggle" name="is_diaspora" value="1"{% if f %}{% if f.is_diaspora %} checked{% endif %}{% elif member.is_diaspora %} checked{% endif %} onchange="document.getElementById('f-city').style.display=this.checked?'':'none'"><span><b>Diaspora</b> — vit hors du pays du groupe</span></label>
+    <label class="fld" id="f-city" style="grid-column:1/-1{% if f %}{% if not f.is_diaspora %};display:none{% endif %}{% elif not member.is_diaspora %};display:none{% endif %}"><span class="fld-l">Ville</span><span class="fld-box"><input name="city" maxlength="80" placeholder="Lyon, France" value="{% if f %}{{ f.city }}{% else %}{{ member.city }}{% endif %}"></span></label>
+    <label class="fld"><span class="fld-l">Parent ou tuteur</span><span class="fld-box"><input name="parent_name" maxlength="120" value="{% if f %}{{ f.parent_name }}{% else %}{{ member.parent_name }}{% endif %}"></span></label>
+    <label class="fld"><span class="fld-l">Lien</span><span class="fld-box"><input name="parent_relation" maxlength="40" placeholder="Mère, oncle…" value="{% if f %}{{ f.parent_relation }}{% else %}{{ member.parent_relation }}{% endif %}"></span></label>
+    <label class="fld" style="grid-column:1/-1"><span class="fld-l">Téléphone du parent</span><span class="fld-box"><input name="parent_phone" inputmode="tel" value="{% if f %}{{ f.parent_phone }}{% else %}{{ member.parent_phone|phone }}{% endif %}"></span><span class="fld-h">Obligatoire pour un mineur.</span></label>
+    <label class="fld" style="grid-column:1/-1"><span class="fld-l">Photo</span><span class="fld-box"><input type="file" name="photo" accept="image/jpeg,image/png" style="padding:10px 0;font:inherit;font-size:14px"></span><span class="fld-h">JPEG ou PNG, 5 Mo maximum. Remplace la photo actuelle.</span></label>
+    {% if member.photo %}<label style="display:flex;gap:10px;align-items:center;grid-column:1/-1"><input type="checkbox" name="remove_photo" value="1"><span>Retirer la photo actuelle</span></label>{% endif %}
+  </div>
+  {% endwith %}
+  <p style="margin:0;font-size:13px;color:var(--text-secondary)">Chaque modification est inscrite au journal avec l’ancienne et la nouvelle valeur. Le numéro de téléphone se change à part.</p>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
+</form></dialog>
+<dialog id="dlg-phone" class="dialog" style="border:none;padding:24px;max-width:480px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="phone">
+  <h2 style="margin:0">Changer le numéro</h2>
+  {% if dialog.0 == 'dlg-phone' %}<div class="notice alert" role="alert">{% icon 'circle-alert' %}<span>{{ dialog.1 }}</span></div>{% endif %}
+  <div class="notice warn">{% icon 'triangle-alert' %}<span>Le numéro sert à se connecter. Après le changement, les téléphones de {{ member.short_name }} sont déconnectés ; la connexion se fait avec le nouveau numéro et le même PIN.</span></div>
+  <p style="margin:0;font-size:14px">Actuel : <b class="tnum">{{ phone }}</b></p>
+  <label class="fld"><span class="fld-l">Nouveau numéro<em> *</em></span><span class="fld-box">{% icon 'phone' %}<input name="phone" inputmode="tel" required placeholder="6 XX XX XX XX" value="{% if dialog.0 == 'dlg-phone' %}{{ form.phone }}{% endif %}"></span></label>
+  <label class="fld"><span class="fld-l">Motif (journalisé)<em> *</em></span><span class="fld-box"><input name="reason" required placeholder="Nouvelle puce, numéro mal saisi…" value="{% if dialog.0 == 'dlg-phone' %}{{ form.reason }}{% endif %}"></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-ghost" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Changer le numéro</button></div>
+</form></dialog>
+{% if dialog %}<script>document.getElementById('{{ dialog.0 }}').showModal()</script>{% endif %}
 <dialog id="dlg-assign" class="dialog wide" style="border:none;padding:24px;max-width:640px"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="assign">
   <h3>Affecter un rôle à {{ member.short_name }}</h3>
   <div class="form-grid">
