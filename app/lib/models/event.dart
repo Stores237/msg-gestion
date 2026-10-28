@@ -37,6 +37,9 @@ class CalendarEvent {
   /// Second line under the place ("Quartier, ville").
   final String placeDetail;
 
+  /// The event is over: its end (or start, without an end) has passed.
+  bool get isOver => (endsAt ?? startsAt).isBefore(DateTime.now());
+
   /// What the dress means in this group (Paramètres → Tenues).
   final String dressDetail;
 

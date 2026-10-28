@@ -14,6 +14,9 @@ class AttachmentInfo {
 
   bool get isPdf => contentType == 'application/pdf';
 
+  /// A photo, shown in the announcement in its 4:3 frame.
+  bool get isImage => contentType.startsWith('image/');
+
   factory AttachmentInfo.fromJson(Map<String, dynamic> j) => AttachmentInfo(
     id: j['id'] as int,
     name: j['name'] as String,

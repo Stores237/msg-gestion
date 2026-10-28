@@ -1353,7 +1353,7 @@
   "autoDownloadHint": "Les pièces jointes ne se téléchargent que lorsque vous les ouvrez.",
   "onMobileData": "Sur données mobiles",
   "onWifi": "En Wi-Fi",
-  "memberPhotos": "Photos des membres",
+  "memberPhotos": "Photos (membres et annonces)",
   "noMedia": "Aucun média",
   "autoOffBySaver": "Désactivé : économie de données",
   "currentNetwork": "Connexion actuelle : {network}",
@@ -1381,5 +1381,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "framePhoto": "Cadrer la photo",
+  "framePhotoHint": "Déplacez et zoomez la photo : seul ce qui est dans le cadre est envoyé.",
+  "photoRules": "Format paysage 4:3 · 2 Mo maximum · 4 photos par annonce",
+  "usePhoto": "Utiliser cette photo",
+  "photoUnreadable": "Cette image ne peut pas être lue.",
+  "showPhoto": "Afficher la photo",
+  "addPhotoHint": "Galerie ou appareil photo · cadrée en 4:3, 2 Mo max",
+  "photosLimit": "4 photos maximum par annonce.",
+  "attachPdfHint": "Document PDF, 10 Mo max",
+  "eventExpired": "Expiré"
 }

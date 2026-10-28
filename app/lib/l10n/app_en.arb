@@ -592,7 +592,7 @@
   "autoDownloadHint": "Attachments download only when you open them.",
   "onMobileData": "When using mobile data",
   "onWifi": "When connected on Wi-Fi",
-  "memberPhotos": "Member photos",
+  "memberPhotos": "Photos (members and announcements)",
   "noMedia": "No media",
   "autoOffBySaver": "Off: using less data",
   "currentNetwork": "Current connection: {network}",
@@ -606,5 +606,15 @@
   "unsentKept": "kept until sent",
   "imagesInMemory": "Images in memory",
   "clear": "Clear",
-  "sizeGb": "{n} GB"
+  "sizeGb": "{n} GB",
+  "framePhoto": "Frame the photo",
+  "framePhotoHint": "Move and zoom the photo: only what is inside the frame is sent.",
+  "photoRules": "Landscape 4:3 · 2 MB maximum · 4 photos per announcement",
+  "usePhoto": "Use this photo",
+  "photoUnreadable": "This image can’t be read.",
+  "showPhoto": "Show the photo",
+  "addPhotoHint": "Gallery or camera · framed 4:3, 2 MB max",
+  "photosLimit": "4 photos maximum per announcement.",
+  "attachPdfHint": "PDF document, 10 MB max",
+  "eventExpired": "Expired"
 }

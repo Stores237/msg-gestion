@@ -10,6 +10,7 @@ import 'attachments.dart';
 import 'dates.dart';
 import 'errors.dart';
 import 'labels.dart';
+import 'photo_frame.dart';
 import 'sync_widgets.dart';
 
 /// Screen title row (design: .appbar).
@@ -909,7 +910,8 @@ class EventCard extends StatelessWidget {
 }
 
 /// The event's type in small caps, with an Intérieur / Extérieur chip for
-/// types that have it; Extérieur in amber so it is told apart at a glance.
+/// types that have it (Extérieur in amber so it is told apart at a glance),
+/// and a grey "Expiré" chip once the event is over.
 class EventTypeLine extends StatelessWidget {
   const EventTypeLine({super.key, required this.event});
   final CalendarEvent event;
@@ -937,6 +939,13 @@ class EventTypeLine extends StatelessWidget {
             scopeLabel(l, event.scope),
             key: const Key('event-scope'),
             tone: event.scope == 'exterieur' ? Tone.amber : Tone.neutral,
+          ),
+        // Over (owner, 2026-10-28): a grey "Expiré" chip.
+        if (event.isOver)
+          Badge2(
+            l.eventExpired,
+            key: const Key('event-expired'),
+            tone: Tone.neutral,
           ),
       ],
     );
@@ -1059,29 +1068,71 @@ class AnnouncementCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (a.attachments.isNotEmpty)
-                  AttachmentList(items: a.attachments),
-                if (a.isConvocation && a.eventStartsAt != null) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.event_available_outlined,
-                        size: 16,
-                        color: c.primaryText,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          d.fullDateTime(a.eventStartsAt!),
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: c.primaryText,
-                          ),
+                // Photos in their 4:3 frame: the first on the feed card
+                // (with "+N"), all of them on the announcement itself.
+                ...() {
+                  final photos = [
+                    for (final x in a.attachments)
+                      if (x.isImage) x,
+                  ];
+                  if (photos.isEmpty) return const <Widget>[];
+                  final shown = onTap == null ? photos : photos.take(1);
+                  return [
+                    for (final (i, p) in shown.indexed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: AnnouncementPhoto(
+                          key: Key('ann-photo-${p.id}'),
+                          url: p.url,
+                          badge: onTap != null && i == 0 && photos.length > 1
+                              ? '+${photos.length - 1}'
+                              : null,
                         ),
                       ),
+                  ];
+                }(),
+                if (a.attachments.any((x) => !x.isImage))
+                  AttachmentList(
+                    items: [
+                      for (final x in a.attachments)
+                        if (!x.isImage) x,
                     ],
+                  ),
+                if (a.isConvocation && a.eventStartsAt != null) ...[
+                  const SizedBox(height: 8),
+                  // The date it convenes to; once past, grey with "Expiré"
+                  // (owner, 2026-10-28), like an event that is over.
+                  Builder(
+                    builder: (context) {
+                      final over = a.eventStartsAt!.isBefore(DateTime.now());
+                      final tone = over ? c.textSecondary : c.primaryText;
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.event_available_outlined,
+                            size: 16,
+                            color: tone,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              d.fullDateTime(a.eventStartsAt!),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: tone,
+                              ),
+                            ),
+                          ),
+                          if (over)
+                            Badge2(
+                              l.eventExpired,
+                              key: const Key('announcement-expired'),
+                              tone: Tone.neutral,
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ],
                 const SizedBox(height: 8),

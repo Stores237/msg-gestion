@@ -2130,7 +2130,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onWifi => 'En Wi-Fi';
 
   @override
-  String get memberPhotos => 'Photos des membres';
+  String get memberPhotos => 'Photos (membres et annonces)';
 
   @override
   String get noMedia => 'Aucun média';
@@ -2177,4 +2177,37 @@ class AppLocalizationsFr extends AppLocalizations {
   String sizeGb(String n) {
     return '$n Go';
   }
+
+  @override
+  String get framePhoto => 'Cadrer la photo';
+
+  @override
+  String get framePhotoHint =>
+      'Déplacez et zoomez la photo : seul ce qui est dans le cadre est envoyé.';
+
+  @override
+  String get photoRules =>
+      'Format paysage 4:3 · 2 Mo maximum · 4 photos par annonce';
+
+  @override
+  String get usePhoto => 'Utiliser cette photo';
+
+  @override
+  String get photoUnreadable => 'Cette image ne peut pas être lue.';
+
+  @override
+  String get showPhoto => 'Afficher la photo';
+
+  @override
+  String get addPhotoHint =>
+      'Galerie ou appareil photo · cadrée en 4:3, 2 Mo max';
+
+  @override
+  String get photosLimit => '4 photos maximum par annonce.';
+
+  @override
+  String get attachPdfHint => 'Document PDF, 10 Mo max';
+
+  @override
+  String get eventExpired => 'Expiré';
 }

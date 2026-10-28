@@ -3653,7 +3653,7 @@ abstract class AppLocalizations {
   /// No description provided for @memberPhotos.
   ///
   /// In fr, this message translates to:
-  /// **'Photos des membres'**
+  /// **'Photos (membres et annonces)'**
   String get memberPhotos;
 
   /// No description provided for @noMedia.
@@ -3739,6 +3739,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n} Go'**
   String sizeGb(String n);
+
+  /// No description provided for @framePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadrer la photo'**
+  String get framePhoto;
+
+  /// No description provided for @framePhotoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déplacez et zoomez la photo : seul ce qui est dans le cadre est envoyé.'**
+  String get framePhotoHint;
+
+  /// No description provided for @photoRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Format paysage 4:3 · 2 Mo maximum · 4 photos par annonce'**
+  String get photoRules;
+
+  /// No description provided for @usePhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser cette photo'**
+  String get usePhoto;
+
+  /// No description provided for @photoUnreadable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette image ne peut pas être lue.'**
+  String get photoUnreadable;
+
+  /// No description provided for @showPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher la photo'**
+  String get showPhoto;
+
+  /// No description provided for @addPhotoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Galerie ou appareil photo · cadrée en 4:3, 2 Mo max'**
+  String get addPhotoHint;
+
+  /// No description provided for @photosLimit.
+  ///
+  /// In fr, this message translates to:
+  /// **'4 photos maximum par annonce.'**
+  String get photosLimit;
+
+  /// No description provided for @attachPdfHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Document PDF, 10 Mo max'**
+  String get attachPdfHint;
+
+  /// No description provided for @eventExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Expiré'**
+  String get eventExpired;
 }
 
 class _AppLocalizationsDelegate

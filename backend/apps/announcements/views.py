@@ -11,7 +11,7 @@ from apps.accounts.permissions import require
 from apps.core import audit
 from apps.core.notify import notify
 
-from .files import MAX_BYTES, sniff
+from .files import MAX_BYTES, PHOTOS_PER_ANNOUNCEMENT, photo_problem, sniff
 from .models import Announcement, Attachment, Read
 from .serializers import AnnouncementSerializer, AttachmentSerializer
 
@@ -154,6 +154,13 @@ class AttachmentUploadView(APIView):
         content_type = sniff(upload)
         if content_type is None:
             return Response({"detail": "Seuls les PDF, JPEG et PNG sont acceptés.", "code": "file_type"}, status=400)
+        if content_type.startswith("image/"):
+            # Photos keep one frame and size (owner, 2026-10-28).
+            problem = photo_problem(upload)
+            if problem:
+                return Response({"detail": problem[1], "code": problem[0]}, status=400)
+            if item.attachments.filter(content_type__startswith="image/").count() >= PHOTOS_PER_ANNOUNCEMENT:
+                return Response({"detail": f"{PHOTOS_PER_ANNOUNCEMENT} photos maximum par annonce.", "code": "too_many_photos"}, status=400)
         name = (upload.name or "fichier").rsplit("/", 1)[-1][:160]
         att = Attachment.objects.create(announcement=item, file=upload, name=name, size=upload.size, content_type=content_type, uploaded_by=request.user)
         audit.record("Pièce jointe ajoutée", actor=request.user, obj=item, request=request, detail={"fichier": name})

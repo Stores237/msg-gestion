@@ -732,3 +732,28 @@ Owner, 2026-10-28 (after the phone's own "Storage and data" screen).
 **Verify.** App: Mon compte → Stockage et données; turn on the saver → "Sur données mobiles" says
 "Désactivé : économie de données". Back-office on a short window: log-out and signature visible.
 `flutter test test/storage_data_test.dart`.
+
+## 34. Photos in announcements; "Expiré" on past events and convocations (build 20)
+
+Owner, 2026-10-28.
+
+- **"Ajouter une photo"** in the announcement composer (gallery or camera). Every photo has
+  one frame: **landscape 4:3**. After picking, "Cadrer la photo" shows it under the frame; move
+  and zoom it, only what is inside is kept. The app resizes it (quality from Stockage et
+  données: 1024×768 standard, 2048×1536 high) and compresses it to **2 MB at most**;
+  **4 photos** per announcement.
+- The server checks the same rules on every image attached to an announcement (format 4:3 ±2 %,
+  320–2048 px, ≤ 2 MB, 4 per announcement: `photo_frame`, `photo_size`, `photo_too_large`,
+  `too_many_photos`). "Joindre un fichier" is now for PDFs (10 MB); pictures go through the
+  frame.
+- Photos show **in the announcement**: the first on the feed card (with "+N" when there are
+  more), all of them in the announcement, tap for full screen. With automatic photos off for
+  the network (Stockage et données), they show "Afficher la photo" until tapped.
+- **"Expiré"** (grey chip) on an event once it is over (its end, or its start without an end),
+  wherever the event shows: calendar, Accueil, event page, report, roll call. And on a
+  convocation once its date has passed (the date line turns grey).
+
+**Verify.** New announcement → Ajouter une photo → pick a portrait photo → the frame is
+landscape; move it, Utiliser cette photo → send → the card shows the photo. A past event in the
+calendar shows EXPIRÉ. `pytest apps/announcements/test_photos.py`;
+`flutter test test/announcement_photo_test.dart test/design_details_test.dart`.

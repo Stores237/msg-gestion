@@ -11,6 +11,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
 import '../../widgets/attachments.dart';
+import '../../widgets/photo_frame.dart';
 import '../../widgets/ui.dart';
 
 /// A file chosen in the composer, uploaded after the announcement exists.
@@ -41,6 +42,21 @@ class _ComposeScreenState extends State<ComposeScreen> {
   bool _busy = false;
   bool _eventMissing = false;
   final List<PickedFile> _files = [];
+
+  /// Photos framed 4:3, ≤ 2 MB (owner, 2026-10-28), sent after the files.
+  final List<FramedPhoto> _photos = [];
+
+  Future<void> _addPhoto() async {
+    final l = AppLocalizations.of(context);
+    if (_photos.length >= photosPerAnnouncement) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l.photosLimit)));
+      return;
+    }
+    final p = await addFramedPhoto(context);
+    if (p != null && mounted) setState(() => _photos.add(p));
+  }
 
   bool get _editing => widget.existing != null;
 
@@ -178,7 +194,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
     try {
       picked = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
+        // Pictures go through "Ajouter une photo" and its frame.
+        allowedExtensions: const ['pdf'],
       );
     } catch (e) {
       if (mounted) showErrorSnack(context, e);
@@ -223,7 +240,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
               eventId: eventId,
               pinned: _pinned,
             );
-      for (final f in _files) {
+      for (final f in [
+        ..._files,
+        for (final p in _photos) PickedFile(p.name, p.bytes),
+      ]) {
         try {
           await repo.attach(created.id, bytes: f.bytes, filename: f.name);
         } catch (_) {
@@ -318,6 +338,46 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       decoration: deco(),
                     ),
                     const SizedBox(height: 16),
+                    if (_photos.isNotEmpty) ...[
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: photoRatio,
+                        children: [
+                          for (final (i, p) in _photos.indexed)
+                            Stack(
+                              key: Key('picked-photo-$i'),
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    MsgRadius.md,
+                                  ),
+                                  child: Image.memory(
+                                    p.bytes,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 4,
+                                  right: 4,
+                                  child: IconButton.filledTonal(
+                                    tooltip: l.removeFile,
+                                    visualDensity: VisualDensity.compact,
+                                    icon: const Icon(Icons.close, size: 18),
+                                    onPressed: () =>
+                                        setState(() => _photos.removeAt(i)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     for (final (i, f) in _files.indexed)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8),
@@ -359,13 +419,28 @@ class _ComposeScreenState extends State<ComposeScreen> {
                             onTap: _pickEvent,
                           ),
                         ListRow(
+                          key: const Key('a-photo'),
+                          lead: const IconChip(
+                            Icons.add_photo_alternate_outlined,
+                            tone: Tone.green,
+                          ),
+                          title: Text(l.addPhoto),
+                          subtitle: Text(l.addPhotoHint),
+                          trailing: _photos.isEmpty
+                              ? null
+                              : Badge2(
+                                  '${_photos.length}/$photosPerAnnouncement',
+                                ),
+                          onTap: _addPhoto,
+                        ),
+                        ListRow(
                           key: const Key('a-attach'),
                           lead: const IconChip(
                             Icons.attach_file,
                             tone: Tone.red,
                           ),
                           title: Text(l.attachFile),
-                          subtitle: Text(l.attachHint),
+                          subtitle: Text(l.attachPdfHint),
                           onTap: _pickFile,
                         ),
                         ListRow(

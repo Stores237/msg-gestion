@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:msg_gestion/main.dart';
+import 'package:msg_gestion/models/announcement.dart';
 import 'package:msg_gestion/models/event.dart';
 import 'package:msg_gestion/models/member.dart';
 import 'package:msg_gestion/screens/announcements/compose_screen.dart';
 import 'package:msg_gestion/screens/calendar/event_detail_screen.dart';
 import 'package:msg_gestion/screens/members/member_profile_screen.dart';
+import 'package:msg_gestion/widgets/ui.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';
@@ -96,5 +98,70 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.textContaining('JUSQU’AU'), findsOneWidget);
+  });
+
+  testWidgets('an event that is over shows a grey Expiré chip', (tester) async {
+    await setUpApp(tester);
+    CalendarEvent at(Duration from) => CalendarEvent(
+      id: 1,
+      kind: 'assise',
+      title: 'Assise',
+      startsAt: DateTime.now().add(from),
+      endsAt: DateTime.now().add(from + const Duration(hours: 2)),
+      place: '',
+      dress: '',
+      notes: '',
+    );
+    await tester.pumpWidget(
+      MsgApp(
+        home: Scaffold(
+          body: Column(
+            children: [
+              EventCard(event: at(const Duration(days: -2))),
+              EventCard(event: at(const Duration(days: 2))),
+              // Started, not ended yet: not expired.
+              EventCard(event: at(const Duration(hours: -1))),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('event-expired')), findsOneWidget);
+    expect(find.text('EXPIRÉ'), findsOneWidget);
+  });
+
+  testWidgets('a convocation whose date has passed shows Expiré', (
+    tester,
+  ) async {
+    await setUpApp(tester);
+    Announcement conv(Duration from) => Announcement(
+      id: 7,
+      kind: 'convocation',
+      title: 'Assemblée générale',
+      body: '',
+      pinned: false,
+      authorName: 'Nyobe C.',
+      createdAt: DateTime(2026, 10, 1),
+      unread: false,
+      eventId: 3,
+      eventStartsAt: DateTime.now().add(from),
+    );
+    await tester.pumpWidget(
+      MsgApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                AnnouncementCard(item: conv(const Duration(days: -3))),
+                AnnouncementCard(item: conv(const Duration(days: 3))),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('announcement-expired')), findsOneWidget);
   });
 }

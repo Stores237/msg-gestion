@@ -2119,7 +2119,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onWifi => 'When connected on Wi-Fi';
 
   @override
-  String get memberPhotos => 'Member photos';
+  String get memberPhotos => 'Photos (members and announcements)';
 
   @override
   String get noMedia => 'No media';
@@ -2166,4 +2166,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String sizeGb(String n) {
     return '$n GB';
   }
+
+  @override
+  String get framePhoto => 'Frame the photo';
+
+  @override
+  String get framePhotoHint =>
+      'Move and zoom the photo: only what is inside the frame is sent.';
+
+  @override
+  String get photoRules =>
+      'Landscape 4:3 · 2 MB maximum · 4 photos per announcement';
+
+  @override
+  String get usePhoto => 'Use this photo';
+
+  @override
+  String get photoUnreadable => 'This image can’t be read.';
+
+  @override
+  String get showPhoto => 'Show the photo';
+
+  @override
+  String get addPhotoHint => 'Gallery or camera · framed 4:3, 2 MB max';
+
+  @override
+  String get photosLimit => '4 photos maximum per announcement.';
+
+  @override
+  String get attachPdfHint => 'PDF document, 10 MB max';
+
+  @override
+  String get eventExpired => 'Expired';
 }

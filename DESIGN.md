@@ -91,3 +91,5 @@ Where they live in code: `app/lib/theme/tokens.dart` + `app_theme.dart` (Flutter
 | 2026-10-28 | "Propulsé par STORES" with an "S" mark in the text colour (inverted in dark mode), small, at the foot of login, Mon compte and the back-office sidebar, with the version | Owner. Kept out of the group's colour so it never reads as a group's identity |
 | 2026-10-28 | Mon compte → Stockage et données (storage, network usage, data saver, photo quality, auto-download per network), only what applies to MSG | Owner's reference: the phone's Storage and data screen. Proxy and roaming left out |
 | 2026-10-28 | Back-office sidebar: menu scrolls, account + signature pinned at the bottom | Rendered check: the footer (and log-out) was cut off under ~900 px |
+| 2026-10-28 | Announcement photos: one landscape 4:3 frame (framed by the author), ≤ 2 MB, 4 per announcement, checked by the server; files are PDFs | Owner: "respect a particular frame and MB". One frame keeps the feed even; 4:3 matches phone photos |
+| 2026-10-28 | Grey "Expiré" chip on events that are over and on convocations whose date has passed | Owner. Neutral tone: past, not an error |
