@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'file_store.dart';
+
 /// Where offline data lives. Files in the app's private directory by
 /// default; memory in tests.
 abstract class OfflineStorage {
@@ -159,6 +161,8 @@ class OfflineState extends ChangeNotifier {
     lastError = null;
     await _storage.write(_cacheFile, '{}');
     await _saveOutbox();
+    // Photos seen and files downloaded are this member's too.
+    await FileStore.instance.forget();
     notifyListeners();
   }
 

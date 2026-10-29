@@ -217,6 +217,10 @@ class Settings(models.Model):
     # still pick their own in the app.
     color = models.CharField("couleur de l’application", max_length=7, default="#2E7D46",
                              validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Couleur au format #RRVVBB.")])
+    # Optional second colour: the app's header goes from one to the other
+    # (owner, 2026-10-29). Empty = a plain colour.
+    color2 = models.CharField("deuxième couleur (dégradé)", max_length=7, blank=True,
+                              validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Couleur au format #RRVVBB.")])
     fee_registration = models.PositiveIntegerField(default=500)
     fee_medal = models.PositiveIntegerField(default=2000)
     fee_illness = models.PositiveIntegerField(default=1000)

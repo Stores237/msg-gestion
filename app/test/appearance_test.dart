@@ -89,4 +89,63 @@ void main() {
       expect(width - right, lessThan(24), reason: 'right edge at $right');
     });
   }
+
+  testWidgets('gradient: the group’s second colour, then the member’s own', (
+    tester,
+  ) async {
+    await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        groups: const [
+          {'id': 1, 'name': 'Chorale', 'color': '#1E5AA8', 'color2': '#8E1B3A'},
+        ],
+      ),
+    );
+    MsgColors colors() => Theme.of(
+      tester.element(find.byKey(const Key('home-header'))),
+    ).extension<MsgColors>()!;
+    BoxDecoration header() =>
+        tester
+                .widget<Container>(find.byKey(const Key('home-header')))
+                .decoration!
+            as BoxDecoration;
+    expect(header().gradient, isNotNull);
+    expect(colors().headerEnd, isNot(colors().header));
+
+    await tester.tap(find.byKey(const Key('open-appearance')));
+    await tester.pumpAndSettle();
+    // Plain: no gradient.
+    await tester.tap(find.byKey(const Key('gradient-switch')));
+    await tester.pumpAndSettle();
+    expect(ThemeController.instance.seed2, isNull);
+    expect(colors().headerEnd, colors().header);
+    // Gradient again, with a second colour from the palette.
+    await tester.tap(find.byKey(const Key('gradient-switch')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('color2-6')));
+    await tester.tap(find.byKey(const Key('color2-6')));
+    await tester.pumpAndSettle();
+    expect(ThemeController.instance.seed2, ThemeController.palette[6]);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getInt('msg_color2'), ThemeController.palette[6].toARGB32());
+  });
+
+  testWidgets('Autre couleur: any colour from hue and shade', (tester) async {
+    await setUpApp(tester);
+    await pumpShell(tester, fakeMe());
+    await tester.tap(find.byKey(const Key('open-appearance')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('color-custom')));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byKey(const Key('custom-hue')), const Offset(60, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('custom-color-ok')));
+    await tester.pumpAndSettle();
+    final mine = ThemeController.instance.myColor!;
+    expect(ThemeController.palette, isNot(contains(mine)));
+    expect(_primary(tester), mine);
+    // Dark enough for white text.
+    expect(HSLColor.fromColor(mine).lightness, lessThanOrEqualTo(0.451));
+  });
 }

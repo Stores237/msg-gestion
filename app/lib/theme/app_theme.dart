@@ -8,8 +8,9 @@ import 'tokens.dart';
 ThemeData buildTheme(
   Brightness brightness, [
   Color seed = const Color(0xFF2E7D46),
+  Color? seed2,
 ]) {
-  final c = MsgColors.fromSeed(seed, brightness);
+  final c = MsgColors.fromSeed(seed, brightness, seed2);
   final base = ThemeData(
     brightness: brightness,
     useMaterial3: true,

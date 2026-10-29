@@ -6,8 +6,11 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 
 import '../data/data_settings.dart';
+import '../data/file_store.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
+import 'files.dart';
+import 'store_image.dart';
 import 'ui.dart';
 
 /// Photos in announcements (owner, 2026-10-28): one frame for all, a size
@@ -301,7 +304,8 @@ class _FramePhotoScreenState extends State<FramePhotoScreen> {
 
 /// A photo of an announcement in its 4:3 frame. Follows Mon compte →
 /// Stockage et données: when photos don't load by themselves on this
-/// network, a tap loads it. A tap on a loaded photo opens it full screen.
+/// network, a tap loads it (one already on the phone always shows). A tap
+/// on a loaded photo opens it full screen.
 class AnnouncementPhoto extends StatefulWidget {
   const AnnouncementPhoto({
     super.key,
@@ -325,7 +329,10 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.msg;
-    final show = _asked || DataSettings.instance.autoPhotos;
+    final show =
+        _asked ||
+        DataSettings.instance.autoPhotos ||
+        FileStore.instance.isCached(widget.url);
     return ClipRRect(
       borderRadius: BorderRadius.circular(MsgRadius.md),
       child: AspectRatio(
@@ -349,8 +356,8 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
               fit: StackFit.expand,
               children: [
                 if (show)
-                  Image.network(
-                    widget.url,
+                  Image(
+                    image: StoreImage(widget.url),
                     fit: BoxFit.cover,
                     errorBuilder: (_, _, _) => Icon(
                       Icons.broken_image_outlined,
@@ -513,7 +520,8 @@ class _PhotoCarouselState extends State<PhotoCarousel> {
 }
 
 /// An announcement's photos full screen, side by side, opened at the one
-/// that was tapped; pinch to zoom (swiping waits until it is zoomed out).
+/// that was tapped; pinch to zoom (swiping waits until it is zoomed out);
+/// Télécharger saves the one shown to the phone's gallery.
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key, required this.urls, this.initial = 0});
   final List<String> urls;
@@ -549,6 +557,14 @@ class _PhotoGalleryState extends State<PhotoGallery> {
               style: const TextStyle(fontSize: 16),
             )
           : null,
+      actions: [
+        IconButton(
+          key: const Key('gallery-download'),
+          tooltip: AppLocalizations.of(context).downloadPhoto,
+          icon: const Icon(Icons.download_outlined),
+          onPressed: () => downloadPhoto(context, widget.urls[_page]),
+        ),
+      ],
     ),
     body: PageView.builder(
       key: const Key('photo-gallery'),
@@ -592,8 +608,8 @@ class _ZoomablePhotoState extends State<_ZoomablePhoto> {
     onInteractionEnd: (_) =>
         widget.onZoomed(_transform.value.getMaxScaleOnAxis() > 1.01),
     child: Center(
-      child: Image.network(
-        widget.url,
+      child: Image(
+        image: StoreImage(widget.url),
         errorBuilder: (_, _, _) =>
             const Icon(Icons.broken_image_outlined, color: Colors.white54),
       ),

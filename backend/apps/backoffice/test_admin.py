@@ -211,6 +211,23 @@ def test_group_color_is_set_in_settings(admin, client):
     assert Settings.get().color == "#1E5AA8"
 
 
+def test_group_color_gradient_and_custom_colour(admin, client):
+    """Any colour (not only the palette) and a second one for a gradient
+    (owner, 2026-10-29): one hidden field per colour, shown in /me."""
+    page = client.get("/bo/parametres/").content.decode()
+    assert 'name="color"' in page and 'name="color2"' in page and "Dégradé" in page
+    client.post("/bo/parametres/", {"color": "#1ACD4D", "color2": "#8E1B3A"})
+    st = Settings.get()
+    assert (st.color, st.color2) == ("#1ACD4D", "#8E1B3A")
+    assert "linear-gradient(135deg,#1ACD4D,#8E1B3A)" in client.get("/bo/parametres/").content.decode()
+    # Back to a palette colour, gradient off (the field is sent empty).
+    client.post("/bo/parametres/", {"color": "#00695C", "color2": ""})
+    st = Settings.get()
+    assert (st.color, st.color2) == ("#00695C", "")
+    r = client.post("/bo/parametres/", {"color2": "rose"}, follow=True)
+    assert "Valeur invalide" in r.content.decode()
+
+
 @pytest.mark.parametrize("url", ["/bo/securite/", "/bo/affectations/", "/bo/parametres/", "/bo/utilisateurs/nouveau/", "/bo/utilisateurs/import/",
                                  "/bo/utilisateurs/export.csv", "/bo/journal/export.csv", "/bo/utilisateurs/?role=super-admin&diaspora=0"])
 def test_pages_render(admin, client, url):

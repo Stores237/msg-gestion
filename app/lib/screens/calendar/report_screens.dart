@@ -9,7 +9,7 @@ import '../../theme/tokens.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
-import '../../widgets/launch.dart';
+import '../../widgets/files.dart';
 import '../../widgets/notice.dart';
 import '../../widgets/ui.dart';
 
@@ -200,7 +200,12 @@ class ReportViewScreen extends StatelessWidget {
                           name: r.fileName,
                           subtitle: 'PDF',
                           isPdf: true,
-                          onTap: () => openUri(context, Uri.parse(r.fileUrl!)),
+                          onTap: () => openDocument(
+                            context,
+                            source: 'event-report-${event.id}',
+                            name: r.fileName,
+                            link: () async => r.fileUrl!,
+                          ),
                         ),
                       ],
                       const SizedBox(height: 16),

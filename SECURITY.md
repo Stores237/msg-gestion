@@ -89,6 +89,11 @@ login limit; fix `CLIENT_IP_HEADER` on Render.
 - The offline copy (cached answers and unsent changes) is in the app's private files. It is
   erased on sign-out (after a warning if changes are still unsent), after 5 wrong PINs on the
   lock screen, and when a different account signs in on the phone (`OfflineState.belongsTo`).
+- Photos seen and downloaded files (`FileStore`, `msg_files/` in the app's private files) are
+  erased with the offline copy. Only `msg_files/downloads/` is shared, read-only and one file at a
+  time, with the phone's PDF viewer (FileProvider, not exported). A copy the member puts in the
+  phone's Pictures/MSG or Download/MSG is outside the app and stays after sign-out; that is the
+  member's choice. The storage permission is requested only on Android 7–9 (`maxSdkVersion=28`).
 - Android backup is off (`allowBackup="false"`, `data_extraction_rules.xml`): member data never
   leaves the phone in a Google backup or a device transfer.
 

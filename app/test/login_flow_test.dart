@@ -145,6 +145,9 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    // Clear of the bottom bar (Mon compte grew a Téléchargements row).
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -200));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('logout')));
     await tester.pumpAndSettle();
     expect(auth.logouts, 1);

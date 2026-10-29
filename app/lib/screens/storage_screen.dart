@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../data/data_settings.dart';
+import '../data/file_store.dart';
 import '../data/offline.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/dates.dart';
 import '../widgets/ui.dart';
+import 'downloads_screen.dart';
 
 /// "Stockage et données" (owner, 2026-10-28, after the phone's own Storage
 /// and data screen): what the app keeps on the phone, the data it has used,
@@ -25,7 +27,11 @@ class StorageDataScreen extends StatelessWidget {
             ScreenHeader(title: l.storageAndData, back: true, small: true),
             Expanded(
               child: ListenableBuilder(
-                listenable: Listenable.merge([settings, OfflineState.instance]),
+                listenable: Listenable.merge([
+                  settings,
+                  OfflineState.instance,
+                  FileStore.instance,
+                ]),
                 builder: (context, _) => _Body(settings: settings),
               ),
             ),
@@ -55,6 +61,8 @@ class _Body extends StatelessWidget {
     final c = context.msg;
     final (cached, unsent) = OfflineState.instance.sizes;
     final images = PaintingBinding.instance.imageCache.currentSizeBytes;
+    final files = FileStore.instance;
+    final kept = files.mediaBytes + files.downloadBytes;
     final saverOnMobile = settings.dataSaver;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -66,10 +74,20 @@ class _Body extends StatelessWidget {
               lead: const Icon(Icons.folder_outlined),
               title: Text(l.manageStorage),
               subtitle: Text(
-                l.storageUsed(bytesLabel(l, cached + unsent + images)),
+                l.storageUsed(bytesLabel(l, cached + unsent + images + kept)),
               ),
               chevron: true,
               onTap: () => _manageStorage(context),
+            ),
+            ListRow(
+              key: const Key('storage-downloads'),
+              lead: const Icon(Icons.download_outlined),
+              title: Text(l.downloads),
+              subtitle: Text(bytesLabel(l, files.downloadBytes)),
+              chevron: true,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const DownloadsScreen()),
+              ),
             ),
           ],
         ),
@@ -178,6 +196,7 @@ class _Body extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           final (cached, unsent) = OfflineState.instance.sizes;
@@ -185,7 +204,7 @@ class _Body extends StatelessWidget {
           Widget clear(Key key, VoidCallback onPressed) =>
               TextButton(key: key, onPressed: onPressed, child: Text(l.clear));
           return SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -215,6 +234,18 @@ class _Body extends StatelessWidget {
                         subtitle: Text(
                           '${bytesLabel(l, unsent)} · ${l.unsentKept}',
                         ),
+                      ),
+                      ListRow(
+                        lead: const Icon(Icons.photo_library_outlined),
+                        title: Text(l.photosAndFiles),
+                        subtitle: Text(
+                          '${bytesLabel(l, FileStore.instance.mediaBytes)} · '
+                          '${l.photosAndFilesHint}',
+                        ),
+                        trailing: clear(const Key('clear-media'), () async {
+                          await FileStore.instance.clearMedia();
+                          setState(() {});
+                        }),
                       ),
                       ListRow(
                         lead: const Icon(Icons.image_outlined),

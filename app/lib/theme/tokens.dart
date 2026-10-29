@@ -23,6 +23,7 @@ class MsgColors extends ThemeExtension<MsgColors> {
     required this.warnTint,
     required this.ink800,
     this.header = const Color(0xFF1C2A20),
+    this.headerEnd = const Color(0xFF1C2A20),
   });
 
   final Color primary;
@@ -45,6 +46,10 @@ class MsgColors extends ThemeExtension<MsgColors> {
 
   /// The dark band at the top of Accueil (a deep shade of [primary]).
   final Color header;
+
+  /// Where the Accueil header's gradient ends: [header] unless a second
+  /// colour was chosen (owner, 2026-10-29).
+  final Color headerEnd;
 
   static const light = MsgColors(
     primary: Color(0xFF2E7D46),
@@ -88,7 +93,7 @@ class MsgColors extends ThemeExtension<MsgColors> {
 
   /// The tokens with [seed] as the main colour (ThemeController): the
   /// greens of the design are replaced by shades of the chosen colour.
-  static MsgColors fromSeed(Color seed, Brightness brightness) {
+  static MsgColors fromSeed(Color seed, Brightness brightness, [Color? seed2]) {
     final base = brightness == Brightness.dark ? dark : light;
     final isDark = brightness == Brightness.dark;
     return MsgColors(
@@ -113,9 +118,15 @@ class MsgColors extends ThemeExtension<MsgColors> {
       warnText: base.warnText,
       warnTint: base.warnTint,
       ink800: base.ink800,
-      header: Color.lerp(const Color(0xFF15120D), seed, 0.3)!,
+      header: _header(seed, seed2 != null),
+      headerEnd: _header(seed2 ?? seed, seed2 != null),
     );
   }
+
+  /// The dark header in the main colour. A gradient keeps more of each
+  /// colour so the change from one to the other shows.
+  static Color _header(Color c, bool gradient) =>
+      Color.lerp(const Color(0xFF15120D), c, gradient ? 0.6 : 0.3)!;
 
   @override
   MsgColors copyWith() => this;

@@ -718,7 +718,7 @@ def role_manage(request, slug=None):
 # --- Settings ----------------------------------------------------------------------------
 
 
-SETTING_FIELDS = ["parish", "welcome_message", "motto", "color", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
+SETTING_FIELDS = ["parish", "welcome_message", "motto", "color", "color2", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
                   "assise_time", "vigil_time", "reminder_time", "duty_template"]
 
 

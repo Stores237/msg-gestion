@@ -927,3 +927,57 @@ that of the 2 admins, and the admin should be able to define the duration for a 
 **Verify.** Back-office → Rôles et permissions → Formateur: "Durée 24 mois" (or 12), button
 **Durée**; set 6 with a reason → the chip says 6. Super admin: "Sans fin", no Durée button. A
 user page: the Formateur role now has an end date. `pytest apps/backoffice/test_role_duration.py`.
+
+## 43. Download photos and PDFs; what was seen stays viewable offline (app, build 24)
+
+Owner, 2026-10-29: "User should be able to download a picture seen on an announcement, a pdf
+report, and when offline view what has already been downloaded or even what he had already viewed".
+
+- **Photos**: full-screen viewer → **Télécharger** (download icon): saved to the phone's gallery
+  (Pictures/MSG) and kept in **Mon compte → Téléchargements**.
+- **PDFs** (quarterly report, cash book, balance statements, a member's statement, the chef's event
+  report, announcement attachments): tapping downloads the file, copies it to the phone's
+  Download/MSG folder (once per version), keeps it in Téléchargements and opens it in the phone's
+  PDF viewer. If none is installed the app says so; the file stays in Téléchargements.
+- **Offline**: every photo shown (announcements, member photos) is kept on the phone (up to
+  150 MB, oldest dropped first), so it shows without network, even with data saver on. A PDF
+  opened before opens again from its kept copy ("Hors ligne : copie du …"). An announcement opened
+  from a notification falls back to the copy in a feed already loaded.
+- **Mon compte → Téléchargements**: the list (name, size, date, "sur le téléphone"), tap to open,
+  ⋮ → Enregistrer sur le téléphone / Supprimer. **Stockage et données** shows Téléchargements and
+  "Photos vues" (with Vider).
+- Sign-out (and the other cases that erase the offline copy) also erases the kept photos and
+  downloads; copies already put in the phone's Pictures/Download folders stay (the member put them
+  there).
+- Android: MediaStore on Android 10+ (no permission); on 7–9 the storage permission is asked the
+  first time. Native code in `MainActivity.kt` (channel `msg/files`), FileProvider limited to the
+  app's `msg_files/downloads/`.
+
+**Verify.** Open an announcement with photos → tap a photo → download icon → "Photo enregistrée
+dans la galerie"; it's in the phone's gallery (album MSG). Finances → PDF icon → the PDF opens and
+is in Download/MSG. Turn on airplane mode: the announcement photos still show, the same PDF opens
+again ("Hors ligne : copie du …"), Mon compte → Téléchargements lists both.
+`flutter test test/downloads_test.dart`.
+
+## 44. App colour: any colour and a gradient (back-office and app)
+
+Owner, 2026-10-29, with a screenshot of Paramètres → Couleur de l'application: "the color palette
+couldn't be changed whereas it has to be", "also add the possibility to form gradient color".
+
+- **Back-office** (Paramètres and Groupes → Modifier): one picker for both pages: the swatches and
+  **Autre…** (any colour) set one hidden field each, so what is shown selected is what is saved
+  (the old radio + named-on-input custom field could disagree). **Dégradé avec une deuxième
+  couleur** opens a second row; a live **Aperçu** shows the result. The Groupes list dot shows the
+  gradient.
+- Server: `Settings.color2` (empty = plain), migration core 0013, sent in `/api/me/` as
+  `group.color2`.
+- **App**: Accueil's header goes from the first colour to the second (darkened less than a plain
+  header so the change shows). **Apparence**: **Autre couleur…** (hue and shade sliders, kept dark
+  enough for white text), a **Dégradé** switch with a second row of colours, and a preview. The
+  member's choice still wins on their phone; "Couleur du groupe" returns to the group's, gradient
+  included.
+
+**Verify.** Back-office → Paramètres: click a swatch → preview changes, Enregistrer → it stays
+selected after reload; tick Dégradé, pick a second colour, save. In the app (after reopening it),
+Accueil's header shows the gradient. Apparence → Autre couleur… → move Teinte → Choisir.
+`pytest apps/backoffice/test_admin.py -k color`, `flutter test test/appearance_test.dart`.

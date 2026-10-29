@@ -75,10 +75,7 @@ class ApiClient {
   /// the last remembered answer is returned and the app shows "Hors ligne".
   Future<dynamic> get(String path, {Map<String, String>? query}) async {
     final uri = _uri(path, query);
-    // Per group: one group's cached answers never show in another.
-    final key =
-        'g${GroupController.instance.id ?? 0}:'
-        '${uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path}';
+    final key = _cacheKey(uri);
     final offline = OfflineState.instance;
     try {
       final data = await _send('GET', uri);
@@ -93,6 +90,15 @@ class ApiClient {
       rethrow;
     }
   }
+
+  // Per group: one group's cached answers never show in another.
+  String _cacheKey(Uri uri) =>
+      'g${GroupController.instance.id ?? 0}:'
+      '${uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path}';
+
+  /// The last answer [get] remembered for this address, if any.
+  Object? cached(String path, {Map<String, String>? query}) =>
+      OfflineState.instance.recall(_cacheKey(_uri(path, query)));
 
   /// A write that may wait for the network (idempotent operations only).
   /// Without network it is queued and [QueuedOffline] is thrown.

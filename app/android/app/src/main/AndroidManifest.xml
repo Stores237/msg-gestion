@@ -2,6 +2,11 @@
     <!-- Release builds talk to the API; Flutter only adds this to debug/profile. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <!-- Downloads copied to Pictures/MSG or Download/MSG: only Android 7–9
+         need a permission for that (10+ use MediaStore without one). -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
     <!-- No cloud or device-to-device backup: the offline copy holds member
          data (lists, finances) and the secure-storage keys can't be restored
          on another phone anyway (SECURITY.md, 2026-10-26). -->
@@ -34,6 +39,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Opens a downloaded PDF in the phone's viewer (MainActivity.kt). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/msg_files" />
+        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -50,6 +65,10 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
         </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

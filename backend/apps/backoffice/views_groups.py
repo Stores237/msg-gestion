@@ -66,7 +66,7 @@ def group_edit(request, pk):
     g = get_object_or_404(Group, pk=pk)
     try:
         changed = update_group(g, by=request.user, request=request, name=request.POST.get("name"),
-                               **{f: request.POST.get(f) for f in ("parish", "motto", "welcome_message", "color")})
+                               **{f: request.POST.get(f) for f in ("parish", "motto", "welcome_message", "color", "color2")})
     except GroupAdminError as e:
         return _refused(request, g, "Modification de groupe refusée", e)
     messages.success(request, f"Groupe « {g.name} » enregistré." if changed else "Aucun changement.")

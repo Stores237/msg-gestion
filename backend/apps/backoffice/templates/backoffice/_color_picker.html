@@ -1,0 +1,53 @@
+{% comment %}
+The app's colour for a group (owner, 2026-10-29): a swatch or any colour,
+and an optional second one for a gradient. One hidden field per colour, set
+by the buttons, so what is shown selected is always what is saved.
+Params: color, color2, palette.
+{% endcomment %}
+<div class="fld color-picker" data-color-picker>
+  <span class="fld-l">Couleur de l’application</span>
+  <div class="cp-preview" data-preview style="height:44px;border-radius:12px;background:{% if color2 %}linear-gradient(135deg,{{ color }},{{ color2 }}){% else %}{{ color }}{% endif %};display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:800;font-size:13px">Aperçu</div>
+  <div class="cp-row" data-which="color" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px">
+    <input type="hidden" name="color" value="{{ color }}">
+    {% for hex, label in palette %}<button type="button" class="cp-sw{% if color|upper == hex %} on{% endif %}" data-hex="{{ hex }}" title="{{ label }}" aria-label="{{ label }}" style="background:{{ hex }}"></button>{% endfor %}
+    <label class="fld-box" style="min-height:44px;width:150px;cursor:pointer"><input type="color" class="cp-custom" value="{{ color }}" aria-label="Autre couleur" style="width:40px;height:32px;border:none;background:transparent;padding:0"><span style="font-size:13px">Autre…</span></label>
+  </div>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px;cursor:pointer"><input type="checkbox" class="cp-grad" {% if color2 %}checked{% endif %}> Dégradé avec une deuxième couleur</label>
+  <div class="cp-row" data-which="color2" style="display:{% if color2 %}flex{% else %}none{% endif %};flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px">
+    <input type="hidden" name="color2" value="{{ color2 }}">
+    {% for hex, label in palette %}<button type="button" class="cp-sw{% if color2|upper == hex %} on{% endif %}" data-hex="{{ hex }}" title="{{ label }}" aria-label="{{ label }} (2e couleur)" style="background:{{ hex }}"></button>{% endfor %}
+    <label class="fld-box" style="min-height:44px;width:150px;cursor:pointer"><input type="color" class="cp-custom" value="{{ color2|default:'#8E1B3A' }}" aria-label="Autre deuxième couleur" style="width:40px;height:32px;border:none;background:transparent;padding:0"><span style="font-size:13px">Autre…</span></label>
+  </div>
+  <span style="font-size:12px;color:var(--text-secondary)">Couleur principale de l’application pour ce groupe (en-tête d’Accueil en dégradé si une deuxième est choisie). Chaque membre peut choisir la sienne dans l’application.</span>
+</div>
+<script>
+(function () {
+  if (window.msgColorPicker) return;
+  window.msgColorPicker = true;
+  function refresh(p) {
+    var c1 = p.querySelector('input[name=color]').value;
+    var c2 = p.querySelector('input[name=color2]').value;
+    p.querySelector('[data-preview]').style.background = c2 ? 'linear-gradient(135deg,' + c1 + ',' + c2 + ')' : c1;
+  }
+  function set(row, hex) {
+    row.querySelector('input[type=hidden]').value = hex.toUpperCase();
+    row.querySelectorAll('.cp-sw').forEach(function (b) { b.classList.toggle('on', b.dataset.hex === hex.toUpperCase()); });
+    refresh(row.closest('[data-color-picker]'));
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-color-picker] .cp-sw');
+    if (b) set(b.closest('.cp-row'), b.dataset.hex);
+  });
+  document.addEventListener('input', function (e) {
+    if (e.target.matches('[data-color-picker] .cp-custom')) set(e.target.closest('.cp-row'), e.target.value);
+  });
+  document.addEventListener('change', function (e) {
+    if (!e.target.matches('[data-color-picker] .cp-grad')) return;
+    var p = e.target.closest('[data-color-picker]');
+    var row = p.querySelector('.cp-row[data-which=color2]');
+    row.style.display = e.target.checked ? 'flex' : 'none';
+    if (e.target.checked) set(row, row.querySelector('.cp-custom').value);
+    else { row.querySelector('input[type=hidden]').value = ''; refresh(p); }
+  });
+})();
+</script>

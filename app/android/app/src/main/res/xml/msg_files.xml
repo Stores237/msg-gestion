@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the downloads kept by the app (lib/data/file_store.dart) are shared,
+     read-only, with the phone's PDF viewer. -->
+<paths>
+    <files-path name="downloads" path="msg_files/downloads/" />
+</paths>

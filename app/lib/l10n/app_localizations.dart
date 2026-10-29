@@ -3877,6 +3877,180 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Rechercher un nom'**
   String get searchName;
+
+  /// No description provided for @downloads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargements'**
+  String get downloads;
+
+  /// No description provided for @downloadsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les photos et PDF téléchargés ou ouverts restent ici, lisibles sans réseau. Les photos déjà vues dans l’app aussi.'**
+  String get downloadsHint;
+
+  /// No description provided for @downloadsEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun téléchargement'**
+  String get downloadsEmpty;
+
+  /// No description provided for @downloadsEmptyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléchargez une photo d’une annonce ou ouvrez un rapport PDF : il restera ici.'**
+  String get downloadsEmptyHint;
+
+  /// No description provided for @onThePhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'sur le téléphone'**
+  String get onThePhone;
+
+  /// No description provided for @saveToPhone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer sur le téléphone'**
+  String get saveToPhone;
+
+  /// No description provided for @saveToPhoneFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le téléphone n’a pas permis l’enregistrement. Le fichier reste dans Téléchargements.'**
+  String get saveToPhoneFailed;
+
+  /// No description provided for @deleteFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get deleteFile;
+
+  /// No description provided for @savedToDownloads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistré dans Téléchargements › MSG'**
+  String get savedToDownloads;
+
+  /// No description provided for @photoSavedToGallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo enregistrée dans la galerie (Images › MSG)'**
+  String get photoSavedToGallery;
+
+  /// No description provided for @keptInDownloads.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardé dans Mon compte › Téléchargements'**
+  String get keptInDownloads;
+
+  /// No description provided for @noPdfViewer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune application ne peut ouvrir ce PDF. Il est gardé dans Mon compte › Téléchargements.'**
+  String get noPdfViewer;
+
+  /// No description provided for @offlineCopyOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne : copie du {date}'**
+  String offlineCopyOf(String date);
+
+  /// No description provided for @downloadPhoto.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger la photo'**
+  String get downloadPhoto;
+
+  /// No description provided for @downloadFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get downloadFile;
+
+  /// No description provided for @photosAndFiles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photos vues'**
+  String get photosAndFiles;
+
+  /// No description provided for @photosAndFilesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'gardées pour les voir sans réseau'**
+  String get photosAndFilesHint;
+
+  /// No description provided for @pdfStatementName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé des soldes {date}.pdf'**
+  String pdfStatementName(String date);
+
+  /// No description provided for @pdfCashbookName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre de caisse {date}.pdf'**
+  String pdfCashbookName(String date);
+
+  /// No description provided for @pdfReportName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport T{quarter} {year}.pdf'**
+  String pdfReportName(int quarter, int year);
+
+  /// No description provided for @pdfMemberStatementName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé {name} {date}.pdf'**
+  String pdfMemberStatementName(String name, String date);
+
+  /// No description provided for @preview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu'**
+  String get preview;
+
+  /// No description provided for @gradient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dégradé'**
+  String get gradient;
+
+  /// No description provided for @gradientHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’en-tête d’Accueil passe de la couleur principale à une deuxième.'**
+  String get gradientHint;
+
+  /// No description provided for @secondColorN.
+  ///
+  /// In fr, this message translates to:
+  /// **'Deuxième couleur {n}'**
+  String secondColorN(int n);
+
+  /// No description provided for @otherColor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre couleur…'**
+  String get otherColor;
+
+  /// No description provided for @hue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Teinte'**
+  String get hue;
+
+  /// No description provided for @shade.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nuance'**
+  String get shade;
+
+  /// No description provided for @choose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir'**
+  String get choose;
 }
 
 class _AppLocalizationsDelegate

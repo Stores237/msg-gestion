@@ -9,6 +9,7 @@ import '../../models/member.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/files.dart';
 import '../../widgets/launch.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
@@ -108,16 +109,15 @@ class _ProfileBody extends StatelessWidget {
     }
   }
 
-  Future<void> _statement(BuildContext context) async {
-    try {
-      final url = await RepositoryLocator.instance.finances.memberStatementPdf(
-        m.summary.id,
-      );
-      if (context.mounted) await openUri(context, Uri.parse(url));
-    } catch (e) {
-      if (context.mounted) showErrorSnack(context, e);
-    }
-  }
+  Future<void> _statement(BuildContext context) => openDocument(
+    context,
+    source: 'fin-statement-${m.summary.id}',
+    name: AppLocalizations.of(
+      context,
+    ).pdfMemberStatementName(m.summary.fullName, fileDate()),
+    link: () =>
+        RepositoryLocator.instance.finances.memberStatementPdf(m.summary.id),
+  );
 
   Future<void> _resetPin(BuildContext context) async {
     final l = AppLocalizations.of(context);

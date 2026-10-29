@@ -78,10 +78,33 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
   @override
   Future<void> delete(int id) async => _api.delete('/announcements/$id/');
 
+  /// Without network and never opened before: the copy in a feed seen
+  /// earlier (a notification opens it offline too).
   @override
-  Future<Announcement> get(int id) async => Announcement.fromJson(
-    await _api.get('/announcements/$id/') as Map<String, dynamic>,
-  );
+  Future<Announcement> get(int id) async {
+    try {
+      return Announcement.fromJson(
+        await _api.get('/announcements/$id/') as Map<String, dynamic>,
+      );
+    } on NetworkException {
+      for (final filter in const [
+        'all',
+        'convocations',
+        'unread',
+        'for_me',
+        'sent',
+      ]) {
+        final feed = _api.cached('/announcements/', query: {'filter': filter});
+        if (feed is! Map<String, dynamic>) continue;
+        for (final a in feed['results'] as List) {
+          if ((a as Map<String, dynamic>)['id'] == id) {
+            return Announcement.fromJson(a);
+          }
+        }
+      }
+      rethrow;
+    }
+  }
 
   @override
   Future<List<ReadReceipt>> receipts(int id) async {

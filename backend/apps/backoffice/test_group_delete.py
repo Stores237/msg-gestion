@@ -79,6 +79,8 @@ def test_edit_a_group(login, choir):
     st = Settings.get(choir)
     assert (choir.name, st.parish, st.motto, st.welcome_message, st.color) == ("Chorale Ste-Cécile", "Akwa", "Chanter", "Bienvenue", "#5B3FA0")
     assert AuditLog.objects.filter(action="Groupe modifié", group__isnull=True).exists()
+    a.post(f"/bo/groupes/{choir.pk}/modifier/", {"name": "Chorale Ste-Cécile", "color": "#5B3FA0", "color2": "#1E5AA8"})
+    assert Settings.get(choir).color2 == "#1E5AA8"
     r = a.post(f"/bo/groupes/{choir.pk}/modifier/", {"name": "X", "color": "violet"}, follow=True)
     assert "#RRVVBB" in r.content.decode()
     choir.refresh_from_db()

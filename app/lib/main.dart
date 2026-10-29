@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'data/data_settings.dart';
+import 'data/file_store.dart';
 import 'data/group_controller.dart';
 import 'data/locale_controller.dart';
 import 'data/offline.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
   await initializeDateFormatting();
   await OfflineState.instance.load();
   await DataSettings.instance.load();
+  await FileStore.instance.load();
   runApp(const MsgApp());
 }
 
@@ -39,8 +41,16 @@ class MsgApp extends StatelessWidget {
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         debugShowCheckedModeBanner: false,
         // The group's colour, or the member's own choice (ThemeController).
-        theme: buildTheme(Brightness.light, ThemeController.instance.seed),
-        darkTheme: buildTheme(Brightness.dark, ThemeController.instance.seed),
+        theme: buildTheme(
+          Brightness.light,
+          ThemeController.instance.seed,
+          ThemeController.instance.seed2,
+        ),
+        darkTheme: buildTheme(
+          Brightness.dark,
+          ThemeController.instance.seed,
+          ThemeController.instance.seed2,
+        ),
         // The member's choice (LocaleController); otherwise French unless the
         // phone is set to a language we also ship.
         locale: LocaleController.instance.locale,

@@ -55,6 +55,14 @@ class HomeHeader extends StatelessWidget {
         key: const Key('home-header'),
         decoration: BoxDecoration(
           color: c.header,
+          // The group's or the member's second colour (owner, 2026-10-29).
+          gradient: c.headerEnd == c.header
+              ? null
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [c.header, c.headerEnd],
+                ),
           borderRadius: const BorderRadius.vertical(
             bottom: Radius.circular(28),
           ),

@@ -13,7 +13,7 @@
 {% endif %}{% endfor %}
 <section class="panel">
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupe</th><th class="amt">Membres</th><th>Statut</th><th></th></tr></thead><tbody>
-    {% for g in rows %}<tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{{ g.st.color }};vertical-align:middle;margin-right:6px" aria-hidden="true"></span><b>{{ g.name }}</b>{% if g.pk == request.group.pk %} <span class="rb sys"><i></i>Groupe en cours</span>{% endif %}<br><small class="muted">{{ g.st.parish|default:"" }}</small></td>
+    {% for g in rows %}<tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{% if g.st.color2 %}linear-gradient(135deg,{{ g.st.color }},{{ g.st.color2 }}){% else %}{{ g.st.color }}{% endif %};vertical-align:middle;margin-right:6px" aria-hidden="true"></span><b>{{ g.name }}</b>{% if g.pk == request.group.pk %} <span class="rb sys"><i></i>Groupe en cours</span>{% endif %}<br><small class="muted">{{ g.st.parish|default:"" }}</small></td>
       <td class="tnum amt">{{ g.n }}</td><td>{% if g.pending %}<span class="status err"><i></i>Suppression demandée</span>{% elif g.is_active %}<span class="status ok"><i></i>Actif</span>{% else %}<span class="status off"><i></i>Inactif</span>{% endif %}</td>
       <td class="amt"><span style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">{% if g.pk != request.group.pk and g.is_active %}<form method="post" action="{% url 'backoffice:group_switch' %}">{% csrf_token %}<input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">Travailler sur ce groupe</button></form>{% endif %}
         <button class="btn btn-secondary btn-sm" type="button" data-edit="{{ g.pk }}" onclick="document.getElementById('dlg-edit-{{ g.pk }}').showModal()">{% icon 'pencil' 16 %}Modifier</button>
@@ -37,9 +37,7 @@
   <label class="fld"><span class="fld-l">Lieu ou rattachement</span><span class="fld-box"><input name="parish" maxlength="160" value="{{ g.st.parish }}"></span></label>
   <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" maxlength="120" value="{{ g.st.motto }}"></span></label>
   <label class="fld"><span class="fld-l">Message de bienvenue</span><span class="fld-box" style="align-items:flex-start;padding-top:10px;padding-bottom:10px"><textarea name="welcome_message" rows="4" maxlength="600" style="width:100%;border:none;background:transparent;font:inherit;color:inherit;resize:vertical">{{ g.st.welcome_message }}</textarea></span></label>
-  <div class="fld"><span class="fld-l">Couleur de l’application</span><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
-    {% for hex, label in palette %}<label title="{{ label }}" style="cursor:pointer"><input type="radio" name="color" value="{{ hex }}" {% if g.st.color|upper == hex %}checked{% endif %} style="position:absolute;opacity:0;width:0;height:0"><span class="swatch" style="display:inline-block;width:32px;height:32px;border-radius:50%;background:{{ hex }};box-shadow:0 0 0 2px var(--surface-card),0 0 0 4px transparent"></span></label>{% endfor %}
-  </div></div>
+  {% include "backoffice/_color_picker.html" with color=g.st.color color2=g.st.color2 palette=palette %}
   <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
 </form></dialog>
 {% if g.pending %}{% if g.pending.requested_by_id != request.user.pk %}

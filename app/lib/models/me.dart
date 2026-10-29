@@ -33,10 +33,14 @@ class GroupInfo {
     this.motto = '',
     this.welcomeMessage = '',
     this.color,
+    this.color2,
   });
 
   /// The group's app colour, "#RRGGBB" (back-office → Paramètres).
   final String? color;
+
+  /// Its second colour for a gradient header; null or empty = plain.
+  final String? color2;
 
   final int id;
   final String name;
@@ -53,6 +57,7 @@ class GroupInfo {
     motto: (j['motto'] as String?) ?? '',
     welcomeMessage: (j['welcome_message'] as String?) ?? '',
     color: j['color'] as String?,
+    color2: j['color2'] as String?,
   );
 }
 

@@ -2261,4 +2261,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchName => 'Search a name';
+
+  @override
+  String get downloads => 'Downloads';
+
+  @override
+  String get downloadsHint =>
+      'Photos and PDFs you downloaded or opened stay here, readable without network. Photos already seen in the app too.';
+
+  @override
+  String get downloadsEmpty => 'No downloads';
+
+  @override
+  String get downloadsEmptyHint =>
+      'Download a photo from an announcement or open a PDF report: it will stay here.';
+
+  @override
+  String get onThePhone => 'on the phone';
+
+  @override
+  String get saveToPhone => 'Save to the phone';
+
+  @override
+  String get saveToPhoneFailed =>
+      'The phone did not allow saving. The file stays in Downloads.';
+
+  @override
+  String get deleteFile => 'Delete';
+
+  @override
+  String get savedToDownloads => 'Saved in Downloads › MSG';
+
+  @override
+  String get photoSavedToGallery =>
+      'Photo saved to the gallery (Pictures › MSG)';
+
+  @override
+  String get keptInDownloads => 'Kept in My account › Downloads';
+
+  @override
+  String get noPdfViewer =>
+      'No app can open this PDF. It is kept in My account › Downloads.';
+
+  @override
+  String offlineCopyOf(String date) {
+    return 'Offline: copy from $date';
+  }
+
+  @override
+  String get downloadPhoto => 'Download the photo';
+
+  @override
+  String get downloadFile => 'Download';
+
+  @override
+  String get photosAndFiles => 'Photos seen';
+
+  @override
+  String get photosAndFilesHint => 'kept to view them without network';
+
+  @override
+  String pdfStatementName(String date) {
+    return 'Balance statement $date.pdf';
+  }
+
+  @override
+  String pdfCashbookName(String date) {
+    return 'Cash book $date.pdf';
+  }
+
+  @override
+  String pdfReportName(int quarter, int year) {
+    return 'Report Q$quarter $year.pdf';
+  }
+
+  @override
+  String pdfMemberStatementName(String name, String date) {
+    return 'Statement $name $date.pdf';
+  }
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get gradient => 'Gradient';
+
+  @override
+  String get gradientHint =>
+      'Accueil’s header goes from the main colour to a second one.';
+
+  @override
+  String secondColorN(int n) {
+    return 'Second colour $n';
+  }
+
+  @override
+  String get otherColor => 'Other colour…';
+
+  @override
+  String get hue => 'Hue';
+
+  @override
+  String get shade => 'Shade';
+
+  @override
+  String get choose => 'Choose';
 }

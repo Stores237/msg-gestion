@@ -2273,4 +2273,109 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get searchName => 'Rechercher un nom';
+
+  @override
+  String get downloads => 'Téléchargements';
+
+  @override
+  String get downloadsHint =>
+      'Les photos et PDF téléchargés ou ouverts restent ici, lisibles sans réseau. Les photos déjà vues dans l’app aussi.';
+
+  @override
+  String get downloadsEmpty => 'Aucun téléchargement';
+
+  @override
+  String get downloadsEmptyHint =>
+      'Téléchargez une photo d’une annonce ou ouvrez un rapport PDF : il restera ici.';
+
+  @override
+  String get onThePhone => 'sur le téléphone';
+
+  @override
+  String get saveToPhone => 'Enregistrer sur le téléphone';
+
+  @override
+  String get saveToPhoneFailed =>
+      'Le téléphone n’a pas permis l’enregistrement. Le fichier reste dans Téléchargements.';
+
+  @override
+  String get deleteFile => 'Supprimer';
+
+  @override
+  String get savedToDownloads => 'Enregistré dans Téléchargements › MSG';
+
+  @override
+  String get photoSavedToGallery =>
+      'Photo enregistrée dans la galerie (Images › MSG)';
+
+  @override
+  String get keptInDownloads => 'Gardé dans Mon compte › Téléchargements';
+
+  @override
+  String get noPdfViewer =>
+      'Aucune application ne peut ouvrir ce PDF. Il est gardé dans Mon compte › Téléchargements.';
+
+  @override
+  String offlineCopyOf(String date) {
+    return 'Hors ligne : copie du $date';
+  }
+
+  @override
+  String get downloadPhoto => 'Télécharger la photo';
+
+  @override
+  String get downloadFile => 'Télécharger';
+
+  @override
+  String get photosAndFiles => 'Photos vues';
+
+  @override
+  String get photosAndFilesHint => 'gardées pour les voir sans réseau';
+
+  @override
+  String pdfStatementName(String date) {
+    return 'Relevé des soldes $date.pdf';
+  }
+
+  @override
+  String pdfCashbookName(String date) {
+    return 'Livre de caisse $date.pdf';
+  }
+
+  @override
+  String pdfReportName(int quarter, int year) {
+    return 'Rapport T$quarter $year.pdf';
+  }
+
+  @override
+  String pdfMemberStatementName(String name, String date) {
+    return 'Relevé $name $date.pdf';
+  }
+
+  @override
+  String get preview => 'Aperçu';
+
+  @override
+  String get gradient => 'Dégradé';
+
+  @override
+  String get gradientHint =>
+      'L’en-tête d’Accueil passe de la couleur principale à une deuxième.';
+
+  @override
+  String secondColorN(int n) {
+    return 'Deuxième couleur $n';
+  }
+
+  @override
+  String get otherColor => 'Autre couleur…';
+
+  @override
+  String get hue => 'Teinte';
+
+  @override
+  String get shade => 'Nuance';
+
+  @override
+  String get choose => 'Choisir';
 }

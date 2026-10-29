@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/data_settings.dart';
+import '../data/file_store.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
@@ -11,6 +12,7 @@ import 'dates.dart';
 import 'errors.dart';
 import 'labels.dart';
 import 'photo_frame.dart';
+import 'store_image.dart';
 import 'sync_widgets.dart';
 
 /// Screen title row (design: .appbar).
@@ -407,7 +409,10 @@ class MemberAvatar extends StatelessWidget {
             ),
             // Photos load by themselves unless Stockage et données says
             // otherwise for this network; the initials stand in.
-            child: photo == null || !DataSettings.instance.autoPhotos
+            child:
+                photo == null ||
+                    !(DataSettings.instance.autoPhotos ||
+                        FileStore.instance.isCached(photo!))
                 ? Text(
                     initials,
                     style: TextStyle(
@@ -417,8 +422,8 @@ class MemberAvatar extends StatelessWidget {
                     ),
                   )
                 : ClipOval(
-                    child: Image.network(
-                      photo!,
+                    child: Image(
+                      image: StoreImage(photo!),
                       width: size,
                       height: size,
                       fit: BoxFit.cover,

@@ -349,7 +349,13 @@
   },
   "nextMeeting": "Prochain rendez-vous",
   "photoCount": "{n, plural, =1{1 photo} other{{n} photos}}",
-  "@photoCount": {"placeholders": {"n": {"type": "int"}}},
+  "@photoCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "lastAnnouncement": "Dernières annonces",
   "nothingPlanned": "Rien de prévu pour l’instant.",
   "calendarLink": "Calendrier",
@@ -1433,5 +1439,82 @@
       }
     }
   },
-  "searchName": "Rechercher un nom"
+  "searchName": "Rechercher un nom",
+  "downloads": "Téléchargements",
+  "downloadsHint": "Les photos et PDF téléchargés ou ouverts restent ici, lisibles sans réseau. Les photos déjà vues dans l’app aussi.",
+  "downloadsEmpty": "Aucun téléchargement",
+  "downloadsEmptyHint": "Téléchargez une photo d’une annonce ou ouvrez un rapport PDF : il restera ici.",
+  "onThePhone": "sur le téléphone",
+  "saveToPhone": "Enregistrer sur le téléphone",
+  "saveToPhoneFailed": "Le téléphone n’a pas permis l’enregistrement. Le fichier reste dans Téléchargements.",
+  "deleteFile": "Supprimer",
+  "savedToDownloads": "Enregistré dans Téléchargements › MSG",
+  "photoSavedToGallery": "Photo enregistrée dans la galerie (Images › MSG)",
+  "keptInDownloads": "Gardé dans Mon compte › Téléchargements",
+  "noPdfViewer": "Aucune application ne peut ouvrir ce PDF. Il est gardé dans Mon compte › Téléchargements.",
+  "offlineCopyOf": "Hors ligne : copie du {date}",
+  "@offlineCopyOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadPhoto": "Télécharger la photo",
+  "downloadFile": "Télécharger",
+  "photosAndFiles": "Photos vues",
+  "photosAndFilesHint": "gardées pour les voir sans réseau",
+  "pdfStatementName": "Relevé des soldes {date}.pdf",
+  "@pdfStatementName": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfCashbookName": "Livre de caisse {date}.pdf",
+  "@pdfCashbookName": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReportName": "Rapport T{quarter} {year}.pdf",
+  "@pdfReportName": {
+    "placeholders": {
+      "quarter": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "pdfMemberStatementName": "Relevé {name} {date}.pdf",
+  "@pdfMemberStatementName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "preview": "Aperçu",
+  "gradient": "Dégradé",
+  "gradientHint": "L’en-tête d’Accueil passe de la couleur principale à une deuxième.",
+  "secondColorN": "Deuxième couleur {n}",
+  "@secondColorN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "otherColor": "Autre couleur…",
+  "hue": "Teinte",
+  "shade": "Nuance",
+  "choose": "Choisir"
 }

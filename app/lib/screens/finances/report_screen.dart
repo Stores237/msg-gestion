@@ -7,7 +7,7 @@ import '../../models/me.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
-import '../../widgets/launch.dart';
+import '../../widgets/files.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/money.dart';
 import '../../widgets/notice.dart';
@@ -109,17 +109,15 @@ class _ReportViewState extends State<ReportView> {
                     key: const Key('export-report'),
                     tooltip: l.exportPdf,
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    onPressed: () async {
-                      try {
-                        final url = await RepositoryLocator.instance.finances
-                            .reportPdf(_year, _quarter);
-                        if (context.mounted) {
-                          await openUri(context, Uri.parse(url));
-                        }
-                      } catch (e) {
-                        if (context.mounted) showErrorSnack(context, e);
-                      }
-                    },
+                    onPressed: () => openDocument(
+                      context,
+                      source: 'fin-report-$_year-$_quarter',
+                      name: l.pdfReportName(_quarter, _year),
+                      link: () => RepositoryLocator.instance.finances.reportPdf(
+                        _year,
+                        _quarter,
+                      ),
+                    ),
                   ),
               ],
             ),

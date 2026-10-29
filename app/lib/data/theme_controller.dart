@@ -26,15 +26,25 @@ class ThemeController extends ChangeNotifier {
   ];
 
   static const _key = 'msg_color';
+  static const _key2 = 'msg_color2';
 
   Color? _group;
+  Color? _group2;
   Color? _mine;
+  Color? _mine2;
 
   Color? get groupColor => _group;
+  Color? get groupColor2 => _group2;
 
   /// null = the group's colour.
   Color? get myColor => _mine;
+
+  /// The member's second colour (gradient); only with [myColor].
+  Color? get myColor2 => _mine2;
   Color get seed => _mine ?? _group ?? fallback;
+
+  /// The gradient's second colour, or null for a plain colour.
+  Color? get seed2 => _mine != null ? _mine2 : _group2;
 
   /// "#2E7D46" → Color; null when absent or malformed.
   static Color? parse(String? hex) {
@@ -44,21 +54,32 @@ class ThemeController extends ChangeNotifier {
 
   Future<void> load() async {
     try {
-      final v = (await SharedPreferences.getInstance()).getInt(_key);
+      final p = await SharedPreferences.getInstance();
+      final v = p.getInt(_key);
       if (v != null) _mine = Color(v);
+      final v2 = p.getInt(_key2);
+      if (v2 != null && _mine != null) _mine2 = Color(v2);
     } catch (_) {
       // Preferences unavailable: the group's colour.
     }
   }
 
-  void setGroupColor(Color? c) {
-    if (c == _group) return;
+  void setGroupColor(Color? c, [Color? c2]) {
+    if (c == _group && c2 == _group2) return;
     _group = c;
+    _group2 = c2;
     notifyListeners();
   }
 
-  Future<void> choose(Color? c) async {
+  /// The member's colour; null goes back to the group's (gradient too).
+  /// The second colour is kept unless [second] is given.
+  Future<void> choose(Color? c, {Color? second, bool plain = false}) async {
     _mine = c;
+    if (c == null || plain) {
+      _mine2 = null;
+    } else if (second != null) {
+      _mine2 = second;
+    }
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -66,6 +87,11 @@ class ThemeController extends ChangeNotifier {
         await prefs.remove(_key);
       } else {
         await prefs.setInt(_key, c.toARGB32());
+      }
+      if (_mine2 == null) {
+        await prefs.remove(_key2);
+      } else {
+        await prefs.setInt(_key2, _mine2!.toARGB32());
       }
     } catch (_) {}
   }

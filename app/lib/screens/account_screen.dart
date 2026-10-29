@@ -16,6 +16,7 @@ import '../widgets/appearance_sheet.dart';
 import '../widgets/my_photo.dart';
 import '../widgets/ui.dart';
 import 'help_screens.dart';
+import 'downloads_screen.dart';
 import 'storage_screen.dart';
 import 'login_phone_screen.dart';
 import 'pin_screens.dart';
@@ -184,6 +185,17 @@ class AccountScreen extends StatelessWidget {
                         onTap: () => Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const StorageDataScreen(),
+                          ),
+                        ),
+                      ),
+                      ListRow(
+                        key: const Key('open-downloads'),
+                        lead: const Icon(Icons.download_outlined),
+                        title: Text(l.downloads),
+                        chevron: true,
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const DownloadsScreen(),
                           ),
                         ),
                       ),

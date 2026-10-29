@@ -43,6 +43,7 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => ThemeController.instance.setGroupColor(
         ThemeController.parse(widget.me.group?.color),
+        ThemeController.parse(widget.me.group?.color2),
       ),
     );
     WidgetsBinding.instance.addObserver(this);

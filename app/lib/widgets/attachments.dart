@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../theme/tokens.dart';
+import 'files.dart';
 
 String fileSize(AppLocalizations l, int bytes) => bytes < 1024 * 1024
     ? l.sizeKb((bytes / 1024).ceil())
     : l.sizeMb((bytes / (1024 * 1024)).toStringAsFixed(1));
 
-/// Attachment row (design: .file): icon, name, type · size. Tap opens it
-/// in the phone's viewer or browser (signed link, valid one hour).
+/// Attachment row (design: .file): icon, name, type · size. Tap downloads
+/// it (kept in Téléchargements, readable offline) and opens it.
 class AttachmentTile extends StatelessWidget {
   const AttachmentTile({
     super.key,
@@ -82,18 +82,13 @@ class AttachmentList extends StatelessWidget {
   const AttachmentList({super.key, required this.items});
   final List<AttachmentInfo> items;
 
-  Future<void> _open(BuildContext context, AttachmentInfo a) async {
-    final l = AppLocalizations.of(context);
-    final ok = await launchUrl(
-      Uri.parse(a.url),
-      mode: LaunchMode.externalApplication,
-    ).catchError((_) => false);
-    if (!ok && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.openFileFailed)));
-    }
-  }
+  Future<void> _open(BuildContext context, AttachmentInfo a) => openDocument(
+    context,
+    source: 'att-${a.id}',
+    name: a.name,
+    mime: a.contentType,
+    link: () async => a.url,
+  );
 
   @override
   Widget build(BuildContext context) {

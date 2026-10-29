@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/api_client.dart';
+import '../data/file_store.dart';
 import '../data/offline.dart';
 import '../data/repositories/auth_repository.dart';
 import '../l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ String describeError(BuildContext context, Object error) {
     ApiException(code: 'pin_gone') => l.pinGone,
     QueuedOffline() => l.savedOnPhone,
     NetworkException() => l.networkError,
+    FileUnavailable() => l.networkError,
     ApiException(statusCode: 403) => l.errorForbidden,
     ApiException(code: 'pin_too_simple') => l.pinTooSimple,
     ApiException(code: 'bad_code') => l.badCode,
