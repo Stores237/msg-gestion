@@ -21,6 +21,17 @@ def _audience():
     return User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
 
 
+def _notify_new(item, users):
+    """Tells [users] about a new announcement or convocation: everyone, or
+    only the members it is for."""
+    conv = item.kind == Announcement.Kind.CONVOCATION
+    if item.tagged.exists():
+        title = "Convocation pour vous" if conv else "Annonce pour vous"
+    else:
+        title = "Nouvelle convocation" if conv else "Nouvelle annonce"
+    return notify(users, "convocation" if conv else "announcement", title, item.title, {"type": "announcement", "id": item.pk})
+
+
 def _context(request, items):
     read_ids = set(Read.objects.filter(member=request.user, announcement__in=items).values_list("announcement_id", flat=True))
     return {"read_ids": read_ids, "viewer": request.user, "audience": _audience().count(), "request": request}
@@ -38,7 +49,7 @@ class AnnouncementListView(APIView):
         # and annotate(Count) makes this one.
         qs = (
             Announcement.objects.select_related("author", "event")
-            .prefetch_related("attachments")
+            .prefetch_related("attachments", "tagged")
             .annotate(read_count=Count("reads"))
             .order_by("-pinned", "-created_at")
         )
@@ -49,6 +60,8 @@ class AnnouncementListView(APIView):
             qs = qs.filter(author=request.user)
         elif f == "unread":
             qs = qs.exclude(reads__member=request.user)
+        elif f == "for_me":
+            qs = qs.filter(tagged=request.user)
         items = list(qs[:100])
         unread = Announcement.objects.exclude(reads__member=request.user).count()
         return Response({"unread": unread, "results": AnnouncementSerializer(items, many=True, context=_context(request, items)).data})
@@ -59,15 +72,11 @@ class AnnouncementListView(APIView):
         s.is_valid(raise_exception=True)
         item = s.save(author=request.user, author_role=request.user.display_role())
         Read.objects.create(announcement=item, member=request.user)  # the author has read it
-        notify(
-            _audience().exclude(pk=request.user.pk),
-            "convocation" if item.kind == Announcement.Kind.CONVOCATION else "announcement",
-            ("Nouvelle convocation" if item.kind == Announcement.Kind.CONVOCATION else "Nouvelle annonce"),
-            item.title,
-            {"type": "announcement", "id": item.pk},
-        )
+        tagged = item.tagged.all()
+        n = _notify_new(item, (tagged if tagged else _audience()).exclude(pk=request.user.pk))
         audit.record("Convocation envoyée" if item.kind == Announcement.Kind.CONVOCATION else "Annonce publiée",
-                     actor=request.user, obj=item, request=request, detail={"destinataires": _audience().count()})
+                     actor=request.user, obj=item, request=request,
+                     detail={"notifiés": n, **({"mentionnés": len(tagged)} if tagged else {})})
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data, status=status.HTTP_201_CREATED)
 
 
@@ -78,7 +87,7 @@ class AnnouncementDetailView(APIView):
     permission_classes = [require("announcements.posts", "view")]
 
     def get(self, request, pk):
-        item = get_object_or_404(Announcement.objects.select_related("author", "event"), pk=pk)
+        item = get_object_or_404(Announcement.objects.select_related("author", "event").prefetch_related("tagged"), pk=pk)
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
 
     @extend_schema(request=AnnouncementSerializer, responses=AnnouncementSerializer)
@@ -86,12 +95,16 @@ class AnnouncementDetailView(APIView):
         item = get_object_or_404(Announcement.objects.select_related("author", "event"), pk=pk)
         if not (item.author_id == request.user.pk or request.user.can("announcements.posts", "change")):
             return Response({"detail": "Seul l’auteur peut modifier cette annonce.", "code": "author_only"}, status=403)
-        data = {k: v for k, v in request.data.items() if k in ("title", "body", "kind", "event", "pinned")}
+        data = {k: v for k, v in request.data.items() if k in ("title", "body", "kind", "event", "pinned", "tagged")}
         if "pinned" in data and not request.user.can("announcements.posts", "change"):
             data.pop("pinned")  # pinning stays with whoever manages announcements
         s = AnnouncementSerializer(item, data=data, partial=True, context=_context(request, [item]))
         s.is_valid(raise_exception=True)
+        before = set(item.tagged.values_list("pk", flat=True))
         s.save()
+        if "tagged" in data:
+            # Members added afterwards are told; the others already were.
+            _notify_new(item, item.tagged.exclude(pk__in=before | {request.user.pk}))
         audit.record("Annonce modifiée", actor=request.user, obj=item, request=request, detail={"champs": sorted(data)})
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
 
@@ -126,7 +139,9 @@ class ReadReceiptsView(APIView):
         if not (item.author_id == request.user.pk or request.user.can("announcements.posts", "change")):
             return Response({"detail": "Réservé à l’expéditeur.", "code": "author_only"}, status=403)
         read_ids = set(item.reads.values_list("member_id", flat=True))
-        rows = [{"member": m.pk, "full_name": m.full_name, "read": m.pk in read_ids} for m in _audience().order_by("last_name", "first_name")]
+        tagged = set(item.tagged.values_list("pk", flat=True))
+        rows = [{"member": m.pk, "full_name": m.full_name, "read": m.pk in read_ids, "tagged": m.pk in tagged}
+                for m in _audience().order_by("last_name", "first_name")]
         return Response({"read": sum(r["read"] for r in rows), "total": len(rows), "rows": rows})
 
 
@@ -189,7 +204,21 @@ class RemindUnreadView(APIView):
         if not _may_edit(request.user, item):
             return Response({"detail": "Réservé à l’expéditeur.", "code": "author_only"}, status=403)
         read_ids = item.reads.values_list("member_id", flat=True)
-        n = notify(_audience().exclude(pk__in=read_ids), "announcement", f"Rappel : {item.title}", "Merci de lire cette annonce.",
+        # Only the members it is for, when it names some.
+        who = item.tagged.all() if item.tagged.exists() else _audience()
+        n = notify(who.exclude(pk__in=read_ids), "announcement", f"Rappel : {item.title}", "Merci de lire cette annonce.",
                    {"type": "announcement", "id": item.pk})
         audit.record("Relance des non-lecteurs", actor=request.user, obj=item, request=request, detail={"relancés": n})
         return Response({"reminded": n})
+
+
+class RecipientsView(APIView):
+    """Who an announcement can be for (active and on-leave members), for
+    the author's "Notifier" picker. Needs only the right to post, not the
+    member directory."""
+
+    permission_classes = [require("announcements.posts", "create")]
+
+    def get(self, request):
+        people = _audience().exclude(pk=request.user.pk).order_by("last_name", "first_name")
+        return Response([{"id": u.pk, "name": u.full_name, "status": u.gstatus} for u in people])

@@ -996,6 +996,12 @@ class AnnouncementCard extends StatelessWidget {
                                 : l.kindAnnouncement,
                             tone: a.isConvocation ? Tone.green : Tone.neutral,
                           ),
+                          if (a.forMe)
+                            Badge2(
+                              l.forYou,
+                              key: const Key('announcement-for-me'),
+                              tone: Tone.amber,
+                            ),
                           if (a.pinned)
                             Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1055,6 +1061,40 @@ class AnnouncementCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Who it is for, when the author named members (they were
+                // notified; everyone can read it).
+                if (a.tagged.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    key: const Key('announcement-tagged'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Icon(
+                          Icons.alternate_email,
+                          size: 15,
+                          color: c.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          l.taggedLine(
+                            onTap == null || a.tagged.length <= 3
+                                ? a.tagged.map((t) => t.name).join(', ')
+                                : '${a.tagged.take(3).map((t) => t.name).join(', ')} +${a.tagged.length - 3}',
+                          ),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (a.body.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(

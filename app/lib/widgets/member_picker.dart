@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
+import '../models/announcement.dart';
 import '../models/member.dart';
+import '../theme/tokens.dart';
+import 'errors.dart';
 import 'ui.dart';
 
 /// Bottom sheet to pick one member, with search. [activeOnly] leaves out
@@ -98,4 +101,175 @@ class _PickerState extends State<_Picker> {
       ],
     );
   }
+}
+
+/// "Qui notifier ?": tick the members an announcement is for (owner,
+/// 2026-10-29). Returns the new choice, or null when dismissed; an empty
+/// list means everyone.
+Future<List<Recipient>?> pickRecipients(
+  BuildContext context, {
+  List<int> selected = const [],
+}) {
+  return showModalBottomSheet<List<Recipient>>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (context, scroll) =>
+          _RecipientPicker(scroll: scroll, selected: selected.toSet()),
+    ),
+  );
+}
+
+class _RecipientPicker extends StatefulWidget {
+  const _RecipientPicker({required this.scroll, required this.selected});
+  final ScrollController scroll;
+  final Set<int> selected;
+
+  @override
+  State<_RecipientPicker> createState() => _RecipientPickerState();
+}
+
+class _RecipientPickerState extends State<_RecipientPicker> {
+  List<Recipient>? _all;
+  Object? _error;
+  String _q = '';
+  late final Set<int> _on = {...widget.selected};
+
+  @override
+  void initState() {
+    super.initState();
+    RepositoryLocator.instance.announcements
+        .recipients()
+        .then((r) {
+          if (mounted) setState(() => _all = r);
+        })
+        .catchError((Object e) {
+          if (mounted) setState(() => _error = e);
+        });
+  }
+
+  /// Accents ignored, so "esso" finds "Éssomba".
+  static String _fold(String s) {
+    const from = 'àâäáãçéèêëíìîïñóòôöõúùûüýÿœ';
+    const to = 'aaaaaceeeeiiiinooooouuuuyyo';
+    final b = StringBuffer();
+    for (final ch in s.toLowerCase().split('')) {
+      final i = from.indexOf(ch);
+      b.write(i < 0 ? ch : to[i]);
+    }
+    return b.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    final all = _all ?? const <Recipient>[];
+    final shown = all.where((r) => _fold(r.name).contains(_fold(_q))).toList();
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            controller: widget.scroll,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              Text(
+                l.chooseRecipients,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l.chooseRecipientsHint,
+                style: TextStyle(fontSize: 14, color: c.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                key: const Key('recipients-search'),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l.searchName,
+                ),
+                onChanged: (v) => setState(() => _q = v),
+              ),
+              const SizedBox(height: 12),
+              if (_error != null)
+                Text(
+                  describeError(context, _error!),
+                  style: TextStyle(color: c.alert),
+                )
+              else if (_all == null)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                GroupCard(
+                  children: [
+                    for (final r in shown)
+                      ListRow(
+                        key: Key('recipient-${r.id}'),
+                        lead: MemberAvatar(
+                          name: r.name,
+                          status: r.status,
+                          size: 36,
+                        ),
+                        title: Text(r.name),
+                        subtitle: r.status == 'conge'
+                            ? Text(l.statusLeave)
+                            : null,
+                        trailing: Checkbox(
+                          value: _on.contains(r.id),
+                          onChanged: (_) => _toggle(r.id),
+                        ),
+                        onTap: () => _toggle(r.id),
+                      ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          decoration: BoxDecoration(
+            color: c.surfaceCard,
+            border: Border(top: BorderSide(color: c.borderSubtle)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    key: const Key('recipients-everyone'),
+                    onPressed: () =>
+                        Navigator.of(context).pop(const <Recipient>[]),
+                    child: Text(l.notifyEveryone),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    key: const Key('recipients-done'),
+                    onPressed: _all == null
+                        ? null
+                        : () => Navigator.of(context).pop([
+                            for (final r in all)
+                              if (_on.contains(r.id)) r,
+                          ]),
+                    child: Text(l.doneCount(_on.length)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _toggle(int id) =>
+      setState(() => _on.contains(id) ? _on.remove(id) : _on.add(id));
 }

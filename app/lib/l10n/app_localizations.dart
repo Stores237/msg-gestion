@@ -1124,12 +1124,6 @@ abstract class AppLocalizations {
   /// **'Épingler en tête du fil'**
   String get pinOnTop;
 
-  /// No description provided for @recipientsAll.
-  ///
-  /// In fr, this message translates to:
-  /// **'Tous les membres'**
-  String get recipientsAll;
-
   /// No description provided for @sendAnnouncement.
   ///
   /// In fr, this message translates to:
@@ -3799,6 +3793,84 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Expiré'**
   String get eventExpired;
+
+  /// No description provided for @notifyAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Notifier : tous les membres'**
+  String get notifyAll;
+
+  /// No description provided for @notifyCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Notifier : 1 membre} other{Notifier : {n} membres}}'**
+  String notifyCount(int n);
+
+  /// No description provided for @notifyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez qui reçoit la notification. L’annonce reste visible par tous.'**
+  String get notifyHint;
+
+  /// No description provided for @chooseRecipients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui notifier ?'**
+  String get chooseRecipients;
+
+  /// No description provided for @chooseRecipientsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les membres cochés sont notifiés. Sans choix, tout le monde l’est.'**
+  String get chooseRecipientsHint;
+
+  /// No description provided for @notifyEveryone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout le monde'**
+  String get notifyEveryone;
+
+  /// No description provided for @doneCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider ({n})'**
+  String doneCount(int n);
+
+  /// No description provided for @forYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour vous'**
+  String get forYou;
+
+  /// No description provided for @taggedLine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour : {names}'**
+  String taggedLine(String names);
+
+  /// No description provided for @filterForMe.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour moi'**
+  String get filterForMe;
+
+  /// No description provided for @taggedStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mentionné'**
+  String get taggedStatus;
+
+  /// No description provided for @removeRecipient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer {name}'**
+  String removeRecipient(String name);
+
+  /// No description provided for @searchName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un nom'**
+  String get searchName;
 }
 
 class _AppLocalizationsDelegate

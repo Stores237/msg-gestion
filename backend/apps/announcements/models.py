@@ -7,7 +7,8 @@ from apps.core.groups import default_group_id, scoped
 class Announcement(models.Model):
     """An announcement or a convocation to every member. A convocation is
     tied to a calendar event. Title and body are shown as written (the
-    author chooses the language)."""
+    author chooses the language). With `tagged` members, only they are
+    notified; everyone still sees it (owner, 2026-10-29)."""
 
     class Kind(models.TextChoices):
         ANNOUNCEMENT = "annonce", "Annonce"
@@ -21,6 +22,7 @@ class Announcement(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     # The author's role when they posted (owner, 2026-10-26: shown on it).
     author_role = models.CharField(max_length=100, blank=True)
+    tagged = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")

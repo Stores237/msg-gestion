@@ -595,8 +595,10 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
     required String body,
     int? eventId,
     bool pinned = false,
+    List<int> tagged = const [],
   }) async {
     sent.add('$kind:$title:${eventId ?? '-'}');
+    lastTagged = tagged;
     final a = Announcement(
       id: 100 + sent.length,
       kind: kind,
@@ -607,6 +609,10 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
       unread: false,
       canEdit: true, // the author
       canDelete: true,
+      tagged: [
+        for (final r in people)
+          if (tagged.contains(r.id)) TaggedMember(r.id, r.name),
+      ],
     );
     items = [a, ...items];
     return a;
@@ -622,8 +628,10 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
     required String title,
     required String body,
     int? eventId,
+    List<int> tagged = const [],
   }) async {
     updated.add('$id:$title');
+    lastTagged = tagged;
     items = [
       for (final a in items)
         a.id == id
@@ -638,6 +646,10 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
                 unread: false,
                 canEdit: true,
                 canDelete: true,
+                tagged: [
+                  for (final r in people)
+                    if (tagged.contains(r.id)) TaggedMember(r.id, r.name),
+                ],
               )
             : a,
     ];
@@ -655,6 +667,17 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
 
   @override
   Future<List<ReadReceipt>> receipts(int id) async => const [];
+
+  /// The ids sent with the last create or update.
+  List<int> lastTagged = const [];
+  List<Recipient> people = const [
+    Recipient(id: 11, name: 'Essomba Kévin', status: 'actif'),
+    Recipient(id: 12, name: 'Mbarga Rose', status: 'actif'),
+    Recipient(id: 13, name: 'Ndi Paul', status: 'conge'),
+  ];
+
+  @override
+  Future<List<Recipient>> recipients() async => people;
 
   final attached = <String>[];
 

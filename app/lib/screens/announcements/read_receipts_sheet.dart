@@ -89,6 +89,9 @@ class _ReceiptsState extends State<_Receipts> {
                     lead: MemberAvatar(name: r.fullName, size: 36),
                     title: Text(r.fullName),
                     subtitle: Text(r.read ? l.readStatus : l.unreadDot),
+                    trailing: r.tagged
+                        ? Badge2(l.taggedStatus, tone: Tone.green)
+                        : null,
                   ),
               ],
             ),

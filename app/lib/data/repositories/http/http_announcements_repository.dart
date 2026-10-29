@@ -37,6 +37,7 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
     required String body,
     int? eventId,
     bool pinned = false,
+    List<int> tagged = const [],
   }) async => Announcement.fromJson(
     await _api.post(
           '/announcements/',
@@ -46,6 +47,7 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
             'body': body,
             'event': eventId,
             'pinned': pinned,
+            'tagged': tagged,
           },
         )
         as Map<String, dynamic>,
@@ -58,10 +60,17 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
     required String title,
     required String body,
     int? eventId,
+    List<int> tagged = const [],
   }) async => Announcement.fromJson(
     await _api.patch(
           '/announcements/$id/',
-          body: {'kind': kind, 'title': title, 'body': body, 'event': eventId},
+          body: {
+            'kind': kind,
+            'title': title,
+            'body': body,
+            'event': eventId,
+            'tagged': tagged,
+          },
         )
         as Map<String, dynamic>,
   );
@@ -84,9 +93,16 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
           memberId: r['member'] as int,
           fullName: r['full_name'] as String,
           read: r['read'] as bool,
+          tagged: (r['tagged'] as bool?) ?? false,
         ),
     ];
   }
+
+  @override
+  Future<List<Recipient>> recipients() async => [
+    for (final r in await _api.get('/announcements/recipients/') as List)
+      Recipient.fromJson(r as Map<String, dynamic>),
+  ];
 
   @override
   Future<AttachmentInfo> attach(

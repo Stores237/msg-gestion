@@ -835,3 +835,28 @@ showed the identity read-only, as in the design; there was no way to correct a n
 Enregistrer: the page shows it, Journal d'audit shows "Identité modifiée" with before/after.
 ✎ next to the phone → another member's number → refused; a new number with a reason → the
 member's app asks to sign in again, with the new number. `pytest apps/backoffice/test_identity.py`.
+
+## 39. Choose who is notified of an announcement or convocation (build 21)
+
+Owner, 2026-10-29: "select among members who should be notified, like a tag; the announcement or
+convocation could still be seen by everyone".
+
+- **Rédiger → Notifier** (was a fixed "Tous les membres" row) opens **Qui notifier ?**: the
+  group's active and on-leave members, search by name (accents ignored), tick any number,
+  **Valider (n)**; **Tout le monde** clears the choice. The names chosen show under the form as
+  chips (✕ removes one). Also when editing; members added then are notified, the others aren't
+  notified twice.
+- With members chosen, only they get the notification ("Annonce pour vous" / "Convocation pour
+  vous"); without, everyone does, as before. **Everyone still sees it** in the feed.
+- On the card: **POUR VOUS** for a tagged reader, and "@ Pour : names" (3 names + n on the feed,
+  all on the announcement). New feed filter **Pour moi**. Read receipts mark the tagged members;
+  "Relancer les non-lecteurs" then reminds only the tagged ones who haven't read it.
+- Server: `Announcement.tagged` (migration announcements 0005); `tagged` ids on POST/PATCH,
+  checked against the group's audience; `tagged_members` and `for_me` in the response;
+  `?filter=for_me`; `GET /api/announcements/recipients/` for whoever may post (no need for the
+  member directory). Audit: "notifiés" and "mentionnés" counts.
+
+**Verify.** As a secretary: new announcement → Notifier → tick 2 members → Publier. Those two get
+"Annonce pour vous"; a third member gets no notification but sees it in Annonces, with "Pour :"
+and no POUR VOUS. `pytest apps/announcements/test_tagged.py`,
+`flutter test test/announcement_tagged_test.dart`.

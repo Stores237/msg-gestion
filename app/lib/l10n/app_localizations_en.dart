@@ -585,9 +585,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pinOnTop => 'Pin to the top of the feed';
 
   @override
-  String get recipientsAll => 'All members';
-
-  @override
   String get sendAnnouncement => 'Publish announcement';
 
   @override
@@ -2198,4 +2195,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get eventExpired => 'Expired';
+
+  @override
+  String get notifyAll => 'Notify: all members';
+
+  @override
+  String notifyCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Notify: $n members',
+      one: 'Notify: 1 member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notifyHint =>
+      'Choose who gets the notification. Everyone can still see it.';
+
+  @override
+  String get chooseRecipients => 'Who to notify?';
+
+  @override
+  String get chooseRecipientsHint =>
+      'Only the members ticked are notified. With none, everyone is.';
+
+  @override
+  String get notifyEveryone => 'Everyone';
+
+  @override
+  String doneCount(int n) {
+    return 'Done ($n)';
+  }
+
+  @override
+  String get forYou => 'For you';
+
+  @override
+  String taggedLine(String names) {
+    return 'For: $names';
+  }
+
+  @override
+  String get filterForMe => 'For me';
+
+  @override
+  String get taggedStatus => 'Tagged';
+
+  @override
+  String removeRecipient(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String get searchName => 'Search a name';
 }

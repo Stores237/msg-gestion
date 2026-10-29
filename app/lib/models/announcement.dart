@@ -26,6 +26,28 @@ class AttachmentInfo {
   );
 }
 
+/// A member an announcement is for (owner, 2026-10-29: only they are
+/// notified; everyone still sees it).
+class TaggedMember {
+  const TaggedMember(this.id, this.name);
+  final int id;
+  final String name;
+}
+
+/// Someone the author can tag (the group's active and on-leave members).
+class Recipient {
+  const Recipient({required this.id, required this.name, this.status = ''});
+  final int id;
+  final String name;
+  final String status;
+
+  factory Recipient.fromJson(Map<String, dynamic> j) => Recipient(
+    id: j['id'] as int,
+    name: j['name'] as String,
+    status: (j['status'] as String?) ?? '',
+  );
+}
+
 class Announcement {
   const Announcement({
     required this.id,
@@ -45,6 +67,8 @@ class Announcement {
     this.readCount,
     this.audience,
     this.attachments = const [],
+    this.tagged = const [],
+    this.forMe = false,
   });
 
   final int id;
@@ -73,6 +97,12 @@ class Announcement {
   final int? audience;
   final List<AttachmentInfo> attachments;
 
+  /// The members it is for; empty: everyone was notified.
+  final List<TaggedMember> tagged;
+
+  /// The viewer is one of [tagged].
+  final bool forMe;
+
   bool get isConvocation => kind == 'convocation';
 
   Announcement copyWith({bool? unread}) => Announcement(
@@ -93,6 +123,8 @@ class Announcement {
     readCount: readCount,
     audience: audience,
     attachments: attachments,
+    tagged: tagged,
+    forMe: forMe,
   );
 
   factory Announcement.fromJson(Map<String, dynamic> j) {
@@ -120,6 +152,14 @@ class Announcement {
         for (final a in (j['attachments'] as List?) ?? const [])
           AttachmentInfo.fromJson(a as Map<String, dynamic>),
       ],
+      tagged: [
+        for (final t in (j['tagged_members'] as List?) ?? const [])
+          TaggedMember(
+            (t as Map<String, dynamic>)['id'] as int,
+            t['name'] as String,
+          ),
+      ],
+      forMe: (j['for_me'] as bool?) ?? false,
     );
   }
 }
@@ -135,8 +175,12 @@ class ReadReceipt {
     required this.memberId,
     required this.fullName,
     required this.read,
+    this.tagged = false,
   });
   final int memberId;
   final String fullName;
   final bool read;
+
+  /// The announcement named them (they were notified).
+  final bool tagged;
 }

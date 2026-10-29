@@ -27,7 +27,7 @@ class AnnouncementsScreen extends StatefulWidget {
 }
 
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
-  static const _filters = ['all', 'convocations', 'unread', 'sent'];
+  static const _filters = ['all', 'convocations', 'unread', 'for_me', 'sent'];
   int _filter = 0;
   AnnouncementFeed? _feed;
   Object? _error;
@@ -79,6 +79,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
       l.filterAnnAll,
       l.filterConvocations,
       l.filterUnread(feed?.unread ?? 0),
+      l.filterForMe,
       if (_canWrite) l.filterSent,
     ];
     return Scaffold(

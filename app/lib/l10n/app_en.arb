@@ -171,7 +171,6 @@
   "chooseEvent": "Choose an event",
   "eventRequired": "A convocation must be linked to an event.",
   "pinOnTop": "Pin to the top of the feed",
-  "recipientsAll": "All members",
   "sendAnnouncement": "Publish announcement",
   "sendConvocation": "Send convocation",
   "announcementSent": "Published.",
@@ -616,5 +615,46 @@
   "addPhotoHint": "Gallery or camera · framed 4:3, 2 MB max",
   "photosLimit": "4 photos maximum per announcement.",
   "attachPdfHint": "PDF document, 10 MB max",
-  "eventExpired": "Expired"
+  "eventExpired": "Expired",
+  "notifyAll": "Notify: all members",
+  "notifyCount": "{n, plural, =1{Notify: 1 member} other{Notify: {n} members}}",
+  "@notifyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notifyHint": "Choose who gets the notification. Everyone can still see it.",
+  "chooseRecipients": "Who to notify?",
+  "chooseRecipientsHint": "Only the members ticked are notified. With none, everyone is.",
+  "notifyEveryone": "Everyone",
+  "doneCount": "Done ({n})",
+  "@doneCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "forYou": "For you",
+  "taggedLine": "For: {names}",
+  "@taggedLine": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "filterForMe": "For me",
+  "taggedStatus": "Tagged",
+  "removeRecipient": "Remove {name}",
+  "@removeRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchName": "Search a name"
 }

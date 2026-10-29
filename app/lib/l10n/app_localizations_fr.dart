@@ -587,9 +587,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pinOnTop => 'Épingler en tête du fil';
 
   @override
-  String get recipientsAll => 'Tous les membres';
-
-  @override
   String get sendAnnouncement => 'Publier l’annonce';
 
   @override
@@ -2210,4 +2207,59 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get eventExpired => 'Expiré';
+
+  @override
+  String get notifyAll => 'Notifier : tous les membres';
+
+  @override
+  String notifyCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Notifier : $n membres',
+      one: 'Notifier : 1 membre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get notifyHint =>
+      'Choisissez qui reçoit la notification. L’annonce reste visible par tous.';
+
+  @override
+  String get chooseRecipients => 'Qui notifier ?';
+
+  @override
+  String get chooseRecipientsHint =>
+      'Seuls les membres cochés sont notifiés. Sans choix, tout le monde l’est.';
+
+  @override
+  String get notifyEveryone => 'Tout le monde';
+
+  @override
+  String doneCount(int n) {
+    return 'Valider ($n)';
+  }
+
+  @override
+  String get forYou => 'Pour vous';
+
+  @override
+  String taggedLine(String names) {
+    return 'Pour : $names';
+  }
+
+  @override
+  String get filterForMe => 'Pour moi';
+
+  @override
+  String get taggedStatus => 'Mentionné';
+
+  @override
+  String removeRecipient(String name) {
+    return 'Retirer $name';
+  }
+
+  @override
+  String get searchName => 'Rechercher un nom';
 }

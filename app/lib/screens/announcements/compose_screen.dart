@@ -10,6 +10,7 @@ import '../../models/event.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
+import '../../widgets/member_picker.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/photo_frame.dart';
 import '../../widgets/ui.dart';
@@ -22,7 +23,8 @@ class PickedFile {
 }
 
 /// "Rédiger une annonce": announcement or convocation (linked to an
-/// upcoming event), optionally pinned. Goes to every member. With
+/// upcoming event), optionally pinned. Everyone sees it; "Notifier" picks
+/// the members who get the notification (none chosen: everyone). With
 /// [existing], "Modifier l’annonce" (its author, or whoever manages posts).
 class ComposeScreen extends StatefulWidget {
   const ComposeScreen({super.key, this.existing});
@@ -42,6 +44,17 @@ class _ComposeScreenState extends State<ComposeScreen> {
   bool _busy = false;
   bool _eventMissing = false;
   final List<PickedFile> _files = [];
+
+  /// The members it is for; empty: everyone is notified.
+  List<Recipient> _tagged = [];
+
+  Future<void> _pickTagged() async {
+    final picked = await pickRecipients(
+      context,
+      selected: [for (final r in _tagged) r.id],
+    );
+    if (picked != null && mounted) setState(() => _tagged = picked);
+  }
 
   /// Photos framed 4:3, ≤ 2 MB (owner, 2026-10-28), sent after the files.
   final List<FramedPhoto> _photos = [];
@@ -122,6 +135,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
     _body.text = a.body;
     _kind = a.isConvocation ? 1 : 0;
     _pinned = a.pinned;
+    _tagged = [for (final t in a.tagged) Recipient(id: t.id, name: t.name)];
     if (a.eventId != null) {
       // Enough of the linked event to show and keep it.
       _event = CalendarEvent(
@@ -232,6 +246,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
               title: _title.text.trim(),
               body: _body.text.trim(),
               eventId: eventId,
+              tagged: [for (final r in _tagged) r.id],
             )
           : await repo.create(
               kind: kind,
@@ -239,6 +254,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
               body: _body.text.trim(),
               eventId: eventId,
               pinned: _pinned,
+              tagged: [for (final r in _tagged) r.id],
             );
       for (final f in [
         ..._files,
@@ -444,11 +460,21 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           onTap: _pickFile,
                         ),
                         ListRow(
-                          lead: const IconChip(
-                            Icons.groups_outlined,
-                            tone: Tone.neutral,
+                          key: const Key('a-notify'),
+                          lead: IconChip(
+                            _tagged.isEmpty
+                                ? Icons.groups_outlined
+                                : Icons.alternate_email,
+                            tone: _tagged.isEmpty ? Tone.neutral : Tone.green,
                           ),
-                          title: Text(l.recipientsAll),
+                          title: Text(
+                            _tagged.isEmpty
+                                ? l.notifyAll
+                                : l.notifyCount(_tagged.length),
+                          ),
+                          subtitle: Text(l.notifyHint),
+                          chevron: true,
+                          onTap: _pickTagged,
                         ),
                         if (!_editing)
                           ListRow(
@@ -461,6 +487,34 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           ),
                       ],
                     ),
+                    if (_tagged.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Wrap(
+                        key: const Key('a-tagged'),
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final r in _tagged)
+                            InputChip(
+                              avatar: const Icon(
+                                Icons.alternate_email,
+                                size: 16,
+                              ),
+                              label: Text(r.name),
+                              deleteButtonTooltipMessage: l.removeRecipient(
+                                r.name,
+                              ),
+                              onDeleted: () => setState(
+                                () => _tagged = [
+                                  for (final x in _tagged)
+                                    if (x.id != r.id) x,
+                                ],
+                              ),
+                              onPressed: _pickTagged,
+                            ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

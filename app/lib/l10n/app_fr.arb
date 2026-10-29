@@ -324,7 +324,6 @@
   "chooseEvent": "Choisir un événement",
   "eventRequired": "Une convocation doit être liée à un événement.",
   "pinOnTop": "Épingler en tête du fil",
-  "recipientsAll": "Tous les membres",
   "sendAnnouncement": "Publier l’annonce",
   "sendConvocation": "Envoyer la convocation",
   "announcementSent": "Publié.",
@@ -1391,5 +1390,46 @@
   "addPhotoHint": "Galerie ou appareil photo · cadrée en 4:3, 2 Mo max",
   "photosLimit": "4 photos maximum par annonce.",
   "attachPdfHint": "Document PDF, 10 Mo max",
-  "eventExpired": "Expiré"
+  "eventExpired": "Expiré",
+  "notifyAll": "Notifier : tous les membres",
+  "notifyCount": "{n, plural, =1{Notifier : 1 membre} other{Notifier : {n} membres}}",
+  "@notifyCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notifyHint": "Choisissez qui reçoit la notification. L’annonce reste visible par tous.",
+  "chooseRecipients": "Qui notifier ?",
+  "chooseRecipientsHint": "Seuls les membres cochés sont notifiés. Sans choix, tout le monde l’est.",
+  "notifyEveryone": "Tout le monde",
+  "doneCount": "Valider ({n})",
+  "@doneCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "forYou": "Pour vous",
+  "taggedLine": "Pour : {names}",
+  "@taggedLine": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "filterForMe": "Pour moi",
+  "taggedStatus": "Mentionné",
+  "removeRecipient": "Retirer {name}",
+  "@removeRecipient": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "searchName": "Rechercher un nom"
 }

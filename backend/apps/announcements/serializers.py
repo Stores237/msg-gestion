@@ -25,6 +25,15 @@ class EventField(serializers.PrimaryKeyRelatedField):
         return Event.objects.all()
 
 
+class TaggedField(serializers.PrimaryKeyRelatedField):
+    """A member the announcement is for: one of the group's audience."""
+
+    def get_queryset(self):
+        from .views import _audience
+
+        return _audience()
+
+
 class AnnouncementSerializer(serializers.ModelSerializer):
     event = EventField(required=False, allow_null=True)
     event_title = serializers.CharField(source="event.title", read_only=True, default=None)
@@ -36,11 +45,15 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     attachments = AttachmentSerializer(many=True, read_only=True)
     can_edit = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
+    # Write the ids; read who they are and whether the viewer is one of them.
+    tagged = TaggedField(many=True, required=False, write_only=True)
+    tagged_members = serializers.SerializerMethodField()
+    for_me = serializers.SerializerMethodField()
 
     class Meta:
         model = Announcement
         fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "author_role", "created_at", "unread", "reads", "attachments",
-                  "can_edit", "can_delete"]
+                  "can_edit", "can_delete", "tagged", "tagged_members", "for_me"]
         read_only_fields = ["created_at"]
 
     # The author edits and deletes their own post (owner, 2026-10-26); people
@@ -52,6 +65,18 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     def get_can_delete(self, a) -> bool:
         v = self.context.get("viewer")
         return bool(v) and (a.author_id == v.pk or v.can("announcements.posts", "delete"))
+
+    def get_tagged_members(self, a) -> list[dict]:
+        return [{"id": u.pk, "name": u.short_name} for u in sorted(a.tagged.all(), key=lambda u: (u.last_name, u.first_name))]
+
+    def get_for_me(self, a) -> bool:
+        v = self.context.get("viewer")
+        return bool(v) and any(u.pk == v.pk for u in a.tagged.all())
+
+    def validate_tagged(self, value):
+        if len(value) > 200:
+            raise serializers.ValidationError("200 membres au plus.", code="too_many")
+        return value
 
     def get_author_name(self, a) -> str | None:
         return a.author.short_name if a.author else None
