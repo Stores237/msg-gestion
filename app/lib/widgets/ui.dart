@@ -1132,30 +1132,19 @@ class AnnouncementCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                // Photos in their 4:3 frame: the first on the feed card
-                // (with "+N"), all of them on the announcement itself.
-                ...() {
-                  final photos = [
-                    for (final x in a.attachments)
-                      if (x.isImage) x,
-                  ];
-                  if (photos.isEmpty) return const <Widget>[];
-                  final shown = onTap == null ? photos : photos.take(1);
-                  return [
-                    for (final (i, p) in shown.indexed)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: AnnouncementPhoto(
-                          key: Key('ann-photo-${p.id}'),
-                          url: p.url,
-                          gallery: [for (final x in photos) x.url],
-                          badge: onTap != null && i == 0 && photos.length > 1
-                              ? '+${photos.length - 1}'
-                              : null,
-                        ),
-                      ),
-                  ];
-                }(),
+                // Photos in their 4:3 frame, side by side, moving on by
+                // themselves (owner, 2026-10-29).
+                if (a.attachments.any((x) => x.isImage))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: PhotoCarousel(
+                      key: Key('ann-photos-${a.id}'),
+                      urls: [
+                        for (final x in a.attachments)
+                          if (x.isImage) x.url,
+                      ],
+                    ),
+                  ),
                 if (a.attachments.any((x) => !x.isImage))
                   AttachmentList(
                     items: [

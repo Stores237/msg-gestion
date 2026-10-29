@@ -46,10 +46,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Qui notifier ?'), findsOneWidget);
     // Search ignores accents.
-    await tester.enterText(
-      find.byKey(const Key('recipients-search')),
-      'kevin',
-    );
+    await tester.enterText(find.byKey(const Key('recipients-search')), 'kevin');
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('recipient-12')), findsNothing);
     await tester.tap(find.byKey(const Key('recipient-11')));
@@ -119,7 +116,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('announcement-for-me')), findsOneWidget);
     // The feed card shortens the list; the announcement itself shows all.
-    expect(find.text('Pour : Essomba K., Mbarga R., Ndi P. +1'), findsOneWidget);
+    expect(
+      find.text('Pour : Essomba K., Mbarga R., Ndi P. +1'),
+      findsOneWidget,
+    );
 
     await tester.pumpWidget(
       MsgApp(

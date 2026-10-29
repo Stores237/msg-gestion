@@ -79,11 +79,16 @@ class HomeScreen extends StatelessWidget {
     final f = await feed;
     return _HomeData(
       nextEvent: upcoming.isEmpty ? null : upcoming.first,
-      // The three newest, pinned or not (owner, 2026-10-29); the feed puts
-      // pinned ones first.
-      latest: ([
-        ...f.items,
-      ]..sort((a, b) => b.createdAt.compareTo(a.createdAt))).take(3).toList(),
+      // Pinned ones on top, then the three newest others (owner,
+      // 2026-10-29).
+      latest: () {
+        final newest = [...f.items]
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return [
+          ...newest.where((a) => a.pinned),
+          ...newest.where((a) => !a.pinned).take(3),
+        ];
+      }(),
       unread: f.unread,
       dues: await dues,
       summary: await summary,
@@ -318,6 +323,17 @@ class _AnnouncementRow extends StatelessWidget {
           Expanded(
             child: Text(a.title, maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
+          if (a.pinned)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: Icon(
+                Icons.push_pin_outlined,
+                key: Key('home-pinned-${a.id}'),
+                size: 16,
+                color: c.textSecondary,
+                semanticLabel: l.pinned,
+              ),
+            ),
         ],
       ),
       subtitle: Column(

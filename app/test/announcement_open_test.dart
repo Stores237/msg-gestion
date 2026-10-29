@@ -10,7 +10,7 @@ import 'fakes.dart';
 import 'helpers.dart';
 
 /// Owner, 2026-10-29: a notification opens its announcement, "Pour vous" is
-/// a small mark; photos scroll vertically; Accueil shows the three newest.
+/// a small mark; photos side by side; Accueil: pinned, then the newest.
 void main() {
   testWidgets('a notification opens its announcement; "Pour vous" is a mark', (
     tester,
@@ -29,7 +29,7 @@ void main() {
     expect(find.text('Jeudi 18:00 à l’église.'), findsOneWidget);
   });
 
-  testWidgets('photos: all of them, one under the other, from the tapped one', (
+  testWidgets('full screen: photos side by side, from the tapped one', (
     tester,
   ) async {
     await setUpApp(tester);
@@ -43,29 +43,27 @@ void main() {
             'https://example.test/0.jpg',
             'https://example.test/1.jpg',
             'https://example.test/2.jpg',
-            'https://example.test/3.jpg',
           ],
-          initial: 3,
+          initial: 1,
         ),
       ),
     );
     await tester.pumpAndSettle();
-    final list = tester.widget<ListView>(
+    final pages = tester.widget<PageView>(
       find.byKey(const Key('photo-gallery')),
     );
-    expect(list.scrollDirection, Axis.vertical);
-    expect(find.text('4 photos'), findsOneWidget);
-    expect(find.byKey(const Key('gallery-photo-3')), findsOneWidget);
-    expect(find.byKey(const Key('gallery-photo-0')), findsNothing);
+    expect(pages.scrollDirection, Axis.horizontal);
+    expect(find.text('2 / 3'), findsOneWidget);
+    expect(find.byKey(const Key('gallery-photo-1')), findsOneWidget);
     await tester.drag(
       find.byKey(const Key('photo-gallery')),
-      const Offset(0, 2000),
+      const Offset(-500, 0),
     );
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('gallery-photo-0')), findsOneWidget);
+    expect(find.text('3 / 3'), findsOneWidget);
   });
 
-  testWidgets('Accueil: the three newest announcements, pinned or not', (
+  testWidgets('Accueil: pinned on top, then the three newest others', (
     tester,
   ) async {
     final f = await setUpApp(tester);
@@ -84,6 +82,7 @@ void main() {
       item(2, 29),
       item(3, 27),
       item(4, 25),
+      item(5, 21),
     ];
     await pumpShell(tester, fakeMe());
     await tester.scrollUntilVisible(
@@ -108,9 +107,11 @@ void main() {
         .map((w) => (w.key as ValueKey<String>).value)
         .toList();
     expect(rows, [
+      'home-announcement-1',
       'home-announcement-2',
       'home-announcement-3',
       'home-announcement-4',
     ]);
+    expect(find.byKey(const Key('home-pinned-1')), findsOneWidget);
   });
 }

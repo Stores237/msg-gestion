@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
@@ -304,17 +306,13 @@ class AnnouncementPhoto extends StatefulWidget {
   const AnnouncementPhoto({
     super.key,
     required this.url,
-    this.badge,
     this.gallery = const [],
   });
   final String url;
 
-  /// All the announcement's photos: tapping one shows them all, one under
-  /// the other (owner, 2026-10-29). Empty means just this one.
+  /// All the announcement's photos: tapping one opens them all full screen,
+  /// at this one. Empty means just this one.
   final List<String> gallery;
-
-  /// "+2" on the first photo of a card when there are more.
-  final String? badge;
 
   @override
   State<AnnouncementPhoto> createState() => _AnnouncementPhotoState();
@@ -372,10 +370,100 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
                       ),
                     ],
                   ),
-                if (widget.badge != null)
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// An announcement's photos side by side (owner, 2026-10-29): swipe, and
+/// they move on by themselves every few seconds, back to the first after
+/// the last. A touch pauses it; reduced motion (phone setting) turns it off.
+class PhotoCarousel extends StatefulWidget {
+  const PhotoCarousel({
+    super.key,
+    required this.urls,
+    this.interval = const Duration(seconds: 4),
+  });
+  final List<String> urls;
+  final Duration interval;
+
+  @override
+  State<PhotoCarousel> createState() => _PhotoCarouselState();
+}
+
+class _PhotoCarouselState extends State<PhotoCarousel> {
+  final _pages = PageController();
+  Timer? _timer;
+  int _page = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _start();
+  }
+
+  void _start() {
+    _timer?.cancel();
+    _timer = null;
+    if (widget.urls.length < 2 || MediaQuery.disableAnimationsOf(context)) {
+      return;
+    }
+    _timer = Timer.periodic(widget.interval, (_) {
+      if (!_pages.hasClients) return;
+      final next = (_page + 1) % widget.urls.length;
+      if (next == 0) {
+        _pages.jumpToPage(0);
+      } else {
+        _pages.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 450),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    final n = widget.urls.length;
+    return Column(
+      children: [
+        Listener(
+          // Held or swiped by hand: wait a full interval before moving on.
+          onPointerDown: (_) => _timer?.cancel(),
+          onPointerUp: (_) => _start(),
+          onPointerCancel: (_) => _start(),
+          child: AspectRatio(
+            aspectRatio: photoRatio,
+            child: Stack(
+              children: [
+                PageView.builder(
+                  key: const Key('photo-carousel'),
+                  controller: _pages,
+                  itemCount: n,
+                  onPageChanged: (i) => setState(() => _page = i),
+                  itemBuilder: (context, i) => AnnouncementPhoto(
+                    key: Key('carousel-photo-$i'),
+                    url: widget.urls[i],
+                    gallery: widget.urls,
+                  ),
+                ),
+                if (n > 1)
                   Positioned(
                     right: 8,
-                    bottom: 8,
+                    top: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -386,7 +474,8 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
-                        widget.badge!,
+                        '${_page + 1}/$n',
+                        key: const Key('carousel-count'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -399,30 +488,32 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
             ),
           ),
         ),
-      ),
+        if (n > 1) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < n; i++)
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: i == _page ? 16 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: i == _page ? c.primary : c.borderStrong,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
 
-class _PhotoViewer extends StatelessWidget {
-  const _PhotoViewer({required this.url});
-  final String url;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: Colors.black,
-    appBar: AppBar(
-      backgroundColor: Colors.black,
-      foregroundColor: Colors.white,
-    ),
-    body: Center(
-      child: InteractiveViewer(maxScale: 5, child: Image.network(url)),
-    ),
-  );
-}
-
-/// An announcement's photos, scrolling vertically, opened at the one that
-/// was tapped; tap one to zoom it.
+/// An announcement's photos full screen, side by side, opened at the one
+/// that was tapped; pinch to zoom (swiping waits until it is zoomed out).
 class PhotoGallery extends StatefulWidget {
   const PhotoGallery({super.key, required this.urls, this.initial = 0});
   final List<String> urls;
@@ -433,12 +524,15 @@ class PhotoGallery extends StatefulWidget {
 }
 
 class _PhotoGalleryState extends State<PhotoGallery> {
-  static const _gap = 12.0;
-  ScrollController? _scroll;
+  late final _pages = PageController(
+    initialPage: widget.initial.clamp(0, widget.urls.length - 1),
+  );
+  late int _page = widget.initial.clamp(0, widget.urls.length - 1);
+  bool _zoomed = false;
 
   @override
   void dispose() {
-    _scroll?.dispose();
+    _pages.dispose();
     super.dispose();
   }
 
@@ -450,47 +544,59 @@ class _PhotoGalleryState extends State<PhotoGallery> {
       foregroundColor: Colors.white,
       title: widget.urls.length > 1
           ? Text(
-              AppLocalizations.of(context).photoCount(widget.urls.length),
+              '${_page + 1} / ${widget.urls.length}',
+              key: const Key('gallery-count'),
               style: const TextStyle(fontSize: 16),
             )
           : null,
     ),
-    body: LayoutBuilder(
-      builder: (context, box) {
-        // Every photo has the same 4:3 frame, so the tapped one's place is
-        // known before anything loads.
-        final h = box.maxWidth / photoRatio + _gap;
-        _scroll ??= ScrollController(
-          initialScrollOffset:
-              widget.initial.clamp(0, widget.urls.length - 1) * h,
-        );
-        return ListView.separated(
-          key: const Key('photo-gallery'),
-          controller: _scroll,
-          padding: const EdgeInsets.only(bottom: 24),
-          itemCount: widget.urls.length,
-          separatorBuilder: (_, _) => const SizedBox(height: _gap),
-          itemBuilder: (context, i) => GestureDetector(
-            key: Key('gallery-photo-$i'),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => _PhotoViewer(url: widget.urls[i]),
-              ),
-            ),
-            child: AspectRatio(
-              aspectRatio: photoRatio,
-              child: Image.network(
-                widget.urls[i],
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(
-                  Icons.broken_image_outlined,
-                  color: Colors.white54,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    body: PageView.builder(
+      key: const Key('photo-gallery'),
+      controller: _pages,
+      physics: _zoomed ? const NeverScrollableScrollPhysics() : null,
+      itemCount: widget.urls.length,
+      onPageChanged: (i) => setState(() => _page = i),
+      itemBuilder: (context, i) => _ZoomablePhoto(
+        key: Key('gallery-photo-$i'),
+        url: widget.urls[i],
+        onZoomed: (z) {
+          if (z != _zoomed) setState(() => _zoomed = z);
+        },
+      ),
+    ),
+  );
+}
+
+class _ZoomablePhoto extends StatefulWidget {
+  const _ZoomablePhoto({super.key, required this.url, required this.onZoomed});
+  final String url;
+  final ValueChanged<bool> onZoomed;
+
+  @override
+  State<_ZoomablePhoto> createState() => _ZoomablePhotoState();
+}
+
+class _ZoomablePhotoState extends State<_ZoomablePhoto> {
+  final _transform = TransformationController();
+
+  @override
+  void dispose() {
+    _transform.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => InteractiveViewer(
+    transformationController: _transform,
+    maxScale: 5,
+    onInteractionEnd: (_) =>
+        widget.onZoomed(_transform.value.getMaxScaleOnAxis() > 1.01),
+    child: Center(
+      child: Image.network(
+        widget.url,
+        errorBuilder: (_, _, _) =>
+            const Icon(Icons.broken_image_outlined, color: Colors.white54),
+      ),
     ),
   );
 }

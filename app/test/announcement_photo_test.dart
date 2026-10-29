@@ -99,58 +99,103 @@ void main() {
     },
   );
 
-  testWidgets('card shows the first photo with +N; tap-to-load when off', (
-    tester,
-  ) async {
-    await setUpApp(tester);
-    Announcement withPhotos() => Announcement(
-      id: 3,
-      kind: 'annonce',
-      title: 'Album',
-      body: '',
-      pinned: false,
-      authorName: 'Din Y.',
-      createdAt: DateTime(2026, 10, 28),
-      unread: false,
-      attachments: [
-        for (final i in [1, 2, 3])
-          AttachmentInfo(
-            id: i,
-            name: 'photo-$i.jpg',
-            size: 200000,
-            contentType: 'image/jpeg',
-            url: 'https://example.test/$i.jpg',
-          ),
-      ],
-    );
-    // Photos stay as "Afficher la photo" here: tests have no network.
-    DataSettings.instance
-      ..network = 'mobile'
-      ..dataSaver = true;
-    await tester.pumpWidget(
-      MsgApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: AnnouncementCard(item: withPhotos(), onTap: () {}),
+  testWidgets(
+    'card: photos slide by themselves, a touch pauses; tap-to-load when off',
+    (tester) async {
+      await setUpApp(tester);
+      Announcement withPhotos() => Announcement(
+        id: 3,
+        kind: 'annonce',
+        title: 'Album',
+        body: '',
+        pinned: false,
+        authorName: 'Din Y.',
+        createdAt: DateTime(2026, 10, 28),
+        unread: false,
+        attachments: [
+          for (final i in [1, 2, 3])
+            AttachmentInfo(
+              id: i,
+              name: 'photo-$i.jpg',
+              size: 200000,
+              contentType: 'image/jpeg',
+              url: 'https://example.test/$i.jpg',
+            ),
+        ],
+      );
+      // Photos stay as "Afficher la photo" here: tests have no network.
+      DataSettings.instance
+        ..network = 'mobile'
+        ..dataSaver = true;
+      await tester.pumpWidget(
+        MsgApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AnnouncementCard(item: withPhotos(), onTap: () {}),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.byType(AnnouncementPhoto), findsOneWidget);
-    expect(find.text('+2'), findsOneWidget);
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(PhotoCarousel), findsOneWidget);
+      expect(find.text('1/3'), findsOneWidget);
+      expect(find.byKey(const Key('photo-tap-to-load')), findsOneWidget);
 
+      // Moves on by itself, and back to the first after the last.
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(find.text('2/3'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(find.text('3/3'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(find.text('1/3'), findsOneWidget);
+
+      // Swiped by hand, horizontally.
+      await tester.drag(
+        find.byKey(const Key('photo-carousel')),
+        const Offset(-500, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('2/3'), findsOneWidget);
+
+      // A finger held on it pauses it.
+      final hold = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('photo-carousel'))),
+      );
+      await tester.pump(const Duration(seconds: 9));
+      await tester.pumpAndSettle();
+      expect(find.text('2/3'), findsOneWidget);
+      await hold.up();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('reduced motion: no automatic sliding', (tester) async {
+    await setUpApp(tester);
     await tester.pumpWidget(
       MsgApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: AnnouncementCard(key: UniqueKey(), item: withPhotos()),
+        home: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: const Scaffold(
+              body: SingleChildScrollView(
+                child: PhotoCarousel(
+                  urls: [
+                    'https://example.test/1.jpg',
+                    'https://example.test/2.jpg',
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(AnnouncementPhoto), findsNWidgets(3));
-    expect(find.byKey(const Key('photo-tap-to-load')), findsNWidgets(3));
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    expect(find.text('1/2'), findsOneWidget);
   });
 }

@@ -884,3 +884,24 @@ announcement all the same.
 notification shows the title and "@ Pour vous"; tapping it opens the announcement; tapping a
 photo shows the three stacked. Accueil lists the 3 newest. `pytest apps/announcements/test_tagged.py`,
 `flutter test test/announcement_open_test.dart`.
+
+## 41. Photos slide side by side by themselves; pinned on top of Accueil (build 23)
+
+Owner, 2026-10-29: "make the announcement picture view a horizontal scrolling view with auto
+scrolling"; "an announcement that has been pinned should stay at the top of the latest
+announcements".
+
+- **Photos** (feed card and announcement): one 4:3 frame holding all the photos side by side.
+  Swipe left/right; they also move on by themselves every 4 s, back to the first after the last.
+  "2/3" in the corner and dots underneath. A finger on the photos pauses it; the phone's
+  "remove animations" setting turns the automatic sliding off. Replaces "+N" on the feed and the
+  stack on the announcement.
+- **Full screen** (tap a photo): the photos side by side too, opened at the one tapped, "2 / 3" on
+  top; pinch to zoom (swiping waits until it's zoomed out). Replaces the vertical list of build 22.
+- **Accueil → Dernières annonces**: pinned announcements first (pin icon), then the three newest
+  others.
+
+**Verify.** An announcement with 3 photos: on the feed the photos change every 4 s and loop; swipe
+works; hold a finger and they stop. Tap one → full screen at that photo, swipe to the others.
+Pin an old announcement → it heads Accueil's list, with three recent ones under it.
+`flutter test test/announcement_photo_test.dart test/announcement_open_test.dart`.
