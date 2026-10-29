@@ -905,3 +905,25 @@ announcements".
 works; hold a finger and they stop. Tap one → full screen at that photo, swipe to the others.
 Pin an old announcement → it heads Accueil's list, with three recent ones under it.
 `flutter test test/announcement_photo_test.dart test/announcement_open_test.dart`.
+
+## 42. Roles have a duration; only the super admin's is without end (back-office)
+
+Owner, 2026-10-29, with a screenshot of a Formateur held "sans fin": "the infinite role has to be
+that of the 2 admins, and the admin should be able to define the duration for a role".
+
+- Every role but **Super admin** (and **Membre**, the membership itself: if it ran out the person
+  would lose the app) has a **duration in months**. **Rôles et permissions → [rôle] → Durée**
+  (1–120 months, reason required, audited "Durée du rôle modifiée"); the chip next to the name
+  shows "Durée N mois" or "Sans fin". **Nouveau rôle** asks for it (12 by default).
+- Assigning a role fills its end date from that duration (the date can still be changed in the
+  dialog); a role without a duration can't be given ("Refus · durée du rôle" in the journal).
+  A new duration applies to the next assignments; current ones keep their end date (renew from
+  Affectations).
+- Migration accounts 0017: bureau roles keep their 24-month mandate; the other roles (formateur,
+  temporary roles, back-office staff…) get 12 months; open-ended assignments of those roles get
+  their end (start + duration, or a full term from today if that is already past). Back-office
+  staff roles are included: renew them before they end.
+
+**Verify.** Back-office → Rôles et permissions → Formateur: "Durée 24 mois" (or 12), button
+**Durée**; set 6 with a reason → the chip says 6. Super admin: "Sans fin", no Durée button. A
+user page: the Formateur role now has an end date. `pytest apps/backoffice/test_role_duration.py`.

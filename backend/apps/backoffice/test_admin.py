@@ -187,9 +187,9 @@ def test_assignments_page_and_renew(admin, client):
 
 
 def test_role_management_and_settings(admin, client):
-    client.post("/bo/roles/nouveau/", {"action": "new", "name": "Responsable matériel"})
+    client.post("/bo/roles/nouveau/", {"action": "new", "name": "Responsable matériel", "months": "18"})
     role = Role.objects.get(name="Responsable matériel")
-    assert role.permissions.count() == 0
+    assert role.permissions.count() == 0 and role.mandate_months == 18
     client.post(f"/bo/roles/{role.slug}/gerer/", {"action": "rename", "name": "Matériel"})
     client.post(f"/bo/roles/{role.slug}/gerer/", {"action": "duplicate"})
     assert Role.objects.filter(name="Matériel (copie)").exists()

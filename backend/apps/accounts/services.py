@@ -104,12 +104,21 @@ def default_end(role, starts_on):
     return starts_on.replace(year=year, month=month, day=day) - timedelta(days=1)
 
 
+def needs_end(role):
+    """Every role but the open-ended ones is given for a set time."""
+    return role.slug not in registry.OPEN_ENDED_ROLES
+
+
 def assign_role(user, role, *, reason, by, starts_on=None, ends_on=None, request=None):
     if not reason or not reason.strip():
         raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
     starts_on = starts_on or timezone.localdate()
     if ends_on is None:
         ends_on = default_end(role, starts_on)
+    if ends_on is None and needs_end(role):
+        audit.record("Refus · durée du rôle", actor=by, obj=user, request=request, refused=True, detail={"role": role.name})
+        raise RuleViolation(f"Le rôle « {role.name} » n’a pas de durée : définissez-la d’abord "
+                            "(Rôles et permissions → Durée). Seul le super admin garde un rôle sans fin.")
     held = user.role_slugs(on=starts_on)
     for a, b in registry.INCOMPATIBLE_ROLES:
         if (role.slug == a and b in held) or (role.slug == b and a in held):
@@ -184,6 +193,29 @@ def revoke_assignment(assignment, *, by, reason, request=None):
         sensitive=True,
         detail={"role": assignment.role.name, "motif": reason.strip()},
     )
+
+
+def set_role_duration(role, months, *, by, reason, request=None):
+    """How long the role is given for, in months (owner, 2026-10-29).
+    Applies to the next assignments; current ones keep their end date."""
+    if not reason or not reason.strip():
+        raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
+    if not needs_end(role):
+        raise RuleViolation(f"Le rôle « {role.name} » est sans fin : il n’a pas de durée.")
+    try:
+        months = int(months)
+    except (TypeError, ValueError):
+        months = 0
+    if not 1 <= months <= registry.ROLE_MONTHS_MAX:
+        raise RuleViolation(f"La durée va de 1 à {registry.ROLE_MONTHS_MAX} mois.")
+    old = role.mandate_months
+    if old == months:
+        return False
+    role.mandate_months = months
+    role.save(update_fields=["mandate_months"])
+    audit.record("Durée du rôle modifiée", actor=by, obj=role, request=request, sensitive=True,
+                 detail={"role": role.name, "avant": old, "apres": months, "motif": reason.strip()})
+    return True
 
 
 # --- Permission matrix ---------------------------------------------------------

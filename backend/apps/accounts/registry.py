@@ -123,6 +123,13 @@ TABS = [
 MIN_SUPER_ADMINS = 2
 SUPER_ADMIN_SLUG = "super-admin"
 
+# Roles held with no end date (owner, 2026-10-29: "the infinite role has to
+# be that of the 2 admins"). Every other role is given for the duration set
+# on it in the back-office (Role.mandate_months). "membre" is the membership
+# itself, not a post: if it ran out, the person would lose the app.
+OPEN_ENDED_ROLES = {SUPER_ADMIN_SLUG, "membre"}
+ROLE_MONTHS_MAX = 120
+
 
 def is_locked(role_slug, resource, action):
     if (resource, action) in LINEUP_ACTIONS and role_slug not in LINEUP_ROLES:

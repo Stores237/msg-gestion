@@ -120,6 +120,9 @@ Defined in `apps/accounts/registry.py`:
   (`backoffice_only`), and an access request can't add one to a group.
 - The super admin holds every permission, finances included, but only in the back-office.
 - There must always be at least 2 active super admins; removing one below that is refused.
+- Only the super admin role (and Membre, the membership itself) is held with no end
+  (`OPEN_ENDED_ROLES`). Every other role, back-office staff included, is given for the duration
+  set on it (1–120 months, changed with a reason, audited); a role without one can't be given.
 - Deleting a group takes two super admins (`apps/core/group_admin.py`): one asks, with a reason
   and the group's name typed back; a different one confirms, again typing the name, within 3
   days (the request lapses after). The platform's last active group can't be deleted. A deleted

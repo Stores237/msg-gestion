@@ -287,6 +287,8 @@ def roles(request, slug=None):
             "actions": registry.ACTION_LABELS.values(),
             "holders": holders,
             "can_edit": request.user.can("backoffice.roles", "change"),
+            "open_ended": role.slug in registry.OPEN_ENDED_ROLES,
+            "months_max": registry.ROLE_MONTHS_MAX,
         },
     )
 

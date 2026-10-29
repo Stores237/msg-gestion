@@ -30,6 +30,7 @@ from apps.accounts.services import (
     default_end,
     reset_pin,
     revoke_assignment,
+    set_role_duration,
     temporary_pin,
     update_identity,
 )
@@ -664,8 +665,16 @@ def role_manage(request, slug=None):
         s, i = base, 2
         while Role.objects.filter(slug=s).exists():
             s, i = f"{base}-{i}", i + 1
-        role = Role.objects.create(slug=s, name=name, kind=request.POST.get("kind") or Role.Kind.STANDARD)
-        audit.record("Rôle créé", actor=request.user, obj=role, request=request, sensitive=True)
+        try:
+            months = int(request.POST.get("months") or 0)
+        except ValueError:
+            months = 0
+        if not 1 <= months <= registry.ROLE_MONTHS_MAX:
+            # Only the super admin holds a role with no end (owner, 2026-10-29).
+            messages.error(request, f"Durée requise : de 1 à {registry.ROLE_MONTHS_MAX} mois.")
+            return redirect("backoffice:roles")
+        role = Role.objects.create(slug=s, name=name, kind=request.POST.get("kind") or Role.Kind.STANDARD, mandate_months=months)
+        audit.record("Rôle créé", actor=request.user, obj=role, request=request, sensitive=True, detail={"durée (mois)": months})
         return redirect("backoffice:role", slug=role.slug)
     role = get_object_or_404(Role, slug=slug)
     if action == "rename" and name:
@@ -673,6 +682,13 @@ def role_manage(request, slug=None):
         role.name = name
         role.save(update_fields=["name"])
         audit.record("Rôle renommé", actor=request.user, obj=role, request=request, detail={"avant": old, "après": name})
+    elif action == "duration":
+        try:
+            if set_role_duration(role, request.POST.get("months"), by=request.user, reason=request.POST.get("reason", ""), request=request):
+                messages.success(request, f"« {role.name} » est désormais donné pour {role.mandate_months} mois "
+                                          "(affectations à venir ; celles en cours gardent leur fin).")
+        except RuleViolation as e:
+            messages.error(request, str(e))
     elif action == "daily" and role.slug not in ("membre", registry.SUPER_ADMIN_SLUG):
         role.daily = not role.daily
         role.save(update_fields=["daily"])
