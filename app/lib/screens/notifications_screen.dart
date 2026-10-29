@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/dates.dart';
 import '../widgets/errors.dart';
 import '../widgets/ui.dart';
+import 'announcements/announcement_detail_screen.dart';
 import 'members/access_requests_screen.dart';
 import 'calendar/event_detail_screen.dart';
 import 'planning/my_duties_view.dart';
@@ -61,7 +62,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       page = RequestsScreen(me: me);
     } else if (type == 'access_request') {
       page = const AccessRequestsScreen();
+    } else if (type == 'announcement') {
+      // Opens the announcement itself (owner, 2026-10-29).
+      try {
+        final item = await RepositoryLocator.instance.announcements.get(
+          n.target['id'] as int,
+        );
+        page = AnnouncementDetailScreen(item: item);
+      } catch (e) {
+        if (mounted) showErrorSnack(context, e);
+      }
     }
+    if (!mounted) return;
     if (page != null) {
       await Navigator.of(
         context,
@@ -168,9 +180,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                       Expanded(child: Text(n.title)),
                                     ],
                                   ),
-                                  subtitle: n.body.isEmpty
+                                  // Tagged: a small mark, not the title.
+                                  subtitle:
+                                      n.body.isEmpty &&
+                                          n.target['for_me'] != true
                                       ? null
-                                      : Text(n.body),
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (n.target['for_me'] == true)
+                                              ForYouMark(
+                                                key: Key(
+                                                  'notif-for-me-${n.id}',
+                                                ),
+                                              ),
+                                            if (n.body.isNotEmpty)
+                                              Text(
+                                                n.body,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
+                                        ),
                                   trailing: Text(
                                     e.key == l.today
                                         ? d.time(n.createdAt)

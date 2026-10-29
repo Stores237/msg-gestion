@@ -25,11 +25,14 @@ def _notify_new(item, users):
     """Tells [users] about a new announcement or convocation: everyone, or
     only the members it is for."""
     conv = item.kind == Announcement.Kind.CONVOCATION
+    kind = "convocation" if conv else "announcement"
+    target = {"type": "announcement", "id": item.pk}
     if item.tagged.exists():
-        title = "Convocation pour vous" if conv else "Annonce pour vous"
-    else:
-        title = "Nouvelle convocation" if conv else "Nouvelle annonce"
-    return notify(users, "convocation" if conv else "announcement", title, item.title, {"type": "announcement", "id": item.pk})
+        # Its own title, with a small "Pour vous" mark in the app (owner, 2026-10-29).
+        body = " ".join(item.body.split()) or ("Convocation" if conv else "Annonce")
+        return notify(users, kind, item.title, body, target | {"for_me": True})
+    title = "Nouvelle convocation" if conv else "Nouvelle annonce"
+    return notify(users, kind, title, item.title, target)
 
 
 def _context(request, items):

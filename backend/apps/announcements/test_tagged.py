@@ -23,7 +23,8 @@ def test_only_tagged_members_are_notified_everyone_sees_it():
     body = r.json()
     assert {m["id"] for m in body["tagged_members"]} == {a.pk, b.pk}
     assert set(Notification.objects.values_list("user_id", flat=True)) == {a.pk, b.pk}
-    assert Notification.objects.filter(user=a).get().title == "Annonce pour vous"
+    note = Notification.objects.filter(user=a).get()
+    assert (note.title, note.target) == ("Clés de la sacristie", {"type": "announcement", "id": body["id"], "for_me": True})
     assert AuditLog.objects.get(action="Annonce publiée").detail == {"notifiés": 2, "mentionnés": 2}
 
     # C wasn't tagged: still sees it, not "for me".

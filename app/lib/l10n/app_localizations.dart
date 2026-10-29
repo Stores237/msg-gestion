@@ -1184,10 +1184,16 @@ abstract class AppLocalizations {
   /// **'Prochain rendez-vous'**
   String get nextMeeting;
 
+  /// No description provided for @photoCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 photo} other{{n} photos}}'**
+  String photoCount(int n);
+
   /// No description provided for @lastAnnouncement.
   ///
   /// In fr, this message translates to:
-  /// **'Dernière annonce'**
+  /// **'Dernières annonces'**
   String get lastAnnouncement;
 
   /// No description provided for @nothingPlanned.

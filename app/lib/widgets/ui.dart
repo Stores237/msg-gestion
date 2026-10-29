@@ -292,6 +292,30 @@ class ListRow extends StatelessWidget {
 enum Tone { green, amber, neutral, red }
 
 /// Short uppercase status chip (design: DS Badge). Always text, never colour alone.
+/// "@ Pour vous": a small mark for something meant for the viewer
+/// (notifications, Accueil), not a title.
+class ForYouMark extends StatelessWidget {
+  const ForYouMark({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    final style = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: c.warnText,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.alternate_email, size: 13, color: c.warnText),
+        const SizedBox(width: 3),
+        Text(AppLocalizations.of(context).forYou, style: style),
+      ],
+    );
+  }
+}
+
 class Badge2 extends StatelessWidget {
   const Badge2(this.text, {super.key, this.tone = Tone.neutral});
   final String text;
@@ -1124,6 +1148,7 @@ class AnnouncementCard extends StatelessWidget {
                         child: AnnouncementPhoto(
                           key: Key('ann-photo-${p.id}'),
                           url: p.url,
+                          gallery: [for (final x in photos) x.url],
                           badge: onTap != null && i == 0 && photos.length > 1
                               ? '+${photos.length - 1}'
                               : null,

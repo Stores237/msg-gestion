@@ -301,8 +301,17 @@ class _FramePhotoScreenState extends State<FramePhotoScreen> {
 /// Stockage et données: when photos don't load by themselves on this
 /// network, a tap loads it. A tap on a loaded photo opens it full screen.
 class AnnouncementPhoto extends StatefulWidget {
-  const AnnouncementPhoto({super.key, required this.url, this.badge});
+  const AnnouncementPhoto({
+    super.key,
+    required this.url,
+    this.badge,
+    this.gallery = const [],
+  });
   final String url;
+
+  /// All the announcement's photos: tapping one shows them all, one under
+  /// the other (owner, 2026-10-29). Empty means just this one.
+  final List<String> gallery;
 
   /// "+2" on the first photo of a card when there are more.
   final String? badge;
@@ -329,7 +338,12 @@ class _AnnouncementPhotoState extends State<AnnouncementPhoto> {
             onTap: show
                 ? () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => _PhotoViewer(url: widget.url),
+                      builder: (_) => PhotoGallery(
+                        urls: widget.gallery.isEmpty
+                            ? [widget.url]
+                            : widget.gallery,
+                        initial: widget.gallery.indexOf(widget.url),
+                      ),
                     ),
                   )
                 : () => setState(() => _asked = true),
@@ -403,6 +417,80 @@ class _PhotoViewer extends StatelessWidget {
     ),
     body: Center(
       child: InteractiveViewer(maxScale: 5, child: Image.network(url)),
+    ),
+  );
+}
+
+/// An announcement's photos, scrolling vertically, opened at the one that
+/// was tapped; tap one to zoom it.
+class PhotoGallery extends StatefulWidget {
+  const PhotoGallery({super.key, required this.urls, this.initial = 0});
+  final List<String> urls;
+  final int initial;
+
+  @override
+  State<PhotoGallery> createState() => _PhotoGalleryState();
+}
+
+class _PhotoGalleryState extends State<PhotoGallery> {
+  static const _gap = 12.0;
+  ScrollController? _scroll;
+
+  @override
+  void dispose() {
+    _scroll?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      title: widget.urls.length > 1
+          ? Text(
+              AppLocalizations.of(context).photoCount(widget.urls.length),
+              style: const TextStyle(fontSize: 16),
+            )
+          : null,
+    ),
+    body: LayoutBuilder(
+      builder: (context, box) {
+        // Every photo has the same 4:3 frame, so the tapped one's place is
+        // known before anything loads.
+        final h = box.maxWidth / photoRatio + _gap;
+        _scroll ??= ScrollController(
+          initialScrollOffset:
+              widget.initial.clamp(0, widget.urls.length - 1) * h,
+        );
+        return ListView.separated(
+          key: const Key('photo-gallery'),
+          controller: _scroll,
+          padding: const EdgeInsets.only(bottom: 24),
+          itemCount: widget.urls.length,
+          separatorBuilder: (_, _) => const SizedBox(height: _gap),
+          itemBuilder: (context, i) => GestureDetector(
+            key: Key('gallery-photo-$i'),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => _PhotoViewer(url: widget.urls[i]),
+              ),
+            ),
+            child: AspectRatio(
+              aspectRatio: photoRatio,
+              child: Image.network(
+                widget.urls[i],
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white54,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     ),
   );
 }

@@ -1198,9 +1198,9 @@ class FakeNotificationsRepository implements NotificationsRepository {
       AppNotification(
         id: 1,
         kind: 'convocation',
-        title: 'Nouvelle convocation',
-        body: 'Assemblée générale',
-        target: const {},
+        title: 'Répétition des chants',
+        body: 'Jeudi 18:00 à l’église.',
+        target: const {'type': 'announcement', 'id': 1, 'for_me': true},
         createdAt: now,
         unread: !allRead,
       ),

@@ -348,7 +348,9 @@
     }
   },
   "nextMeeting": "Prochain rendez-vous",
-  "lastAnnouncement": "Dernière annonce",
+  "photoCount": "{n, plural, =1{1 photo} other{{n} photos}}",
+  "@photoCount": {"placeholders": {"n": {"type": "int"}}},
+  "lastAnnouncement": "Dernières annonces",
   "nothingPlanned": "Rien de prévu pour l’instant.",
   "calendarLink": "Calendrier",
   "allAnnouncements": "Toutes",

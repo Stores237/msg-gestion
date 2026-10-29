@@ -620,7 +620,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextMeeting => 'Next meeting';
 
   @override
-  String get lastAnnouncement => 'Latest announcement';
+  String photoCount(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n photos',
+      one: '1 photo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lastAnnouncement => 'Latest announcements';
 
   @override
   String get nothingPlanned => 'Nothing planned yet.';

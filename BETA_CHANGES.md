@@ -860,3 +860,27 @@ convocation could still be seen by everyone".
 "Annonce pour vous"; a third member gets no notification but sees it in Annonces, with "Pour :"
 and no POUR VOUS. `pytest apps/announcements/test_tagged.py`,
 `flutter test test/announcement_tagged_test.dart`.
+
+## 40. Photos scroll vertically, notifications open the announcement, three latest on Accueil (build 22)
+
+Owner, 2026-10-29, with screenshots: "images have to be vertical scrolling"; "when clicking on a
+notification (announcement) he is not redirected to the announcement, and 'announce pour vous'
+should be a small notice, not the title"; "latest announcement … at least 3 visible".
+
+- **Photos.** Tapping a photo (feed card with "+N", or the announcement) opens all of the
+  announcement's photos, one under the other, starting at the one tapped ("3 photos" on top);
+  tap one to zoom it.
+- **Notifications.** An announcement or convocation notification now opens it (it did nothing).
+  For a tagged member the notification carries the announcement's **own title** and text, with a
+  small amber "@ Pour vous" under the title (was the title "Annonce pour vous"). Server: target
+  `{"type": "announcement", "id", "for_me": true}`.
+- **Accueil → Dernières annonces**: the three newest, newest first, pinned or not (pinned ones
+  used to win), as short rows (title, unread dot, "@ Pour vous", kind · date · author).
+
+Notifications sent before this deploy keep their old "Annonce pour vous" title; they open the
+announcement all the same.
+
+**Verify.** Tag a member in a new announcement with 3 photos. On that member's phone: the
+notification shows the title and "@ Pour vous"; tapping it opens the announcement; tapping a
+photo shows the three stacked. Accueil lists the 3 newest. `pytest apps/announcements/test_tagged.py`,
+`flutter test test/announcement_open_test.dart`.

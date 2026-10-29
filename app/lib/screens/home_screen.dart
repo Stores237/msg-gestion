@@ -26,7 +26,7 @@ import 'splash_screen.dart';
 class _HomeData {
   const _HomeData({
     this.nextEvent,
-    this.lastAnnouncement,
+    this.latest = const [],
     this.unread = 0,
     this.dues,
     this.summary,
@@ -36,7 +36,7 @@ class _HomeData {
   final DutyAssignment? nextDuty;
   final BureauHome? bureau;
   final CalendarEvent? nextEvent;
-  final Announcement? lastAnnouncement;
+  final List<Announcement> latest;
   final int unread;
   final MyDues? dues;
   final FinanceSummary? summary;
@@ -50,8 +50,8 @@ Future<T?> _orNull<T>(Future<T> f) async {
   }
 }
 
-/// Accueil (design: "Accueil · membre"): greeting, next meeting, latest
-/// announcement. Contributions and duties arrive with their modules.
+/// Accueil (design: "Accueil · membre"): greeting, next meeting, the
+/// latest announcements. Contributions and duties arrive with their modules.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.me, this.onOpenTab});
 
@@ -79,7 +79,11 @@ class HomeScreen extends StatelessWidget {
     final f = await feed;
     return _HomeData(
       nextEvent: upcoming.isEmpty ? null : upcoming.first,
-      lastAnnouncement: f.items.isEmpty ? null : f.items.first,
+      // The three newest, pinned or not (owner, 2026-10-29); the feed puts
+      // pinned ones first.
+      latest: ([
+        ...f.items,
+      ]..sort((a, b) => b.createdAt.compareTo(a.createdAt))).take(3).toList(),
       unread: f.unread,
       dues: await dues,
       summary: await summary,
@@ -232,7 +236,7 @@ class HomeScreen extends StatelessWidget {
                       onAction: () => onOpenTab?.call(AppTab.annonces),
                     ),
                     const SizedBox(height: 8),
-                    if (data.lastAnnouncement == null)
+                    if (data.latest.isEmpty)
                       GroupCard(
                         children: [
                           ListRow(
@@ -244,18 +248,23 @@ class HomeScreen extends StatelessWidget {
                         ],
                       )
                     else
-                      AnnouncementCard(
-                        item: data.lastAnnouncement!,
-                        onTap: () async {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => AnnouncementDetailScreen(
-                                item: data.lastAnnouncement!,
-                              ),
+                      GroupCard(
+                        key: const Key('home-latest'),
+                        children: [
+                          for (final a in data.latest)
+                            _AnnouncementRow(
+                              item: a,
+                              onTap: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AnnouncementDetailScreen(item: a),
+                                  ),
+                                );
+                                reload();
+                              },
                             ),
-                          );
-                          reload();
-                        },
+                        ],
                       ),
                     if (data.unread > 1) ...[
                       const SizedBox(height: 8),
@@ -272,6 +281,62 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// One announcement on Accueil: short, so three fit on the screen.
+class _AnnouncementRow extends StatelessWidget {
+  const _AnnouncementRow({required this.item, required this.onTap});
+  final Announcement item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    final d = Dates(context);
+    final a = item;
+    return ListRow(
+      key: Key('home-announcement-${a.id}'),
+      lead: IconChip(
+        a.isConvocation ? Icons.event_note_outlined : Icons.campaign_outlined,
+        tone: a.isConvocation ? Tone.green : Tone.neutral,
+      ),
+      title: Row(
+        children: [
+          if (a.unread)
+            Container(
+              margin: const EdgeInsets.only(right: 6),
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: c.primary,
+                shape: BoxShape.circle,
+              ),
+            ),
+          Expanded(
+            child: Text(a.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+        ],
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (a.forMe) const ForYouMark(),
+          Text(
+            [
+              a.isConvocation ? l.kindConvocation : l.kindAnnouncement,
+              d.dayMonth(a.createdAt),
+              ?a.authorName,
+            ].join(' · '),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+      chevron: true,
+      onTap: onTap,
     );
   }
 }
