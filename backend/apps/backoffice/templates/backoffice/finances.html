@@ -2,7 +2,7 @@
 {% block title %}Bilan financier{% endblock %}
 {% block crumb %}<div class="crumb">Finances · {{ rows|length }} membre{{ rows|length|pluralize }}</div>{% endblock %}
 {% block heading %}Bilan financier des membres{% endblock %}
-{% block acts %}{% if can_export %}<a class="btn btn-outline" href="{% url 'backoffice:statement_csv' %}">{% icon 'file-spreadsheet' %}CSV</a><a class="btn btn-primary" href="{% url 'backoffice:statement_pdf' %}">{% icon 'file-down' %}Bilan général (PDF)</a>{% endif %}{% endblock %}
+{% block acts %}<a class="btn btn-outline" href="{% url 'backoffice:expenses' %}">{% icon 'receipt' %}Demandes de dépense</a>{% if can_export %}<a class="btn btn-outline" href="{% url 'backoffice:statement_csv' %}">{% icon 'file-spreadsheet' %}CSV</a><a class="btn btn-primary" href="{% url 'backoffice:statement_pdf' %}">{% icon 'file-down' %}Bilan général (PDF)</a>{% endif %}{% endblock %}
 {% block body %}
 <div class="kpis money">
   <div class="kpi"><span>Solde de la caisse</span><b class="tnum">{{ balance|fcfa }}</b><small>opérations validées{% if pending %} · {{ pending }} à valider{% endif %}</small></div>
@@ -25,6 +25,6 @@
   </tbody>
   {% if rows %}<tfoot><tr><td><b>Total</b></td><td class="tnum amt"><b>{{ totals.owed|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.paid|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.pending|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.remaining|fcfa }}</b></td><td></td></tr></tfoot>{% endif %}
   </table></div>
-  <div class="tbl-f"><span>« Versé » ne compte que les paiements validés par le commissaire aux comptes.</span></div>
+  <div class="tbl-f"><span>« Versé » ne compte que les paiements validés : le trésorier et le commissaire aux comptes sont d’accord sur chaque opération.</span></div>
 </section>
 {% endblock %}

@@ -79,6 +79,9 @@ def test_the_whole_way_from_request_to_payment():
     e = Entry.objects.get(pk=body["entry"])
     assert (e.direction, e.amount, e.status, e.created_by, e.validated_by) == ("out", 4800, "validated", tre, cac)
     assert tre_api.get("/api/finances/summary/").json()["balance"] == -4800
+    # The cash book line points back to the request (and its proof).
+    row = next(x for x in cac_api.get("/api/finances/entries/").json() if x["id"] == e.pk)
+    assert row["expense"] == rid
     assert Notification.objects.filter(user=member, title="Dépense payée").exists()
     steps = [m["body"] for m in member_api.get(f"/api/finances/expenses/{rid}/").json()["messages"]]
     assert steps[0].startswith("Demande envoyée") and "Transmise au trésorier" in steps[2]

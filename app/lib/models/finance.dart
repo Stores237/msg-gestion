@@ -24,6 +24,7 @@ class FinanceEntry {
     this.canApprove = false,
     this.canEdit = false,
     this.awaitingOther = false,
+    this.expenseId,
   });
 
   final int id;
@@ -66,6 +67,9 @@ class FinanceEntry {
   final bool canEdit;
   final bool awaitingOther;
 
+  /// The expense request this Sortie paid (its proof is in that request).
+  final int? expenseId;
+
   bool get isIn => direction == 'in';
   bool get pending => status == 'pending';
   bool get toConfirm => status == 'to_confirm';
@@ -94,6 +98,7 @@ class FinanceEntry {
     canApprove: j['can_approve'] == true,
     canEdit: j['can_edit'] == true,
     awaitingOther: j['awaiting_other'] == true,
+    expenseId: j['expense'] as int?,
   );
 }
 

@@ -11,6 +11,7 @@ import '../../widgets/files.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/money.dart';
 import '../../widgets/ui.dart';
+import '../expenses/expenses_screen.dart';
 import 'collection_screen.dart';
 import 'entry_form_screen.dart';
 import 'report_screen.dart';
@@ -145,6 +146,11 @@ class _FinancesScreenState extends State<FinancesScreen> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       _Balance(key: ValueKey(_reload)),
+      // The finance team's way into expense requests (with what waits).
+      if (widget.me.can('finances.expenses', 'view')) ...[
+        const SizedBox(height: 12),
+        ExpensesEntryRow(key: ValueKey(('exp', _reload)), me: widget.me),
+      ],
       const SizedBox(height: 16),
       Seg2(
         options: tabs,
@@ -318,6 +324,12 @@ class EntryRow extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (e.expenseId != null)
+                  Text(
+                    l.fromExpense(e.expenseId!),
+                    key: Key('from-expense-${e.id}'),
+                    style: TextStyle(fontSize: 13, color: c.primaryText),
+                  ),
                 if (detail != title)
                   Text(
                     detail,
@@ -519,14 +531,19 @@ class _CashBookState extends State<_CashBook> {
   final _picked = <int>{};
   List<FinanceEntry> _shown = const [];
 
-  bool get _picking => _picked.isNotEmpty;
+  /// Picking lines: by a long press on one, or the "Sélectionner" button.
+  bool _picking = false;
+
+  void _startPicking() {
+    setState(() => _picking = true);
+    widget.onSelecting(true);
+  }
 
   void _pick(FinanceEntry e) {
-    final was = _picking;
+    if (!_picking) _startPicking();
     setState(
       () => _picked.contains(e.id) ? _picked.remove(e.id) : _picked.add(e.id),
     );
-    if (was != _picking) widget.onSelecting(_picking);
   }
 
   void _pickAll() {
@@ -540,7 +557,10 @@ class _CashBookState extends State<_CashBook> {
   }
 
   void _stopPicking() {
-    setState(_picked.clear);
+    setState(() {
+      _picked.clear();
+      _picking = false;
+    });
     widget.onSelecting(false);
   }
 
@@ -589,6 +609,7 @@ class _CashBookState extends State<_CashBook> {
         ),
       );
       _picked.clear();
+      _picking = false;
       widget.onSelecting(false);
       widget.onChanged();
     } catch (err) {
@@ -625,7 +646,7 @@ class _CashBookState extends State<_CashBook> {
             const SizedBox(width: 4),
             FilledButton(
               key: const Key('validate-selected'),
-              onPressed: _validatePicked,
+              onPressed: _picked.isEmpty ? null : _validatePicked,
               child: Text(l.validateSelected(_picked.length)),
             ),
           ],
@@ -853,13 +874,25 @@ class _CashBookState extends State<_CashBook> {
                 if (approvable && !_picking)
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 4),
-                    child: Text(
-                      l.longPressHint,
-                      key: const Key('long-press-hint'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.msg.textSecondary,
-                      ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l.longPressHint,
+                            key: const Key('long-press-hint'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.msg.textSecondary,
+                            ),
+                          ),
+                        ),
+                        TextButton.icon(
+                          key: const Key('select-mode'),
+                          onPressed: _startPicking,
+                          icon: const Icon(Icons.checklist, size: 18),
+                          label: Text(l.selectLines),
+                        ),
+                      ],
                     ),
                   ),
                 for (final g in groups) ...[
@@ -907,6 +940,12 @@ class _CashBookState extends State<_CashBook> {
           ? () => _edit(e)
           : finalising
           ? () => _finalise(e)
+          : e.expenseId != null
+          ? () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => ExpenseDetailScreen(expenseId: e.expenseId!),
+              ),
+            )
           : null,
       onLongPress: approving ? () => _pick(e) : null,
       onEdit: editing ? () => _edit(e) : null,

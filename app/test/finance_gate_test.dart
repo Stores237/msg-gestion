@@ -95,4 +95,20 @@ void main() {
     expect(find.byKey(const Key('finance-gate')), findsNothing);
     expect(f.auth.financeChecks, 2);
   });
+
+  testWidgets('Accueil hides the balance until the code is given', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.auth.financeCode = '7395';
+    FinanceGate.lock();
+    await pumpShell(tester, _me(set: true));
+    expect(find.text('Solde de la caisse'), findsNothing);
+    await tester.tap(find.byKey(const Key('tab-finances')));
+    await tester.pumpAndSettle();
+    await _type(tester, '7395');
+    await tester.tap(find.byKey(const Key('tab-accueil')));
+    await tester.pumpAndSettle();
+    expect(find.text('Solde de la caisse'), findsOneWidget);
+  });
 }

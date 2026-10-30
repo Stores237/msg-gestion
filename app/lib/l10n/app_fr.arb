@@ -63,7 +63,7 @@
   },
   "noRole": "Aucun rôle actif",
   "errorUnknownMember": "Ce numéro n’est pas enregistré. Demandez au responsable de votre groupe de vous inscrire.",
-  "errorWrongPin": "{n, plural, =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}",
+  "errorWrongPin": "{n, plural, =0{Code incorrect. Il vous reste {n} essais.} =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}",
   "@errorWrongPin": {
     "placeholders": {
       "n": {
@@ -265,7 +265,7 @@
   "statRemaining": "Restants",
   "remote": "À distance",
   "rollCallSaved": "Appel enregistré.",
-  "unsavedChanges": "{n, plural, =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}",
+  "unsavedChanges": "{n, plural, =0{{n} modifications non enregistrées} =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}",
   "@unsavedChanges": {
     "placeholders": {
       "n": {
@@ -348,7 +348,7 @@
     }
   },
   "nextMeeting": "Prochain rendez-vous",
-  "photoCount": "{n, plural, =1{1 photo} other{{n} photos}}",
+  "photoCount": "{n, plural, =0{{n} photos} =1{1 photo} other{{n} photos}}",
   "@photoCount": {
     "placeholders": {
       "n": {
@@ -363,7 +363,7 @@
   "myAccount": "Mon compte",
   "readStatus": "Lu",
   "openAccount": "Ouvrir mon compte",
-  "unreadCount": "{n, plural, =1{1 annonce non lue} other{{n} annonces non lues}}",
+  "unreadCount": "{n, plural, =0{{n} annonces non lues} =1{1 annonce non lue} other{{n} annonces non lues}}",
   "@unreadCount": {
     "placeholders": {
       "n": {
@@ -555,7 +555,7 @@
     }
   },
   "paidInFull": "Payé",
-  "savePayments": "{n, plural, =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}",
+  "savePayments": "{n, plural, =0{Enregistrer {n} paiements · {amount}} =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}",
   "@savePayments": {
     "placeholders": {
       "n": {
@@ -588,7 +588,7 @@
   "incomeLabel": "Entrées",
   "expenseLabel": "Sorties",
   "incomeByCategory": "Entrées par catégorie",
-  "pendingBlock": "{n, plural, =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}",
+  "pendingBlock": "{n, plural, =0{{n} opérations restent à vérifier avant de valider.} =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}",
   "@pendingBlock": {
     "placeholders": {
       "n": {
@@ -667,7 +667,7 @@
       }
     }
   },
-  "alertsCount": "{n, plural, =1{1 alerte} other{{n} alertes}}",
+  "alertsCount": "{n, plural, =0{{n} alertes} =1{1 alerte} other{{n} alertes}}",
   "@alertsCount": {
     "placeholders": {
       "n": {
@@ -707,7 +707,7 @@
   },
   "publishAndNotify": "Publier et notifier",
   "published": "Publié",
-  "publishedDone": "{n, plural, =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}",
+  "publishedDone": "{n, plural, =0{Planning publié · {n} gardes notifiés.} =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}",
   "@publishedDone": {
     "placeholders": {
       "n": {
@@ -856,7 +856,7 @@
   "thisWeek": "Cette semaine",
   "earlier": "Plus ancien",
   "offlineBar": "Hors ligne",
-  "offlinePending": "{n, plural, =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}",
+  "offlinePending": "{n, plural, =0{Hors ligne · {n} saisies en attente d’envoi} =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}",
   "@offlinePending": {
     "placeholders": {
       "n": {
@@ -883,7 +883,7 @@
   },
   "syncFailed": "Échec de la synchronisation",
   "savedOnPhone": "Enregistré sur le téléphone. Envoi dès le retour du réseau.",
-  "pendingSend": "{n, plural, =1{1 envoi en attente} other{{n} envois en attente}}",
+  "pendingSend": "{n, plural, =0{{n} envois en attente} =1{1 envoi en attente} other{{n} envois en attente}}",
   "@pendingSend": {
     "placeholders": {
       "n": {
@@ -928,7 +928,7 @@
   "reminders": "Rappels",
   "remindEve": "La veille à 20:00",
   "remind2h": "2 heures avant",
-  "remindUnread": "{n, plural, =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}",
+  "remindUnread": "{n, plural, =0{Relancer les {n} non-lecteurs} =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}",
   "@remindUnread": {
     "placeholders": {
       "n": {
@@ -936,7 +936,7 @@
       }
     }
   },
-  "remindedDone": "{n, plural, =1{1 membre relancé.} other{{n} membres relancés.}}",
+  "remindedDone": "{n, plural, =0{{n} membres relancés.} =1{1 membre relancé.} other{{n} membres relancés.}}",
   "@remindedDone": {
     "placeholders": {
       "n": {
@@ -947,7 +947,7 @@
   "exportPdf": "Exporter en PDF",
   "toFollow": "À suivre",
   "activeMembers": "Membres actifs",
-  "entriesToValidate": "{n, plural, =1{1 opération à valider} other{{n} opérations à valider}}",
+  "entriesToValidate": "{n, plural, =0{{n} opérations à valider} =1{1 opération à valider} other{{n} opérations à valider}}",
   "@entriesToValidate": {
     "placeholders": {
       "n": {
@@ -956,7 +956,7 @@
     }
   },
   "awaitingAuditor": "En attente de votre accord",
-  "unfilledSlots": "{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}",
+  "unfilledSlots": "{n, plural, =0{{n} postes non pourvus} =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}",
   "@unfilledSlots": {
     "placeholders": {
       "n": {
@@ -1125,7 +1125,7 @@
   "termsOfServiceLink": "conditions d’utilisation",
   "termsRequired": "Les conditions d’utilisation ont changé : revenez en arrière, relisez-les et cochez la case pour continuer.",
   "termsTickToContinue": "Cochez la case pour continuer.",
-  "logoutPending": "{n, plural, =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}",
+  "logoutPending": "{n, plural, =0{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.} =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}",
   "@logoutPending": {
     "placeholders": {
       "n": {
@@ -1400,7 +1400,7 @@
   "attachPdfHint": "Document PDF, 10 Mo max",
   "eventExpired": "Expiré",
   "notifyAll": "Notifier : tous les membres",
-  "notifyCount": "{n, plural, =1{Notifier : 1 membre} other{Notifier : {n} membres}}",
+  "notifyCount": "{n, plural, =0{Notifier : {n} membres} =1{Notifier : 1 membre} other{Notifier : {n} membres}}",
   "@notifyCount": {
     "placeholders": {
       "n": {
@@ -1540,7 +1540,7 @@
     }
   },
   "datePassed": "Date passée",
-  "pastDraftsNotice": "{n, plural, =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}",
+  "pastDraftsNotice": "{n, plural, =0{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.} =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}",
   "@pastDraftsNotice": {
     "placeholders": {
       "n": {
@@ -1554,7 +1554,7 @@
   "chooseMembers": "Choisir les membres",
   "membersLabel": "Membres",
   "memberRequiredError": "Choisissez au moins un membre.",
-  "membersChosen": "{n, plural, =1{1 membre choisi} other{{n} membres choisis}}",
+  "membersChosen": "{n, plural, =0{{n} membres choisis} =1{1 membre choisi} other{{n} membres choisis}}",
   "@membersChosen": {
     "placeholders": {
       "n": {
@@ -1608,7 +1608,7 @@
   "entrySentBack": "Opération renvoyée au trésorier.",
   "validateEditedNote": "Elle a été modifiée : en la validant, vous approuvez la version corrigée.",
   "linkedEntryNote": "Paiement d’une cotisation ou d’une amende : le membre et la catégorie ne changent pas.",
-  "entriesToConfirm": "{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}",
+  "entriesToConfirm": "{n, plural, =0{{n} opérations à finaliser} =1{1 opération à finaliser} other{{n} opérations à finaliser}}",
   "@entriesToConfirm": {
     "placeholders": {
       "n": {
@@ -1622,7 +1622,7 @@
   "groupByStatus": "Statut",
   "groupByMember": "Membre",
   "noMemberGroup": "Sans membre",
-  "entriesCount": "{count, plural, =1{1 opération} other{{count} opérations}}",
+  "entriesCount": "{count, plural, =0{{count} opérations} =1{1 opération} other{{count} opérations}}",
   "@entriesCount": {
     "placeholders": {
       "count": {
@@ -1632,13 +1632,13 @@
   },
   "awaitingOtherBadge": "En attente de l’autre",
   "longPressHint": "Appui long sur une opération pour en valider plusieurs.",
-  "selectedCount": "{count, plural, =1{1 sélectionnée} other{{count} sélectionnées}}",
+  "selectedCount": "{count, plural, =0{{count} sélectionnées} =1{1 sélectionnée} other{{count} sélectionnées}}",
   "selectAll": "Tout sélectionner",
   "validateSelected": "Valider ({count})",
-  "validateManyTitle": "{count, plural, =1{Valider 1 opération ?} other{Valider {count} opérations ?}}",
+  "validateManyTitle": "{count, plural, =0{Valider {count} opérations ?} =1{Valider 1 opération ?} other{Valider {count} opérations ?}}",
   "validateManyBody": "Total : {total}. Votre nom et l’heure seront enregistrés sur chacune ; elles ne pourront plus être modifiées.",
-  "validatedMany": "{count, plural, =1{1 opération validée.} other{{count} opérations validées.}}",
-  "skippedMany": "{count, plural, =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}",
+  "validatedMany": "{count, plural, =0{{count} opérations validées.} =1{1 opération validée.} other{{count} opérations validées.}}",
+  "skippedMany": "{count, plural, =0{{count} n’ont pas été validées (elles attendent l’accord de l’autre).} =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}",
   "@selectedCount": {
     "placeholders": {
       "count": {
@@ -1829,6 +1829,23 @@
     "placeholders": {
       "amount": {
         "type": "String"
+      }
+    }
+  },
+  "fromExpense": "Payée sur la demande de dépense n° {id} · voir la preuve",
+  "selectLines": "Sélectionner",
+  "expTodoCount": "{count} à traiter",
+  "@fromExpense": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "@expTodoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

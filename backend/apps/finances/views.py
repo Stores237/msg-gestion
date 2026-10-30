@@ -37,6 +37,8 @@ class EntrySerializer(serializers.ModelSerializer):
     confirmed_by_name = serializers.CharField(source="confirmed_by.short_name", default=None, read_only=True)
     # For the viewer (owner, 2026-10-30): may I approve it, may I correct
     # it, or does it wait for the other one?
+    # The expense request this Sortie paid, if any (its proof is there).
+    expense = serializers.SerializerMethodField()
     can_approve = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
     awaiting_other = serializers.SerializerMethodField()
@@ -46,7 +48,7 @@ class EntrySerializer(serializers.ModelSerializer):
         fields = ["id", "direction", "amount", "category", "label", "member", "member_name", "date", "status", "client_uuid",
                   "created_by_name", "created_at", "validated_by_name", "validated_at", "collection", "due",
                   "edited_by_name", "edited_at", "confirmed_by_name", "confirmed_at",
-                  "can_approve", "can_edit", "awaiting_other"]
+                  "can_approve", "can_edit", "awaiting_other", "expense"]
         read_only_fields = ["status", "created_at", "validated_at", "collection", "due", "edited_at", "confirmed_at"]
         extra_kwargs = {"client_uuid": {"required": False, "allow_null": True, "validators": []}}
 
@@ -58,6 +60,10 @@ class EntrySerializer(serializers.ModelSerializer):
             ok = bool(u and u.is_authenticated)
             self.context["_viewer"] = (u if ok else None, ok and u.can("finances.cashbook", "validate"))
         return self.context["_viewer"]
+
+    def get_expense(self, e) -> int | None:
+        x = getattr(e, "expense", None)
+        return x.pk if x is not None else None
 
     def get_can_approve(self, e) -> bool:
         u, approves = self._viewer()
@@ -90,7 +96,7 @@ class EntryListView(APIView):
 
     @extend_schema(responses=EntrySerializer(many=True))
     def get(self, request):
-        qs = Entry.objects.select_related("member", "created_by", "validated_by", "edited_by", "confirmed_by")
+        qs = Entry.objects.select_related("member", "created_by", "validated_by", "edited_by", "confirmed_by", "expense")
         st = request.query_params.get("status")
         if st in Entry.Status.values:
             qs = qs.filter(status=st)

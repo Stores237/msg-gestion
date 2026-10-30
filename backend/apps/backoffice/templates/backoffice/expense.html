@@ -1,0 +1,28 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Demande n° {{ r.pk }}{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:finances' %}">Finances</a> · <a href="{% url 'backoffice:expenses' %}">Demandes de dépense</a> · n° {{ r.pk }}</div>{% endblock %}
+{% block heading %}{{ r.title }}{% endblock %}
+{% block body %}
+<div class="bo-cols half">
+  <section class="panel"><div class="panel-h"><h2>Demande</h2></div><div class="panel-b"><div class="list" style="padding:0">
+    <div class="row"><div class="row-main"><div class="row-t">Étape</div></div><span class="status{% if r.status == 'paid' %} ok{% elif r.status == 'refused' %} alert{% elif r.status != 'cancelled' %} warn{% endif %}"><i></i>{{ r.get_status_display }}</span></div>
+    <div class="row"><div class="row-main"><div class="row-t">Montant demandé</div></div><b class="tnum">{{ r.amount|fcfa }}</b></div>
+    {% if r.paid_amount %}<div class="row"><div class="row-main"><div class="row-t">Montant payé</div><div class="row-s">{% if r.entry_id %}Opération n° {{ r.entry_id }} au livre de caisse{% endif %}</div></div><b class="tnum">{{ r.paid_amount|fcfa }}</b></div>{% endif %}
+    <div class="row"><div class="row-main"><div class="row-t">Domaine</div></div><span>{{ r.domain.name }}</span></div>
+    <div class="row"><div class="row-main"><div class="row-t">Demandeur</div><div class="row-s">{{ r.created_at|date:"d/m/Y H:i" }}</div></div><span>{{ r.requester.full_name }}</span></div>
+    {% if r.tagged.exists %}<div class="row"><div class="row-main"><div class="row-t">Coordinateurs identifiés</div></div><span>{% for u in r.tagged.all %}{{ u.short_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
+    {% if r.description %}<div class="row"><div class="row-main"><div class="row-t">Détails</div><div class="row-s">{{ r.description|linebreaksbr }}</div></div></div>{% endif %}
+    {% if r.close_reason %}<div class="row"><div class="row-main"><div class="row-t">Motif</div><div class="row-s">{{ r.close_reason }}</div></div></div>{% endif %}
+    {% if r.replaces_id %}<div class="row"><div class="row-main"><div class="row-t">Remplace</div></div><a href="{% url 'backoffice:expense' r.replaces_id %}">n° {{ r.replaces_id }}</a></div>{% endif %}
+  </div></div></section>
+  <section class="panel"><div class="panel-h"><h2>Étapes</h2></div><div class="panel-b"><div class="list" style="padding:0">
+    <div class="row"><div class="row-main"><div class="row-t">Responsable du domaine</div><div class="row-s">{% if r.lead_at %}{{ r.lead_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</div></div><span>{{ r.lead_by.short_name|default:"—" }}</span></div>
+    <div class="row"><div class="row-main"><div class="row-t">Commissaire aux comptes</div><div class="row-s">{% if r.audit_at %}{{ r.audit_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</div></div><span>{{ r.audit_by.short_name|default:"—" }}</span></div>
+    <div class="row"><div class="row-main"><div class="row-t">Paiement par le trésorier</div><div class="row-s">{% if r.paid_at %}{{ r.paid_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}</div></div><span>{{ r.paid_by.short_name|default:"—" }}</span></div>
+  </div></div></section>
+</div>
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Échanges</h2></div><div class="panel-b"><div class="list" style="padding:0">
+  {% for m in messages_ %}<div class="row"><div class="row-main"><div class="row-t">{% if m.kind == 'proof' %}Preuve de paiement · {% elif m.kind == 'step' %}Étape · {% endif %}{{ m.author.short_name|default:"—" }}</div><div class="row-s">{{ m.created_at|date:"d/m/Y H:i" }}{% if m.body %} — {{ m.body }}{% endif %}</div></div>{% if m.file %}<a class="btn btn-secondary btn-sm" href="{{ m.file.url }}" target="_blank" rel="noopener">{% icon 'file-down' %}{{ m.file_name }}</a>{% endif %}</div>
+  {% empty %}<div class="row"><div class="row-main"><div class="row-s">Aucun échange.</div></div></div>{% endfor %}
+</div></div></section>
+{% endblock %}

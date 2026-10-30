@@ -882,5 +882,8 @@
   "expPayCashbook": "The expense goes into the cash book and counts at once: the auditor approved the request.",
   "expPayConfirm": "Record the payment",
   "homeExpenses": "Expense requests",
-  "homeExpensesHint": "Ask for a purchase, follow your requests"
+  "homeExpensesHint": "Ask for a purchase, follow your requests",
+  "fromExpense": "Paid on expense request no. {id} · see the proof",
+  "selectLines": "Select",
+  "expTodoCount": "{count} to handle"
 }

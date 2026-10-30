@@ -149,4 +149,16 @@ void main() {
     expect(icon(2).icon, Icons.radio_button_checked);
     expect(icon(3).icon, Icons.radio_button_unchecked);
   });
+
+  testWidgets('Accueil shows how many requests wait for me', (tester) async {
+    final f = await setUpApp(tester);
+    f.finances.expenseActions = const ['decide'];
+    await pumpShell(tester, fakeMe(tabs: const ['accueil']));
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('home-expenses')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('1 À TRAITER'), findsOneWidget);
+  });
 }

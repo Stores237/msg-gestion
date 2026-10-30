@@ -166,4 +166,52 @@ void main() {
     expect(find.byKey(const Key('pick-1')), findsNothing);
     expect(find.byKey(const Key('validate-1')), findsOneWidget);
   });
+
+  testWidgets('the Sélectionner button starts picking, nothing ticked yet', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    await openFinances(tester, _validates);
+    await tester.tap(find.byKey(const Key('select-mode')));
+    await tester.pumpAndSettle();
+    expect(find.text('0 sélectionnées'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const Key('validate-selected')))
+          .onPressed,
+      isNull,
+    );
+    await tester.tap(find.byKey(const Key('entry-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('validate-selected')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('validate-many-confirm')));
+    await tester.pumpAndSettle();
+    expect(f.finances.validated, [1]);
+  });
+
+  testWidgets('a Sortie paid on a request opens it', (tester) async {
+    final f = await setUpApp(tester);
+    f.finances.items = [
+      FinanceEntry(
+        id: 7,
+        direction: 'out',
+        amount: 4800,
+        category: 'depense',
+        label: 'Formation · Papier',
+        memberName: 'Essomba Kévin',
+        date: DateTime(2026, 10, 30),
+        status: 'validated',
+        createdByName: 'Fotso I.',
+        createdAt: DateTime(2026, 10, 30, 12),
+        validatedByName: 'Tchoumi A.',
+        expenseId: 31,
+      ),
+    ];
+    await openFinances(tester, _views);
+    expect(find.byKey(const Key('from-expense-7')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('entry-7')));
+    await tester.pumpAndSettle();
+    expect(find.text('Demande de dépense'), findsOneWidget);
+  });
 }

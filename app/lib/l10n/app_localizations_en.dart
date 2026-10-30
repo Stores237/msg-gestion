@@ -2887,4 +2887,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeExpensesHint => 'Ask for a purchase, follow your requests';
+
+  @override
+  String fromExpense(int id) {
+    return 'Paid on expense request no. $id · see the proof';
+  }
+
+  @override
+  String get selectLines => 'Select';
+
+  @override
+  String expTodoCount(int count) {
+    return '$count to handle';
+  }
 }

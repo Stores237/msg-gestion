@@ -136,6 +136,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Code incorrect. Il vous reste $n essais.',
       one: 'Code incorrect. Il vous reste 1 essai.',
+      zero: 'Code incorrect. Il vous reste $n essais.',
     );
     return '$_temp0';
   }
@@ -495,6 +496,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n modifications non enregistrées',
       one: '1 modification non enregistrée',
+      zero: '$n modifications non enregistrées',
     );
     return '$_temp0';
   }
@@ -628,6 +630,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n photos',
       one: '1 photo',
+      zero: '$n photos',
     );
     return '$_temp0';
   }
@@ -660,6 +663,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n annonces non lues',
       one: '1 annonce non lue',
+      zero: '$n annonces non lues',
     );
     return '$_temp0';
   }
@@ -936,6 +940,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Enregistrer $n paiements · $amount',
       one: 'Enregistrer 1 paiement · $amount',
+      zero: 'Enregistrer $n paiements · $amount',
     );
     return '$_temp0';
   }
@@ -986,6 +991,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n opérations restent à vérifier avant de valider.',
       one: '1 opération reste à vérifier avant de valider.',
+      zero: '$n opérations restent à vérifier avant de valider.',
     );
     return '$_temp0';
   }
@@ -1079,6 +1085,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n alertes',
       one: '1 alerte',
+      zero: '$n alertes',
     );
     return '$_temp0';
   }
@@ -1111,6 +1118,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Planning publié · $n gardes notifiés.',
       one: 'Planning publié · 1 garde notifié.',
+      zero: 'Planning publié · $n gardes notifiés.',
     );
     return '$_temp0';
   }
@@ -1335,6 +1343,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Hors ligne · $n saisies en attente d’envoi',
       one: 'Hors ligne · 1 saisie en attente d’envoi',
+      zero: 'Hors ligne · $n saisies en attente d’envoi',
     );
     return '$_temp0';
   }
@@ -1366,6 +1375,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n envois en attente',
       one: '1 envoi en attente',
+      zero: '$n envois en attente',
     );
     return '$_temp0';
   }
@@ -1433,6 +1443,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Relancer les $n non-lecteurs',
       one: 'Relancer le non-lecteur',
+      zero: 'Relancer les $n non-lecteurs',
     );
     return '$_temp0';
   }
@@ -1444,6 +1455,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n membres relancés.',
       one: '1 membre relancé.',
+      zero: '$n membres relancés.',
     );
     return '$_temp0';
   }
@@ -1464,6 +1476,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n opérations à valider',
       one: '1 opération à valider',
+      zero: '$n opérations à valider',
     );
     return '$_temp0';
   }
@@ -1478,6 +1491,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n postes non pourvus',
       one: '1 poste non pourvu',
+      zero: '$n postes non pourvus',
     );
     return '$_temp0 · $title';
   }
@@ -1835,6 +1849,8 @@ class AppLocalizationsFr extends AppLocalizations {
           '$n modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.',
       one:
           '1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.',
+      zero:
+          '$n modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.',
     );
     return '$_temp0';
   }
@@ -2230,6 +2246,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Notifier : $n membres',
       one: 'Notifier : 1 membre',
+      zero: 'Notifier : $n membres',
     );
     return '$_temp0';
   }
@@ -2422,6 +2439,8 @@ class AppLocalizationsFr extends AppLocalizations {
           '$n plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.',
       one:
           'Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.',
+      zero:
+          '$n plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.',
     );
     return '$_temp0';
   }
@@ -2453,6 +2472,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n membres choisis',
       one: '1 membre choisi',
+      zero: '$n membres choisis',
     );
     return '$_temp0';
   }
@@ -2530,6 +2550,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$n opérations à finaliser',
       one: '1 opération à finaliser',
+      zero: '$n opérations à finaliser',
     );
     return '$_temp0';
   }
@@ -2559,6 +2580,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count opérations',
       one: '1 opération',
+      zero: '$count opérations',
     );
     return '$_temp0';
   }
@@ -2577,6 +2599,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count sélectionnées',
       one: '1 sélectionnée',
+      zero: '$count sélectionnées',
     );
     return '$_temp0';
   }
@@ -2596,6 +2619,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: 'Valider $count opérations ?',
       one: 'Valider 1 opération ?',
+      zero: 'Valider $count opérations ?',
     );
     return '$_temp0';
   }
@@ -2612,6 +2636,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count opérations validées.',
       one: '1 opération validée.',
+      zero: '$count opérations validées.',
     );
     return '$_temp0';
   }
@@ -2624,6 +2649,8 @@ class AppLocalizationsFr extends AppLocalizations {
       other:
           '$count n’ont pas été validées (elles attendent l’accord de l’autre).',
       one: '1 n’a pas été validée (elle attend l’accord de l’autre).',
+      zero:
+          '$count n’ont pas été validées (elles attendent l’accord de l’autre).',
     );
     return '$_temp0';
   }
@@ -2904,4 +2931,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get homeExpensesHint => 'Demander un achat, suivre vos demandes';
+
+  @override
+  String fromExpense(int id) {
+    return 'Payée sur la demande de dépense n° $id · voir la preuve';
+  }
+
+  @override
+  String get selectLines => 'Sélectionner';
+
+  @override
+  String expTodoCount(int count) {
+    return '$count à traiter';
+  }
 }

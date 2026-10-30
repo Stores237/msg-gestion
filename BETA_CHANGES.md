@@ -1195,3 +1195,28 @@ finance code (not the PIN again).
   the last code the server accepted on it (salted hash, like the app lock).
 - How to verify: turn it on; open Finances → choose the code with the PIN; leave the app and come
   back after the lock: the code is asked again; three wrong codes → locked.
+
+## 54. Check of the day's features, and what was missing
+
+Owner, 2026-10-30: "I am not seeing [Domaines de dépense, Code finances] in the back office and
+multi select is not applied; verify all the functionalities we implemented today and determine
+what's lacking". Staging was on build 30 (commit 4174009): build 31's back-office settings need
+the deploy. Every feature of the day was then run end to end against a local server, as each role
+over HTTP (one phone at a time, finance corrections, mutual approval, bulk validation, expense
+requests from request to proof, finance code): 42 checks pass, and the server's real answers were
+parsed by the app's models. Found and fixed:
+
+- **Multi-select was hidden**: only a long press, and only on lines the viewer may approve (none
+  for a line you entered yourself). The cash book now has a **Sélectionner** button next to the
+  hint; picking starts with nothing ticked and "Valider (0)" stays off.
+- **French counts of zero read as one** ("1 sélectionnée" for none, "1 photo" for 0): Flutter
+  puts 0 with 1 in French. Every French plural (24) now has its own zero form.
+- **The finance code could be bypassed from Accueil**, which showed the cash balance. When the
+  group requires the code, Accueil shows the balance only after the code was given.
+- **The back-office had no expense requests**: Finances → Demandes de dépense (filter by step,
+  counts) and each request's page (steps, who and when, thread, proof file), read only.
+- **Expense requests from Finances**: the finance team gets a "Demandes de dépense · N à traiter"
+  row above the cash book; the Accueil row shows the same count.
+- **A Sortie paid on a request** says so in the cash book ("Payée sur la demande n° …") and opens
+  the request with its proof (`expense` on each cash-book line).
+- Back-office Finances footnote updated to the mutual rule.

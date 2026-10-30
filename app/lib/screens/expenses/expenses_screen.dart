@@ -114,6 +114,66 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 }
 
+/// "Demandes de dépense · N à traiter": opens the requests (Accueil, Finances).
+class ExpensesEntryRow extends StatefulWidget {
+  const ExpensesEntryRow({super.key, required this.me});
+  final Me me;
+
+  @override
+  State<ExpensesEntryRow> createState() => _ExpensesEntryRowState();
+}
+
+class _ExpensesEntryRowState extends State<ExpensesEntryRow> {
+  int _todo = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _count();
+  }
+
+  Future<void> _count() async {
+    try {
+      final items = await RepositoryLocator.instance.finances.expenses('todo');
+      if (mounted) setState(() => _todo = items.length);
+    } catch (_) {
+      // Offline: the row still opens the screen.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return GroupCard(
+      children: [
+        ListRow(
+          key: const Key('home-expenses'),
+          lead: const IconChip(
+            Icons.request_quote_outlined,
+            tone: Tone.neutral,
+          ),
+          title: Text(l.homeExpenses),
+          subtitle: Text(l.homeExpensesHint),
+          trailing: _todo > 0
+              ? Badge2(
+                  l.expTodoCount(_todo),
+                  key: const Key('expenses-todo'),
+                  tone: Tone.amber,
+                )
+              : null,
+          chevron: true,
+          onTap: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ExpensesScreen(me: widget.me)),
+            );
+            _count();
+          },
+        ),
+      ],
+    );
+  }
+}
+
 String expenseStatusLabel(AppLocalizations l, String s) => switch (s) {
   'submitted' => l.expStatusSubmitted,
   'approved' => l.expStatusApproved,

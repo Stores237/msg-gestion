@@ -24,6 +24,13 @@ class FinanceGate extends StatefulWidget {
   /// Closed again (sign-out, app locked).
   static void lock() => _openUntil = null;
 
+  /// Finance figures may show (Accueil): no code needed, or opened lately.
+  static bool showsFigures(Me me) {
+    if (!(me.group?.financeCodeRequired ?? false)) return true;
+    final until = _openUntil;
+    return until != null && DateTime.now().isBefore(until);
+  }
+
   @override
   State<FinanceGate> createState() => _FinanceGateState();
 }

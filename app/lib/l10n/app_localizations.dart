@@ -311,7 +311,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorWrongPin.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}'**
+  /// **'{n, plural, =0{Code incorrect. Il vous reste {n} essais.} =1{Code incorrect. Il vous reste 1 essai.} other{Code incorrect. Il vous reste {n} essais.}}'**
   String errorWrongPin(int n);
 
   /// No description provided for @errorLocked.
@@ -959,7 +959,7 @@ abstract class AppLocalizations {
   /// No description provided for @unsavedChanges.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}'**
+  /// **'{n, plural, =0{{n} modifications non enregistrées} =1{1 modification non enregistrée} other{{n} modifications non enregistrées}}'**
   String unsavedChanges(int n);
 
   /// No description provided for @eventKind.
@@ -1187,7 +1187,7 @@ abstract class AppLocalizations {
   /// No description provided for @photoCount.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 photo} other{{n} photos}}'**
+  /// **'{n, plural, =0{{n} photos} =1{1 photo} other{{n} photos}}'**
   String photoCount(int n);
 
   /// No description provided for @lastAnnouncement.
@@ -1235,7 +1235,7 @@ abstract class AppLocalizations {
   /// No description provided for @unreadCount.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 annonce non lue} other{{n} annonces non lues}}'**
+  /// **'{n, plural, =0{{n} annonces non lues} =1{1 annonce non lue} other{{n} annonces non lues}}'**
   String unreadCount(int n);
 
   /// No description provided for @changePin.
@@ -1703,7 +1703,7 @@ abstract class AppLocalizations {
   /// No description provided for @savePayments.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}'**
+  /// **'{n, plural, =0{Enregistrer {n} paiements · {amount}} =1{Enregistrer 1 paiement · {amount}} other{Enregistrer {n} paiements · {amount}}}'**
   String savePayments(int n, String amount);
 
   /// No description provided for @paymentsSaved.
@@ -1781,7 +1781,7 @@ abstract class AppLocalizations {
   /// No description provided for @pendingBlock.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}'**
+  /// **'{n, plural, =0{{n} opérations restent à vérifier avant de valider.} =1{1 opération reste à vérifier avant de valider.} other{{n} opérations restent à vérifier avant de valider.}}'**
   String pendingBlock(int n);
 
   /// No description provided for @validateReport.
@@ -1931,7 +1931,7 @@ abstract class AppLocalizations {
   /// No description provided for @alertsCount.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 alerte} other{{n} alertes}}'**
+  /// **'{n, plural, =0{{n} alertes} =1{1 alerte} other{{n} alertes}}'**
   String alertsCount(int n);
 
   /// No description provided for @alertUnderstaffed.
@@ -1967,7 +1967,7 @@ abstract class AppLocalizations {
   /// No description provided for @publishedDone.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}'**
+  /// **'{n, plural, =0{Planning publié · {n} gardes notifiés.} =1{Planning publié · 1 garde notifié.} other{Planning publié · {n} gardes notifiés.}}'**
   String publishedDone(int n);
 
   /// No description provided for @noServicesWeek.
@@ -2345,7 +2345,7 @@ abstract class AppLocalizations {
   /// No description provided for @offlinePending.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}'**
+  /// **'{n, plural, =0{Hors ligne · {n} saisies en attente d’envoi} =1{Hors ligne · 1 saisie en attente d’envoi} other{Hors ligne · {n} saisies en attente d’envoi}}'**
   String offlinePending(int n);
 
   /// No description provided for @syncedAt.
@@ -2381,7 +2381,7 @@ abstract class AppLocalizations {
   /// No description provided for @pendingSend.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 envoi en attente} other{{n} envois en attente}}'**
+  /// **'{n, plural, =0{{n} envois en attente} =1{1 envoi en attente} other{{n} envois en attente}}'**
   String pendingSend(int n);
 
   /// No description provided for @never.
@@ -2489,13 +2489,13 @@ abstract class AppLocalizations {
   /// No description provided for @remindUnread.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}'**
+  /// **'{n, plural, =0{Relancer les {n} non-lecteurs} =1{Relancer le non-lecteur} other{Relancer les {n} non-lecteurs}}'**
   String remindUnread(int n);
 
   /// No description provided for @remindedDone.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 membre relancé.} other{{n} membres relancés.}}'**
+  /// **'{n, plural, =0{{n} membres relancés.} =1{1 membre relancé.} other{{n} membres relancés.}}'**
   String remindedDone(int n);
 
   /// No description provided for @exportPdf.
@@ -2519,7 +2519,7 @@ abstract class AppLocalizations {
   /// No description provided for @entriesToValidate.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 opération à valider} other{{n} opérations à valider}}'**
+  /// **'{n, plural, =0{{n} opérations à valider} =1{1 opération à valider} other{{n} opérations à valider}}'**
   String entriesToValidate(int n);
 
   /// No description provided for @awaitingAuditor.
@@ -2531,7 +2531,7 @@ abstract class AppLocalizations {
   /// No description provided for @unfilledSlots.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}'**
+  /// **'{n, plural, =0{{n} postes non pourvus} =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}'**
   String unfilledSlots(int n, String title);
 
   /// No description provided for @roleVicePresident.
@@ -3155,7 +3155,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutPending.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}'**
+  /// **'{n, plural, =0{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.} =1{1 modification n’est pas encore envoyée : elle sera perdue si vous vous déconnectez maintenant.} other{{n} modifications ne sont pas encore envoyées : elles seront perdues si vous vous déconnectez maintenant.}}'**
   String logoutPending(int n);
 
   /// No description provided for @scopeInside.
@@ -3809,7 +3809,7 @@ abstract class AppLocalizations {
   /// No description provided for @notifyCount.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Notifier : 1 membre} other{Notifier : {n} membres}}'**
+  /// **'{n, plural, =0{Notifier : {n} membres} =1{Notifier : 1 membre} other{Notifier : {n} membres}}'**
   String notifyCount(int n);
 
   /// No description provided for @notifyHint.
@@ -4109,7 +4109,7 @@ abstract class AppLocalizations {
   /// No description provided for @pastDraftsNotice.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}'**
+  /// **'{n, plural, =0{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.} =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}'**
   String pastDraftsNotice(int n);
 
   /// No description provided for @errorDatePassed.
@@ -4151,7 +4151,7 @@ abstract class AppLocalizations {
   /// No description provided for @membersChosen.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 membre choisi} other{{n} membres choisis}}'**
+  /// **'{n, plural, =0{{n} membres choisis} =1{1 membre choisi} other{{n} membres choisis}}'**
   String membersChosen(int n);
 
   /// No description provided for @perMemberTotal.
@@ -4271,7 +4271,7 @@ abstract class AppLocalizations {
   /// No description provided for @entriesToConfirm.
   ///
   /// In fr, this message translates to:
-  /// **'{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}'**
+  /// **'{n, plural, =0{{n} opérations à finaliser} =1{1 opération à finaliser} other{{n} opérations à finaliser}}'**
   String entriesToConfirm(int n);
 
   /// No description provided for @groupBy.
@@ -4313,7 +4313,7 @@ abstract class AppLocalizations {
   /// No description provided for @entriesCount.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 opération} other{{count} opérations}}'**
+  /// **'{count, plural, =0{{count} opérations} =1{1 opération} other{{count} opérations}}'**
   String entriesCount(int count);
 
   /// No description provided for @awaitingOtherBadge.
@@ -4331,7 +4331,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectedCount.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 sélectionnée} other{{count} sélectionnées}}'**
+  /// **'{count, plural, =0{{count} sélectionnées} =1{1 sélectionnée} other{{count} sélectionnées}}'**
   String selectedCount(int count);
 
   /// No description provided for @selectAll.
@@ -4349,7 +4349,7 @@ abstract class AppLocalizations {
   /// No description provided for @validateManyTitle.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{Valider 1 opération ?} other{Valider {count} opérations ?}}'**
+  /// **'{count, plural, =0{Valider {count} opérations ?} =1{Valider 1 opération ?} other{Valider {count} opérations ?}}'**
   String validateManyTitle(int count);
 
   /// No description provided for @validateManyBody.
@@ -4361,13 +4361,13 @@ abstract class AppLocalizations {
   /// No description provided for @validatedMany.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 opération validée.} other{{count} opérations validées.}}'**
+  /// **'{count, plural, =0{{count} opérations validées.} =1{1 opération validée.} other{{count} opérations validées.}}'**
   String validatedMany(int count);
 
   /// No description provided for @skippedMany.
   ///
   /// In fr, this message translates to:
-  /// **'{count, plural, =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}'**
+  /// **'{count, plural, =0{{count} n’ont pas été validées (elles attendent l’accord de l’autre).} =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}'**
   String skippedMany(int count);
 
   /// No description provided for @financeCodeTitle.
@@ -4855,6 +4855,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Demander un achat, suivre vos demandes'**
   String get homeExpensesHint;
+
+  /// No description provided for @fromExpense.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée sur la demande de dépense n° {id} · voir la preuve'**
+  String fromExpense(int id);
+
+  /// No description provided for @selectLines.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sélectionner'**
+  String get selectLines;
+
+  /// No description provided for @expTodoCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} à traiter'**
+  String expTodoCount(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -85,3 +85,30 @@ def member_statement_pdf_view(request, pk):
     audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
     slug = f"{member.last_name}-{member.first_name}".lower().replace(" ", "-")
     return _file(member_statement_pdf(services.member_statement(member)), f"bilan-{slug}-{timezone.localdate():%Y-%m-%d}.pdf", "application/pdf")
+
+
+# --- Expense requests (owner, 2026-10-30): the super admin sees them all,
+# with their thread and the trésorier's proof, read only. ---
+
+
+@backoffice_view("finances.expenses", "view")
+def expenses(request):
+    from apps.finances.models import ExpenseRequest
+
+    st = request.GET.get("statut", "")
+    qs = ExpenseRequest.objects.select_related("domain", "requester", "lead_by", "audit_by", "paid_by")
+    if st in ExpenseRequest.Status.values:
+        qs = qs.filter(status=st)
+    counts = {s: ExpenseRequest.objects.filter(status=s).count() for s in ExpenseRequest.Status.values}
+    return render(request, "backoffice/expenses.html", {
+        "nav": "finances", "items": qs[:300], "statut": st, "statuses": ExpenseRequest.Status.choices, "counts": counts,
+    })
+
+
+@backoffice_view("finances.expenses", "view")
+def expense(request, pk):
+    from apps.finances.models import ExpenseRequest
+
+    r = get_object_or_404(ExpenseRequest.objects.select_related("domain", "requester", "lead_by", "audit_by", "paid_by"),
+                          pk=pk)
+    return render(request, "backoffice/expense.html", {"nav": "finances", "r": r, "messages_": r.messages.select_related("author")})

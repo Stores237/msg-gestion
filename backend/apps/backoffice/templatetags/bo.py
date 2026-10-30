@@ -92,3 +92,9 @@ def role_badge(role, ends_on=None, starts_on=None):
 def status(user):
     # The status in the group being worked on.
     return format_html('<span class="status {}"><i></i>{}</span>', STATUS_DOT.get(user.group_status, "off"), user.get_group_status_display())
+
+
+@register.filter
+def get(mapping, key):
+    """{{ counts|get:value }}: a dict lookup in a template."""
+    return mapping.get(key, "") if hasattr(mapping, "get") else ""

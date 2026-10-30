@@ -19,6 +19,7 @@ import '../widgets/sync_widgets.dart';
 import '../widgets/ui.dart';
 import 'account_screen.dart';
 import 'expenses/expenses_screen.dart';
+import 'finances/finance_gate.dart';
 import 'planning/my_duties_view.dart';
 import 'announcements/announcement_detail_screen.dart';
 import 'calendar/event_detail_screen.dart';
@@ -154,7 +155,8 @@ class HomeScreen extends StatelessWidget {
                     _ToFollow(b: data.bureau!, onOpen: onOpenTab),
                     const SizedBox(height: 24),
                   ],
-                  if (data.summary != null) ...[
+                  // Behind the finance code when the group requires it.
+                  if (data.summary != null && FinanceGate.showsFigures(me)) ...[
                     _Stats(
                       summary: data.summary!,
                       onOpen: () => onOpenTab?.call(AppTab.finances),
@@ -162,25 +164,7 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                   ],
                   // Expense requests, for every member (owner, 2026-10-30).
-                  GroupCard(
-                    children: [
-                      ListRow(
-                        key: const Key('home-expenses'),
-                        lead: const IconChip(
-                          Icons.request_quote_outlined,
-                          tone: Tone.neutral,
-                        ),
-                        title: Text(l.homeExpenses),
-                        subtitle: Text(l.homeExpensesHint),
-                        chevron: true,
-                        onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ExpensesScreen(me: me),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ExpensesEntryRow(me: me),
                   const SizedBox(height: 24),
                   if (data.dues != null && data.dues!.dues.isNotEmpty) ...[
                     SectionLabel(l.myContributions),

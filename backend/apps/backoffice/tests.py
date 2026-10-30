@@ -194,3 +194,19 @@ def test_finance_code_switch_and_expense_domains(logged_in):
     formation.refresh_from_db()
     assert formation.lead_role == censeur
     assert ExpenseDomain.objects.get(name="Matériel").lead_role is None
+
+
+def test_expense_requests_pages(logged_in):
+    """The super admin sees every expense request and its thread, read only."""
+    from apps.accounts.factories import UserFactory, give_role
+    from apps.finances import expenses
+    from apps.finances.models import ExpenseDomain
+
+    member, lead = UserFactory(), UserFactory()
+    give_role(lead, "formateur")
+    r = expenses.submit(by=member, domain=ExpenseDomain.objects.get(name="Formation"), title="Papier examen", amount=5000)
+    page = logged_in.get("/bo/finances/depenses/").content.decode()
+    assert "Papier examen" in page and "Chez le responsable · 1" in page
+    detail = logged_in.get(f"/bo/finances/depenses/{r.pk}/").content.decode()
+    assert "Demande envoyée" in detail and "Responsable du domaine" in detail
+    assert "Demandes de dépense" in logged_in.get("/bo/finances/").content.decode()
