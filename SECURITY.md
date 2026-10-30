@@ -125,6 +125,14 @@ Defined in `apps/accounts/registry.py`:
   bulk `POST /api/finances/entries/validate/`; refusals audited). A line is deleted only by who
   entered it. Before 2026-10-30 the roles were split (commissaire enters, trésorier validates).
 - One person can't be both trésorier and commissaire aux comptes.
+- Expense requests (owner, 2026-10-30, `apps/finances/expenses.py`): nobody decides any step of
+  their own request; the commissaire who approves can't have asked or decided the first step; the
+  trésorier who pays can't have asked or approved; payment is at most the approved amount and needs
+  the proof file (checked on its bytes). Refused steps are audited.
+- Finance code (owner, 2026-10-30): when the group requires it, Finances opens only after a second
+  4-digit code, hashed on the server, different from the PIN, set with the PIN, 3 misses → locked
+  15 min (audited). It gates the app's Finances tab; the finance API itself is still protected by
+  the session and permissions (the code is not a second API factor).
 - Back-office permissions belong to platform roles only: the super admin and the back-office
   staff (support, IT helpdesk, integration ops; agent and responsable levels). Staff roles can
   never hold anything outside the back-office (finances, a group's members, calendar…), changing

@@ -59,6 +59,10 @@ class MeSerializer(serializers.Serializer):
         request = self.context.get("request")
         return request.build_absolute_uri(url) if request is not None and url.startswith("/") else url
     groups = serializers.SerializerMethodField()
+    finance_code_set = serializers.SerializerMethodField()
+
+    def get_finance_code_set(self, user) -> bool:
+        return bool(user.finance_code)
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_group(self, user) -> dict:
@@ -67,7 +71,9 @@ class MeSerializer(serializers.Serializer):
 
         st = Settings.get()
         return {"id": st.group_id, "name": st.group.name, "place": st.parish, "motto": st.motto,
-                "welcome_message": st.welcome_message, "color": st.color, "color2": st.color2}
+                "welcome_message": st.welcome_message, "color": st.color, "color2": st.color2,
+                # Finances asks the finance code first (owner, 2026-10-30).
+                "finance_code_required": st.finance_code_required}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:

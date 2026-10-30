@@ -2612,4 +2612,279 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeCodeTitle => 'Finance code';
+
+  @override
+  String get financeCodeSubtitle => 'Enter your finance code to open Finances.';
+
+  @override
+  String financeCodeWrong(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Wrong finance code. $count tries left.',
+      one: 'Wrong finance code. 1 try left.',
+      zero: 'Wrong finance code.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeCodeForgot => 'Forgot the finance code?';
+
+  @override
+  String get financeCodeChooseTitle => 'Your finance code';
+
+  @override
+  String get financeCodeChooseBody =>
+      'Your group protects Finances with a second 4-digit code, different from your PIN. Choose it and confirm with your PIN.';
+
+  @override
+  String get financeCodeYourPin => 'Your PIN';
+
+  @override
+  String get financeCodeNew => 'Finance code (4 digits)';
+
+  @override
+  String get financeCodeConfirm => 'Confirm the finance code';
+
+  @override
+  String get financeCodeMismatch => 'The two codes don\'t match.';
+
+  @override
+  String get financeCodeFourDigits => 'The PIN and the code have 4 digits.';
+
+  @override
+  String get financeCodeSameAsPin =>
+      'The finance code must differ from the PIN.';
+
+  @override
+  String get financeCodeSaved => 'Finance code saved.';
+
+  @override
+  String get financeCodeSave => 'Save the code';
+
+  @override
+  String get financeCodeOffline =>
+      'Offline: this code was never checked on this phone yet.';
+
+  @override
+  String get expensesTitle => 'Expense requests';
+
+  @override
+  String get expTodo => 'To handle';
+
+  @override
+  String get expMine => 'My requests';
+
+  @override
+  String get expAll => 'All';
+
+  @override
+  String get expNew => 'New request';
+
+  @override
+  String get expNothingTodo => 'No request is waiting for you.';
+
+  @override
+  String get expNone => 'No requests.';
+
+  @override
+  String get expStatusSubmitted => 'With the lead';
+
+  @override
+  String get expStatusApproved => 'With the auditor';
+
+  @override
+  String get expStatusToPay => 'To pay';
+
+  @override
+  String get expStatusPaid => 'Paid';
+
+  @override
+  String get expStatusRefused => 'Refused';
+
+  @override
+  String get expStatusCancelled => 'Cancelled';
+
+  @override
+  String expReplaces(int id) {
+    return 'Replaces request no. $id.';
+  }
+
+  @override
+  String expReplacedBy(int id) {
+    return 'Redone: request no. $id.';
+  }
+
+  @override
+  String get expDomain => 'Domain';
+
+  @override
+  String get expDomainRequired => 'Choose the domain.';
+
+  @override
+  String get expTitleRequired => 'Say what the expense is for.';
+
+  @override
+  String expLeadHint(String role) {
+    return 'Approved first by: $role (or a coordinator you tag).';
+  }
+
+  @override
+  String get expNoLeadHint => 'Tag the coordinator who will approve it.';
+
+  @override
+  String get expTitle => 'What for (e.g. Paper for the exam)';
+
+  @override
+  String get expAmount => 'Amount requested';
+
+  @override
+  String get expDescription => 'Details (optional)';
+
+  @override
+  String get expTagCoordinators => 'Tag a coordinator';
+
+  @override
+  String get expTagHint => 'Optional: a higher lead can approve it too.';
+
+  @override
+  String get expSend => 'Send the request';
+
+  @override
+  String get expSent => 'Request sent.';
+
+  @override
+  String get expDetailTitle => 'Expense request';
+
+  @override
+  String get expThread => 'Thread';
+
+  @override
+  String get expCancelTitle => 'Cancel the request?';
+
+  @override
+  String get expRefuseTitle => 'Refuse the request?';
+
+  @override
+  String get expReasonLabel => 'Reason (required)';
+
+  @override
+  String get expCancelled => 'Request cancelled. It stays in the history.';
+
+  @override
+  String get expApproved => 'Request approved and passed on.';
+
+  @override
+  String get expRefused => 'Request refused.';
+
+  @override
+  String get expPaid => 'Payment recorded, proof attached.';
+
+  @override
+  String get expMessageSent => 'Message sent.';
+
+  @override
+  String get expApprove => 'Approve';
+
+  @override
+  String get expRefuse => 'Refuse';
+
+  @override
+  String get expPayAction => 'Pay and attach the proof';
+
+  @override
+  String get expCancelAction => 'Cancel the request';
+
+  @override
+  String get expResubmit => 'Make a new request';
+
+  @override
+  String get expAttach => 'Attach a file';
+
+  @override
+  String get expMessageHint => 'Write a message…';
+
+  @override
+  String get expSendMessage => 'Send';
+
+  @override
+  String expPaidAmount(String amount) {
+    return 'Paid: $amount';
+  }
+
+  @override
+  String expAskedBy(String name) {
+    return 'asked by $name';
+  }
+
+  @override
+  String expTagged(String names) {
+    return 'Tagged coordinators: $names';
+  }
+
+  @override
+  String expReason(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get expStepAsked => 'Request';
+
+  @override
+  String get expStepLead => 'Domain lead';
+
+  @override
+  String get expStepAuditor => 'Auditor';
+
+  @override
+  String get expStepPaid => 'Payment by the treasurer';
+
+  @override
+  String get expProof => 'Proof of payment';
+
+  @override
+  String get expPayTitle => 'Pay the expense';
+
+  @override
+  String expApprovedAmount(String amount) {
+    return 'Approved amount: $amount';
+  }
+
+  @override
+  String get expAmountPaid => 'Amount paid';
+
+  @override
+  String get expAmountMaxHint =>
+      'At most the approved amount. For more, the requester cancels and asks again.';
+
+  @override
+  String expAmountMax(String amount) {
+    return 'The amount paid is from 1 to $amount.';
+  }
+
+  @override
+  String get expProofRequired => 'Attach the transaction screenshot.';
+
+  @override
+  String get expAddProof => 'Attach the transaction screenshot';
+
+  @override
+  String get expPayNote => 'Note (e.g. Orange Money, ref …)';
+
+  @override
+  String get expPayCashbook =>
+      'The expense goes into the cash book and counts at once: the auditor approved the request.';
+
+  @override
+  String get expPayConfirm => 'Record the payment';
+
+  @override
+  String get homeExpenses => 'Expense requests';
+
+  @override
+  String get homeExpensesHint => 'Ask for a purchase, follow your requests';
 }

@@ -154,3 +154,102 @@ class QuarterReport(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["group", "year", "quarter"], name="one_report_per_quarter")]
+
+
+# --- Expense requests (owner, 2026-10-30) -------------------------------------------
+#
+# Any member asks for money for a purchase; the lead of the domain it
+# concerns (or a coordinator the member tags) approves it, then the
+# commissaire aux comptes, then the trésorier pays and posts the proof in the
+# request's thread. Domains and their lead roles are each group's own
+# (back-office → Paramètres).
+
+
+class ExpenseDomain(models.Model):
+    """What an expense is for (Formation, Liturgie, Matériel…) and the role
+    that approves it first (the formateur for Formation, never the adjoint)."""
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    name = models.CharField(max_length=60)
+    lead_role = models.ForeignKey("accounts.Role", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    sort_order = models.PositiveSmallIntegerField(default=100)
+    is_archived = models.BooleanField(default=False)
+
+    objects = scoped()
+    all_groups = models.Manager()
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class ExpenseRequest(models.Model):
+    class Status(models.TextChoices):
+        SUBMITTED = "submitted", "Chez le responsable"
+        APPROVED = "approved", "Chez le commissaire aux comptes"
+        TO_PAY = "to_pay", "Chez le trésorier"
+        PAID = "paid", "Payée"
+        REFUSED = "refused", "Refusée"
+        CANCELLED = "cancelled", "Annulée"
+
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
+    requester = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    domain = models.ForeignKey(ExpenseDomain, on_delete=models.PROTECT, related_name="requests")
+    title = models.CharField(max_length=140)
+    description = models.TextField(max_length=1000, blank=True)
+    amount = models.PositiveIntegerField()
+    # Coordinators the member asked to look at it too; any one of them, or
+    # a holder of the domain's lead role, decides the first step.
+    tagged = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="+")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.SUBMITTED)
+    lead_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    lead_at = models.DateTimeField(null=True, blank=True)
+    audit_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    audit_at = models.DateTimeField(null=True, blank=True)
+    paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    paid_at = models.DateTimeField(null=True, blank=True)
+    paid_amount = models.PositiveIntegerField(null=True, blank=True)
+    entry = models.OneToOneField("Entry", on_delete=models.PROTECT, null=True, blank=True, related_name="expense")
+    closed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    closed_at = models.DateTimeField(null=True, blank=True)
+    close_reason = models.CharField(max_length=300, blank=True)
+    # A new request made after cancelling this one (to match the exact amount):
+    # the cancelled one stays on record.
+    replaces = models.OneToOneField("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="replaced_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = scoped()
+    all_groups = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} · {self.amount} FCFA"
+
+
+class ExpenseMessage(models.Model):
+    """The request's thread: each step's decision, comments, and the
+    trésorier's proof of payment (a screenshot)."""
+
+    class Kind(models.TextChoices):
+        STEP = "step", "Étape"
+        COMMENT = "comment", "Commentaire"
+        PROOF = "proof", "Preuve de paiement"
+
+    request = models.ForeignKey(ExpenseRequest, on_delete=models.CASCADE, related_name="messages")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.COMMENT)
+    body = models.TextField(max_length=1000, blank=True)
+    file = models.FileField(upload_to="expenses/%Y/%m/", null=True, blank=True)
+    file_name = models.CharField(max_length=160, blank=True)
+    content_type = models.CharField(max_length=60, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = scoped("request__group")
+    all_groups = models.Manager()
+
+    class Meta:
+        ordering = ["created_at"]

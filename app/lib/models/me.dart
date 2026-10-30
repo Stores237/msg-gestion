@@ -34,7 +34,12 @@ class GroupInfo {
     this.welcomeMessage = '',
     this.color,
     this.color2,
+    this.financeCodeRequired = false,
   });
+
+  /// Opening Finances asks the finance code (owner, 2026-10-30; set per
+  /// group in the back-office).
+  final bool financeCodeRequired;
 
   /// The group's app colour, "#RRGGBB" (back-office → Paramètres).
   final String? color;
@@ -58,6 +63,7 @@ class GroupInfo {
     welcomeMessage: (j['welcome_message'] as String?) ?? '',
     color: j['color'] as String?,
     color2: j['color2'] as String?,
+    financeCodeRequired: j['finance_code_required'] == true,
   );
 }
 
@@ -79,7 +85,11 @@ class Me {
     this.group,
     this.groups = const [],
     this.photo,
+    this.financeCodeSet = false,
   });
+
+  /// The member has chosen a finance code (second code for Finances).
+  final bool financeCodeSet;
 
   /// Signed URL of the member's own picture; null = initials.
   final String? photo;
@@ -102,6 +112,7 @@ class Me {
     group: group,
     groups: groups,
     photo: photo,
+    financeCodeSet: financeCodeSet,
   );
 
   /// The group this session works in, and every group the member is in.
@@ -143,6 +154,7 @@ class Me {
         e.key: List<String>.from(e.value as List),
     },
     photo: json['photo'] as String?,
+    financeCodeSet: json['finance_code_set'] == true,
     group: json['group'] == null
         ? null
         : GroupInfo.fromJson(json['group'] as Map<String, dynamic>),

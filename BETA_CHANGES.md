@@ -1144,3 +1144,54 @@ confirms he holds the money.
 - How to verify: deploy, then as the trésorier enter an Entrée → it shows "En attente de l'autre";
   as the commissaire it shows Valider. Enter three as the commissaire; as the trésorier long press
   one, Tout sélectionner, Valider (3).
+
+## 52. Expense requests: member → domain lead → commissaire → trésorier with proof
+
+Owner, 2026-10-30: "for any expense an expense request has to be submitted; it is validated by the
+concerned board lead only, not the vice (paper for a training exam asked by the vice-formateur or a
+member is validated by the formateur), but they can also tag another coordinator with higher
+responsibility; then the auditor approves and passes it to the treasurer, who provides the amount
+and shows a proof with a screenshot of the transaction as a comment in the thread". Choices made
+with the owner: the lead or any tagged coordinator decides (first one); the proof records the
+Sortie, counted at once; the amount paid is at most the approved one, otherwise the member cancels
+(kept on record) and asks again with the exact amount.
+
+- **Domains** (each group's own, back-office → Paramètres → Domaines de dépense): a name and the
+  role that approves first. Seeded per group: Formation (formateur), Discipline (censeur général),
+  Secrétariat (secrétaire général), Fonctionnement général (président). A new group copies them.
+- **App**: Accueil → Demandes de dépense (every member): À traiter / Mes demandes / Toutes (finance
+  team). New request: domain (shows who approves), what for, amount, details, optional tagged
+  coordinators. The request shows its four steps, the buttons the viewer may use, and the thread
+  (comments with a photo or PDF; each step written in it).
+- **Rules (server)**: the first step belongs to the holders of the domain's lead role and the
+  tagged; nobody decides on their own request (a lead asking for himself must tag someone). The
+  commissaire (`finances.expenses` validate) approves next, not if he asked or decided before. The
+  trésorier (`finances.expenses` change) pays 1 … approved amount with a required screenshot (JPEG,
+  PNG or PDF, 10 MB); that creates the Sortie (Dépenses, member = requester) validated in the
+  commissaire's name and posts the proof in the thread. Refusing and cancelling need a reason.
+  Every step notifies who's next and the requester; refusals of a step are audited.
+- Server: `ExpenseDomain`, `ExpenseRequest`, `ExpenseMessage` (migrations finances 0004, 0005;
+  accounts 0021 gives the commissaire view+validate and the trésorier view+change),
+  `/api/finances/expense-domains/`, `/api/finances/expenses/` (?box=todo|mine|all),
+  `…/<id>/decide|review|cancel|pay|messages/`.
+- How to verify: as a member, Accueil → Demandes de dépense → Nouvelle demande (Formation, 5 000).
+  As the formateur: À traiter → Approuver. As the commissaire: Approuver. As the trésorier: Payer et
+  joindre la preuve (4 800 + a screenshot) → the Sortie is in the cash book, the proof in the thread.
+
+## 53. Finance code: a second code to open Finances
+
+Owner, 2026-10-30: "add another pass verification to access the finance page"; chosen: a separate
+finance code (not the PIN again).
+
+- Back-office → Paramètres → Sécurité des finances → **Code finances obligatoire** (per group, off
+  by default).
+- When on, opening Finances asks a 4-digit **code finances**, different from the PIN, each
+  person's own. The first time, the member chooses it and confirms with the PIN; "Code finances
+  oublié ?" resets it the same way. A right code opens Finances for 5 minutes; it closes again
+  when the app locks or the member signs out.
+- Server: hashed (`User.finance_code`), `POST /api/auth/finance-code/` {pin, code} (wrong PINs
+  count like a login), `POST /api/auth/finance-code/check/` (3 misses lock it 15 min, audited);
+  /me gives `group.finance_code_required` and `finance_code_set`. Offline, the phone checks against
+  the last code the server accepted on it (salted hash, like the app lock).
+- How to verify: turn it on; open Finances → choose the code with the PIN; leave the app and come
+  back after the lock: the code is asked again; three wrong codes → locked.

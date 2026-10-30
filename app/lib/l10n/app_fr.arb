@@ -1680,5 +1680,156 @@
         "type": "String"
       }
     }
+  },
+  "financeCodeTitle": "Code finances",
+  "financeCodeSubtitle": "Saisissez votre code finances pour ouvrir les finances.",
+  "financeCodeWrong": "{count, plural, =0{Code finances incorrect.} =1{Code finances incorrect. Encore 1 essai.} other{Code finances incorrect. Encore {count} essais.}}",
+  "financeCodeForgot": "Code finances oublié ?",
+  "financeCodeChooseTitle": "Votre code finances",
+  "financeCodeChooseBody": "Votre groupe protège les finances par un second code à 4 chiffres, différent de votre PIN. Choisissez-le et confirmez avec votre PIN.",
+  "financeCodeYourPin": "Votre PIN",
+  "financeCodeNew": "Code finances (4 chiffres)",
+  "financeCodeConfirm": "Confirmez le code finances",
+  "financeCodeMismatch": "Les deux codes ne correspondent pas.",
+  "financeCodeFourDigits": "Le PIN et le code ont 4 chiffres.",
+  "financeCodeSameAsPin": "Le code finances doit être différent du PIN.",
+  "financeCodeSaved": "Code finances enregistré.",
+  "financeCodeSave": "Enregistrer le code",
+  "financeCodeOffline": "Hors ligne : ce code n’a encore jamais été vérifié sur ce téléphone.",
+  "@financeCodeWrong": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expensesTitle": "Demandes de dépense",
+  "expTodo": "À traiter",
+  "expMine": "Mes demandes",
+  "expAll": "Toutes",
+  "expNew": "Nouvelle demande",
+  "expNothingTodo": "Aucune demande ne vous attend.",
+  "expNone": "Aucune demande.",
+  "expStatusSubmitted": "Chez le responsable",
+  "expStatusApproved": "Chez le commissaire",
+  "expStatusToPay": "À payer",
+  "expStatusPaid": "Payée",
+  "expStatusRefused": "Refusée",
+  "expStatusCancelled": "Annulée",
+  "expReplaces": "Remplace la demande n° {id}.",
+  "expReplacedBy": "Refaite : demande n° {id}.",
+  "expDomain": "Domaine",
+  "expDomainRequired": "Choisissez le domaine.",
+  "expTitleRequired": "Indiquez l’objet de la dépense.",
+  "expLeadHint": "Approuvée d’abord par : {role} (ou un coordinateur que vous identifiez).",
+  "expNoLeadHint": "Identifiez le coordinateur qui l’approuvera.",
+  "expTitle": "Objet (ex. Papier pour l’examen)",
+  "expAmount": "Montant demandé",
+  "expDescription": "Détails (facultatif)",
+  "expTagCoordinators": "Identifier un coordinateur",
+  "expTagHint": "Facultatif : un responsable plus haut peut aussi l’approuver.",
+  "expSend": "Envoyer la demande",
+  "expSent": "Demande envoyée.",
+  "expDetailTitle": "Demande de dépense",
+  "expThread": "Échanges",
+  "expCancelTitle": "Annuler la demande ?",
+  "expRefuseTitle": "Refuser la demande ?",
+  "expReasonLabel": "Motif (obligatoire)",
+  "expCancelled": "Demande annulée. Elle reste dans l’historique.",
+  "expApproved": "Demande approuvée et transmise.",
+  "expRefused": "Demande refusée.",
+  "expPaid": "Paiement enregistré, preuve jointe.",
+  "expMessageSent": "Message envoyé.",
+  "expApprove": "Approuver",
+  "expRefuse": "Refuser",
+  "expPayAction": "Payer et joindre la preuve",
+  "expCancelAction": "Annuler la demande",
+  "expResubmit": "Refaire une demande",
+  "expAttach": "Joindre un fichier",
+  "expMessageHint": "Écrire un message…",
+  "expSendMessage": "Envoyer",
+  "expPaidAmount": "Payé : {amount}",
+  "expAskedBy": "demandée par {name}",
+  "expTagged": "Coordinateurs identifiés : {names}",
+  "expReason": "Motif : {reason}",
+  "expStepAsked": "Demande",
+  "expStepLead": "Responsable du domaine",
+  "expStepAuditor": "Commissaire aux comptes",
+  "expStepPaid": "Paiement par le trésorier",
+  "expProof": "Preuve de paiement",
+  "expPayTitle": "Payer la dépense",
+  "expApprovedAmount": "Montant approuvé : {amount}",
+  "expAmountPaid": "Montant payé",
+  "expAmountMaxHint": "Au plus le montant approuvé. Pour plus, le demandeur annule et refait sa demande.",
+  "expAmountMax": "Le montant payé va de 1 à {amount}.",
+  "expProofRequired": "Joignez la capture de la transaction.",
+  "expAddProof": "Joindre la capture de la transaction",
+  "expPayNote": "Note (ex. Orange Money, réf. …)",
+  "expPayCashbook": "La sortie est inscrite au livre de caisse et compte aussitôt : la demande a été approuvée par le commissaire.",
+  "expPayConfirm": "Enregistrer le paiement",
+  "homeExpenses": "Demandes de dépense",
+  "homeExpensesHint": "Demander un achat, suivre vos demandes",
+  "@expReplaces": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "@expReplacedBy": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "@expLeadHint": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "@expPaidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@expAskedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@expTagged": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "@expReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "@expApprovedAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@expAmountMax": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

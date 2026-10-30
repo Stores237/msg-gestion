@@ -748,16 +748,24 @@ def settings_view(request):
             if getattr(st, f) != value:
                 changed[f] = str(value)
                 setattr(st, f, value)
+        if "finance_code_form" in request.POST:
+            on = bool(request.POST.get("finance_code_required"))
+            if on != st.finance_code_required:
+                st.finance_code_required = on
+                changed["finance_code_required"] = "oui" if on else "non"
         st.save()
         if changed:
             audit.record("Paramètres modifiés", actor=request.user, obj=None, request=request, detail=changed)
         messages.success(request, "Paramètres enregistrés.")
         return redirect("backoffice:settings")
     from apps.events.models import ActivityType, DressCode
+    from apps.finances.models import ExpenseDomain
 
     return render(request, "backoffice/settings.html", {
         "nav": "settings", "s": st, "today": date.today(), "palette": APP_COLORS,
         "activity_types": ActivityType.objects.all(), "dress_codes": DressCode.objects.all(),
+        "expense_domains": ExpenseDomain.objects.all(),
+        "roles": Role.objects.filter(is_archived=False).exclude(slug__in=registry.PLATFORM_ROLES).order_by("sort_order", "name"),
     })
 
 
@@ -805,6 +813,22 @@ def settings_lists(request):
         name = P["d_new_name"].strip()[:60]
         DressCode.objects.create(slug=_new_slug(DressCode, name, 12), name=name, description=P.get("d_new_desc", "").strip()[:140],
                                  sort_order=DressCode.objects.count() * 10)
+        changed.append(name)
+    from apps.finances.models import ExpenseDomain
+
+    roles = {str(r.pk): r for r in Role.objects.filter(is_archived=False).exclude(slug__in=registry.PLATFORM_ROLES)}
+    for x in ExpenseDomain.objects.all():
+        k = f"x{x.pk}"
+        lead = roles.get(P.get(f"{k}_lead", str(x.lead_role_id or "")))
+        new = (P.get(f"{k}_name", x.name).strip() or x.name, lead, bool(P.get(f"{k}_archived")))
+        if new != (x.name, x.lead_role, x.is_archived):
+            x.name, x.lead_role, x.is_archived = new
+            x.save()
+            changed.append(x.name)
+    if P.get("x_new_name", "").strip():
+        name = P["x_new_name"].strip()[:60]
+        ExpenseDomain.objects.create(name=name, lead_role=roles.get(P.get("x_new_lead", "")),
+                                     sort_order=(ExpenseDomain.objects.count() + 1) * 10)
         changed.append(name)
     if changed:
         audit.record("Listes du groupe modifiées", actor=request.user, request=request, detail={"elements": ", ".join(changed)[:300]})

@@ -55,6 +55,12 @@ class BackofficeOnly extends PinFailure {
   const BackofficeOnly();
 }
 
+/// A wrong finance code (owner, 2026-10-30).
+class WrongFinanceCode extends PinFailure {
+  const WrongFinanceCode(this.attemptsLeft);
+  final int attemptsLeft;
+}
+
 /// The conditions changed (or weren't accepted): tick the box again.
 class TermsRequired extends PinFailure {
   const TermsRequired();
@@ -92,4 +98,12 @@ abstract class AuthRepository {
   });
 
   Future<void> logout();
+
+  /// Chooses or resets the finance code; the PIN proves it's the member.
+  /// Throws [WrongPin]/[AccountLocked], or an ApiException with code
+  /// `pin_too_simple` / `same_as_pin`.
+  Future<void> setFinanceCode({required String pin, required String code});
+
+  /// Throws [WrongFinanceCode] or [AccountLocked] (code locked).
+  Future<void> checkFinanceCode(String code);
 }

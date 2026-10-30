@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../data/current_user.dart';
 import '../data/group_controller.dart';
 import '../data/offline.dart';
+import 'finances/finance_gate.dart';
 import 'login_phone_screen.dart';
 
 /// Back to the login screen leaving nothing of this member on the phone:
 /// after "Se déconnecter", and when the account was opened on another
 /// phone ([notice] says so on the login screen).
 Future<void> leaveSession(NavigatorState nav, {String? notice}) async {
+  FinanceGate.lock();
   await OfflineState.instance.forget();
   await GroupController.instance.select(null);
   currentUser.value = null;

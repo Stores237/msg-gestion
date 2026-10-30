@@ -193,6 +193,51 @@ class ChangePinView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class FinanceCodeView(APIView):
+    """POST {pin, code}: set or reset the finance code (owner, 2026-10-30).
+    The PIN proves it's the member; wrong PINs count like a login."""
+
+    throttle_scope = "pin_login"
+
+    @extend_schema(request=None, responses={204: None})
+    def post(self, request):
+        from .services import set_finance_code
+
+        code = str(request.data.get("code", ""))
+        problem = pin_problem(code)
+        if problem:
+            return Response({"detail": "Choisissez un code moins simple.", "code": problem}, status=400)
+        if request.user.check_pin(code):
+            return Response({"detail": "Le code finances doit être différent du PIN.", "code": "same_as_pin"}, status=400)
+        result = check_pin_login(request.user, str(request.data.get("pin", "")), request=request)
+        if not result.ok:
+            if result.locked_until is not None:
+                return Response({"detail": "Compte bloqué.", "code": "locked", "minutes": settings.PIN_LOCKOUT_MINUTES}, status=423)
+            return Response({"detail": "PIN incorrect.", "code": "wrong_pin", "attempts_left": result.attempts_left}, status=401)
+        set_finance_code(result.user, code, request=request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FinanceCodeCheckView(APIView):
+    """POST {code}: 204 when right; 401 with attempts left; 423 locked."""
+
+    throttle_scope = "pin_login"
+
+    @extend_schema(request=None, responses={204: None})
+    def post(self, request):
+        from .services import check_finance_code
+
+        if not request.user.finance_code:
+            return Response({"detail": "Choisissez d’abord votre code finances.", "code": "no_finance_code"}, status=409)
+        result = check_finance_code(request.user, str(request.data.get("code", "")), request=request)
+        if result.ok:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        if result.locked_until is not None:
+            return Response({"detail": "Code finances bloqué.", "code": "locked", "minutes": settings.PIN_LOCKOUT_MINUTES}, status=423)
+        return Response({"detail": "Code finances incorrect.", "code": "wrong_code", "attempts_left": result.attempts_left},
+                        status=401)
+
+
 class ForgotPinView(APIView):
     """Step 1 of "Code oublié ?": text a one-time code to the member."""
 

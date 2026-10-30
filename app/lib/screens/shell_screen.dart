@@ -13,6 +13,7 @@ import '../models/me.dart';
 import '../theme/tokens.dart';
 import 'announcements/announcements_screen.dart';
 import 'calendar/calendar_screen.dart';
+import 'finances/finance_gate.dart';
 import 'finances/finances_screen.dart';
 import 'home_screen.dart';
 import 'lock_screen.dart';
@@ -96,6 +97,7 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
         RepositoryLocator.instance.authSession.isLoggedIn &&
         !_locking) {
       _locking = true;
+      FinanceGate.lock();
       LockScreen.show(
         Navigator.of(context, rootNavigator: true),
       ).whenComplete(() => _locking = false);
@@ -143,7 +145,10 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
       me: widget.me,
       onUnreadChanged: (n) => setState(() => _unread = n),
     ),
-    AppTab.finances => FinancesScreen(me: widget.me),
+    AppTab.finances => FinanceGate(
+      me: widget.me,
+      child: FinancesScreen(me: widget.me),
+    ),
   };
 
   /// Each tab gets width / count. Under ~72 dp a slot can't hold

@@ -2627,4 +2627,281 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeCodeTitle => 'Code finances';
+
+  @override
+  String get financeCodeSubtitle =>
+      'Saisissez votre code finances pour ouvrir les finances.';
+
+  @override
+  String financeCodeWrong(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Code finances incorrect. Encore $count essais.',
+      one: 'Code finances incorrect. Encore 1 essai.',
+      zero: 'Code finances incorrect.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get financeCodeForgot => 'Code finances oublié ?';
+
+  @override
+  String get financeCodeChooseTitle => 'Votre code finances';
+
+  @override
+  String get financeCodeChooseBody =>
+      'Votre groupe protège les finances par un second code à 4 chiffres, différent de votre PIN. Choisissez-le et confirmez avec votre PIN.';
+
+  @override
+  String get financeCodeYourPin => 'Votre PIN';
+
+  @override
+  String get financeCodeNew => 'Code finances (4 chiffres)';
+
+  @override
+  String get financeCodeConfirm => 'Confirmez le code finances';
+
+  @override
+  String get financeCodeMismatch => 'Les deux codes ne correspondent pas.';
+
+  @override
+  String get financeCodeFourDigits => 'Le PIN et le code ont 4 chiffres.';
+
+  @override
+  String get financeCodeSameAsPin =>
+      'Le code finances doit être différent du PIN.';
+
+  @override
+  String get financeCodeSaved => 'Code finances enregistré.';
+
+  @override
+  String get financeCodeSave => 'Enregistrer le code';
+
+  @override
+  String get financeCodeOffline =>
+      'Hors ligne : ce code n’a encore jamais été vérifié sur ce téléphone.';
+
+  @override
+  String get expensesTitle => 'Demandes de dépense';
+
+  @override
+  String get expTodo => 'À traiter';
+
+  @override
+  String get expMine => 'Mes demandes';
+
+  @override
+  String get expAll => 'Toutes';
+
+  @override
+  String get expNew => 'Nouvelle demande';
+
+  @override
+  String get expNothingTodo => 'Aucune demande ne vous attend.';
+
+  @override
+  String get expNone => 'Aucune demande.';
+
+  @override
+  String get expStatusSubmitted => 'Chez le responsable';
+
+  @override
+  String get expStatusApproved => 'Chez le commissaire';
+
+  @override
+  String get expStatusToPay => 'À payer';
+
+  @override
+  String get expStatusPaid => 'Payée';
+
+  @override
+  String get expStatusRefused => 'Refusée';
+
+  @override
+  String get expStatusCancelled => 'Annulée';
+
+  @override
+  String expReplaces(int id) {
+    return 'Remplace la demande n° $id.';
+  }
+
+  @override
+  String expReplacedBy(int id) {
+    return 'Refaite : demande n° $id.';
+  }
+
+  @override
+  String get expDomain => 'Domaine';
+
+  @override
+  String get expDomainRequired => 'Choisissez le domaine.';
+
+  @override
+  String get expTitleRequired => 'Indiquez l’objet de la dépense.';
+
+  @override
+  String expLeadHint(String role) {
+    return 'Approuvée d’abord par : $role (ou un coordinateur que vous identifiez).';
+  }
+
+  @override
+  String get expNoLeadHint => 'Identifiez le coordinateur qui l’approuvera.';
+
+  @override
+  String get expTitle => 'Objet (ex. Papier pour l’examen)';
+
+  @override
+  String get expAmount => 'Montant demandé';
+
+  @override
+  String get expDescription => 'Détails (facultatif)';
+
+  @override
+  String get expTagCoordinators => 'Identifier un coordinateur';
+
+  @override
+  String get expTagHint =>
+      'Facultatif : un responsable plus haut peut aussi l’approuver.';
+
+  @override
+  String get expSend => 'Envoyer la demande';
+
+  @override
+  String get expSent => 'Demande envoyée.';
+
+  @override
+  String get expDetailTitle => 'Demande de dépense';
+
+  @override
+  String get expThread => 'Échanges';
+
+  @override
+  String get expCancelTitle => 'Annuler la demande ?';
+
+  @override
+  String get expRefuseTitle => 'Refuser la demande ?';
+
+  @override
+  String get expReasonLabel => 'Motif (obligatoire)';
+
+  @override
+  String get expCancelled => 'Demande annulée. Elle reste dans l’historique.';
+
+  @override
+  String get expApproved => 'Demande approuvée et transmise.';
+
+  @override
+  String get expRefused => 'Demande refusée.';
+
+  @override
+  String get expPaid => 'Paiement enregistré, preuve jointe.';
+
+  @override
+  String get expMessageSent => 'Message envoyé.';
+
+  @override
+  String get expApprove => 'Approuver';
+
+  @override
+  String get expRefuse => 'Refuser';
+
+  @override
+  String get expPayAction => 'Payer et joindre la preuve';
+
+  @override
+  String get expCancelAction => 'Annuler la demande';
+
+  @override
+  String get expResubmit => 'Refaire une demande';
+
+  @override
+  String get expAttach => 'Joindre un fichier';
+
+  @override
+  String get expMessageHint => 'Écrire un message…';
+
+  @override
+  String get expSendMessage => 'Envoyer';
+
+  @override
+  String expPaidAmount(String amount) {
+    return 'Payé : $amount';
+  }
+
+  @override
+  String expAskedBy(String name) {
+    return 'demandée par $name';
+  }
+
+  @override
+  String expTagged(String names) {
+    return 'Coordinateurs identifiés : $names';
+  }
+
+  @override
+  String expReason(String reason) {
+    return 'Motif : $reason';
+  }
+
+  @override
+  String get expStepAsked => 'Demande';
+
+  @override
+  String get expStepLead => 'Responsable du domaine';
+
+  @override
+  String get expStepAuditor => 'Commissaire aux comptes';
+
+  @override
+  String get expStepPaid => 'Paiement par le trésorier';
+
+  @override
+  String get expProof => 'Preuve de paiement';
+
+  @override
+  String get expPayTitle => 'Payer la dépense';
+
+  @override
+  String expApprovedAmount(String amount) {
+    return 'Montant approuvé : $amount';
+  }
+
+  @override
+  String get expAmountPaid => 'Montant payé';
+
+  @override
+  String get expAmountMaxHint =>
+      'Au plus le montant approuvé. Pour plus, le demandeur annule et refait sa demande.';
+
+  @override
+  String expAmountMax(String amount) {
+    return 'Le montant payé va de 1 à $amount.';
+  }
+
+  @override
+  String get expProofRequired => 'Joignez la capture de la transaction.';
+
+  @override
+  String get expAddProof => 'Joindre la capture de la transaction';
+
+  @override
+  String get expPayNote => 'Note (ex. Orange Money, réf. …)';
+
+  @override
+  String get expPayCashbook =>
+      'La sortie est inscrite au livre de caisse et compte aussitôt : la demande a été approuvée par le commissaire.';
+
+  @override
+  String get expPayConfirm => 'Enregistrer le paiement';
+
+  @override
+  String get homeExpenses => 'Demandes de dépense';
+
+  @override
+  String get homeExpensesHint => 'Demander un achat, suivre vos demandes';
 }

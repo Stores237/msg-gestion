@@ -4369,6 +4369,492 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}'**
   String skippedMany(int count);
+
+  /// No description provided for @financeCodeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances'**
+  String get financeCodeTitle;
+
+  /// No description provided for @financeCodeSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez votre code finances pour ouvrir les finances.'**
+  String get financeCodeSubtitle;
+
+  /// No description provided for @financeCodeWrong.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Code finances incorrect.} =1{Code finances incorrect. Encore 1 essai.} other{Code finances incorrect. Encore {count} essais.}}'**
+  String financeCodeWrong(int count);
+
+  /// No description provided for @financeCodeForgot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances oublié ?'**
+  String get financeCodeForgot;
+
+  /// No description provided for @financeCodeChooseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre code finances'**
+  String get financeCodeChooseTitle;
+
+  /// No description provided for @financeCodeChooseBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe protège les finances par un second code à 4 chiffres, différent de votre PIN. Choisissez-le et confirmez avec votre PIN.'**
+  String get financeCodeChooseBody;
+
+  /// No description provided for @financeCodeYourPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre PIN'**
+  String get financeCodeYourPin;
+
+  /// No description provided for @financeCodeNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances (4 chiffres)'**
+  String get financeCodeNew;
+
+  /// No description provided for @financeCodeConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Confirmez le code finances'**
+  String get financeCodeConfirm;
+
+  /// No description provided for @financeCodeMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les deux codes ne correspondent pas.'**
+  String get financeCodeMismatch;
+
+  /// No description provided for @financeCodeFourDigits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le PIN et le code ont 4 chiffres.'**
+  String get financeCodeFourDigits;
+
+  /// No description provided for @financeCodeSameAsPin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code finances doit être différent du PIN.'**
+  String get financeCodeSameAsPin;
+
+  /// No description provided for @financeCodeSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances enregistré.'**
+  String get financeCodeSaved;
+
+  /// No description provided for @financeCodeSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le code'**
+  String get financeCodeSave;
+
+  /// No description provided for @financeCodeOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hors ligne : ce code n’a encore jamais été vérifié sur ce téléphone.'**
+  String get financeCodeOffline;
+
+  /// No description provided for @expensesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes de dépense'**
+  String get expensesTitle;
+
+  /// No description provided for @expTodo.
+  ///
+  /// In fr, this message translates to:
+  /// **'À traiter'**
+  String get expTodo;
+
+  /// No description provided for @expMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes demandes'**
+  String get expMine;
+
+  /// No description provided for @expAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes'**
+  String get expAll;
+
+  /// No description provided for @expNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle demande'**
+  String get expNew;
+
+  /// No description provided for @expNothingTodo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande ne vous attend.'**
+  String get expNothingTodo;
+
+  /// No description provided for @expNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande.'**
+  String get expNone;
+
+  /// No description provided for @expStatusSubmitted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chez le responsable'**
+  String get expStatusSubmitted;
+
+  /// No description provided for @expStatusApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chez le commissaire'**
+  String get expStatusApproved;
+
+  /// No description provided for @expStatusToPay.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer'**
+  String get expStatusToPay;
+
+  /// No description provided for @expStatusPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée'**
+  String get expStatusPaid;
+
+  /// No description provided for @expStatusRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get expStatusRefused;
+
+  /// No description provided for @expStatusCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get expStatusCancelled;
+
+  /// No description provided for @expReplaces.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplace la demande n° {id}.'**
+  String expReplaces(int id);
+
+  /// No description provided for @expReplacedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refaite : demande n° {id}.'**
+  String expReplacedBy(int id);
+
+  /// No description provided for @expDomain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Domaine'**
+  String get expDomain;
+
+  /// No description provided for @expDomainRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez le domaine.'**
+  String get expDomainRequired;
+
+  /// No description provided for @expTitleRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez l’objet de la dépense.'**
+  String get expTitleRequired;
+
+  /// No description provided for @expLeadHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Approuvée d’abord par : {role} (ou un coordinateur que vous identifiez).'**
+  String expLeadHint(String role);
+
+  /// No description provided for @expNoLeadHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifiez le coordinateur qui l’approuvera.'**
+  String get expNoLeadHint;
+
+  /// No description provided for @expTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Objet (ex. Papier pour l’examen)'**
+  String get expTitle;
+
+  /// No description provided for @expAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant demandé'**
+  String get expAmount;
+
+  /// No description provided for @expDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détails (facultatif)'**
+  String get expDescription;
+
+  /// No description provided for @expTagCoordinators.
+  ///
+  /// In fr, this message translates to:
+  /// **'Identifier un coordinateur'**
+  String get expTagCoordinators;
+
+  /// No description provided for @expTagHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif : un responsable plus haut peut aussi l’approuver.'**
+  String get expTagHint;
+
+  /// No description provided for @expSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get expSend;
+
+  /// No description provided for @expSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée.'**
+  String get expSent;
+
+  /// No description provided for @expDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande de dépense'**
+  String get expDetailTitle;
+
+  /// No description provided for @expThread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Échanges'**
+  String get expThread;
+
+  /// No description provided for @expCancelTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande ?'**
+  String get expCancelTitle;
+
+  /// No description provided for @expRefuseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser la demande ?'**
+  String get expRefuseTitle;
+
+  /// No description provided for @expReasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (obligatoire)'**
+  String get expReasonLabel;
+
+  /// No description provided for @expCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande annulée. Elle reste dans l’historique.'**
+  String get expCancelled;
+
+  /// No description provided for @expApproved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande approuvée et transmise.'**
+  String get expApproved;
+
+  /// No description provided for @expRefused.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande refusée.'**
+  String get expRefused;
+
+  /// No description provided for @expPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement enregistré, preuve jointe.'**
+  String get expPaid;
+
+  /// No description provided for @expMessageSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message envoyé.'**
+  String get expMessageSent;
+
+  /// No description provided for @expApprove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Approuver'**
+  String get expApprove;
+
+  /// No description provided for @expRefuse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get expRefuse;
+
+  /// No description provided for @expPayAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer et joindre la preuve'**
+  String get expPayAction;
+
+  /// No description provided for @expCancelAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande'**
+  String get expCancelAction;
+
+  /// No description provided for @expResubmit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refaire une demande'**
+  String get expResubmit;
+
+  /// No description provided for @expAttach.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre un fichier'**
+  String get expAttach;
+
+  /// No description provided for @expMessageHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire un message…'**
+  String get expMessageHint;
+
+  /// No description provided for @expSendMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get expSendMessage;
+
+  /// No description provided for @expPaidAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé : {amount}'**
+  String expPaidAmount(String amount);
+
+  /// No description provided for @expAskedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'demandée par {name}'**
+  String expAskedBy(String name);
+
+  /// No description provided for @expTagged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Coordinateurs identifiés : {names}'**
+  String expTagged(String names);
+
+  /// No description provided for @expReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif : {reason}'**
+  String expReason(String reason);
+
+  /// No description provided for @expStepAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande'**
+  String get expStepAsked;
+
+  /// No description provided for @expStepLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Responsable du domaine'**
+  String get expStepLead;
+
+  /// No description provided for @expStepAuditor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commissaire aux comptes'**
+  String get expStepAuditor;
+
+  /// No description provided for @expStepPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement par le trésorier'**
+  String get expStepPaid;
+
+  /// No description provided for @expProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Preuve de paiement'**
+  String get expProof;
+
+  /// No description provided for @expPayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payer la dépense'**
+  String get expPayTitle;
+
+  /// No description provided for @expApprovedAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant approuvé : {amount}'**
+  String expApprovedAmount(String amount);
+
+  /// No description provided for @expAmountPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant payé'**
+  String get expAmountPaid;
+
+  /// No description provided for @expAmountMaxHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Au plus le montant approuvé. Pour plus, le demandeur annule et refait sa demande.'**
+  String get expAmountMaxHint;
+
+  /// No description provided for @expAmountMax.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le montant payé va de 1 à {amount}.'**
+  String expAmountMax(String amount);
+
+  /// No description provided for @expProofRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joignez la capture de la transaction.'**
+  String get expProofRequired;
+
+  /// No description provided for @expAddProof.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre la capture de la transaction'**
+  String get expAddProof;
+
+  /// No description provided for @expPayNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Note (ex. Orange Money, réf. …)'**
+  String get expPayNote;
+
+  /// No description provided for @expPayCashbook.
+  ///
+  /// In fr, this message translates to:
+  /// **'La sortie est inscrite au livre de caisse et compte aussitôt : la demande a été approuvée par le commissaire.'**
+  String get expPayCashbook;
+
+  /// No description provided for @expPayConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer le paiement'**
+  String get expPayConfirm;
+
+  /// No description provided for @homeExpenses.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes de dépense'**
+  String get homeExpenses;
+
+  /// No description provided for @homeExpensesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander un achat, suivre vos demandes'**
+  String get homeExpensesHint;
 }
 
 class _AppLocalizationsDelegate

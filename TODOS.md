@@ -8,6 +8,7 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 31 (2026-10-30):** deploy on Render (migrations accounts 0020, 0021; core 0014; finances 0004, 0005) and install build 31 (includes 30). In the back-office: check Paramètres → Domaines de dépense (names, lead roles) and decide whether to turn on Sécurité des finances → Code finances obligatoire. Tell members about Accueil → Demandes de dépense.
 - [ ] **Owner — build 30 (2026-10-30):** deploy on Render (migration accounts 0019: trésorier and commissaire both get the cash-book and solidarity rights) and install build 30. Tell the finance team: both enter, the other approves; long press to validate several.
 - [ ] **Owner — build 29 (2026-10-30):** deploy on Render (raised sign-in limits, no migration) and install build 29 (includes 27 and 28, which were withdrawn: built without the server address).
 - [ ] **Owner — build 26 (2026-10-30):** deploy on Render (migrations accounts 0018 and finances

@@ -88,6 +88,48 @@ def check_pin_login(user, pin, request=None):
     return PinResult(user, False, attempts_left=left, locked_until=user.pin_locked_until)
 
 
+# --- Finance code ------------------------------------------------------------------
+# (owner, 2026-10-30) A second 4-digit code, separate from the PIN, opens
+# Finances when the group requires it (Settings.finance_code_required). Set
+# and reset with the PIN; 3 misses lock it for the PIN's lockout time.
+
+FINANCE_CODE_MAX_ATTEMPTS = 3
+
+
+def set_finance_code(user, code, request=None):
+    from django.contrib.auth.hashers import make_password
+
+    user.finance_code = make_password(code)
+    user.finance_code_fails = 0
+    user.finance_code_locked_until = None
+    user.save(update_fields=["finance_code", "finance_code_fails", "finance_code_locked_until"])
+    audit.record("Code finances défini", actor=user, obj=user, request=request, sensitive=True)
+
+
+def check_finance_code(user, code, request=None):
+    """PinResult: ok, attempts left, lock. Counted under a row lock."""
+    from django.contrib.auth.hashers import check_password
+
+    now = timezone.now()
+    with transaction.atomic():
+        user = User.objects.select_for_update().get(pk=user.pk)
+        if user.finance_code_locked_until and user.finance_code_locked_until > now:
+            return PinResult(user, False, attempts_left=0, locked_until=user.finance_code_locked_until)
+        if user.finance_code and check_password(code, user.finance_code):
+            user.finance_code_fails, user.finance_code_locked_until = 0, None
+            user.save(update_fields=["finance_code_fails", "finance_code_locked_until"])
+            return PinResult(user, True)
+        user.finance_code_fails += 1
+        left = max(FINANCE_CODE_MAX_ATTEMPTS - user.finance_code_fails, 0)
+        if left == 0:
+            user.finance_code_fails = 0
+            user.finance_code_locked_until = now + timedelta(minutes=settings.PIN_LOCKOUT_MINUTES)
+        user.save(update_fields=["finance_code_fails", "finance_code_locked_until"])
+    audit.record("Code finances incorrect" + (" · bloqué" if left == 0 else ""), actor=user, obj=user, request=request,
+                 refused=True, detail={"essais_restants": left})
+    return PinResult(user, False, attempts_left=left, locked_until=user.finance_code_locked_until)
+
+
 # --- One phone at a time ---------------------------------------------------------
 # (owner, 2026-10-30) An account is used on one phone: signing in on another
 # phone opens a new session there, and the first phone is signed out at its

@@ -1,5 +1,6 @@
 from django.urls import path
 
+from . import expense_views as xv
 from . import views
 
 urlpatterns = [
@@ -24,4 +25,12 @@ urlpatterns = [
     path("statement/pdf/", views.StatementPdfView.as_view(), name="fin-statement-pdf"),
     path("statement/<int:pk>/", views.MemberStatementView.as_view(), name="fin-member-statement"),
     path("statement/<int:pk>/pdf/", views.MemberStatementPdfView.as_view(), name="fin-member-statement-pdf"),
+    path("expense-domains/", xv.DomainListView.as_view(), name="fin-expense-domains"),
+    path("expenses/", xv.RequestListView.as_view(), name="fin-expenses"),
+    path("expenses/<int:pk>/", xv.RequestDetailView.as_view(), name="fin-expense"),
+    path("expenses/<int:pk>/decide/", xv.RequestStepView.as_view(step="decide"), name="fin-expense-decide"),
+    path("expenses/<int:pk>/review/", xv.RequestStepView.as_view(step="review"), name="fin-expense-review"),
+    path("expenses/<int:pk>/cancel/", xv.RequestStepView.as_view(step="cancel"), name="fin-expense-cancel"),
+    path("expenses/<int:pk>/pay/", xv.RequestPayView.as_view(), name="fin-expense-pay"),
+    path("expenses/<int:pk>/messages/", xv.RequestMessageView.as_view(), name="fin-expense-messages"),
 ]

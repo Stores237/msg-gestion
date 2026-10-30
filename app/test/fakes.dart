@@ -8,6 +8,7 @@ import 'package:msg_gestion/data/repositories/planning_repository.dart';
 import 'package:msg_gestion/data/repositories/profile_repository.dart';
 import 'package:msg_gestion/models/announcement.dart';
 import 'package:msg_gestion/models/event.dart';
+import 'package:msg_gestion/models/expense.dart';
 import 'package:msg_gestion/models/finance.dart';
 import 'package:msg_gestion/models/me.dart';
 import 'package:msg_gestion/models/access_request.dart';
@@ -116,6 +117,25 @@ class FakeAuthRepository implements AuthRepository {
       throw ApiException(400, '{"code":"pin_too_simple"}');
     }
     changed.add(newPin);
+  }
+
+  String? financeCode;
+  int financeChecks = 0;
+
+  @override
+  Future<void> setFinanceCode({
+    required String pin,
+    required String code,
+  }) async {
+    if (pin != this.pin) throw const WrongPin(2);
+    if (code == pin) throw ApiException(400, '{"code":"same_as_pin"}');
+    financeCode = code;
+  }
+
+  @override
+  Future<void> checkFinanceCode(String code) async {
+    financeChecks++;
+    if (code != financeCode) throw const WrongFinanceCode(2);
   }
 
   @override
@@ -767,6 +787,156 @@ class FakeFinancesRepository implements FinancesRepository {
     );
     items = [e, ...items];
     return e;
+  }
+
+  // --- Expense requests: a small in-memory flow --------------------------
+  final expenseCalls = <String>[];
+  List<String> expenseActions = const ['cancel'];
+  late List<ExpenseRequest> expenseItems = [_expense(id: 31)];
+
+  ExpenseRequest _expense({
+    required int id,
+    String status = 'submitted',
+    String title = 'Papier pour l’examen',
+    int amount = 5000,
+    int? paid,
+    List<String>? actions,
+    List<ExpenseMessage> messages = const [],
+    int? replaces,
+  }) => ExpenseRequest(
+    id: id,
+    title: title,
+    amount: amount,
+    domainId: 1,
+    domainName: 'Formation',
+    status: status,
+    requesterName: 'Essomba K.',
+    createdAt: DateTime(2026, 10, 30, 9),
+    paidAmount: paid,
+    actions: actions ?? expenseActions,
+    messages: messages,
+    replaces: replaces,
+  );
+
+  ExpenseRequest _put(ExpenseRequest r) {
+    expenseItems = [for (final e in expenseItems) e.id == r.id ? r : e];
+    return r;
+  }
+
+  @override
+  Future<List<ExpenseDomain>> expenseDomains() async => const [
+    ExpenseDomain(id: 1, name: 'Formation', leadRole: 'Formateur'),
+    ExpenseDomain(id: 2, name: 'Matériel'),
+  ];
+
+  @override
+  Future<List<ExpenseRequest>> expenses(String box) async {
+    expenseCalls.add('list:$box');
+    return expenseItems;
+  }
+
+  @override
+  Future<ExpenseRequest> expense(int id) async =>
+      expenseItems.firstWhere((e) => e.id == id);
+
+  @override
+  Future<ExpenseRequest> newExpense({
+    required int domainId,
+    required String title,
+    required int amount,
+    String description = '',
+    List<int> tagged = const [],
+    int? replaces,
+  }) async {
+    expenseCalls.add('new:$title:$amount:${tagged.join(',')}:$replaces');
+    final r = _expense(
+      id: 40 + expenseItems.length,
+      title: title,
+      amount: amount,
+      replaces: replaces,
+    );
+    expenseItems = [r, ...expenseItems];
+    return r;
+  }
+
+  @override
+  Future<ExpenseRequest> expenseStep(
+    int id,
+    String step, {
+    bool approve = false,
+    String note = '',
+  }) async {
+    expenseCalls.add('$step:$id:$approve:$note');
+    final status = step == 'cancel'
+        ? 'cancelled'
+        : !approve
+        ? 'refused'
+        : step == 'decide'
+        ? 'approved'
+        : 'to_pay';
+    return _put(
+      _expense(
+        id: id,
+        status: status,
+        actions: step == 'cancel' ? const ['resubmit'] : const [],
+      ),
+    );
+  }
+
+  @override
+  Future<ExpenseRequest> payExpense(
+    int id, {
+    required int amount,
+    required PickedFile proof,
+    String note = '',
+  }) async {
+    expenseCalls.add('pay:$id:$amount:${proof.name}');
+    return _put(
+      _expense(
+        id: id,
+        status: 'paid',
+        paid: amount,
+        actions: const [],
+        messages: [
+          ExpenseMessage(
+            id: 9,
+            kind: 'proof',
+            body: 'Payée : $amount FCFA.',
+            authorName: 'Moi',
+            fileName: proof.name,
+            contentType: 'image/png',
+            createdAt: DateTime(2026, 10, 30, 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Future<ExpenseRequest> expenseMessage(
+    int id, {
+    String body = '',
+    PickedFile? file,
+  }) async {
+    expenseCalls.add('message:$id:$body');
+    final r = expenseItems.firstWhere((e) => e.id == id);
+    return _put(
+      _expense(
+        id: id,
+        status: r.status,
+        actions: r.actions,
+        messages: [
+          ...r.messages,
+          ExpenseMessage(
+            id: 100 + r.messages.length,
+            kind: 'comment',
+            body: body,
+            authorName: 'Moi',
+            createdAt: DateTime(2026, 10, 30, 10),
+          ),
+        ],
+      ),
+    );
   }
 
   /// As the server says it to someone who entered line [id]: it waits for

@@ -169,3 +169,28 @@ def test_session_ends_when_super_admin_role_is_revoked(logged_in, admin_user):
     RoleAssignment.objects.filter(user=admin_user, role__slug="super-admin").update(revoked_at=timezone.now())
     r = logged_in.get("/bo/utilisateurs/")
     assert r.status_code == 302 and r["Location"].endswith("/bo/connexion/")
+
+
+def test_finance_code_switch_and_expense_domains(logged_in):
+    """Owner, 2026-10-30: each group turns the finance code on, and names its
+    expense domains with the role that approves first."""
+    from apps.core.models import Settings
+    from apps.finances.models import ExpenseDomain
+
+    page = logged_in.get("/bo/parametres/").content.decode()
+    assert "Code finances obligatoire" in page and "Domaines de dépense" in page
+    st = Settings.get()
+    logged_in.post("/bo/parametres/", {"finance_code_form": "1", "finance_code_required": "on"})
+    st.refresh_from_db()
+    assert st.finance_code_required
+    logged_in.post("/bo/parametres/", {"finance_code_form": "1"})
+    st.refresh_from_db()
+    assert not st.finance_code_required
+
+    censeur = Role.objects.get(slug="censeur-general")
+    formation = ExpenseDomain.objects.get(name="Formation")
+    logged_in.post("/bo/parametres/listes/", {f"x{formation.pk}_name": "Formation", f"x{formation.pk}_lead": str(censeur.pk),
+                                               "x_new_name": "Matériel", "x_new_lead": ""})
+    formation.refresh_from_db()
+    assert formation.lead_role == censeur
+    assert ExpenseDomain.objects.get(name="Matériel").lead_role is None

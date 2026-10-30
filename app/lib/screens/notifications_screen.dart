@@ -13,6 +13,7 @@ import 'members/access_requests_screen.dart';
 import 'calendar/event_detail_screen.dart';
 import 'planning/my_duties_view.dart';
 import 'planning/requests_screen.dart';
+import 'expenses/expenses_screen.dart';
 
 /// Notifications (design): grouped by day; the green dot goes when opened.
 class NotificationsScreen extends StatefulWidget {
@@ -60,6 +61,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       );
     } else if (type == 'request' && me != null) {
       page = RequestsScreen(me: me);
+    } else if (type == 'expense') {
+      page = ExpenseDetailScreen(expenseId: n.target['id'] as int);
     } else if (type == 'access_request') {
       page = const AccessRequestsScreen();
     } else if (type == 'announcement') {

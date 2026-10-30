@@ -86,6 +86,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     # signed out at its next request ("ouvert sur un autre appareil").
     app_session = models.CharField(max_length=32, blank=True)
     app_session_at = models.DateTimeField("connecté sur ce téléphone depuis", null=True, blank=True)
+    # Finance code (owner, 2026-10-30): a second 4-digit code, separate from
+    # the PIN, asked to open Finances when the group requires it. Hashed.
+    finance_code = models.CharField(max_length=128, blank=True)
+    finance_code_fails = models.PositiveSmallIntegerField(default=0)
+    finance_code_locked_until = models.DateTimeField(null=True, blank=True)
 
     # Reminder preferences (design: event detail → "Rappels").
     remind_eve = models.BooleanField(default=True, help_text="La veille à 20:00")

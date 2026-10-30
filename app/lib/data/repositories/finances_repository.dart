@@ -1,3 +1,4 @@
+import '../../models/expense.dart';
 import '../../models/finance.dart';
 
 abstract class FinancesRepository {
@@ -46,4 +47,39 @@ abstract class FinancesRepository {
   /// Bilan: every member's dues and payments, or one member's.
   Future<String> statementPdf();
   Future<String> memberStatementPdf(int memberId);
+
+  // --- Expense requests (owner, 2026-10-30) ---
+  Future<List<ExpenseDomain>> expenseDomains();
+
+  /// [box]: todo (waiting for me) | mine | all.
+  Future<List<ExpenseRequest>> expenses(String box);
+  Future<ExpenseRequest> expense(int id);
+  Future<ExpenseRequest> newExpense({
+    required int domainId,
+    required String title,
+    required int amount,
+    String description = '',
+    List<int> tagged = const [],
+    int? replaces,
+  });
+
+  /// [step]: decide | review | cancel ([note] is the reason to refuse or
+  /// cancel).
+  Future<ExpenseRequest> expenseStep(
+    int id,
+    String step, {
+    bool approve = false,
+    String note = '',
+  });
+  Future<ExpenseRequest> payExpense(
+    int id, {
+    required int amount,
+    required PickedFile proof,
+    String note = '',
+  });
+  Future<ExpenseRequest> expenseMessage(
+    int id, {
+    String body = '',
+    PickedFile? file,
+  });
 }

@@ -1,3 +1,4 @@
+import '../../../models/expense.dart';
 import '../../../models/finance.dart';
 import '../../api_client.dart';
 import '../../current_user.dart';
@@ -212,4 +213,96 @@ class HttpFinancesRepository implements FinancesRepository {
       ((await _api.get('/finances/statement/$memberId/pdf/'))
               as Map<String, dynamic>)['url']
           as String;
+
+  @override
+  Future<List<ExpenseDomain>> expenseDomains() async => [
+    for (final d in await _api.get('/finances/expense-domains/') as List)
+      ExpenseDomain.fromJson(d as Map<String, dynamic>),
+  ];
+
+  @override
+  Future<List<ExpenseRequest>> expenses(String box) async => [
+    for (final r in await _api.get('/finances/expenses/?box=$box') as List)
+      ExpenseRequest.fromJson(r as Map<String, dynamic>),
+  ];
+
+  @override
+  Future<ExpenseRequest> expense(int id) async => ExpenseRequest.fromJson(
+    await _api.get('/finances/expenses/$id/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<ExpenseRequest> newExpense({
+    required int domainId,
+    required String title,
+    required int amount,
+    String description = '',
+    List<int> tagged = const [],
+    int? replaces,
+  }) async => ExpenseRequest.fromJson(
+    await _api.post(
+          '/finances/expenses/',
+          body: {
+            'domain': domainId,
+            'title': title,
+            'amount': amount,
+            'description': description,
+            'tagged': tagged,
+            'replaces': ?replaces,
+          },
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<ExpenseRequest> expenseStep(
+    int id,
+    String step, {
+    bool approve = false,
+    String note = '',
+  }) async => ExpenseRequest.fromJson(
+    await _api.post(
+          '/finances/expenses/$id/$step/',
+          body: {'approve': approve, 'note': note},
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<ExpenseRequest> payExpense(
+    int id, {
+    required int amount,
+    required PickedFile proof,
+    String note = '',
+  }) async => ExpenseRequest.fromJson(
+    await _api.postFile(
+          '/finances/expenses/$id/pay/',
+          field: 'file',
+          bytes: proof.bytes,
+          filename: proof.name,
+          fields: {'amount': '$amount', 'note': note},
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<ExpenseRequest> expenseMessage(
+    int id, {
+    String body = '',
+    PickedFile? file,
+  }) async => ExpenseRequest.fromJson(
+    (file == null
+            ? await _api.post(
+                '/finances/expenses/$id/messages/',
+                body: {'body': body},
+              )
+            : await _api.postFile(
+                '/finances/expenses/$id/messages/',
+                field: 'file',
+                bytes: file.bytes,
+                filename: file.name,
+                fields: {'body': body},
+              ))
+        as Map<String, dynamic>,
+  );
 }

@@ -230,6 +230,8 @@ class Settings(models.Model):
     assise_time = models.TimeField(default="15:00")
     vigil_time = models.TimeField(default="22:00")
     reminder_time = models.TimeField(default="20:00")
+    # A second, finance-only code to open Finances (owner, 2026-10-30).
+    finance_code_required = models.BooleanField("code finances obligatoire", default=False)
     duty_template = models.CharField(
         max_length=300,
         default="Bonjour {prénom}, tu es de service {date} à {heure} : {poste} ({côté}). Confirme dans l’app.",

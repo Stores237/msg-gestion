@@ -12,6 +12,7 @@ String describeError(BuildContext context, Object error) {
   final l = AppLocalizations.of(context);
   return switch (error) {
     WrongPin(:final attemptsLeft) => l.errorWrongPin(attemptsLeft),
+    WrongFinanceCode(:final attemptsLeft) => l.financeCodeWrong(attemptsLeft),
     AccountLocked(:final minutes) => l.errorLocked(minutes),
     UnknownMember() => l.errorUnknownMember,
     NoPinSet() => l.errorNoPin,
@@ -26,6 +27,7 @@ String describeError(BuildContext context, Object error) {
     FileUnavailable() => l.networkError,
     ApiException(statusCode: 403) => l.errorForbidden,
     ApiException(code: 'pin_too_simple') => l.pinTooSimple,
+    ApiException(code: 'same_as_pin') => l.financeCodeSameAsPin,
     ApiException(code: 'bad_code') => l.badCode,
     ApiException(code: 'sms_unavailable') => l.smsUnavailable,
     ApiException(code: 'storage_unavailable') => l.storageUnavailable,

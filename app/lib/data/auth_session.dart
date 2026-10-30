@@ -25,6 +25,7 @@ class AuthSession extends ChangeNotifier {
   static const _pinKey = 'msg_pin_check';
   static const _failsKey = 'msg_unlock_fails';
   static const _bioKey = 'msg_biometric';
+  static const _financeKey = 'msg_finance_check';
 
   /// Wrong PINs on the lock screen before the session is closed.
   static const maxUnlockFails = 5;
@@ -64,6 +65,7 @@ class AuthSession extends ChangeNotifier {
     await _storage.delete(_pinKey);
     await _storage.delete(_failsKey);
     await _storage.delete(_bioKey);
+    await _storage.delete(_financeKey);
     notifyListeners();
   }
 
@@ -106,6 +108,21 @@ class AuthSession extends ChangeNotifier {
     }
     await _storage.write(_failsKey, '$fails');
     return maxUnlockFails - fails;
+  }
+
+  /// The finance code, kept like the PIN (salted, stretched hash) once the
+  /// server has accepted it, so Finances opens offline too.
+  Future<void> rememberFinanceCode(String code) async {
+    final r = Random.secure();
+    final salt = base64Encode(List.generate(16, (_) => r.nextInt(256)));
+    await _storage.write(_financeKey, '$salt\$${_hash(salt, code)}');
+  }
+
+  /// Null when no code was ever checked on this phone.
+  Future<bool?> checkFinanceCodeLocally(String code) async {
+    final stored = (await _storage.read(_financeKey))?.split(r'$');
+    if (stored == null || stored.length != 2) return null;
+    return _hash(stored[0], code) == stored[1];
   }
 
   Future<bool> get biometricEnabled async =>

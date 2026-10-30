@@ -47,6 +47,13 @@ def create_group(*, name, place="", motto="", welcome_message="", by=None, reque
         for d in DressCode.all_groups.filter(group=template, is_archived=False):
             DressCode.all_groups.create(group=group, slug=d.slug, name=d.name, description=d.description,
                                         sort_order=d.sort_order)
+        from apps.finances.models import ExpenseDomain
+
+        # Expense domains keep their lead role, by slug, in the new group.
+        new_roles = {r.slug: r for r in Role.all_groups.filter(group=group)}
+        for x in ExpenseDomain.all_groups.filter(group=template, is_archived=False).select_related("lead_role"):
+            ExpenseDomain.all_groups.create(group=group, name=x.name, sort_order=x.sort_order,
+                                            lead_role=new_roles.get(x.lead_role.slug) if x.lead_role else None)
     audit.record("Groupe créé", actor=by, obj=group, request=request, sensitive=True, platform=True,
                  detail={"nom": group.name, "roles": roles})
     return group

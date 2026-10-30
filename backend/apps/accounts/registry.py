@@ -33,6 +33,9 @@ RESOURCES = {
     "finances.cashbook": ("finances", "Livre de caisse", ACTIONS, False),
     "finances.solidarity": ("finances", "Contributions de solidarité", ACTIONS, False),
     "finances.report": ("finances", "Rapport trimestriel", [VIEW, VALIDATE, EXPORT], False),
+    # Expense requests (owner, 2026-10-30): view = see all of the group's,
+    # validate = the commissaire's approval, change = pay (the trésorier).
+    "finances.expenses": ("finances", "Demandes de dépense", [VIEW, VALIDATE, CHANGE], False),
     "calendar.events": ("calendar", "Événements", [VIEW, CREATE, CHANGE, DELETE, EXPORT], False),
     "calendar.attendance": ("calendar", "Appel des présences", [VIEW, CHANGE, EXPORT], False),
     "calendar.planning": ("calendar", "Planning des services", ACTIONS, False),
