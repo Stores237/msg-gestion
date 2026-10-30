@@ -222,16 +222,15 @@ def test_future_role_not_active_yet():
 # --- Separation of duties ---------------------------------------------------------------
 
 
-def test_finances_two_hands_even_if_db_says_otherwise():
-    """The commissaire enters, the trésorier validates — whatever the matrix
-    says (owner, 2026-10-23)."""
+def test_finances_mutual_both_enter_and_approve():
+    """Owner, 2026-10-30: the trésorier and the commissaire both enter and
+    both approve (each line needs the one who didn't enter it, see
+    apps.finances). The quarterly report stays with the trésorier."""
     tre, cac = UserFactory(), UserFactory()
     give_role(tre, "tresorier")
     give_role(cac, "commissaire-aux-comptes")
-    for slug, act in (("tresorier", "create"), ("tresorier", "delete"), ("commissaire-aux-comptes", "validate")):
-        RolePermission.objects.get_or_create(role=Role.objects.get(slug=slug), resource="finances.cashbook", action=act)
-    assert {a for a in registry.ACTIONS if tre.can("finances.cashbook", a)} == {"view", "validate", "export"}
-    assert {a for a in registry.ACTIONS if cac.can("finances.cashbook", a)} == {"view", "create", "change", "delete", "export"}
+    for u in (tre, cac):
+        assert {a for a in registry.ACTIONS if u.can("finances.cashbook", a)} == set(registry.ACTIONS)
     assert tre.can("finances.report", "validate") and not cac.can("finances.report", "validate")
 
 
@@ -280,7 +279,7 @@ def test_treasurer_cannot_also_be_auditor():
     with pytest.raises(RuleViolation, match="cumulé"):
         assign_role(user, Role.objects.get(slug="commissaire-aux-comptes"), reason="AG", by=admin)
     assert AuditLog.objects.filter(action="Refus · séparation des tâches", refused=True).exists()
-    assert not user.can("finances.cashbook", "create")
+    assert "commissaire-aux-comptes" not in user.role_slugs()
 
 
 def test_assign_role_requires_reason_and_logs():
@@ -355,7 +354,7 @@ def test_set_role_permissions_refuses_locked_and_inapplicable():
     admin = UserFactory()
     role = Role.objects.get(slug="tresorier")
     with pytest.raises(RuleViolation, match="séparation"):
-        set_role_permissions(role, {("finances.cashbook", "create"): True}, by=admin, reason="x")
+        set_role_permissions(role, {("calendar.planning", "create"): True}, by=admin, reason="x")
     with pytest.raises(RuleViolation, match="sans objet"):
         set_role_permissions(role, {("announcements.posts", "validate"): True}, by=admin, reason="x")
 

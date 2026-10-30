@@ -88,7 +88,11 @@ class BureauHomeView(APIView):
         if u.can("members.profile", "view"):
             out["members_active"] = User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True).count()
         if u.can("finances.cashbook", "view"):
-            out["to_validate"] = Entry.objects.filter(status=Entry.Status.PENDING).count()
+            # Lines waiting for this person's agreement (owner, 2026-10-30):
+            # not the ones they entered or last changed.
+            pending = Entry.objects.filter(status=Entry.Status.PENDING)
+            out["to_validate"] = (pending.exclude(edited_by__isnull=True, created_by=u).exclude(edited_by=u).count()
+                                  if u.can("finances.cashbook", "validate") else 0)
             out["to_confirm"] = Entry.objects.filter(status=Entry.Status.TO_CONFIRM).count()
         if u.can("finances.solidarity", "view"):
             items = []

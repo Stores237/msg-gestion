@@ -56,14 +56,48 @@ def check_line(direction, category, label, member):
             raise FinanceRule("description_required", "Décrivez l’opération (catégorie « Autre »).")
 
 
+def agreed_by_id(entry):
+    """Who has agreed to the line as it stands: whoever last changed it,
+    else whoever entered it. The other one approves (owner, 2026-10-30)."""
+    return entry.edited_by_id or entry.created_by_id
+
+
+def can_approve(entry, user):
+    return (entry.status == Entry.Status.PENDING and user.can("finances.cashbook", "validate")
+            and agreed_by_id(entry) != user.pk)
+
+
+def approvers(exclude=None):
+    """The group's people who approve cash-book lines (trésorier,
+    commissaire, or any role given that right)."""
+    from apps.accounts.models import RoleAssignment
+
+    ids = RoleAssignment.objects.active().filter(
+        role__permissions__resource="finances.cashbook", role__permissions__action="validate").values("user")
+    qs = User.objects.members().filter(pk__in=ids, is_active=True)
+    if exclude is not None:
+        qs = qs.exclude(pk=exclude.pk)
+    return list(qs)
+
+
+def tell_approvers(entries, *, by):
+    """One notice for what was just entered: the other side approves it."""
+    if not entries:
+        return
+    first = entries[0]
+    body = (f"{first.label} · {first.amount} FCFA" if len(entries) == 1
+            else f"{len(entries)} opérations · {sum(e.amount for e in entries)} FCFA")
+    notify(approvers(exclude=by), "payment", "Opération à approuver", f"{body}, saisie par {by.short_name}.",
+           {"type": "cashbook"})
+
+
 def edit_entry(entry, changes, *, by, request=None):
-    """The trésorier corrects a line before validating it (owner, 2026-10-30).
-    The line is marked "Modifié", every change is journaled, and the
-    commissaire who entered it will finalise it after validation."""
+    """The trésorier or the commissaire corrects a line before it counts
+    (owner, 2026-10-30). The line is marked "Modifié", every change is
+    journaled; the change is its author's agreement, so the other one now
+    approves it."""
     if entry.status != Entry.Status.PENDING:
         raise FinanceRule("not_editable", "Seule une opération à valider peut être modifiée.")
-    if entry.created_by_id == by.pk:
-        raise FinanceRule("own_entry", "On ne peut pas modifier puis valider sa propre saisie.")
     before = {f: getattr(entry, f) for f in EDITABLE}
     linked = entry.due_id or entry.collection_id
     if linked and any(f in changes and changes[f] != before[f] for f in ("direction", "member", "category")):
@@ -85,8 +119,9 @@ def edit_entry(entry, changes, *, by, request=None):
     entry.save()
     audit.record("Opération modifiée avant validation", actor=by, obj=entry, request=request, sensitive=True,
                  detail={f: {"avant": a, "apres": b} for f, (a, b) in diff.items()})
-    notify([entry.created_by], "payment", "Opération modifiée par le trésorier",
-           f"{entry.label} · {entry.amount} FCFA. Vous la finaliserez après sa validation.", {"type": "cashbook"})
+    others = [entry.created_by] if entry.created_by_id != by.pk else approvers(exclude=by)
+    notify(others, "payment", "Opération modifiée · à approuver",
+           f"{entry.label} · {entry.amount} FCFA, modifiée par {by.short_name}.", {"type": "cashbook"})
     return entry
 
 
@@ -114,26 +149,38 @@ def record_entries(members, *, by, request=None, **fields):
 
 
 def validate_entry(entry, *, by, request=None):
-    """The trésorier's validation. An edited line then waits for the
-    commissaire (À finaliser); an unchanged one is final."""
+    """The other one's agreement (owner, 2026-10-30): whoever did not enter
+    or last change the line approves it, and then it counts."""
     if entry.status != Entry.Status.PENDING:
         raise FinanceRule("already_validated", "Cette opération est déjà validée.")
-    if entry.created_by_id == by.pk:
-        # Separation of duties at the level of the line: nobody validates
-        # what they entered, whatever their roles.
+    if agreed_by_id(entry) == by.pk:
+        # Separation of duties at the level of the line: nobody approves
+        # what they entered or last changed, whatever their roles.
         audit.record("Refus · validation de sa propre saisie", actor=by, obj=entry, request=request, refused=True)
-        raise FinanceRule("own_entry", "On ne peut pas valider sa propre saisie.")
-    entry.status = Entry.Status.TO_CONFIRM if entry.edited_at else Entry.Status.VALIDATED
+        raise FinanceRule("own_entry", "Cette opération attend l’accord de l’autre responsable.")
+    entry.status = Entry.Status.VALIDATED
     entry.validated_by = by
     entry.validated_at = timezone.now()
     entry.save(update_fields=["status", "validated_by", "validated_at"])
-    audit.record("Opération validée" + (" · à finaliser" if entry.edited_at else ""), actor=by, obj=entry, request=request,
-                 detail={"montant": entry.amount})
-    if entry.status == Entry.Status.TO_CONFIRM:
-        notify([entry.created_by], "payment", "Opération à finaliser",
-               f"{entry.label} · {entry.amount} FCFA, modifiée et validée par {by.short_name}.", {"type": "cashbook"})
-    else:
-        _tell_member(entry)
+    audit.record("Opération validée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
+    notify([u for u in {entry.created_by, entry.edited_by} if u and u.pk != by.pk], "payment", "Opération approuvée",
+           f"{entry.label} · {entry.amount} FCFA, approuvée par {by.short_name}.", {"type": "cashbook"})
+    _tell_member(entry)
+
+
+def validate_entries(ids, *, by, request=None):
+    """Several at once (owner, 2026-10-30: long press, select, validate).
+    Each line follows the same rule; those that can't be approved by this
+    person are left as they are and listed with the reason."""
+    done, skipped = [], []
+    for entry in Entry.objects.filter(pk__in=ids).select_related("created_by", "edited_by", "member").order_by("pk"):
+        # No transaction around each: a refusal's audit row must stay.
+        try:
+            validate_entry(entry, by=by, request=request)
+            done.append(entry.pk)
+        except FinanceRule as e:
+            skipped.append({"id": entry.pk, "code": e.code, "detail": str(e)})
+    return done, skipped
 
 
 def _tell_member(entry):

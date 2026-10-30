@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("summary/", views.SummaryView.as_view(), name="fin-summary"),
     path("entries/", views.EntryListView.as_view(), name="fin-entries"),
+    path("entries/validate/", views.EntryValidateManyView.as_view(), name="fin-entries-validate"),
     path("entries/<int:pk>/", views.EntryDetailView.as_view(), name="fin-entry"),
     path("entries/<int:pk>/validate/", views.EntryValidateView.as_view(), name="fin-entry-validate"),
     path("entries/<int:pk>/confirm/", views.EntryConfirmView.as_view(), name="fin-entry-confirm"),

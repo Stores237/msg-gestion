@@ -836,7 +836,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get amountRequired => 'Indiquez un montant.';
 
   @override
-  String get willBeValidated => 'Sera validée par le commissaire aux comptes.';
+  String get willBeValidated =>
+      'L’autre responsable des finances (trésorier ou commissaire aux comptes) l’approuvera ; elle compte ensuite.';
 
   @override
   String enteredBy(String name, String when) {
@@ -1468,7 +1469,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get awaitingAuditor => 'En attente du commissaire aux comptes';
+  String get awaitingAuditor => 'En attente de votre accord';
 
   @override
   String unfilledSlots(int n, String title) {
@@ -2478,7 +2479,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get entryEdited =>
-      'Opération modifiée. Le commissaire la finalisera après votre validation.';
+      'Opération modifiée. L’autre responsable l’approuvera.';
 
   @override
   String get editedBadge => 'Modifié';
@@ -2516,7 +2517,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get validateEditedNote =>
-      'Modifiée : après votre validation, le commissaire qui l’a saisie la finalisera.';
+      'Elle a été modifiée : en la validant, vous approuvez la version corrigée.';
 
   @override
   String get linkedEntryNote =>
@@ -2558,6 +2559,71 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count opérations',
       one: '1 opération',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get awaitingOtherBadge => 'En attente de l’autre';
+
+  @override
+  String get longPressHint =>
+      'Appui long sur une opération pour en valider plusieurs.';
+
+  @override
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sélectionnées',
+      one: '1 sélectionnée',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => 'Tout sélectionner';
+
+  @override
+  String validateSelected(int count) {
+    return 'Valider ($count)';
+  }
+
+  @override
+  String validateManyTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Valider $count opérations ?',
+      one: 'Valider 1 opération ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String validateManyBody(String total) {
+    return 'Total : $total. Votre nom et l’heure seront enregistrés sur chacune ; elles ne pourront plus être modifiées.';
+  }
+
+  @override
+  String validatedMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations validées.',
+      one: '1 opération validée.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skippedMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count n’ont pas été validées (elles attendent l’accord de l’autre).',
+      one: '1 n’a pas été validée (elle attend l’accord de l’autre).',
     );
     return '$_temp0';
   }

@@ -21,6 +21,9 @@ class FinanceEntry {
     this.confirmedByName,
     this.linked = false,
     this.local = false,
+    this.canApprove = false,
+    this.canEdit = false,
+    this.awaitingOther = false,
   });
 
   final int id;
@@ -55,6 +58,14 @@ class FinanceEntry {
   /// Entered offline and not yet on the server (design: "Pas encore envoyé").
   final bool local;
 
+  /// For the viewer, from the server (owner, 2026-10-30: the trésorier and
+  /// the commissaire agree on each line): I may approve it (I neither
+  /// entered nor last changed it), I may correct it, or it waits for the
+  /// other one's agreement.
+  final bool canApprove;
+  final bool canEdit;
+  final bool awaitingOther;
+
   bool get isIn => direction == 'in';
   bool get pending => status == 'pending';
   bool get toConfirm => status == 'to_confirm';
@@ -80,6 +91,9 @@ class FinanceEntry {
     editedByName: j['edited_by_name'] as String?,
     confirmedByName: j['confirmed_by_name'] as String?,
     linked: j['due'] != null || j['collection'] != null,
+    canApprove: j['can_approve'] == true,
+    canEdit: j['can_edit'] == true,
+    awaitingOther: j['awaiting_other'] == true,
   );
 }
 

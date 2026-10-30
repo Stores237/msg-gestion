@@ -35,14 +35,41 @@ class EntrySerializer(serializers.ModelSerializer):
     validated_by_name = serializers.CharField(source="validated_by.short_name", default=None, read_only=True)
     edited_by_name = serializers.CharField(source="edited_by.short_name", default=None, read_only=True)
     confirmed_by_name = serializers.CharField(source="confirmed_by.short_name", default=None, read_only=True)
+    # For the viewer (owner, 2026-10-30): may I approve it, may I correct
+    # it, or does it wait for the other one?
+    can_approve = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    awaiting_other = serializers.SerializerMethodField()
 
     class Meta:
         model = Entry
         fields = ["id", "direction", "amount", "category", "label", "member", "member_name", "date", "status", "client_uuid",
                   "created_by_name", "created_at", "validated_by_name", "validated_at", "collection", "due",
-                  "edited_by_name", "edited_at", "confirmed_by_name", "confirmed_at"]
+                  "edited_by_name", "edited_at", "confirmed_by_name", "confirmed_at",
+                  "can_approve", "can_edit", "awaiting_other"]
         read_only_fields = ["status", "created_at", "validated_at", "collection", "due", "edited_at", "confirmed_at"]
         extra_kwargs = {"client_uuid": {"required": False, "allow_null": True, "validators": []}}
+
+
+    def _viewer(self):
+        """(user, may approve at all), worked out once per response."""
+        if "_viewer" not in self.context:
+            u = getattr(self.context.get("request"), "user", None)
+            ok = bool(u and u.is_authenticated)
+            self.context["_viewer"] = (u if ok else None, ok and u.can("finances.cashbook", "validate"))
+        return self.context["_viewer"]
+
+    def get_can_approve(self, e) -> bool:
+        u, approves = self._viewer()
+        return approves and e.status == Entry.Status.PENDING and services.agreed_by_id(e) != u.pk
+
+    def get_can_edit(self, e) -> bool:
+        _, approves = self._viewer()
+        return approves and e.status == Entry.Status.PENDING
+
+    def get_awaiting_other(self, e) -> bool:
+        u, _ = self._viewer()
+        return bool(u) and e.status == Entry.Status.PENDING and services.agreed_by_id(e) == u.pk
 
 
 class NewEntrySerializer(EntrySerializer):
@@ -63,11 +90,11 @@ class EntryListView(APIView):
 
     @extend_schema(responses=EntrySerializer(many=True))
     def get(self, request):
-        qs = Entry.objects.select_related("member", "created_by", "validated_by")
+        qs = Entry.objects.select_related("member", "created_by", "validated_by", "edited_by", "confirmed_by")
         st = request.query_params.get("status")
         if st in Entry.Status.values:
             qs = qs.filter(status=st)
-        return Response(EntrySerializer(qs[:200], many=True).data)
+        return Response(EntrySerializer(qs[:200], many=True, context={"request": request}).data)
 
     @extend_schema(request=NewEntrySerializer, responses=EntrySerializer)
     def post(self, request):
@@ -84,9 +111,12 @@ class EntryListView(APIView):
             return _rule_error(e)
         if not members:
             entry, created = services.record_entry(by=request.user, request=request, **data)
-            return Response(EntrySerializer(entry).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            if created:
+                services.tell_approvers([entry], by=request.user)
+            return Response(EntrySerializer(entry, context={"request": request}).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
         entries = services.record_entries(members, by=request.user, request=request, **data)
-        return Response({"entries": EntrySerializer(entries, many=True).data, "count": len(entries)},
+        services.tell_approvers(entries, by=request.user)
+        return Response({"entries": EntrySerializer(entries, many=True, context={"request": request}).data, "count": len(entries)},
                         status=status.HTTP_201_CREATED)
 
 
@@ -109,12 +139,19 @@ class EntryDetailView(APIView):
             services.edit_entry(entry, changes, by=request.user, request=request)
         except services.FinanceRule as e:
             return _rule_error(e)
-        return Response(EntrySerializer(entry).data)
+        return Response(EntrySerializer(entry, context={"request": request}).data)
 
     def delete(self, request, pk):
         entry = get_object_or_404(Entry, pk=pk)
         if entry.status == Entry.Status.VALIDATED:
             return Response({"detail": "Une opération validée ne peut plus être modifiée.", "code": "validated_locked"}, status=400)
+        if entry.created_by_id != request.user.pk and not request.user.is_super_admin:
+            # Owner, 2026-10-30: both enter, so each removes only their own
+            # line; the other one corrects it instead (audited).
+            audit.record("Refus · suppression de la saisie d’un autre", actor=request.user, obj=entry, request=request,
+                         refused=True)
+            return Response({"detail": "Seul celui qui a saisi l’opération peut la supprimer ; corrigez-la plutôt.",
+                             "code": "not_your_entry"}, status=403)
         audit.record("Opération supprimée", actor=request.user, obj=entry, request=request, detail={"montant": entry.amount})
         entry.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -132,7 +169,22 @@ class EntryValidateView(APIView):
             services.validate_entry(entry, by=request.user, request=request)
         except services.FinanceRule as e:
             return _rule_error(e)
-        return Response(EntrySerializer(entry).data)
+        return Response(EntrySerializer(entry, context={"request": request}).data)
+
+
+class EntryValidateManyView(APIView):
+    """POST {"ids": [...]}: approve several lines at once (long press in the
+    app). Each follows the per-line rule; the others come back in
+    `skipped` with the reason."""
+
+    permission_classes = [require("finances.cashbook", "validate")]
+
+    def post(self, request):
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids or len(ids) > 500 or not all(isinstance(i, int) for i in ids):
+            return Response({"detail": "Choisissez les opérations à valider.", "code": "ids_required"}, status=400)
+        done, skipped = services.validate_entries(ids, by=request.user, request=request)
+        return Response({"validated": done, "skipped": skipped})
 
 
 class EntryConfirmView(APIView):
@@ -150,7 +202,7 @@ class EntryConfirmView(APIView):
                 services.send_back(entry, by=request.user, reason=request.data.get("reason", ""), request=request)
         except services.FinanceRule as e:
             return _rule_error(e)
-        return Response(EntrySerializer(entry).data)
+        return Response(EntrySerializer(entry, context={"request": request}).data)
 
 
 class SummaryView(APIView):
@@ -301,7 +353,7 @@ class DuePayView(APIView):
         entry, _ = services.record_entry(by=request.user, request=request, direction=Entry.Direction.IN, amount=amount, category=category,
                                          label=due.label, member=due.member, due=due, collection=due.collection,
                                          date=timezone.localdate(), client_uuid=request.data.get("client_uuid"))
-        return Response(EntrySerializer(entry).data, status=status.HTTP_201_CREATED)
+        return Response(EntrySerializer(entry, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
 class MineView(APIView):

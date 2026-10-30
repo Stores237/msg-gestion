@@ -119,9 +119,11 @@ login limit; fix `CLIENT_IP_HEADER` on Render.
 
 Defined in `apps/accounts/registry.py`:
 
-- Finances take two hands: the commissaire aux comptes enters (never validates); the trésorier,
-  who holds the money, validates (never enters, changes or deletes). Nobody validates a line they
-  entered.
+- Finances take two hands, mutually (owner, 2026-10-30): the trésorier and the commissaire aux
+  comptes both enter and both approve, and a line counts only once someone other than whoever
+  entered it or last changed it approves it (`apps.finances.services.validate_entry`, also for the
+  bulk `POST /api/finances/entries/validate/`; refusals audited). A line is deleted only by who
+  entered it. Before 2026-10-30 the roles were split (commissaire enters, trésorier validates).
 - One person can't be both trésorier and commissaire aux comptes.
 - Back-office permissions belong to platform roles only: the super admin and the back-office
   staff (support, IT helpdesk, integration ops; agent and responsable levels). Staff roles can

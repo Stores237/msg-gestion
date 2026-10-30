@@ -1115,3 +1115,32 @@ finish if it isn't inside the APK; RELEASING.md now uses it. The two broken APKs
 from the download folder.
 
 - How to verify: install build 29 over 27/28 and sign in; the login works on mobile data and Wi-Fi.
+
+## 51. Finances: the trésorier and the commissaire agree on each operation; validate several at once
+
+Owner, 2026-10-30: "select multiple operations and validate them at once (long press); it's only
+the trésorier who validates whereas it has to be mutual work between the trésorier and the
+auditor: they align on each operation before recording it". Chosen with the owner: either one
+enters, the other approves. The trésorier collects and keeps the money, so he records what he
+receives and the commissaire audits it; when the commissaire records one, the trésorier's approval
+confirms he holds the money.
+
+- **Both enter, the other approves.** Both roles now have the cash-book and solidarity rights
+  (migration accounts 0019; `registry.LOCKED` no longer splits them; one person still can't hold
+  both). A line counts only when someone other than who entered it, or last changed it, approves
+  it. Entering notifies the other side ("Opération à approuver"; one notice for several members).
+  Approving notifies who entered/changed it ("Opération approuvée") and the member.
+- **Corrections**: either one can correct a line not yet counted; the correction is its author's
+  agreement, so the other one approves it ("Opération modifiée · à approuver"). The "À finaliser"
+  step is no longer created; lines already in it keep Finaliser / Renvoyer.
+- **On the line**: the other one sees Modifier and Valider; its author sees "En attente de l'autre"
+  and Modifier. Accueil "N opérations à valider" counts only lines waiting for you. A line is
+  deleted only by who entered it (the other corrects it instead).
+- **Several at once**: long press a line to pick it (check circles), tap others, or "Tout
+  sélectionner" (every line you may approve); "Valider (N)" asks once with the total, then reports
+  how many were validated and how many were left (e.g. your own). Server:
+  `POST /api/finances/entries/validate/ {"ids": [...]}` → `{validated, skipped}`, each line under
+  the same rule, refusals audited.
+- How to verify: deploy, then as the trésorier enter an Entrée → it shows "En attente de l'autre";
+  as the commissaire it shows Valider. Enter three as the commissaire; as the trésorier long press
+  one, Tout sélectionner, Valider (3).

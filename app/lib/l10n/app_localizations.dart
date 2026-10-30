@@ -1547,7 +1547,7 @@ abstract class AppLocalizations {
   /// No description provided for @willBeValidated.
   ///
   /// In fr, this message translates to:
-  /// **'Sera validée par le commissaire aux comptes.'**
+  /// **'L’autre responsable des finances (trésorier ou commissaire aux comptes) l’approuvera ; elle compte ensuite.'**
   String get willBeValidated;
 
   /// No description provided for @enteredBy.
@@ -2525,7 +2525,7 @@ abstract class AppLocalizations {
   /// No description provided for @awaitingAuditor.
   ///
   /// In fr, this message translates to:
-  /// **'En attente du commissaire aux comptes'**
+  /// **'En attente de votre accord'**
   String get awaitingAuditor;
 
   /// No description provided for @unfilledSlots.
@@ -4193,7 +4193,7 @@ abstract class AppLocalizations {
   /// No description provided for @entryEdited.
   ///
   /// In fr, this message translates to:
-  /// **'Opération modifiée. Le commissaire la finalisera après votre validation.'**
+  /// **'Opération modifiée. L’autre responsable l’approuvera.'**
   String get entryEdited;
 
   /// No description provided for @editedBadge.
@@ -4259,7 +4259,7 @@ abstract class AppLocalizations {
   /// No description provided for @validateEditedNote.
   ///
   /// In fr, this message translates to:
-  /// **'Modifiée : après votre validation, le commissaire qui l’a saisie la finalisera.'**
+  /// **'Elle a été modifiée : en la validant, vous approuvez la version corrigée.'**
   String get validateEditedNote;
 
   /// No description provided for @linkedEntryNote.
@@ -4315,6 +4315,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{1 opération} other{{count} opérations}}'**
   String entriesCount(int count);
+
+  /// No description provided for @awaitingOtherBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente de l’autre'**
+  String get awaitingOtherBadge;
+
+  /// No description provided for @longPressHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appui long sur une opération pour en valider plusieurs.'**
+  String get longPressHint;
+
+  /// No description provided for @selectedCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 sélectionnée} other{{count} sélectionnées}}'**
+  String selectedCount(int count);
+
+  /// No description provided for @selectAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout sélectionner'**
+  String get selectAll;
+
+  /// No description provided for @validateSelected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valider ({count})'**
+  String validateSelected(int count);
+
+  /// No description provided for @validateManyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Valider 1 opération ?} other{Valider {count} opérations ?}}'**
+  String validateManyTitle(int count);
+
+  /// No description provided for @validateManyBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Total : {total}. Votre nom et l’heure seront enregistrés sur chacune ; elles ne pourront plus être modifiées.'**
+  String validateManyBody(String total);
+
+  /// No description provided for @validatedMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 opération validée.} other{{count} opérations validées.}}'**
+  String validatedMany(int count);
+
+  /// No description provided for @skippedMany.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}'**
+  String skippedMany(int count);
 }
 
 class _AppLocalizationsDelegate

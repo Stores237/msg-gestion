@@ -474,7 +474,7 @@
   "chooseMember": "Choisir un membre",
   "description": "Libellé",
   "amountRequired": "Indiquez un montant.",
-  "willBeValidated": "Sera validée par le commissaire aux comptes.",
+  "willBeValidated": "L’autre responsable des finances (trésorier ou commissaire aux comptes) l’approuvera ; elle compte ensuite.",
   "enteredBy": "Saisi par {name} · {when}",
   "@enteredBy": {
     "placeholders": {
@@ -955,7 +955,7 @@
       }
     }
   },
-  "awaitingAuditor": "En attente du commissaire aux comptes",
+  "awaitingAuditor": "En attente de votre accord",
   "unfilledSlots": "{n, plural, =1{1 poste non pourvu} other{{n} postes non pourvus}} · {title}",
   "@unfilledSlots": {
     "placeholders": {
@@ -1581,7 +1581,7 @@
   "otherDescription": "Description (obligatoire)",
   "descriptionRequired": "Décrivez l’opération.",
   "editEntryTitle": "Modifier l’opération",
-  "entryEdited": "Opération modifiée. Le commissaire la finalisera après votre validation.",
+  "entryEdited": "Opération modifiée. L’autre responsable l’approuvera.",
   "editedBadge": "Modifié",
   "editedBy": "modifié par {name}",
   "@editedBy": {
@@ -1606,7 +1606,7 @@
   "sendBackReason": "Pourquoi la renvoyer au trésorier ?",
   "entryFinalised": "Opération finalisée.",
   "entrySentBack": "Opération renvoyée au trésorier.",
-  "validateEditedNote": "Modifiée : après votre validation, le commissaire qui l’a saisie la finalisera.",
+  "validateEditedNote": "Elle a été modifiée : en la validant, vous approuvez la version corrigée.",
   "linkedEntryNote": "Paiement d’une cotisation ou d’une amende : le membre et la catégorie ne changent pas.",
   "entriesToConfirm": "{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}",
   "@entriesToConfirm": {
@@ -1627,6 +1627,57 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "awaitingOtherBadge": "En attente de l’autre",
+  "longPressHint": "Appui long sur une opération pour en valider plusieurs.",
+  "selectedCount": "{count, plural, =1{1 sélectionnée} other{{count} sélectionnées}}",
+  "selectAll": "Tout sélectionner",
+  "validateSelected": "Valider ({count})",
+  "validateManyTitle": "{count, plural, =1{Valider 1 opération ?} other{Valider {count} opérations ?}}",
+  "validateManyBody": "Total : {total}. Votre nom et l’heure seront enregistrés sur chacune ; elles ne pourront plus être modifiées.",
+  "validatedMany": "{count, plural, =1{1 opération validée.} other{{count} opérations validées.}}",
+  "skippedMany": "{count, plural, =1{1 n’a pas été validée (elle attend l’accord de l’autre).} other{{count} n’ont pas été validées (elles attendent l’accord de l’autre).}}",
+  "@selectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@validateManyTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@validatedMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@skippedMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@validateSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@validateManyBody": {
+    "placeholders": {
+      "total": {
+        "type": "String"
       }
     }
   }

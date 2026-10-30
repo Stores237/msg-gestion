@@ -832,7 +832,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amountRequired => 'Enter an amount.';
 
   @override
-  String get willBeValidated => 'Will be validated by the auditor.';
+  String get willBeValidated =>
+      'The other finance officer (treasurer or auditor) approves it; then it counts.';
 
   @override
   String enteredBy(String name, String when) {
@@ -1464,7 +1465,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get awaitingAuditor => 'Waiting for the auditor';
+  String get awaitingAuditor => 'Waiting for your approval';
 
   @override
   String unfilledSlots(int n, String title) {
@@ -2465,8 +2466,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editEntryTitle => 'Edit the operation';
 
   @override
-  String get entryEdited =>
-      'Operation edited. The commissaire finalises it after your validation.';
+  String get entryEdited => 'Entry edited. The other officer approves it.';
 
   @override
   String get editedBadge => 'Edited';
@@ -2504,7 +2504,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validateEditedNote =>
-      'Edited: after your validation, the commissaire who entered it finalises it.';
+      'It was edited: validating it approves the corrected version.';
 
   @override
   String get linkedEntryNote =>
@@ -2546,6 +2546,69 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count entries',
       one: '1 entry',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get awaitingOtherBadge => 'Waiting for the other';
+
+  @override
+  String get longPressHint => 'Long-press an entry to validate several.';
+
+  @override
+  String selectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get selectAll => 'Select all';
+
+  @override
+  String validateSelected(int count) {
+    return 'Validate ($count)';
+  }
+
+  @override
+  String validateManyTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Validate $count entries?',
+      one: 'Validate 1 entry?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String validateManyBody(String total) {
+    return 'Total: $total. Your name and the time are recorded on each; they can no longer be changed.';
+  }
+
+  @override
+  String validatedMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries validated.',
+      one: '1 entry validated.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String skippedMany(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count were not validated (they wait for the other officer).',
+      one: '1 was not validated (it waits for the other officer).',
     );
     return '$_temp0';
   }

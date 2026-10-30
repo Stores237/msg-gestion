@@ -72,13 +72,18 @@ void main() {
   );
 
   testWidgets(
-    'treasurer cannot validate; auditor validates with confirmation',
+    'who entered a line waits for the other; they may still correct it',
     (tester) async {
-      await setUpApp(tester);
+      final f = await setUpApp(tester);
+      f.finances.enteredByViewer(1);
       await openFinances(tester, _treasurer);
+      expect(find.byKey(const Key('awaiting-1')), findsOneWidget);
+      expect(find.byKey(const Key('validate-1')), findsNothing);
+      expect(find.byKey(const Key('edit-1')), findsOneWidget);
       await tester.tap(find.byKey(const Key('entry-1')));
       await tester.pumpAndSettle();
       expect(find.text('Valider cette opération ?'), findsNothing);
+      expect(find.text('Modifier l’opération'), findsOneWidget);
     },
   );
 

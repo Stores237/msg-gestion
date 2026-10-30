@@ -241,7 +241,7 @@
   "chooseMember": "Choose a member",
   "description": "Description",
   "amountRequired": "Enter an amount.",
-  "willBeValidated": "Will be validated by the auditor.",
+  "willBeValidated": "The other finance officer (treasurer or auditor) approves it; then it counts.",
   "enteredBy": "Entered by {name} · {when}",
   "validatedBy": "Validated by {name}",
   "toValidate": "To validate",
@@ -404,7 +404,7 @@
   "toFollow": "To follow up",
   "activeMembers": "Active members",
   "entriesToValidate": "{n, plural, =1{1 entry to validate} other{{n} entries to validate}}",
-  "awaitingAuditor": "Waiting for the auditor",
+  "awaitingAuditor": "Waiting for your approval",
   "unfilledSlots": "{n, plural, =1{1 unfilled post} other{{n} unfilled posts}} · {title}",
   "roleVicePresident": "Vice-president",
   "roleSecretaryGeneralDeputy": "Deputy general secretary",
@@ -751,7 +751,7 @@
   "otherDescription": "Description (required)",
   "descriptionRequired": "Describe the operation.",
   "editEntryTitle": "Edit the operation",
-  "entryEdited": "Operation edited. The commissaire finalises it after your validation.",
+  "entryEdited": "Entry edited. The other officer approves it.",
   "editedBadge": "Edited",
   "editedBy": "edited by {name}",
   "@editedBy": {
@@ -776,7 +776,7 @@
   "sendBackReason": "Why send it back to the treasurer?",
   "entryFinalised": "Operation finalised.",
   "entrySentBack": "Operation sent back to the treasurer.",
-  "validateEditedNote": "Edited: after your validation, the commissaire who entered it finalises it.",
+  "validateEditedNote": "It was edited: validating it approves the corrected version.",
   "linkedEntryNote": "Payment towards a share or a fine: the member and the category stay.",
   "entriesToConfirm": "{n, plural, =1{1 operation to finalise} other{{n} operations to finalise}}",
   "@entriesToConfirm": {
@@ -792,5 +792,14 @@
   "groupByStatus": "Status",
   "groupByMember": "Member",
   "noMemberGroup": "No member",
-  "entriesCount": "{count, plural, =1{1 entry} other{{count} entries}}"
+  "entriesCount": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "awaitingOtherBadge": "Waiting for the other",
+  "longPressHint": "Long-press an entry to validate several.",
+  "selectedCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "selectAll": "Select all",
+  "validateSelected": "Validate ({count})",
+  "validateManyTitle": "{count, plural, =1{Validate 1 entry?} other{Validate {count} entries?}}",
+  "validateManyBody": "Total: {total}. Your name and the time are recorded on each; they can no longer be changed.",
+  "validatedMany": "{count, plural, =1{1 entry validated.} other{{count} entries validated.}}",
+  "skippedMany": "{count, plural, =1{1 was not validated (it waits for the other officer).} other{{count} were not validated (they wait for the other officer).}}"
 }

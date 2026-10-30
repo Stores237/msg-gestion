@@ -54,17 +54,18 @@ RESOURCES = {
 }
 
 # Fixed rules. A locked cell can never be granted, whatever the database says.
-# - Finances, two hands (owner, 2026-10-23): the commissaire aux comptes
-#   enters the figures; the trésorier, who collects and keeps the money,
-#   validates them against what he actually holds. Neither can do the
-#   other's part.
+# - Finances, two hands, now mutual (owner, 2026-10-30): the trésorier, who
+#   collects and keeps the money, and the commissaire aux comptes, who audits
+#   it, both enter and both approve; each operation counts only once the one
+#   who did not enter (or last change) it agrees. That rule is per line
+#   (apps.finances.services), so no finance cell is locked per role any more;
+#   one person still can't hold both roles (INCOMPATIBLE_ROLES).
+#   (2026-10-23 to 2026-10-30: the commissaire entered, the trésorier
+#   validated, each locked out of the other's part.)
 # - The super admin can do and see everything, finances included (owner,
 #   2026-10-23); see all_cells() and User.permission_set().
 FINANCE_CELLS = {(res, act) for res, spec in RESOURCES.items() if spec[0] == "finances" for act in spec[2]}
-LOCKED = {
-    "tresorier": {(res, act) for res, act in FINANCE_CELLS if act in {CREATE, CHANGE, DELETE}},
-    "commissaire-aux-comptes": {(res, act) for res, act in FINANCE_CELLS if act == VALIDATE},
-}
+LOCKED: dict[str, set] = {}
 
 # The back-office is the platform's administration console (owner,
 # 2026-10-23): the app serves any group, and whoever runs the platform is not

@@ -28,6 +28,7 @@ class FinancesScreen extends StatefulWidget {
 class _FinancesScreenState extends State<FinancesScreen> {
   int _tab = 0;
   Key _reload = UniqueKey();
+  bool _picking = false;
 
   bool get _canReport => widget.me.can('finances.report', 'view');
 
@@ -69,7 +70,9 @@ class _FinancesScreenState extends State<FinancesScreen> {
     final canCollect = widget.me.can('finances.solidarity', 'create');
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: _tab == 0 && canEntry
+      floatingActionButton: _picking
+          ? null
+          : _tab == 0 && canEntry
           ? FloatingActionButton.extended(
               key: const Key('new-entry'),
               onPressed: _newEntry,
@@ -126,6 +129,7 @@ class _FinancesScreenState extends State<FinancesScreen> {
                   me: widget.me,
                   header: _header(tabs),
                   onChanged: _refresh,
+                  onSelecting: (on) => setState(() => _picking = on),
                 ),
                 1 => _Collections(me: widget.me, header: _header(tabs)),
                 _ => ReportView(me: widget.me, header: _header(tabs)),
@@ -145,7 +149,10 @@ class _FinancesScreenState extends State<FinancesScreen> {
       Seg2(
         options: tabs,
         selected: _tab,
-        onChanged: (i) => setState(() => _tab = i),
+        onChanged: (i) => setState(() {
+          _tab = i;
+          _picking = false;
+        }),
       ),
       const SizedBox(height: 12),
     ],
@@ -220,12 +227,19 @@ class EntryRow extends StatelessWidget {
     this.onEdit,
     this.onValidate,
     this.onFinalise,
+    this.onLongPress,
+    this.selected,
   });
   final FinanceEntry entry;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onValidate;
   final VoidCallback? onFinalise;
+  final VoidCallback? onLongPress;
+
+  /// While several lines are being picked: ticked or not; null for a line
+  /// that can't be picked (shown as usual).
+  final bool? selected;
 
   @override
   Widget build(BuildContext context) {
@@ -250,11 +264,22 @@ class EntryRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconChip(
-            e.isIn ? Icons.south_west : Icons.north_east,
-            tone: e.isIn ? Tone.green : Tone.neutral,
-            size: 36,
-          ),
+          if (selected != null)
+            SizedBox(
+              width: 36,
+              height: 36,
+              child: Icon(
+                selected! ? Icons.check_circle : Icons.radio_button_unchecked,
+                key: Key('pick-${e.id}'),
+                color: selected! ? c.primary : c.textTertiary,
+              ),
+            )
+          else
+            IconChip(
+              e.isIn ? Icons.south_west : Icons.north_east,
+              tone: e.isIn ? Tone.green : Tone.neutral,
+              size: 36,
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -336,7 +361,13 @@ class EntryRow extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 4,
                     children: [
-                      if (e.pending) Badge2(l.toValidate, tone: Tone.amber),
+                      if (e.pending && e.awaitingOther)
+                        Badge2(
+                          l.awaitingOtherBadge,
+                          key: Key('awaiting-${e.id}'),
+                        )
+                      else if (e.pending)
+                        Badge2(l.toValidate, tone: Tone.amber),
                       if (e.toConfirm)
                         Badge2(
                           l.toConfirmBadge,
@@ -390,7 +421,9 @@ class EntryRow extends StatelessWidget {
     );
     return KeyedSubtree(
       key: Key('entry-${e.id}'),
-      child: onTap == null ? row : InkWell(onTap: onTap, child: row),
+      child: onTap == null && onLongPress == null
+          ? row
+          : InkWell(onTap: onTap, onLongPress: onLongPress, child: row),
     );
   }
 }
@@ -462,10 +495,14 @@ class _CashBook extends StatefulWidget {
     required this.me,
     required this.header,
     required this.onChanged,
+    required this.onSelecting,
   });
   final Me me;
   final Widget header;
   final VoidCallback onChanged;
+
+  /// Picking several lines: the screen hides its "+ Opération" button.
+  final ValueChanged<bool> onSelecting;
 
   @override
   State<_CashBook> createState() => _CashBookState();
@@ -477,6 +514,125 @@ class _CashBookState extends State<_CashBook> {
   static final _folded = <String>{};
 
   CashBookGrouping _by = _lastGrouping;
+
+  /// Lines picked by a long press, to validate at once (owner, 2026-10-30).
+  final _picked = <int>{};
+  List<FinanceEntry> _shown = const [];
+
+  bool get _picking => _picked.isNotEmpty;
+
+  void _pick(FinanceEntry e) {
+    final was = _picking;
+    setState(
+      () => _picked.contains(e.id) ? _picked.remove(e.id) : _picked.add(e.id),
+    );
+    if (was != _picking) widget.onSelecting(_picking);
+  }
+
+  void _pickAll() {
+    setState(() {
+      _picked.addAll([
+        for (final e in _shown)
+          if (e.canApprove && !e.local) e.id,
+      ]);
+    });
+    widget.onSelecting(true);
+  }
+
+  void _stopPicking() {
+    setState(_picked.clear);
+    widget.onSelecting(false);
+  }
+
+  Future<void> _validatePicked() async {
+    final l = AppLocalizations.of(context);
+    final lines = [
+      for (final e in _shown)
+        if (_picked.contains(e.id)) e,
+    ];
+    final total = lines.fold<int>(
+      0,
+      (s, e) => s + (e.isIn ? e.amount : -e.amount),
+    );
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l.validateManyTitle(lines.length)),
+        content: Text(l.validateManyBody(fcfa(total))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            key: const Key('validate-many-confirm'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l.validate),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      final r = await RepositoryLocator.instance.finances.validateMany([
+        for (final e in lines) e.id,
+      ]);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            [
+              l.validatedMany(r.validated.length),
+              if (r.skipped > 0) l.skippedMany(r.skipped),
+            ].join(' '),
+          ),
+        ),
+      );
+      _picked.clear();
+      widget.onSelecting(false);
+      widget.onChanged();
+    } catch (err) {
+      if (mounted) showErrorSnack(context, err);
+    }
+  }
+
+  Widget _pickBar(AppLocalizations l) {
+    final c = context.msg;
+    return Material(
+      color: c.surfaceCard,
+      elevation: 6,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+        child: Row(
+          children: [
+            IconButton(
+              key: const Key('pick-cancel'),
+              tooltip: l.cancel,
+              icon: const Icon(Icons.close),
+              onPressed: _stopPicking,
+            ),
+            Expanded(
+              child: Text(
+                l.selectedCount(_picked.length),
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+            TextButton(
+              key: const Key('pick-all'),
+              onPressed: _pickAll,
+              child: Text(l.selectAll),
+            ),
+            const SizedBox(width: 4),
+            FilledButton(
+              key: const Key('validate-selected'),
+              onPressed: _validatePicked,
+              child: Text(l.validateSelected(_picked.length)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Future<void> _edit(FinanceEntry e) async {
     final saved = await Navigator.of(context).push<bool>(
@@ -664,11 +820,12 @@ class _CashBookState extends State<_CashBook> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final d = Dates(context);
-    final canValidate = widget.me.can('finances.cashbook', 'validate');
     final canEnter = widget.me.can('finances.cashbook', 'create');
     return AsyncView<List<FinanceEntry>>(
       load: RepositoryLocator.instance.finances.entries,
       builder: (context, entries, reload) {
+        _shown = entries;
+        final approvable = entries.any((e) => e.canApprove && !e.local);
         final groups = groupEntries(
           entries,
           _by,
@@ -680,7 +837,7 @@ class _CashBookState extends State<_CashBook> {
           statusTitle: (e) => _statusTitle(l, e),
           noMember: l.noMemberGroup,
         );
-        return RefreshIndicator(
+        final list = RefreshIndicator(
           onRefresh: reload,
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
@@ -693,13 +850,24 @@ class _CashBookState extends State<_CashBook> {
                 )
               else ...[
                 _groupingBar(l),
+                if (approvable && !_picking)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 4),
+                    child: Text(
+                      l.longPressHint,
+                      key: const Key('long-press-hint'),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.msg.textSecondary,
+                      ),
+                    ),
+                  ),
                 for (final g in groups) ...[
                   _groupHeader(l, g),
                   if (!_folded.contains(g.key))
                     GroupCard(
                       children: [
-                        for (final e in g.items)
-                          _row(e, canValidate: canValidate, canEnter: canEnter),
+                        for (final e in g.items) _row(e, canEnter: canEnter),
                       ],
                     ),
                 ],
@@ -707,26 +875,42 @@ class _CashBookState extends State<_CashBook> {
             ],
           ),
         );
+        if (!_picking) return list;
+        return Column(
+          children: [
+            Expanded(child: list),
+            _pickBar(l),
+          ],
+        );
       },
     );
   }
 
-  Widget _row(
-    FinanceEntry e, {
-    required bool canValidate,
-    required bool canEnter,
-  }) {
-    final validating = canValidate && e.pending && !e.local;
+  Widget _row(FinanceEntry e, {required bool canEnter}) {
+    // What the viewer may do comes from the server, per line: approve it
+    // (they neither entered nor last changed it), correct it.
+    final approving = e.canApprove && !e.local;
+    final editing = e.canEdit && e.pending && !e.local;
     final finalising = canEnter && e.toConfirm;
+    if (_picking) {
+      return EntryRow(
+        entry: e,
+        selected: approving ? _picked.contains(e.id) : null,
+        onTap: approving ? () => _pick(e) : null,
+      );
+    }
     return EntryRow(
       entry: e,
-      onTap: validating
+      onTap: approving
           ? () => _validate(e)
+          : editing
+          ? () => _edit(e)
           : finalising
           ? () => _finalise(e)
           : null,
-      onEdit: validating ? () => _edit(e) : null,
-      onValidate: validating ? () => _validate(e) : null,
+      onLongPress: approving ? () => _pick(e) : null,
+      onEdit: editing ? () => _edit(e) : null,
+      onValidate: approving ? () => _validate(e) : null,
       onFinalise: finalising ? () => _finalise(e) : null,
     );
   }

@@ -8,14 +8,14 @@ its settings, not in the code.
 
 Developed and powered by **STORES** ("Propulsé par [S] STORES").
 
-**Version 0.1.0 (build 29)** · staging: <https://msg-staging.onrender.com>
+**Version 0.1.0 (build 30)** · staging: <https://msg-staging.onrender.com>
 (`/healthz/` reports the deployed version and commit).
 
 ## Two surfaces
 
 | | For | What |
 |---|---|---|
-| **Mobile app** (Flutter, Android first, iOS-ready) | The groups' members and officers | Accueil, calendar and events, duty planning (line-up, swaps, absences), roll call, chef de groupe reports, announcements and convocations with photos, finances (two hands: entry and validation), members, notifications, PIN login with app lock and fingerprint/face, offline use, French and English |
+| **Mobile app** (Flutter, Android first, iOS-ready) | The groups' members and officers | Accueil, calendar and events, duty planning (line-up, swaps, absences), roll call, chef de groupe reports, announcements and convocations with photos, finances (two hands: each line agreed by the trésorier and the commissaire, bulk approval), members, notifications, PIN login with app lock and fingerprint/face, offline use, French and English |
 | **Web back-office** (Django templates) | The platform: super admins and the back-office staff teams (support, IT helpdesk, integration ops) | Groups, access requests, users and roles, permissions matrix, assignments, financial statements, group settings, staff, integrations, platform help texts, audit log |
 
 Platform accounts work only in the back-office; group members only in the app. Permissions

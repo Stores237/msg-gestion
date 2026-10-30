@@ -74,6 +74,19 @@ class HttpFinancesRepository implements FinancesRepository {
   );
 
   @override
+  Future<({List<int> validated, int skipped})> validateMany(
+    List<int> ids,
+  ) async {
+    final data =
+        await _api.post('/finances/entries/validate/', body: {'ids': ids})
+            as Map<String, dynamic>;
+    return (
+      validated: [for (final i in data['validated'] as List) i as int],
+      skipped: (data['skipped'] as List).length,
+    );
+  }
+
+  @override
   Future<FinanceEntry> editEntry(int id, NewEntry changes) async {
     final body = changes.toJson()..remove('client_uuid');
     return FinanceEntry.fromJson(

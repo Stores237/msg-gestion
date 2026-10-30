@@ -1,6 +1,6 @@
-"""Finance corrections (owner, 2026-10-30): the trésorier edits a line not
-yet validated (marked "Modifié"; after his validation the commissaire
-finalises it); money in names at least one member, several ticked members
+"""Finance corrections (owner, 2026-10-30): a line not yet validated can be
+corrected (marked "Modifié"); the correction is its author's agreement and
+the other one approves it; money in names at least one member, several ticked members
 make one line each; "Autre" is a money-in category with a description."""
 
 import uuid
@@ -22,7 +22,7 @@ def _pair():
     return cac_api, cac, tre_api, tre
 
 
-def test_edit_then_validate_then_commissaire_finalises():
+def test_an_edit_is_its_authors_agreement_and_the_other_approves():
     cac_api, cac, tre_api, tre = _pair()
     payer, right = UserFactory(), UserFactory()
     line = entry(cac_api, member=payer.pk, amount=2500).json()
@@ -32,27 +32,29 @@ def test_edit_then_validate_then_commissaire_finalises():
     body = r.json()
     assert (body["amount"], body["member"], body["status"]) == (3000, right.pk, "pending")
     assert body["edited_by_name"] == tre.short_name and body["edited_at"]
+    # The trésorier changed it: he has agreed, the commissaire approves.
+    assert body["awaiting_other"] is True and body["can_approve"] is False
     log = AuditLog.objects.get(action="Opération modifiée avant validation")
     assert log.detail["amount"] == {"avant": 2500, "apres": 3000}
-    assert Notification.objects.filter(user=cac, title="Opération modifiée par le trésorier").exists()
+    assert Notification.objects.filter(user=cac, title="Opération modifiée · à approuver").exists()
+    assert tre_api.post(f"/api/finances/entries/{line['id']}/validate/").json()["code"] == "own_entry"
+    assert cac_api.get("/api/home/bureau/").json()["to_validate"] == 1
+    assert tre_api.get("/api/home/bureau/").json()["to_validate"] == 0
 
-    # The trésorier validates: an edited line now waits for the commissaire.
-    r = tre_api.post(f"/api/finances/entries/{line['id']}/validate/")
-    assert r.json()["status"] == "to_confirm"
-    assert Notification.objects.filter(user=cac, title="Opération à finaliser").exists()
-    assert not Notification.objects.filter(user=right, title="Paiement validé").exists()
-    assert cac_api.get("/api/finances/summary/").json()["to_confirm"] == 1
-    # Not final: the balance doesn't count it yet.
-    assert cac_api.get("/api/finances/summary/").json()["balance"] == 0
-    # The trésorier can't finalise his own correction.
-    assert tre_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": True}, format="json").status_code == 403
-
-    r = cac_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": True}, format="json")
-    assert r.status_code == 200 and r.json()["status"] == "validated" and r.json()["confirmed_by_name"] == cac.short_name
+    r = cac_api.post(f"/api/finances/entries/{line['id']}/validate/")
+    assert r.json()["status"] == "validated" and r.json()["validated_by_name"] == cac.short_name
     assert cac_api.get("/api/finances/summary/").json()["balance"] == 3000
     assert Notification.objects.filter(user=right, title="Paiement validé").exists()
     # Final: no more changes.
     assert tre_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 1}, format="json").json()["code"] == "not_editable"
+
+
+def test_who_entered_can_correct_before_the_other_approves():
+    cac_api, _, tre_api, _ = _pair()
+    line = entry(cac_api).json()
+    assert cac_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 2000}, format="json").status_code == 200
+    assert cac_api.post(f"/api/finances/entries/{line['id']}/validate/").json()["code"] == "own_entry"
+    assert tre_api.post(f"/api/finances/entries/{line['id']}/validate/").json()["status"] == "validated"
 
 
 def test_unchanged_line_is_still_validated_in_one_step():
@@ -63,25 +65,22 @@ def test_unchanged_line_is_still_validated_in_one_step():
     assert tre_api.post(f"/api/finances/entries/{line['id']}/validate/").json()["status"] == "validated"
 
 
-def test_commissaire_sends_a_correction_back_with_a_reason():
-    cac_api, _, tre_api, tre = _pair()
+def test_a_line_waiting_to_be_finalised_before_the_change_still_can_be():
+    """Lines put "À finaliser" under the 2026-10-30 morning rule keep their
+    Finaliser / Renvoyer."""
+    cac_api, cac, tre_api, tre = _pair()
     line = entry(cac_api).json()
-    tre_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 9000}, format="json")
-    tre_api.post(f"/api/finances/entries/{line['id']}/validate/")
+    Entry.objects.filter(pk=line["id"]).update(status=Entry.Status.TO_CONFIRM, edited_by=tre, validated_by=tre)
     no_reason = cac_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": False}, format="json")
     assert no_reason.json()["code"] == "reason_required"
-    r = cac_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": False, "reason": "Reçu de 2 500"}, format="json")
-    assert r.json()["status"] == "pending" and r.json()["validated_by_name"] is None
-    assert Notification.objects.filter(user=tre, title="Opération renvoyée").exists()
-    # Back with the trésorier, who can correct it again.
-    assert tre_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 2500}, format="json").status_code == 200
+    assert tre_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": True}, format="json").json()["code"] == "own_edit"
+    r = cac_api.post(f"/api/finances/entries/{line['id']}/confirm/", {"accept": True}, format="json")
+    assert r.json()["status"] == "validated" and r.json()["confirmed_by_name"] == cac.short_name
 
 
-def test_only_the_validator_edits_and_never_his_own_line():
-    cac_api, _, tre_api, _ = _pair()
+def test_only_finance_approvers_edit():
+    cac_api, _, _, _ = _pair()
     line = entry(cac_api).json()
-    # The commissaire has no "validate": he can't edit (he can delete and re-enter).
-    assert cac_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 1}, format="json").status_code == 403
     member_api, _ = client_for()
     assert member_api.patch(f"/api/finances/entries/{line['id']}/", {"amount": 1}, format="json").status_code == 403
 

@@ -721,6 +721,8 @@ class FakeFinancesRepository implements FinancesRepository {
       status: 'pending',
       createdByName: 'Fotso I.',
       createdAt: DateTime(2026, 10, 19, 10, 12),
+      canApprove: true,
+      canEdit: true,
     ),
     FinanceEntry(
       id: 2,
@@ -767,6 +769,47 @@ class FakeFinancesRepository implements FinancesRepository {
     return e;
   }
 
+  /// As the server says it to someone who entered line [id]: it waits for
+  /// the other one; they may still correct it.
+  void enteredByViewer(int id) => items = [
+    for (final e in items)
+      e.id == id ? _with(e, edited: e.editedByName, mine: true) : e,
+  ];
+
+  /// As the server says it to someone who only reads the cash book.
+  void readOnly() => items = [
+    for (final e in items)
+      FinanceEntry(
+        id: e.id,
+        direction: e.direction,
+        amount: e.amount,
+        category: e.category,
+        label: e.label,
+        memberId: e.memberId,
+        memberName: e.memberName,
+        date: e.date,
+        status: e.status,
+        createdByName: e.createdByName,
+        createdAt: e.createdAt,
+        validatedByName: e.validatedByName,
+        editedByName: e.editedByName,
+      ),
+  ];
+
+  @override
+  Future<({List<int> validated, int skipped})> validateMany(
+    List<int> ids,
+  ) async {
+    final ok = [
+      for (final e in items)
+        if (ids.contains(e.id) && e.canApprove) e.id,
+    ];
+    for (final id in ok) {
+      await validate(id);
+    }
+    return (validated: ok, skipped: ids.length - ok.length);
+  }
+
   @override
   Future<FinanceEntry> validate(int id) async {
     validated.add(id);
@@ -800,6 +843,7 @@ class FakeFinancesRepository implements FinancesRepository {
     String? label,
     String? category,
     String? edited,
+    bool? mine,
   }) => FinanceEntry(
     id: e.id,
     direction: e.direction,
@@ -814,6 +858,10 @@ class FakeFinancesRepository implements FinancesRepository {
     createdAt: e.createdAt,
     validatedByName: e.validatedByName,
     editedByName: edited ?? e.editedByName,
+    // Changed by me: my agreement is given, the other one approves.
+    canApprove: mine == true ? false : e.canApprove && status == null,
+    canEdit: e.canEdit && status == null,
+    awaitingOther: mine ?? e.awaitingOther,
   );
 
   @override
@@ -828,6 +876,7 @@ class FakeFinancesRepository implements FinancesRepository {
                 label: changes.label,
                 category: changes.category,
                 edited: 'Moi',
+                mine: true,
               )
             : e,
     ];

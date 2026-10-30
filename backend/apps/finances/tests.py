@@ -5,7 +5,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from apps.accounts.factories import UserFactory, give_role
-from apps.core.models import AuditLog
+from apps.core.models import AuditLog, Notification
 
 from .models import Due, Entry
 from .services import quarter_bounds
@@ -41,43 +41,63 @@ def pending_entry(**kw):
     return Entry.objects.create(created_by=UserFactory(), **fields)
 
 
-def test_treasurer_validates_but_never_enters():
+def test_treasurer_enters_and_the_commissaire_approves():
+    """Owner, 2026-10-30: the trésorier collects the money and records it;
+    the commissaire, who audits, approves it. Then it counts."""
     tre_api, tre = client_for("tresorier")
-    e = pending_entry()
-    assert entry(tre_api).status_code == 403
-    assert tre_api.delete(f"/api/finances/entries/{e.id}/").status_code == 403
-    assert tre_api.post("/api/finances/collections/", {"kind": "deces", "title": "x", "amount_per_member": 100}, format="json").status_code == 403
-    v = tre_api.post(f"/api/finances/entries/{e.id}/validate/")
-    assert v.status_code == 200 and v.json()["validated_by_name"] == tre.short_name
-    assert tre_api.get("/api/finances/summary/").status_code == 200
-    assert tre_api.get("/api/finances/statement/").status_code == 200
-
-
-def test_treasurer_write_rights_are_locked():
-    from apps.accounts.models import Role
-
-    tre_api, _ = client_for("tresorier")
-    Role.objects.get(slug="tresorier").permissions.get_or_create(resource="finances.cashbook", action="create")
-    assert entry(tre_api).status_code == 403
-
-
-def test_auditor_enters_and_treasurer_validates():
-    """Owner, 2026-10-23: the commissaire enters the figures; the trésorier,
-    who holds the money, checks and validates them."""
     cac_api, cac = client_for("commissaire-aux-comptes")
-    tre_api, tre = client_for("tresorier")
-    r = entry(cac_api)
+    r = entry(tre_api)
     assert r.status_code == 201 and r.json()["status"] == "pending"
     eid = r.json()["id"]
-    assert cac_api.post(f"/api/finances/entries/{eid}/validate/").status_code == 403
+    assert r.json()["awaiting_other"] is True and r.json()["can_approve"] is False
+    assert Notification.objects.filter(user=cac, title="Opération à approuver").exists()
+    assert tre_api.post(f"/api/finances/entries/{eid}/validate/").json()["code"] == "own_entry"
+    row = next(e for e in cac_api.get("/api/finances/entries/").json() if e["id"] == eid)
+    assert row["can_approve"] is True and row["can_edit"] is True
+    v = cac_api.post(f"/api/finances/entries/{eid}/validate/")
+    assert v.json()["status"] == "validated" and v.json()["validated_by_name"] == cac.short_name
+    assert Notification.objects.filter(user=tre, title="Opération approuvée").exists()
+    assert tre_api.get("/api/finances/summary/").json()["balance"] == 2500
+
+
+def test_commissaire_enters_and_the_treasurer_approves():
+    cac_api, _ = client_for("commissaire-aux-comptes")
+    tre_api, tre = client_for("tresorier")
+    eid = entry(cac_api).json()["id"]
+    assert cac_api.post(f"/api/finances/entries/{eid}/validate/").status_code == 400
     v = tre_api.post(f"/api/finances/entries/{eid}/validate/")
     assert v.json()["status"] == "validated" and v.json()["validated_by_name"] == tre.short_name
-    assert cac_api.delete(f"/api/finances/entries/{pending_entry().id}/").status_code == 204
     # Nobody validates a line they entered themselves, whatever their roles.
     own = Entry.objects.create(created_by=tre, direction="in", amount=100, category="amende", label="x", date=date(2026, 10, 1))
     r = tre_api.post(f"/api/finances/entries/{own.id}/validate/")
     assert (r.status_code, r.json()["code"]) == (400, "own_entry")
     assert AuditLog.objects.filter(action="Refus · validation de sa propre saisie").exists()
+
+
+def test_each_deletes_only_their_own_pending_line():
+    tre_api, _ = client_for("tresorier")
+    cac_api, _ = client_for("commissaire-aux-comptes")
+    mine = entry(tre_api).json()["id"]
+    r = cac_api.delete(f"/api/finances/entries/{mine}/")
+    assert (r.status_code, r.json()["code"]) == (403, "not_your_entry")
+    assert tre_api.delete(f"/api/finances/entries/{mine}/").status_code == 204
+
+
+def test_validate_several_at_once():
+    tre_api, tre = client_for("tresorier")
+    cac_api, _ = client_for("commissaire-aux-comptes")
+    theirs = [entry(cac_api).json()["id"] for _ in range(3)]
+    mine = entry(tre_api).json()["id"]
+    r = tre_api.post("/api/finances/entries/validate/", {"ids": [*theirs, mine]}, format="json")
+    body = r.json()
+    assert r.status_code == 200 and sorted(body["validated"]) == sorted(theirs)
+    assert [(s["id"], s["code"]) for s in body["skipped"]] == [(mine, "own_entry")]
+    assert Entry.objects.filter(status="validated").count() == 3
+    # The refusal stays in the journal.
+    assert AuditLog.objects.filter(action="Refus · validation de sa propre saisie").exists()
+    assert tre_api.post("/api/finances/entries/validate/", {"ids": []}, format="json").json()["code"] == "ids_required"
+    member_api, _ = client_for()
+    assert member_api.post("/api/finances/entries/validate/", {"ids": theirs}, format="json").status_code == 403
 
 
 def test_validated_entry_cannot_be_deleted():

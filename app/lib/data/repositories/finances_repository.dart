@@ -8,8 +8,13 @@ abstract class FinancesRepository {
   Future<FinanceEntry> createEntry(NewEntry entry);
   Future<FinanceEntry> validate(int id);
 
-  /// The trésorier corrects a line not yet validated (direction, amount,
-  /// category, label, member, date).
+  /// Several at once (long press, owner 2026-10-30). Lines this person
+  /// can't approve are left as they are: [skipped] counts them.
+  Future<({List<int> validated, int skipped})> validateMany(List<int> ids);
+
+  /// The trésorier or the commissaire corrects a line not yet validated
+  /// (direction, amount, category, label, member, date); the other one
+  /// then approves it.
   Future<FinanceEntry> editEntry(int id, NewEntry changes);
 
   /// The commissaire finalises a line the trésorier edited and validated,

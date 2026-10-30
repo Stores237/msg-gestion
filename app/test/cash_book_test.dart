@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:msg_gestion/models/finance.dart';
 
 import 'downloads_test.dart' show openFinances;
 import 'helpers.dart';
@@ -38,7 +39,8 @@ void main() {
   testWidgets('a member sees no actions; the line says who, then what', (
     tester,
   ) async {
-    await setUpApp(tester);
+    final f = await setUpApp(tester);
+    f.finances.readOnly();
     await openFinances(tester, _views);
     expect(find.byKey(const Key('edit-1')), findsNothing);
     expect(find.byKey(const Key('validate-1')), findsNothing);
@@ -93,5 +95,75 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('group-by-day')));
     await tester.tap(find.byKey(const Key('group-by-day')));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('long press picks lines; validate them at once', (tester) async {
+    final f = await setUpApp(tester);
+    f.finances.items = [
+      ...f.finances.items,
+      FinanceEntry(
+        id: 3,
+        direction: 'in',
+        amount: 500,
+        category: 'inscription',
+        label: 'Inscription',
+        memberId: 5,
+        memberName: 'Mbella Grâce',
+        date: DateTime(2026, 10, 19),
+        status: 'pending',
+        createdByName: 'Fotso I.',
+        createdAt: DateTime(2026, 10, 19, 11),
+        canApprove: true,
+        canEdit: true,
+      ),
+    ];
+    await openFinances(tester, {
+      ..._validates,
+      'finances.cashbook': ['view', 'create', 'validate', 'export'],
+    });
+    await tester.tap(find.byKey(const Key('group-by-day')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('long-press-hint')), findsOneWidget);
+    expect(find.byKey(const Key('new-entry')), findsOneWidget);
+
+    await tester.longPress(find.byKey(const Key('entry-1')));
+    await tester.pumpAndSettle();
+    expect(find.text('1 sélectionnée'), findsOneWidget);
+    // Picking hides the "+ Opération" button and the line buttons.
+    expect(find.byKey(const Key('new-entry')), findsNothing);
+    expect(find.byKey(const Key('validate-3')), findsNothing);
+    // A validated line can't be picked.
+    expect(find.byKey(const Key('pick-2')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('pick-all')));
+    await tester.pumpAndSettle();
+    expect(find.text('2 sélectionnées'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('entry-3')));
+    await tester.pumpAndSettle();
+    expect(find.text('1 sélectionnée'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('entry-3')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('validate-selected')));
+    await tester.pumpAndSettle();
+    expect(find.text('Valider 2 opérations ?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('validate-many-confirm')));
+    await tester.pumpAndSettle();
+    expect(f.finances.validated..sort(), [1, 3]);
+    expect(find.text('2 opérations validées.'), findsOneWidget);
+    expect(find.byKey(const Key('validate-selected')), findsNothing);
+    expect(find.byKey(const Key('new-entry')), findsOneWidget);
+  });
+
+  testWidgets('picking can be cancelled', (tester) async {
+    await setUpApp(tester);
+    await openFinances(tester, _validates);
+    await tester.longPress(find.byKey(const Key('entry-1')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pick-1')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('pick-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('pick-1')), findsNothing);
+    expect(find.byKey(const Key('validate-1')), findsOneWidget);
   });
 }

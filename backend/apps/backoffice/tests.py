@@ -149,9 +149,9 @@ def test_roles_matrix_edit_requires_reason_and_logs(logged_in):
 def test_locked_cell_cannot_be_posted_on(logged_in):
     """A forged POST ticking a locked cell is ignored, not applied."""
     role = Role.objects.get(slug="tresorier")
-    wanted = [f"{r}:{a}" for r, a in role.permissions.values_list("resource", "action")] + ["finances.cashbook:create"]
+    wanted = [f"{r}:{a}" for r, a in role.permissions.values_list("resource", "action")] + ["calendar.planning:create"]
     logged_in.post("/bo/roles/tresorier/", {"perm": wanted, "reason": "test"})
-    assert not role.permissions.filter(resource="finances.cashbook", action="create").exists()
+    assert not role.permissions.filter(resource="calendar.planning", action="create").exists()
 
 
 def test_only_a_super_admin_gets_into_the_backoffice(client, codes):
