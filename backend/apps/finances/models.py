@@ -94,10 +94,14 @@ class Entry(models.Model):
         FINE = "amende", "Amendes"
         DONATION = "aide_don", "Aides et dons"
         SOLIDARITY = "solidarite", "Contributions de solidarité"
+        OTHER = "autre", "Autre"
         EXPENSE = "depense", "Dépenses"
 
     class Status(models.TextChoices):
         PENDING = "pending", "À valider"
+        # Edited by the trésorier, then validated by him: the commissaire who
+        # entered it finalises (owner, 2026-10-30: the two steps remain).
+        TO_CONFIRM = "to_confirm", "À finaliser"
         VALIDATED = "validated", "Validé"
 
     direction = models.CharField(max_length=3, choices=Direction.choices)
@@ -116,6 +120,11 @@ class Entry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     validated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+")
     validated_at = models.DateTimeField(null=True, blank=True)
+    # "Modifié": the trésorier corrected the line before validating it.
+    edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    edited_at = models.DateTimeField(null=True, blank=True)
+    confirmed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+")
+    confirmed_at = models.DateTimeField(null=True, blank=True)
 
     group = models.ForeignKey("core.Group", on_delete=models.CASCADE, default=default_group_id, related_name="+")
     objects = scoped()

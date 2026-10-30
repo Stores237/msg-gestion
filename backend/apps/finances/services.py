@@ -41,21 +41,140 @@ def record_entry(*, by, request=None, **fields):
     return entry, True
 
 
+EDITABLE = ("direction", "amount", "category", "label", "member", "date")
+
+
+def check_line(direction, category, label, member):
+    """Owner, 2026-10-30: every money-in line names a member; "Autre" is for
+    money in and needs a description."""
+    if direction == Entry.Direction.IN and member is None:
+        raise FinanceRule("member_required", "Choisissez le membre concerné.")
+    if category == Entry.Category.OTHER:
+        if direction != Entry.Direction.IN:
+            raise FinanceRule("other_in_only", "« Autre » est une catégorie d’entrée.")
+        if not (label or "").strip() or label.strip() == Entry.Category.OTHER.label:
+            raise FinanceRule("description_required", "Décrivez l’opération (catégorie « Autre »).")
+
+
+def edit_entry(entry, changes, *, by, request=None):
+    """The trésorier corrects a line before validating it (owner, 2026-10-30).
+    The line is marked "Modifié", every change is journaled, and the
+    commissaire who entered it will finalise it after validation."""
+    if entry.status != Entry.Status.PENDING:
+        raise FinanceRule("not_editable", "Seule une opération à valider peut être modifiée.")
+    if entry.created_by_id == by.pk:
+        raise FinanceRule("own_entry", "On ne peut pas modifier puis valider sa propre saisie.")
+    before = {f: getattr(entry, f) for f in EDITABLE}
+    linked = entry.due_id or entry.collection_id
+    if linked and any(f in changes and changes[f] != before[f] for f in ("direction", "member", "category")):
+        raise FinanceRule("linked_entry", "Cette opération règle une cotisation ou une amende : seuls le montant, la date et "
+                                          "la description se corrigent.")
+    for f, v in changes.items():
+        if f in EDITABLE:
+            setattr(entry, f, v)
+    if entry.direction == Entry.Direction.OUT:
+        entry.category = Entry.Category.EXPENSE
+    elif entry.category == Entry.Category.EXPENSE:
+        raise FinanceRule("bad_category", "Choisissez une catégorie d’entrée.")
+    check_line(entry.direction, entry.category, entry.label, entry.member)
+    diff = {f: (_show(before[f]), _show(getattr(entry, f))) for f in EDITABLE if before[f] != getattr(entry, f)}
+    if not diff:
+        return entry
+    entry.edited_by = by
+    entry.edited_at = timezone.now()
+    entry.save()
+    audit.record("Opération modifiée avant validation", actor=by, obj=entry, request=request, sensitive=True,
+                 detail={f: {"avant": a, "apres": b} for f, (a, b) in diff.items()})
+    notify([entry.created_by], "payment", "Opération modifiée par le trésorier",
+           f"{entry.label} · {entry.amount} FCFA. Vous la finaliserez après sa validation.", {"type": "cashbook"})
+    return entry
+
+
+def _show(v):
+    if hasattr(v, "short_name"):
+        return v.short_name
+    return v.isoformat() if hasattr(v, "isoformat") else v
+
+
+def record_entries(members, *, by, request=None, **fields):
+    """One line per ticked member, same amount each, in one transaction.
+    Offline retries: each line's client_uuid is derived from the request's
+    and the member, so a resent request creates nothing new."""
+    import uuid
+
+    base = fields.pop("client_uuid", None)
+    fields.pop("member", None)
+    out = []
+    with transaction.atomic():
+        for m in dict.fromkeys(members):
+            line_uuid = uuid.uuid5(base, str(m.pk)) if base else None
+            entry, _ = record_entry(by=by, request=request, member=m, client_uuid=line_uuid, **fields)
+            out.append(entry)
+    return out
+
+
 def validate_entry(entry, *, by, request=None):
-    if entry.status == Entry.Status.VALIDATED:
+    """The trésorier's validation. An edited line then waits for the
+    commissaire (À finaliser); an unchanged one is final."""
+    if entry.status != Entry.Status.PENDING:
         raise FinanceRule("already_validated", "Cette opération est déjà validée.")
     if entry.created_by_id == by.pk:
         # Separation of duties at the level of the line: nobody validates
         # what they entered, whatever their roles.
         audit.record("Refus · validation de sa propre saisie", actor=by, obj=entry, request=request, refused=True)
         raise FinanceRule("own_entry", "On ne peut pas valider sa propre saisie.")
-    entry.status = Entry.Status.VALIDATED
+    entry.status = Entry.Status.TO_CONFIRM if entry.edited_at else Entry.Status.VALIDATED
     entry.validated_by = by
     entry.validated_at = timezone.now()
     entry.save(update_fields=["status", "validated_by", "validated_at"])
-    audit.record("Opération validée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
+    audit.record("Opération validée" + (" · à finaliser" if entry.edited_at else ""), actor=by, obj=entry, request=request,
+                 detail={"montant": entry.amount})
+    if entry.status == Entry.Status.TO_CONFIRM:
+        notify([entry.created_by], "payment", "Opération à finaliser",
+               f"{entry.label} · {entry.amount} FCFA, modifiée et validée par {by.short_name}.", {"type": "cashbook"})
+    else:
+        _tell_member(entry)
+
+
+def _tell_member(entry):
     if entry.member_id:
         notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} FCFA", {"type": "dues"})
+
+
+def _check_finaliser(entry, by, request):
+    if entry.status != Entry.Status.TO_CONFIRM:
+        raise FinanceRule("not_to_confirm", "Cette opération n’attend pas de finalisation.")
+    if by.pk in (entry.edited_by_id, entry.validated_by_id):
+        audit.record("Refus · finalisation de sa propre modification", actor=by, obj=entry, request=request, refused=True)
+        raise FinanceRule("own_edit", "La finalisation revient au commissaire, pas à celui qui a modifié.")
+
+
+def confirm_entry(entry, *, by, request=None):
+    """The commissaire accepts the trésorier's correction: the line is final."""
+    _check_finaliser(entry, by, request)
+    entry.status = Entry.Status.VALIDATED
+    entry.confirmed_by = by
+    entry.confirmed_at = timezone.now()
+    entry.save(update_fields=["status", "confirmed_by", "confirmed_at"])
+    audit.record("Opération finalisée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
+    notify([entry.validated_by], "payment", "Opération finalisée", f"{entry.label} · {entry.amount} FCFA", {"type": "cashbook"})
+    _tell_member(entry)
+
+
+def send_back(entry, *, by, reason, request=None):
+    """The commissaire disagrees with the correction: back to "À valider"
+    for the trésorier, with the reason."""
+    if not (reason or "").strip():
+        raise FinanceRule("reason_required", "Indiquez pourquoi vous renvoyez l’opération.")
+    _check_finaliser(entry, by, request)
+    trésorier = entry.validated_by
+    entry.status = Entry.Status.PENDING
+    entry.validated_by = None
+    entry.validated_at = None
+    entry.save(update_fields=["status", "validated_by", "validated_at"])
+    audit.record("Opération renvoyée au trésorier", actor=by, obj=entry, request=request, sensitive=True,
+                 detail={"motif": reason.strip(), "montant": entry.amount})
+    notify([trésorier], "payment", "Opération renvoyée", f"{entry.label} · {reason.strip()}", {"type": "cashbook"})
 
 
 def open_collection(*, by, kind, title, amount_per_member, installments=3, opened_on=None, request=None):
@@ -124,7 +243,7 @@ def report(year, quarter):
         "year": year, "quarter": quarter, "start": start, "end": end,
         "opening": opening, "in": entries_in, "out": entries_out, "closing": opening + entries_in - entries_out,
         "in_by_category": by_cat.get("in", {}), "out_by_category": by_cat.get("out", {}),
-        "pending": in_q.filter(status=Entry.Status.PENDING).count(),
+        "pending": in_q.exclude(status=Entry.Status.VALIDATED).count(),
         "validated_by": done.validated_by.short_name if done else None,
         "validated_at": done.validated_at if done else None,
     }
@@ -161,7 +280,7 @@ def statement_rows(members=None):
         left[d.member_id] = left.get(d.member_id, 0) + max(d.amount - (d.p or 0), 0)
     paid_in = Entry.objects.filter(member_id__in=ids, direction=Entry.Direction.IN)
     validated = dict(paid_in.filter(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
-    pending = dict(paid_in.filter(status=Entry.Status.PENDING).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
+    pending = dict(paid_in.exclude(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
     return [{
         "member": m.pk, "full_name": m.full_name, "phone": m.phone, "status": m.gstatus,
         "owed": owed.get(m.pk, 0), "paid": validated.get(m.pk, 0), "pending": pending.get(m.pk, 0), "remaining": left.get(m.pk, 0),

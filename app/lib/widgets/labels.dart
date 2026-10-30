@@ -88,7 +88,13 @@ String presenceLabel(AppLocalizations l, String status) => switch (status) {
   _ => l.presenceNotMarked,
 };
 
-const incomeCategories = ['solidarite', 'amende', 'inscription', 'aide_don'];
+const incomeCategories = [
+  'solidarite',
+  'amende',
+  'inscription',
+  'aide_don',
+  'autre',
+];
 
 String financeCategoryLabel(AppLocalizations l, String c) => switch (c) {
   'inscription' => l.catRegistration,
@@ -96,6 +102,7 @@ String financeCategoryLabel(AppLocalizations l, String c) => switch (c) {
   'aide_don' => l.catDonation,
   'solidarite' => l.catSolidarity,
   'depense' => l.catExpense,
+  'autre' => l.catOther,
   _ => c,
 };
 

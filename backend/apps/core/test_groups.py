@@ -104,7 +104,7 @@ def test_money_stays_in_its_group(two_groups):
     first, second = two_groups
     cac = UserFactory(membership=second)
     give(cac, second, "commissaire-aux-comptes")
-    body = {"direction": "in", "amount": 1000, "category": "aide_don", "label": "Don", "date": "2026-10-20"}
+    body = {"direction": "in", "amount": 1000, "category": "aide_don", "label": "Don", "date": "2026-10-20", "member": cac.pk}
     assert app_client(cac, second).post("/api/finances/entries/", body, format="json").status_code == 201
     assert Entry.all_groups.get().group == second
     tre = UserFactory(membership=first)

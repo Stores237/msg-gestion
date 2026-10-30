@@ -17,6 +17,9 @@ class FinanceEntry {
     required this.createdAt,
     this.validatedByName,
     this.validatedAt,
+    this.editedByName,
+    this.confirmedByName,
+    this.linked = false,
     this.local = false,
   });
 
@@ -26,14 +29,15 @@ class FinanceEntry {
   final String direction;
   final int amount;
 
-  /// inscription | amende | aide_don | solidarite | depense
+  /// inscription | amende | aide_don | solidarite | autre | depense
   final String category;
   final String label;
   final int? memberId;
   final String? memberName;
   final DateTime date;
 
-  /// pending | validated
+  /// pending | to_confirm (edited by the trésorier, validated, the
+  /// commissaire finalises) | validated
   final String status;
   final String? clientUuid;
   final String createdByName;
@@ -41,11 +45,20 @@ class FinanceEntry {
   final String? validatedByName;
   final DateTime? validatedAt;
 
+  /// The trésorier corrected it before validating ("Modifié").
+  final String? editedByName;
+  final String? confirmedByName;
+
+  /// Pays a share or a fine: its member and category can't change.
+  final bool linked;
+
   /// Entered offline and not yet on the server (design: "Pas encore envoyé").
   final bool local;
 
   bool get isIn => direction == 'in';
   bool get pending => status == 'pending';
+  bool get toConfirm => status == 'to_confirm';
+  bool get edited => editedByName != null;
 
   factory FinanceEntry.fromJson(Map<String, dynamic> j) => FinanceEntry(
     id: j['id'] as int,
@@ -64,6 +77,9 @@ class FinanceEntry {
     validatedAt: j['validated_at'] == null
         ? null
         : DateTime.parse(j['validated_at'] as String).toLocal(),
+    editedByName: j['edited_by_name'] as String?,
+    confirmedByName: j['confirmed_by_name'] as String?,
+    linked: j['due'] != null || j['collection'] != null,
   );
 }
 
@@ -76,16 +92,22 @@ class NewEntry {
     required this.label,
     this.memberId,
     this.memberName,
+    this.memberIds = const [],
+    this.memberNames = const [],
     required this.date,
     String? clientUuid,
   }) : clientUuid = clientUuid ?? uuidV4();
 
   final String direction;
+
+  /// Per member when several are ticked: one line each (owner, 2026-10-30).
   final int amount;
   final String category;
   final String label;
   final int? memberId;
   final String? memberName;
+  final List<int> memberIds;
+  final List<String> memberNames;
   final DateTime date;
   final String clientUuid;
 
@@ -94,7 +116,10 @@ class NewEntry {
     'amount': amount,
     'category': category,
     'label': label,
-    'member': memberId,
+    if (memberIds.length > 1)
+      'members': memberIds
+    else
+      'member': memberIds.isEmpty ? memberId : memberIds.single,
     'date':
         '${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
     'client_uuid': clientUuid,
@@ -120,17 +145,20 @@ class FinanceSummary {
     required this.balance,
     required this.balanceWithPending,
     required this.pending,
+    this.toConfirm = 0,
     this.validatedUntil,
   });
   final int balance;
   final int balanceWithPending;
   final int pending;
+  final int toConfirm;
   final DateTime? validatedUntil;
 
   factory FinanceSummary.fromJson(Map<String, dynamic> j) => FinanceSummary(
     balance: j['balance'] as int,
     balanceWithPending: j['balance_with_pending'] as int,
     pending: j['pending'] as int,
+    toConfirm: (j['to_confirm'] as int?) ?? 0,
     validatedUntil: j['validated_until'] == null
         ? null
         : DateTime.parse(j['validated_until'] as String),

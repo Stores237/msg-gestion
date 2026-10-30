@@ -273,3 +273,178 @@ class _RecipientPickerState extends State<_RecipientPicker> {
   void _toggle(int id) =>
       setState(() => _on.contains(id) ? _on.remove(id) : _on.add(id));
 }
+
+/// Tick several members, with "Tout cocher" (owner, 2026-10-30: finances).
+/// Returns the ticked members in list order, or null when dismissed.
+Future<List<MemberSummary>?> pickMembers(
+  BuildContext context, {
+  List<int> selected = const [],
+}) {
+  return showModalBottomSheet<List<MemberSummary>>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (context, scroll) =>
+          _MultiPicker(scroll: scroll, selected: selected.toSet()),
+    ),
+  );
+}
+
+class _MultiPicker extends StatefulWidget {
+  const _MultiPicker({required this.scroll, required this.selected});
+  final ScrollController scroll;
+  final Set<int> selected;
+
+  @override
+  State<_MultiPicker> createState() => _MultiPickerState();
+}
+
+class _MultiPickerState extends State<_MultiPicker> {
+  List<MemberSummary>? _all;
+  Object? _error;
+  String _q = '';
+  late final Set<int> _on = {...widget.selected};
+
+  @override
+  void initState() {
+    super.initState();
+    RepositoryLocator.instance.members
+        .list()
+        .then((p) {
+          if (mounted) setState(() => _all = p.members);
+        })
+        .catchError((Object e) {
+          if (mounted) setState(() => _error = e);
+        });
+  }
+
+  void _toggle(int id) =>
+      setState(() => _on.contains(id) ? _on.remove(id) : _on.add(id));
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    final all = _all ?? const <MemberSummary>[];
+    final q = _RecipientPickerState._fold(_q);
+    final shown = all
+        .where((m) => _RecipientPickerState._fold(m.fullName).contains(q))
+        .toList();
+    // "Tout cocher" works on what the search shows.
+    final allOn = shown.isNotEmpty && shown.every((m) => _on.contains(m.id));
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            controller: widget.scroll,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              Text(
+                l.chooseMembers,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                key: const Key('members-search'),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: l.searchName,
+                ),
+                onChanged: (v) => setState(() => _q = v),
+              ),
+              const SizedBox(height: 12),
+              if (_error != null)
+                Text(
+                  describeError(context, _error!),
+                  style: TextStyle(color: c.alert),
+                )
+              else if (_all == null)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else ...[
+                GroupCard(
+                  children: [
+                    ListRow(
+                      key: const Key('check-all'),
+                      title: Text(
+                        l.checkAll,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      trailing: Checkbox(
+                        key: const Key('check-all-box'),
+                        value: allOn,
+                        onChanged: shown.isEmpty
+                            ? null
+                            : (_) => setState(
+                                () => allOn
+                                    ? _on.removeAll(shown.map((m) => m.id))
+                                    : _on.addAll(shown.map((m) => m.id)),
+                              ),
+                      ),
+                      onTap: shown.isEmpty
+                          ? null
+                          : () => setState(
+                              () => allOn
+                                  ? _on.removeAll(shown.map((m) => m.id))
+                                  : _on.addAll(shown.map((m) => m.id)),
+                            ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                GroupCard(
+                  children: [
+                    for (final m in shown)
+                      ListRow(
+                        key: Key('pick-many-${m.id}'),
+                        lead: MemberAvatar(
+                          name: m.fullName,
+                          status: m.status,
+                          diaspora: m.isDiaspora,
+                          size: 36,
+                        ),
+                        title: Text(m.fullName),
+                        trailing: Checkbox(
+                          value: _on.contains(m.id),
+                          onChanged: (_) => _toggle(m.id),
+                        ),
+                        onTap: () => _toggle(m.id),
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          decoration: BoxDecoration(
+            color: c.surfaceCard,
+            border: Border(top: BorderSide(color: c.borderSubtle)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                key: const Key('members-done'),
+                onPressed: _all == null
+                    ? null
+                    : () => Navigator.of(context).pop([
+                        for (final m in all)
+                          if (_on.contains(m.id)) m,
+                      ]),
+                child: Text(l.doneCount(_on.length)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

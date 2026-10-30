@@ -87,11 +87,15 @@ class BureauHome {
   const BureauHome({
     this.membersActive,
     this.toValidate,
+    this.toConfirm,
     this.collections = const [],
     this.unfilled = const [],
   });
   final int? membersActive;
   final int? toValidate;
+
+  /// Lines the trésorier edited and validated, for the commissaire.
+  final int? toConfirm;
 
   /// (id, title, paid_full, members)
   final List<(int, String, int, int)> collections;

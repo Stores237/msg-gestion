@@ -715,6 +715,7 @@ class FakeFinancesRepository implements FinancesRepository {
       amount: 2500,
       category: 'solidarite',
       label: 'Décès · Nkotto',
+      memberId: 4,
       memberName: 'Essomba Kévin',
       date: DateTime(2026, 10, 19),
       status: 'pending',
@@ -785,6 +786,64 @@ class FakeFinancesRepository implements FinancesRepository {
                 validatedByName: 'Moi',
               )
             : e,
+    ];
+    return items.firstWhere((e) => e.id == id);
+  }
+
+  final edits = <(int, NewEntry)>[];
+  final confirms = <(int, bool, String)>[];
+
+  FinanceEntry _with(
+    FinanceEntry e, {
+    String? status,
+    int? amount,
+    String? label,
+    String? category,
+    String? edited,
+  }) => FinanceEntry(
+    id: e.id,
+    direction: e.direction,
+    amount: amount ?? e.amount,
+    category: category ?? e.category,
+    label: label ?? e.label,
+    memberId: e.memberId,
+    memberName: e.memberName,
+    date: e.date,
+    status: status ?? e.status,
+    createdByName: e.createdByName,
+    createdAt: e.createdAt,
+    validatedByName: e.validatedByName,
+    editedByName: edited ?? e.editedByName,
+  );
+
+  @override
+  Future<FinanceEntry> editEntry(int id, NewEntry changes) async {
+    edits.add((id, changes));
+    items = [
+      for (final e in items)
+        e.id == id
+            ? _with(
+                e,
+                amount: changes.amount,
+                label: changes.label,
+                category: changes.category,
+                edited: 'Moi',
+              )
+            : e,
+    ];
+    return items.firstWhere((e) => e.id == id);
+  }
+
+  @override
+  Future<FinanceEntry> confirmEntry(
+    int id, {
+    required bool accept,
+    String reason = '',
+  }) async {
+    confirms.add((id, accept, reason));
+    items = [
+      for (final e in items)
+        e.id == id ? _with(e, status: accept ? 'validated' : 'pending') : e,
     ];
     return items.firstWhere((e) => e.id == id);
   }

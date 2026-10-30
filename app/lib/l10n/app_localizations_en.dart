@@ -2420,4 +2420,104 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get signedOutOtherDevice =>
       'Your account was opened on another phone, so this one was signed out. If it wasn’t you, sign in again and change your PIN.';
+
+  @override
+  String get checkAll => 'Select all';
+
+  @override
+  String get chooseMembers => 'Choose members';
+
+  @override
+  String get membersLabel => 'Members';
+
+  @override
+  String get memberRequiredError => 'Choose at least one member.';
+
+  @override
+  String membersChosen(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n members chosen',
+      one: '1 member chosen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String perMemberTotal(int n, String amount, String total) {
+    return '$n members × $amount = $total';
+  }
+
+  @override
+  String get perMemberHint => 'One line per member, same amount each.';
+
+  @override
+  String get catOther => 'Other';
+
+  @override
+  String get otherDescription => 'Description (required)';
+
+  @override
+  String get descriptionRequired => 'Describe the operation.';
+
+  @override
+  String get editEntryTitle => 'Edit the operation';
+
+  @override
+  String get entryEdited =>
+      'Operation edited. The commissaire finalises it after your validation.';
+
+  @override
+  String get editedBadge => 'Edited';
+
+  @override
+  String editedBy(String name) {
+    return 'edited by $name';
+  }
+
+  @override
+  String get toConfirmBadge => 'To finalise';
+
+  @override
+  String get confirmEntryTitle => 'Finalise the operation?';
+
+  @override
+  String confirmEntryBody(String name) {
+    return '$name edited and validated it. Finalise it if the correction is right, otherwise send it back with the reason.';
+  }
+
+  @override
+  String get finalise => 'Finalise';
+
+  @override
+  String get sendBack => 'Send back';
+
+  @override
+  String get sendBackReason => 'Why send it back to the treasurer?';
+
+  @override
+  String get entryFinalised => 'Operation finalised.';
+
+  @override
+  String get entrySentBack => 'Operation sent back to the treasurer.';
+
+  @override
+  String get validateEditedNote =>
+      'Edited: after your validation, the commissaire who entered it finalises it.';
+
+  @override
+  String get linkedEntryNote =>
+      'Payment towards a share or a fine: the member and the category stay.';
+
+  @override
+  String entriesToConfirm(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n operations to finalise',
+      one: '1 operation to finalise',
+    );
+    return '$_temp0';
+  }
 }

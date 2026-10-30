@@ -89,6 +89,7 @@ class BureauHomeView(APIView):
             out["members_active"] = User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True).count()
         if u.can("finances.cashbook", "view"):
             out["to_validate"] = Entry.objects.filter(status=Entry.Status.PENDING).count()
+            out["to_confirm"] = Entry.objects.filter(status=Entry.Status.TO_CONFIRM).count()
         if u.can("finances.solidarity", "view"):
             items = []
             for c in Collection.objects.filter(closed_at__isnull=True)[:3]:

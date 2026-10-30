@@ -49,7 +49,9 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const Key('e-member')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('pick-member-4')));
+      await tester.tap(find.byKey(const Key('pick-many-4')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('members-done')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('e-save')));
       await tester.pumpAndSettle();

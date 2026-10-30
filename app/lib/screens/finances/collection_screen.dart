@@ -121,6 +121,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
       _ => rows,
     };
     final total = _selected.values.fold<int>(0, (a, b) => a + b);
+    final payable = shown.where((r) => !r.done).toList();
+    final allTicked =
+        payable.isNotEmpty &&
+        payable.every((r) => _selected.containsKey(r.memberId));
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -220,6 +224,33 @@ class _CollectionScreenState extends State<CollectionScreen> {
                             onSelected: (i) => setState(() => _filter = i),
                           ),
                           const SizedBox(height: 12),
+                          // "Tout cocher" (owner, 2026-10-30): every member
+                          // shown who still owes, with their next amount.
+                          if (canPay && payable.isNotEmpty) ...[
+                            GroupCard(
+                              children: [
+                                ListRow(
+                                  key: const Key('check-all'),
+                                  onTap: () => setState(
+                                    () => allTicked
+                                        ? _selected.clear()
+                                        : _selected.addAll({
+                                            for (final r in payable)
+                                              r.memberId: r.nextAmount,
+                                          }),
+                                  ),
+                                  lead: _Check(on: allTicked, done: false),
+                                  title: Text(
+                                    l.checkAll,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
                           GroupCard(
                             children: [
                               for (final r in shown)

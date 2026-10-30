@@ -145,6 +145,12 @@ Defined in `apps/accounts/registry.py`:
 
 Each refusal is written to the audit log.
 
+- **Finance edits** (owner, 2026-10-30): the trésorier may correct a line only while it is "À
+  valider", only through his *validate* right (never *change*), never his own entry, and every
+  change is journaled with before/after. An edited line needs a second person after him: the
+  commissaire finalises it (whoever edited or validated it can't), or sends it back with a reason.
+  Until then it is not in the balance.
+
 ## Data visible by role
 
 Swap and absence requests are decided by the lineup makers (calendar.planning change) for any

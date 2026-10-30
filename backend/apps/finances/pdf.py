@@ -87,7 +87,7 @@ def cashbook_pdf(entries):
     return _doc("Livre de caisse", build)
 
 
-STATUS = {"validated": "validé", "pending": "à valider"}
+STATUS = {"validated": "validé", "pending": "à valider", "to_confirm": "à finaliser"}
 
 
 def statement_pdf(rows, totals):

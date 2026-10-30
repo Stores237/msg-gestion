@@ -77,6 +77,7 @@ class HttpProfileRepository implements ProfileRepository {
     return BureauHome(
       membersActive: j['members_active'] as int?,
       toValidate: j['to_validate'] as int?,
+      toConfirm: j['to_confirm'] as int?,
       collections: [
         for (final c in (j['collections'] as List?) ?? const [])
           (

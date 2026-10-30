@@ -24,6 +24,8 @@ def client_for(*slugs):
 
 def entry(api, **kw):
     body = {"direction": "in", "amount": 2500, "category": "solidarite", "label": "Décès · Nkotto", "date": "2026-10-19", **kw}
+    if body["direction"] == "in" and "member" not in body and "members" not in body:
+        body["member"] = UserFactory().pk  # money in names a member (owner, 2026-10-30)
     return api.post("/api/finances/entries/", body, format="json")
 
 

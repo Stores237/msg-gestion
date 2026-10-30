@@ -7,6 +7,18 @@ abstract class FinancesRepository {
   /// Idempotent on [NewEntry.clientUuid]: safe to retry.
   Future<FinanceEntry> createEntry(NewEntry entry);
   Future<FinanceEntry> validate(int id);
+
+  /// The trésorier corrects a line not yet validated (direction, amount,
+  /// category, label, member, date).
+  Future<FinanceEntry> editEntry(int id, NewEntry changes);
+
+  /// The commissaire finalises a line the trésorier edited and validated,
+  /// or sends it back ([reason] required).
+  Future<FinanceEntry> confirmEntry(
+    int id, {
+    required bool accept,
+    String reason = '',
+  });
   Future<List<Collection>> collections();
   Future<Collection> collection(int id);
   Future<Collection> openCollection({

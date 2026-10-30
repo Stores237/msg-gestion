@@ -1549,5 +1549,71 @@
     }
   },
   "errorDatePassed": "La date est passée : ce planning ne peut plus être publié. Réutilisez-le pour un événement à venir.",
-  "signedOutOtherDevice": "Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN."
+  "signedOutOtherDevice": "Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN.",
+  "checkAll": "Tout cocher",
+  "chooseMembers": "Choisir les membres",
+  "membersLabel": "Membres",
+  "memberRequiredError": "Choisissez au moins un membre.",
+  "membersChosen": "{n, plural, =1{1 membre choisi} other{{n} membres choisis}}",
+  "@membersChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "perMemberTotal": "{n} membres × {amount} = {total}",
+  "@perMemberTotal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "perMemberHint": "Une opération par membre, du même montant.",
+  "catOther": "Autre",
+  "otherDescription": "Description (obligatoire)",
+  "descriptionRequired": "Décrivez l’opération.",
+  "editEntryTitle": "Modifier l’opération",
+  "entryEdited": "Opération modifiée. Le commissaire la finalisera après votre validation.",
+  "editedBadge": "Modifié",
+  "editedBy": "modifié par {name}",
+  "@editedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "toConfirmBadge": "À finaliser",
+  "confirmEntryTitle": "Finaliser l’opération ?",
+  "confirmEntryBody": "{name} l’a modifiée puis validée. Finalisez-la si la correction est juste, sinon renvoyez-la avec la raison.",
+  "@confirmEntryBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "finalise": "Finaliser",
+  "sendBack": "Renvoyer",
+  "sendBackReason": "Pourquoi la renvoyer au trésorier ?",
+  "entryFinalised": "Opération finalisée.",
+  "entrySentBack": "Opération renvoyée au trésorier.",
+  "validateEditedNote": "Modifiée : après votre validation, le commissaire qui l’a saisie la finalisera.",
+  "linkedEntryNote": "Paiement d’une cotisation ou d’une amende : le membre et la catégorie ne changent pas.",
+  "entriesToConfirm": "{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}",
+  "@entriesToConfirm": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

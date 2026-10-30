@@ -719,5 +719,71 @@
     }
   },
   "errorDatePassed": "The date has passed: this lineup can no longer be published. Reuse it for an upcoming event.",
-  "signedOutOtherDevice": "Your account was opened on another phone, so this one was signed out. If it wasn’t you, sign in again and change your PIN."
+  "signedOutOtherDevice": "Your account was opened on another phone, so this one was signed out. If it wasn’t you, sign in again and change your PIN.",
+  "checkAll": "Select all",
+  "chooseMembers": "Choose members",
+  "membersLabel": "Members",
+  "memberRequiredError": "Choose at least one member.",
+  "membersChosen": "{n, plural, =1{1 member chosen} other{{n} members chosen}}",
+  "@membersChosen": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "perMemberTotal": "{n} members × {amount} = {total}",
+  "@perMemberTotal": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "perMemberHint": "One line per member, same amount each.",
+  "catOther": "Other",
+  "otherDescription": "Description (required)",
+  "descriptionRequired": "Describe the operation.",
+  "editEntryTitle": "Edit the operation",
+  "entryEdited": "Operation edited. The commissaire finalises it after your validation.",
+  "editedBadge": "Edited",
+  "editedBy": "edited by {name}",
+  "@editedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "toConfirmBadge": "To finalise",
+  "confirmEntryTitle": "Finalise the operation?",
+  "confirmEntryBody": "{name} edited and validated it. Finalise it if the correction is right, otherwise send it back with the reason.",
+  "@confirmEntryBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "finalise": "Finalise",
+  "sendBack": "Send back",
+  "sendBackReason": "Why send it back to the treasurer?",
+  "entryFinalised": "Operation finalised.",
+  "entrySentBack": "Operation sent back to the treasurer.",
+  "validateEditedNote": "Edited: after your validation, the commissaire who entered it finalises it.",
+  "linkedEntryNote": "Payment towards a share or a fine: the member and the category stay.",
+  "entriesToConfirm": "{n, plural, =1{1 operation to finalise} other{{n} operations to finalise}}",
+  "@entriesToConfirm": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -238,6 +238,7 @@ class EntryRow extends StatelessWidget {
                 e.createdByName,
                 '${d.dayMonth(e.createdAt)}, ${d.time(e.createdAt)}',
               ),
+              if (e.editedByName != null) l.editedBy(e.editedByName!),
               if (e.validatedByName != null) l.validatedBy(e.validatedByName!),
             ].join(' · '),
             style: const TextStyle(fontSize: 12),
@@ -259,8 +260,21 @@ class EntryRow extends StatelessWidget {
                 ),
               ],
             )
-          else if (e.pending)
-            Badge2(l.toValidate, tone: Tone.amber),
+          else if (e.pending || e.toConfirm || e.edited)
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                if (e.pending) Badge2(l.toValidate, tone: Tone.amber),
+                if (e.toConfirm)
+                  Badge2(
+                    l.toConfirmBadge,
+                    key: Key('to-confirm-${e.id}'),
+                    tone: Tone.amber,
+                  ),
+                if (e.edited) Badge2(l.editedBadge, key: Key('edited-${e.id}')),
+              ],
+            ),
         ],
       ),
       trailing: Amount(
@@ -282,9 +296,10 @@ class _CashBook extends StatelessWidget {
   final Widget header;
   final VoidCallback onChanged;
 
+  /// The trésorier: validate, or correct it first (owner, 2026-10-30).
   Future<void> _validate(BuildContext context, FinanceEntry e) async {
     final l = AppLocalizations.of(context);
-    final ok = await showDialog<bool>(
+    final ok = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l.validateEntryTitle),
@@ -301,23 +316,35 @@ class _CashBook extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text(l.validateEntryBody),
+            Text(e.edited ? l.validateEditedNote : l.validateEntryBody),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(context).pop(),
             child: Text(l.cancel),
+          ),
+          OutlinedButton(
+            key: const Key('edit-entry'),
+            onPressed: () => Navigator.of(context).pop('edit'),
+            child: Text(l.editAction),
           ),
           FilledButton(
             key: const Key('validate-confirm'),
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(context).pop('validate'),
             child: Text(l.validate),
           ),
         ],
       ),
     );
-    if (ok != true || !context.mounted) return;
+    if (ok == null || !context.mounted) return;
+    if (ok == 'edit') {
+      final saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => EntryFormScreen(editing: e)),
+      );
+      if (saved == true) onChanged();
+      return;
+    }
     try {
       await RepositoryLocator.instance.finances.validate(e.id);
       if (!context.mounted) return;
@@ -330,10 +357,37 @@ class _CashBook extends StatelessWidget {
     }
   }
 
+  /// The commissaire who entered it: finalise the trésorier's correction,
+  /// or send it back with the reason.
+  Future<void> _finalise(BuildContext context, FinanceEntry e) async {
+    final l = AppLocalizations.of(context);
+    final answer = await showDialog<(bool, String)>(
+      context: context,
+      builder: (context) => _FinaliseDialog(entry: e),
+    );
+    if (answer == null || !context.mounted) return;
+    final (choice, why) = answer;
+    try {
+      await RepositoryLocator.instance.finances.confirmEntry(
+        e.id,
+        accept: choice,
+        reason: why,
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(choice ? l.entryFinalised : l.entrySentBack)),
+      );
+      onChanged();
+    } catch (err) {
+      if (context.mounted) showErrorSnack(context, err);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final canValidate = me.can('finances.cashbook', 'validate');
+    final canEnter = me.can('finances.cashbook', 'create');
     return AsyncView<List<FinanceEntry>>(
       load: RepositoryLocator.instance.finances.entries,
       builder: (context, entries, reload) => RefreshIndicator(
@@ -352,6 +406,8 @@ class _CashBook extends StatelessWidget {
                       entry: e,
                       onTap: canValidate && e.pending && !e.local
                           ? () => _validate(context, e)
+                          : canEnter && e.toConfirm
+                          ? () => _finalise(context, e)
                           : null,
                     ),
                 ],
@@ -359,6 +415,72 @@ class _CashBook extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// "Finaliser l'opération ?": owns the reason box, so it outlives the
+/// dialog's closing animation.
+class _FinaliseDialog extends StatefulWidget {
+  const _FinaliseDialog({required this.entry});
+  final FinanceEntry entry;
+
+  @override
+  State<_FinaliseDialog> createState() => _FinaliseDialogState();
+}
+
+class _FinaliseDialogState extends State<_FinaliseDialog> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final e = widget.entry;
+    return AlertDialog(
+      title: Text(l.confirmEntryTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GroupCard(
+              children: [
+                ListRow(
+                  title: Text(e.label),
+                  subtitle: Text(e.memberName ?? e.createdByName),
+                  trailing: Amount(e.amount),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(l.confirmEntryBody(e.editedByName ?? e.validatedByName ?? '')),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('send-back-reason'),
+              controller: _reason,
+              decoration: InputDecoration(labelText: l.sendBackReason),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          key: const Key('send-back'),
+          onPressed: () =>
+              Navigator.of(context).pop((false, _reason.text.trim())),
+          child: Text(l.sendBack),
+        ),
+        FilledButton(
+          key: const Key('finalise'),
+          onPressed: () => Navigator.of(context).pop((true, '')),
+          child: Text(l.finalise),
+        ),
+      ],
     );
   }
 }

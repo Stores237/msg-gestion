@@ -35,6 +35,10 @@ String describeError(BuildContext context, Object error) {
     ApiException(code: 'not_on_duty') => l.notOnDuty,
     ApiException(code: 'too_early') => l.reportTooEarly,
     ApiException(code: 'date_passed') => l.errorDatePassed,
+    ApiException(code: 'member_required') => l.memberRequiredError,
+    ApiException(code: 'description_required') => l.descriptionRequired,
+    ApiException(code: 'linked_entry') => l.linkedEntryNote,
+    ApiException(code: 'reason_required') => l.sendBackReason,
     ApiException(code: 'other_device') => l.signedOutOtherDevice,
     // Server-side validation messages are written for people; show them
     // when there is no code to translate.

@@ -156,7 +156,7 @@ def _finances():
     totals = statement_totals(statement_rows())
     return {
         "balance": balance(Entry.objects.filter(status=Entry.Status.VALIDATED)),
-        "pending": Entry.objects.filter(status=Entry.Status.PENDING).count(),
+        "pending": Entry.objects.exclude(status=Entry.Status.VALIDATED).count(),
         "open_collections": Collection.objects.filter(closed_at__isnull=True).count(),
         **totals,
     }

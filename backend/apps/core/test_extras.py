@@ -113,7 +113,7 @@ def test_pdf_exports_need_export_right(settings, tmp_path):
 def test_bureau_home_blocks_follow_permissions():
     tre_api, _ = client_for("tresorier")
     member_api, _ = client_for("membre")
-    assert set(tre_api.get("/api/home/bureau/").json()) == {"members_active", "to_validate", "collections", "unfilled"}
+    assert set(tre_api.get("/api/home/bureau/").json()) == {"members_active", "to_validate", "to_confirm", "collections", "unfilled"}
     assert member_api.get("/api/home/bureau/").json() == {}
 
 

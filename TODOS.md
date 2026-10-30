@@ -8,9 +8,10 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
-- [ ] **Owner — build 25 (2026-10-30):** deploy on Render (migration accounts 0018) and install
-  build 25. From then on an account works on one phone at a time; tell the testers who share an
-  account, or use a phone and the emulator, that the older one gets signed out.
+- [ ] **Owner — build 26 (2026-10-30):** deploy on Render (migrations accounts 0018 and finances
+  0003) and install build 26 (it includes build 25). From then on an account works on one phone
+  at a time; tell the testers who share an account, or use a phone and the emulator, that the
+  older one gets signed out.
 - [ ] **Owner:** fill in back-office → Plateforme · aide (support phone, WhatsApp, e-mail, website)
   and have the privacy policy and terms drafts reviewed.
 

@@ -1023,3 +1023,41 @@ is told".
 **Réutiliser** → pick next Sunday's mass → snack "Planning repris pour …", the next week shows it as
 a draft. Go back to a past week with an unpublished lineup: "Date passée", nothing to publish.
 `pytest apps/planning/test_reuse.py`, `flutter test test/planning_reuse_test.dart`.
+
+## 47. Finances: edit before validation, members required and ticked, "Autre"
+
+Owner, 2026-10-30: "the trésorier should be able to edit an operation that hasn't yet been
+validated; member selection should be a must, with check boxes and an option to check all; on the
+categories add an option Autre with a description". Choices made with the owner: the edited line is
+marked, the two steps remain (after the trésorier's validation the commissaire finalises it); a
+member is required on Entrées only; several ticked members make one line each; "Autre" for Entrées
+only (Sorties already have their description).
+
+- **Edit (trésorier)**: tapping a line "À valider" offers **Modifier** next to Valider. Amount,
+  date, description, category, member and direction can be corrected (for a payment towards a share
+  or a fine, only amount, date and description). The line shows **Modifié** and "modifié par …";
+  every change is journaled with before/after ("Opération modifiée avant validation") and the
+  commissaire who entered it is notified. Editing is part of the trésorier's *validate* right: the
+  two-hands rule still never gives him *change*.
+- **Two steps**: validating an edited line puts it **À finaliser**; it doesn't count in the balance
+  yet. The commissaire (Accueil "N opérations à finaliser", or tapping the line) **Finalise** it, or
+  **Renvoie** it to the trésorier with a reason (back to À valider). Whoever edited it can't
+  finalise it. An unedited line is still validated in one step.
+- **Members**: an Entrée needs at least one member. Nouvelle opération → Membres opens a list with
+  check boxes and **Tout cocher** (on the names the search shows). Several members → one line each,
+  same amount, with "N membres × montant = total" shown before saving; sent as one request, safe to
+  resend offline. Sorties keep an optional single member.
+- **Autre**: a new Entrée category; its description is required (shown in the cash book,
+  statements and PDFs).
+- **Solidarité** collection screen: **Tout cocher** ticks everyone still owing, with their next
+  instalment.
+- Server: `Entry.Status.TO_CONFIRM`, `edited_by/at`, `confirmed_by/at`, `Category.OTHER`
+  (migration finances 0003), `PATCH /api/finances/entries/<id>/`, `POST …/confirm/`
+  (`{accept}` or `{accept: false, reason}`), `members` on `POST /api/finances/entries/`.
+
+**Verify.** As the commissaire: Nouvelle opération → Entrée, no member → "Choisissez au moins un
+membre"; Membres → Tout cocher → OK → "N membres × …" → save: N lines. Catégorie Autre without a
+description → refused. As the trésorier: tap one of them → Modifier → change the amount → the line
+shows Modifié → Valider → À finaliser. As the commissaire: tap it → Finaliser (or Renvoyer with a
+reason). `pytest apps/finances/test_corrections.py`, `flutter test
+test/finance_corrections_test.dart`.

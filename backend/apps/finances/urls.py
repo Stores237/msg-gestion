@@ -7,6 +7,7 @@ urlpatterns = [
     path("entries/", views.EntryListView.as_view(), name="fin-entries"),
     path("entries/<int:pk>/", views.EntryDetailView.as_view(), name="fin-entry"),
     path("entries/<int:pk>/validate/", views.EntryValidateView.as_view(), name="fin-entry-validate"),
+    path("entries/<int:pk>/confirm/", views.EntryConfirmView.as_view(), name="fin-entry-confirm"),
     path("collections/", views.CollectionListView.as_view(), name="fin-collections"),
     path("collections/<int:pk>/", views.CollectionDetailView.as_view(), name="fin-collection"),
     path("collections/<int:pk>/payments/", views.CollectionPayView.as_view(), name="fin-collection-pay"),

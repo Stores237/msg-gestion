@@ -4123,6 +4123,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN.'**
   String get signedOutOtherDevice;
+
+  /// No description provided for @checkAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout cocher'**
+  String get checkAll;
+
+  /// No description provided for @chooseMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir les membres'**
+  String get chooseMembers;
+
+  /// No description provided for @membersLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get membersLabel;
+
+  /// No description provided for @memberRequiredError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez au moins un membre.'**
+  String get memberRequiredError;
+
+  /// No description provided for @membersChosen.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 membre choisi} other{{n} membres choisis}}'**
+  String membersChosen(int n);
+
+  /// No description provided for @perMemberTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} membres × {amount} = {total}'**
+  String perMemberTotal(int n, String amount, String total);
+
+  /// No description provided for @perMemberHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une opération par membre, du même montant.'**
+  String get perMemberHint;
+
+  /// No description provided for @catOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autre'**
+  String get catOther;
+
+  /// No description provided for @otherDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Description (obligatoire)'**
+  String get otherDescription;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez l’opération.'**
+  String get descriptionRequired;
+
+  /// No description provided for @editEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier l’opération'**
+  String get editEntryTitle;
+
+  /// No description provided for @entryEdited.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération modifiée. Le commissaire la finalisera après votre validation.'**
+  String get entryEdited;
+
+  /// No description provided for @editedBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifié'**
+  String get editedBadge;
+
+  /// No description provided for @editedBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'modifié par {name}'**
+  String editedBy(String name);
+
+  /// No description provided for @toConfirmBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'À finaliser'**
+  String get toConfirmBadge;
+
+  /// No description provided for @confirmEntryTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Finaliser l’opération ?'**
+  String get confirmEntryTitle;
+
+  /// No description provided for @confirmEntryBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'{name} l’a modifiée puis validée. Finalisez-la si la correction est juste, sinon renvoyez-la avec la raison.'**
+  String confirmEntryBody(String name);
+
+  /// No description provided for @finalise.
+  ///
+  /// In fr, this message translates to:
+  /// **'Finaliser'**
+  String get finalise;
+
+  /// No description provided for @sendBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renvoyer'**
+  String get sendBack;
+
+  /// No description provided for @sendBackReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourquoi la renvoyer au trésorier ?'**
+  String get sendBackReason;
+
+  /// No description provided for @entryFinalised.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération finalisée.'**
+  String get entryFinalised;
+
+  /// No description provided for @entrySentBack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Opération renvoyée au trésorier.'**
+  String get entrySentBack;
+
+  /// No description provided for @validateEditedNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifiée : après votre validation, le commissaire qui l’a saisie la finalisera.'**
+  String get validateEditedNote;
+
+  /// No description provided for @linkedEntryNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Paiement d’une cotisation ou d’une amende : le membre et la catégorie ne changent pas.'**
+  String get linkedEntryNote;
+
+  /// No description provided for @entriesToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}'**
+  String entriesToConfirm(int n);
 }
 
 class _AppLocalizationsDelegate

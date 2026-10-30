@@ -33,13 +33,26 @@ class EntrySerializer(serializers.ModelSerializer):
     member_name = serializers.CharField(source="member.full_name", default=None, read_only=True)
     created_by_name = serializers.CharField(source="created_by.short_name", read_only=True)
     validated_by_name = serializers.CharField(source="validated_by.short_name", default=None, read_only=True)
+    edited_by_name = serializers.CharField(source="edited_by.short_name", default=None, read_only=True)
+    confirmed_by_name = serializers.CharField(source="confirmed_by.short_name", default=None, read_only=True)
 
     class Meta:
         model = Entry
         fields = ["id", "direction", "amount", "category", "label", "member", "member_name", "date", "status", "client_uuid",
-                  "created_by_name", "created_at", "validated_by_name", "validated_at", "collection"]
-        read_only_fields = ["status", "created_at", "validated_at", "collection"]
+                  "created_by_name", "created_at", "validated_by_name", "validated_at", "collection", "due",
+                  "edited_by_name", "edited_at", "confirmed_by_name", "confirmed_at"]
+        read_only_fields = ["status", "created_at", "validated_at", "collection", "due", "edited_at", "confirmed_at"]
         extra_kwargs = {"client_uuid": {"required": False, "allow_null": True, "validators": []}}
+
+
+class NewEntrySerializer(EntrySerializer):
+    """A new line; `members` (several ticked members) makes one line each
+    with the same amount (owner, 2026-10-30)."""
+
+    members = serializers.ListField(child=MemberField(), required=False, allow_empty=False, max_length=500)
+
+    class Meta(EntrySerializer.Meta):
+        fields = [*EntrySerializer.Meta.fields, "members"]
 
 
 class EntryListView(APIView):
@@ -56,17 +69,47 @@ class EntryListView(APIView):
             qs = qs.filter(status=st)
         return Response(EntrySerializer(qs[:200], many=True).data)
 
-    @extend_schema(request=EntrySerializer, responses=EntrySerializer)
+    @extend_schema(request=NewEntrySerializer, responses=EntrySerializer)
     def post(self, request):
-        s = EntrySerializer(data=request.data)
+        s = NewEntrySerializer(data=request.data)
         s.is_valid(raise_exception=True)
-        entry, created = services.record_entry(by=request.user, request=request, **s.validated_data)
-        return Response(EntrySerializer(entry).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        data = dict(s.validated_data)
+        members = data.pop("members", None)
+        if data.get("direction") == Entry.Direction.OUT:
+            data["category"] = Entry.Category.EXPENSE
+        try:
+            services.check_line(data.get("direction"), data.get("category"), data.get("label"),
+                                (members or [None])[0] if members else data.get("member"))
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        if not members:
+            entry, created = services.record_entry(by=request.user, request=request, **data)
+            return Response(EntrySerializer(entry).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        entries = services.record_entries(members, by=request.user, request=request, **data)
+        return Response({"entries": EntrySerializer(entries, many=True).data, "count": len(entries)},
+                        status=status.HTTP_201_CREATED)
 
 
 class EntryDetailView(APIView):
+    """DELETE (whoever may delete) or PATCH: the trésorier corrects a line
+    before validating it — part of his "validate" right, since the two-hands
+    rule never gives him "change" (owner, 2026-10-30)."""
+
     def get_permissions(self):
-        return [require("finances.cashbook", "delete" if self.request.method == "DELETE" else "view")()]
+        action = {"DELETE": "delete", "PATCH": "validate"}.get(self.request.method, "view")
+        return [require("finances.cashbook", action)()]
+
+    @extend_schema(request=EntrySerializer, responses=EntrySerializer)
+    def patch(self, request, pk):
+        entry = get_object_or_404(Entry.objects.select_related("member", "created_by"), pk=pk)
+        s = EntrySerializer(entry, data=request.data, partial=True)
+        s.is_valid(raise_exception=True)
+        changes = {k: v for k, v in s.validated_data.items() if k in services.EDITABLE}
+        try:
+            services.edit_entry(entry, changes, by=request.user, request=request)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        return Response(EntrySerializer(entry).data)
 
     def delete(self, request, pk):
         entry = get_object_or_404(Entry, pk=pk)
@@ -92,6 +135,24 @@ class EntryValidateView(APIView):
         return Response(EntrySerializer(entry).data)
 
 
+class EntryConfirmView(APIView):
+    """POST {accept: true} → the commissaire finalises a line the trésorier
+    edited and validated; {accept: false, reason} → back to the trésorier."""
+
+    permission_classes = [require("finances.cashbook", "create")]
+
+    def post(self, request, pk):
+        entry = get_object_or_404(Entry, pk=pk)
+        try:
+            if request.data.get("accept"):
+                services.confirm_entry(entry, by=request.user, request=request)
+            else:
+                services.send_back(entry, by=request.user, reason=request.data.get("reason", ""), request=request)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        return Response(EntrySerializer(entry).data)
+
+
 class SummaryView(APIView):
     permission_classes = [require("finances.cashbook", "view")]
 
@@ -102,6 +163,7 @@ class SummaryView(APIView):
             "balance": services.balance(validated),
             "balance_with_pending": services.balance(Entry.objects.all()),
             "pending": Entry.objects.filter(status=Entry.Status.PENDING).count(),
+            "to_confirm": Entry.objects.filter(status=Entry.Status.TO_CONFIRM).count(),
             "validated_until": validated.aggregate(d=Max("date"))["d"],
         })
 

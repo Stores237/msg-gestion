@@ -23,10 +23,11 @@ class HttpFinancesRepository implements FinancesRepository {
       FinanceEntry.fromJson(e as Map<String, dynamic>),
   ];
 
+  /// Several ticked members: one row "N × amount" until it is sent.
   FinanceEntry _local(Map<String, dynamic> body, DateTime at) => FinanceEntry(
     id: -at.microsecondsSinceEpoch,
     direction: body['direction'] as String,
-    amount: body['amount'] as int,
+    amount: (body['amount'] as int) * ((body['members'] as List?)?.length ?? 1),
     category: body['category'] as String,
     label: body['label'] as String,
     memberId: body['member'] as int?,
@@ -42,16 +43,25 @@ class HttpFinancesRepository implements FinancesRepository {
   @override
   Future<FinanceEntry> createEntry(NewEntry entry) async {
     // member_name rides along for the offline row; the server ignores it.
-    final body = {...entry.toJson(), 'member_name': entry.memberName};
+    final body = {
+      ...entry.toJson(),
+      'member_name': entry.memberNames.isEmpty
+          ? entry.memberName
+          : entry.memberNames.join(', '),
+    };
     try {
+      final j =
+          await _api.sendOrQueue(
+                'POST',
+                '/finances/entries/',
+                body: body,
+                kind: 'entry',
+              )
+              as Map<String, dynamic>;
+      // Several members: {"entries": [...], "count": n}.
+      final rows = j['entries'] as List?;
       return FinanceEntry.fromJson(
-        await _api.sendOrQueue(
-              'POST',
-              '/finances/entries/',
-              body: body,
-              kind: 'entry',
-            )
-            as Map<String, dynamic>,
+        rows == null ? j : rows.first as Map<String, dynamic>,
       );
     } on QueuedOffline catch (q) {
       return _local(body, q.item.createdAt);
@@ -61,6 +71,28 @@ class HttpFinancesRepository implements FinancesRepository {
   @override
   Future<FinanceEntry> validate(int id) async => FinanceEntry.fromJson(
     await _api.post('/finances/entries/$id/validate/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<FinanceEntry> editEntry(int id, NewEntry changes) async {
+    final body = changes.toJson()..remove('client_uuid');
+    return FinanceEntry.fromJson(
+      await _api.patch('/finances/entries/$id/', body: body)
+          as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Future<FinanceEntry> confirmEntry(
+    int id, {
+    required bool accept,
+    String reason = '',
+  }) async => FinanceEntry.fromJson(
+    await _api.post(
+          '/finances/entries/$id/confirm/',
+          body: {'accept': accept, 'reason': reason},
+        )
+        as Map<String, dynamic>,
   );
 
   @override

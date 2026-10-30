@@ -469,6 +469,14 @@ class _ToFollow extends StatelessWidget {
           chevron: true,
           onTap: () => onOpen?.call(AppTab.finances),
         ),
+      if ((b.toConfirm ?? 0) > 0)
+        ListRow(
+          key: const Key('follow-confirm'),
+          lead: const IconChip(Icons.fact_check_outlined, tone: Tone.amber),
+          title: Text(l.entriesToConfirm(b.toConfirm!)),
+          chevron: true,
+          onTap: () => onOpen?.call(AppTab.finances),
+        ),
       for (final (title, at, missing) in b.unfilled)
         ListRow(
           lead: const IconChip(Icons.event_busy_outlined, tone: Tone.red),
