@@ -77,6 +77,7 @@ class PlannedService {
     this.chef,
     this.chefId,
     required this.published,
+    this.past = false,
     required this.slots,
     required this.assignments,
   });
@@ -92,6 +93,10 @@ class PlannedService {
   final String? chef;
   final int? chefId;
   final bool published;
+
+  /// The event has started: a draft can't be published any more (owner,
+  /// 2026-10-30), only reused for an upcoming event.
+  final bool past;
   final List<Slot> slots;
   final List<DutyAssignment> assignments;
 
@@ -116,6 +121,9 @@ class PlannedService {
     chef: j['chef'] as String?,
     chefId: j['chef_id'] as int?,
     published: j['published'] as bool,
+    past:
+        j['past'] as bool? ??
+        DateTime.parse(j['starts_at'] as String).isBefore(DateTime.now()),
     slots: [
       for (final s in j['slots'] as List)
         Slot(s['post'] as String, s['side'] as String, s['index'] as int),
@@ -164,6 +172,12 @@ class UnplannedEvent {
   final int eventId;
   final String title;
   final DateTime startsAt;
+
+  factory UnplannedEvent.fromJson(Map<String, dynamic> u) => UnplannedEvent(
+    eventId: u['event'] as int,
+    title: u['title'] as String,
+    startsAt: DateTime.parse(u['starts_at'] as String).toLocal(),
+  );
 }
 
 class PlanningWeek {
@@ -182,6 +196,15 @@ class PlanningWeek {
   final List<UnplannedEvent> unplanned;
   final bool published;
 
+  /// Drafts first, then the published lineups below (owner, 2026-10-30).
+  List<PlannedService> get drafts =>
+      services.where((s) => !s.published).toList();
+  List<PlannedService> get done => services.where((s) => s.published).toList();
+
+  /// Drafts "Publier et notifier" would send: the ones still to come.
+  int get publishable => drafts.where((s) => !s.past).length;
+  int get pastDrafts => drafts.where((s) => s.past).length;
+
   factory PlanningWeek.fromJson(Map<String, dynamic> j) => PlanningWeek(
     start: DateTime.parse(j['start'] as String),
     end: DateTime.parse(j['end'] as String),
@@ -195,11 +218,7 @@ class PlanningWeek {
     ],
     unplanned: [
       for (final u in j['unplanned'] as List)
-        UnplannedEvent(
-          eventId: u['event'] as int,
-          title: u['title'] as String,
-          startsAt: DateTime.parse(u['starts_at'] as String).toLocal(),
-        ),
+        UnplannedEvent.fromJson(u as Map<String, dynamic>),
     ],
     published: j['published'] as bool,
   );

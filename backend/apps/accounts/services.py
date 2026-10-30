@@ -88,6 +88,50 @@ def check_pin_login(user, pin, request=None):
     return PinResult(user, False, attempts_left=left, locked_until=user.pin_locked_until)
 
 
+# --- One phone at a time ---------------------------------------------------------
+# (owner, 2026-10-30) An account is used on one phone: signing in on another
+# phone opens a new session there, and the first phone is signed out at its
+# next request. The newest phone wins, so a lost phone never locks anyone out.
+
+SESSION_CLAIM = "sid"
+
+
+def _blacklist_refresh_tokens(user):
+    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+    live = OutstandingToken.objects.filter(user=user).exclude(blacklistedtoken__isnull=False)
+    BlacklistedToken.objects.bulk_create([BlacklistedToken(token=t) for t in live], ignore_conflicts=True)
+
+
+def open_app_session(user, *, request=None):
+    """A sign-in on a phone: the other phones' refresh tokens are revoked and
+    a new session id goes into the returned token pair (the access tokens
+    derived from it carry it too)."""
+    import secrets
+
+    from rest_framework_simplejwt.tokens import RefreshToken
+
+    had_one = bool(user.app_session)
+    with transaction.atomic():
+        _blacklist_refresh_tokens(user)
+        user.app_session = secrets.token_hex(16)
+        user.app_session_at = timezone.now()
+        user.save(update_fields=["app_session", "app_session_at"])
+    if had_one:
+        audit.record("Connexion sur un autre téléphone", actor=user, obj=user, request=request,
+                     detail={"effet": "l’autre téléphone est déconnecté"})
+    refresh = RefreshToken.for_user(user)
+    refresh[SESSION_CLAIM] = user.app_session
+    return refresh
+
+
+def session_ended(user, token):
+    """True when [token] belongs to a phone signed out by a newer sign-in.
+    Tokens from before this rule (no session id on the account yet) stay
+    valid until the member signs in again."""
+    return bool(user.app_session) and token.get(SESSION_CLAIM) != user.app_session
+
+
 # --- Role assignments ----------------------------------------------------------
 
 
@@ -308,13 +352,10 @@ def change_phone(member, phone, *, by, reason, request=None):
         audit.record("Changement de numéro refusé", actor=by, obj=member, request=request, sensitive=True, refused=True,
                      detail={"motif": "numéro déjà utilisé"})
         raise RuleViolation("Ce numéro est déjà celui d’un autre compte.")
-    from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
-
     old = member.phone
     with transaction.atomic():
         member.phone = phone
         member.save(update_fields=["phone"])
-        live = OutstandingToken.objects.filter(user=member).exclude(blacklistedtoken__isnull=False)
-        BlacklistedToken.objects.bulk_create([BlacklistedToken(token=t) for t in live], ignore_conflicts=True)
+        _blacklist_refresh_tokens(member)
         audit.record("Numéro de téléphone modifié", actor=by, obj=member, request=request, sensitive=True,
                      detail={"avant": old, "apres": phone, "motif": reason.strip()})

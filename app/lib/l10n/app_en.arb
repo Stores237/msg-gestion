@@ -686,5 +686,38 @@
   "otherColor": "Other colour…",
   "hue": "Hue",
   "shade": "Shade",
-  "choose": "Choose"
+  "choose": "Choose",
+  "draftsSection": "Drafts to publish",
+  "publishedSection": "Published",
+  "reuse": "Reuse",
+  "reuseTitle": "Reuse this lineup for…",
+  "reuseHint": "Same posts and guards, as a draft: check it, then publish.",
+  "reuseNoTarget": "No upcoming event without a lineup. Create the event in the Calendar first.",
+  "reuseDone": "Lineup reused for {title}, as a draft.",
+  "@reuseDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reuseSkipped": "Left out (on leave, inactive or already on duty that day): {names}.",
+  "@reuseSkipped": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "datePassed": "Date passed",
+  "pastDraftsNotice": "{n, plural, =1{A lineup whose date has passed can no longer be published: reuse it for an upcoming event.} other{{n} lineups whose date has passed can no longer be published: reuse them for an upcoming event.}}",
+  "@pastDraftsNotice": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "errorDatePassed": "The date has passed: this lineup can no longer be published. Reuse it for an upcoming event.",
+  "signedOutOtherDevice": "Your account was opened on another phone, so this one was signed out. If it wasn’t you, sign in again and change your PIN."
 }

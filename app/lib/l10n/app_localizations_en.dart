@@ -2366,4 +2366,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get choose => 'Choose';
+
+  @override
+  String get draftsSection => 'Drafts to publish';
+
+  @override
+  String get publishedSection => 'Published';
+
+  @override
+  String get reuse => 'Reuse';
+
+  @override
+  String get reuseTitle => 'Reuse this lineup for…';
+
+  @override
+  String get reuseHint =>
+      'Same posts and guards, as a draft: check it, then publish.';
+
+  @override
+  String get reuseNoTarget =>
+      'No upcoming event without a lineup. Create the event in the Calendar first.';
+
+  @override
+  String reuseDone(String title) {
+    return 'Lineup reused for $title, as a draft.';
+  }
+
+  @override
+  String reuseSkipped(String names) {
+    return 'Left out (on leave, inactive or already on duty that day): $names.';
+  }
+
+  @override
+  String get datePassed => 'Date passed';
+
+  @override
+  String pastDraftsNotice(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          '$n lineups whose date has passed can no longer be published: reuse them for an upcoming event.',
+      one:
+          'A lineup whose date has passed can no longer be published: reuse it for an upcoming event.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorDatePassed =>
+      'The date has passed: this lineup can no longer be published. Reuse it for an upcoming event.';
+
+  @override
+  String get signedOutOtherDevice =>
+      'Your account was opened on another phone, so this one was signed out. If it wasn’t you, sign in again and change your PIN.';
 }

@@ -19,7 +19,11 @@ import 'login_pin_screen.dart';
 /// The member ticks the conditions of use before going on; the server
 /// records the acceptance with the PIN (owner, 2026-10-26).
 class LoginPhoneScreen extends StatefulWidget {
-  const LoginPhoneScreen({super.key});
+  const LoginPhoneScreen({super.key, this.notice});
+
+  /// Why the member landed here, e.g. signed out because the account was
+  /// opened on another phone.
+  final String? notice;
 
   @override
   State<LoginPhoneScreen> createState() => _LoginPhoneScreenState();
@@ -125,6 +129,14 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                 color: c.textSecondary,
               ),
             ),
+            if (widget.notice != null) ...[
+              const SizedBox(height: 16),
+              Notice(
+                key: const Key('signed-out-notice'),
+                tone: NoticeTone.warn,
+                text: widget.notice!,
+              ),
+            ],
             const SizedBox(height: 24),
             Text(
               l.phoneLabel,

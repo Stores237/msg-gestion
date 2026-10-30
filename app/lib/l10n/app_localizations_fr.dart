@@ -2378,4 +2378,58 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get choose => 'Choisir';
+
+  @override
+  String get draftsSection => 'Brouillons à publier';
+
+  @override
+  String get publishedSection => 'Publiés';
+
+  @override
+  String get reuse => 'Réutiliser';
+
+  @override
+  String get reuseTitle => 'Réutiliser ce planning pour…';
+
+  @override
+  String get reuseHint =>
+      'Mêmes postes et mêmes gardes, en brouillon : vérifiez puis publiez.';
+
+  @override
+  String get reuseNoTarget =>
+      'Aucun événement à venir sans planning. Créez d’abord l’événement dans le Calendrier.';
+
+  @override
+  String reuseDone(String title) {
+    return 'Planning repris pour $title, en brouillon.';
+  }
+
+  @override
+  String reuseSkipped(String names) {
+    return 'Non repris (congé, inactif ou déjà de service ce jour-là) : $names.';
+  }
+
+  @override
+  String get datePassed => 'Date passée';
+
+  @override
+  String pastDraftsNotice(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          '$n plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.',
+      one:
+          'Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get errorDatePassed =>
+      'La date est passée : ce planning ne peut plus être publié. Réutilisez-le pour un événement à venir.';
+
+  @override
+  String get signedOutOtherDevice =>
+      'Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN.';
 }

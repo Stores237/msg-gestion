@@ -1516,5 +1516,38 @@
   "otherColor": "Autre couleur…",
   "hue": "Teinte",
   "shade": "Nuance",
-  "choose": "Choisir"
+  "choose": "Choisir",
+  "draftsSection": "Brouillons à publier",
+  "publishedSection": "Publiés",
+  "reuse": "Réutiliser",
+  "reuseTitle": "Réutiliser ce planning pour…",
+  "reuseHint": "Mêmes postes et mêmes gardes, en brouillon : vérifiez puis publiez.",
+  "reuseNoTarget": "Aucun événement à venir sans planning. Créez d’abord l’événement dans le Calendrier.",
+  "reuseDone": "Planning repris pour {title}, en brouillon.",
+  "@reuseDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reuseSkipped": "Non repris (congé, inactif ou déjà de service ce jour-là) : {names}.",
+  "@reuseSkipped": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "datePassed": "Date passée",
+  "pastDraftsNotice": "{n, plural, =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}",
+  "@pastDraftsNotice": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "errorDatePassed": "La date est passée : ce planning ne peut plus être publié. Réutilisez-le pour un événement à venir.",
+  "signedOutOtherDevice": "Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN."
 }

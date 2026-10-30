@@ -298,8 +298,25 @@ def _notify_duty(assignments):
                {"type": "duty", "id": a.pk})
 
 
+DATE_PASSED = "La date de ce service est passée : il ne peut plus être publié. Reprenez-le pour un événement à venir."
+
+
+def is_past(service, now=None):
+    """The date matters (owner, 2026-10-30): a lineup whose event has
+    started can no longer be published, nor a new one made for it."""
+    return service.event.starts_at <= (now or timezone.now())
+
+
 def publish(services, *, by, request=None):
+    """Publishes the week's drafts that are still to come. Drafts whose date
+    has passed stay unpublished; when nothing else is left, the planner is
+    told why (`date_passed`)."""
     now = timezone.now()
+    drafts = [s for s in services if s.published_at is None]
+    upcoming = [s for s in drafts if not is_past(s, now)]
+    if drafts and not upcoming:
+        raise PlanningRule("date_passed", DATE_PASSED)
+    services = upcoming
     to_notify = []
     with transaction.atomic():
         for s in services:
@@ -316,6 +333,46 @@ def publish(services, *, by, request=None):
                f"{by.short_name} a publié le planning ({len(services)} service(s)) à titre exceptionnel.",
                {"type": "planning"})
     return len(to_notify)
+
+
+def reuse_targets(source, now=None):
+    """Upcoming events a published lineup can be reused for: events that
+    need a lineup and have none yet (next 90 days, soonest first)."""
+    from apps.events.models import ActivityType, Event
+
+    now = now or timezone.now()
+    return list(
+        Event.objects.filter(
+            starts_at__gt=now, starts_at__lt=now + timedelta(days=90),
+            kind__in=ActivityType.objects.filter(needs_lineup=True).values("slug"), service__isnull=True,
+        ).order_by("starts_at")[:30]
+    )
+
+
+def reuse(source, event, *, by, request=None):
+    """A new lineup for [event] from [source] (owner, 2026-10-30: "reusing
+    the published one"): same size, team and posts, as a draft to check and
+    publish. Guards who can't serve that day (on leave, no longer active,
+    already on duty) are left out and their posts stay empty."""
+    from .models import Service
+
+    if event.starts_at <= timezone.now():
+        raise PlanningRule("date_passed", "La date de cet événement est passée : choisissez un événement à venir.")
+    if Service.objects.filter(event=event).exists():
+        raise PlanningRule("already_planned", "Cet événement a déjà un planning.", status=409)
+    rows = list(source.assignments.select_related("member").order_by("post", "side", "index"))
+    statuses = _group_status([a.member_id for a in rows])
+    skipped = []
+    with transaction.atomic():
+        target = Service.objects.create(event=event, size=source.size, group=source.group)
+        for a in rows:
+            status, _ = statuses.get(a.member_id, (a.member.status, None))
+            if status != User.Status.ACTIVE or not a.member.is_active or busy_same_day(a.member_id, target):
+                skipped.append(a.member.short_name)
+                continue
+            Assignment.objects.create(service=target, post=a.post, side=a.side, index=a.index, member=a.member, assigned_by=by)
+    note_exceptional(by, "planning repris", target, request, depuis=source.event.title, écartés=len(skipped))
+    return target, skipped
 
 
 # --- Member side ----------------------------------------------------------------

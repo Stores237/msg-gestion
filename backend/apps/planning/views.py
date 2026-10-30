@@ -38,6 +38,7 @@ def _service_json(s, conflicts=()):
         "group": s.group.name if s.group else None,
         "chef": s.chef.short_name if s.chef else None, "chef_id": s.chef_id,
         "published": s.published_at is not None,
+        "past": services.is_past(s),
         "slots": [{"post": p, "side": sd, "index": i} for p, sd, i in slots_for(s.size)],
         "assignments": [_assignment_json(a, conflicts) for a in s.assignments.all()],
     }
@@ -75,6 +76,9 @@ class WeekView(APIView):
             "alerts": services.alerts(items),
             "unplanned": [{"event": e.pk, "title": e.title, "starts_at": e.starts_at} for e in unplanned],
             "published": bool(items) and all(s.published_at for s in items),
+            # Drafts still to come: what "Publier et notifier" would send.
+            "publishable": sum(1 for s in items if s.published_at is None and not services.is_past(s)),
+            "past_drafts": sum(1 for s in items if s.published_at is None and services.is_past(s)),
         })
 
 
@@ -88,6 +92,8 @@ class ServiceCreateView(APIView):
         size = int(request.data.get("size") or 0)
         if size not in SIZES:
             return Response({"detail": "Taille invalide.", "code": "bad_size"}, status=400)
+        if event.starts_at <= timezone.now() and not Service.objects.filter(event=event).exists():
+            return Response({"detail": "La date de cet événement est passée.", "code": "date_passed"}, status=400)
         s, _ = Service.objects.update_or_create(event=event, defaults={"size": size})
         s.assignments.exclude(pk__in=[a.pk for a in s.assignments.all() if (a.post, a.side, a.index) in slots_for(size)]).delete()
         services.note_exceptional(request.user, "taille du service", s, request, taille=size)
@@ -173,8 +179,34 @@ class PublishView(APIView):
     def post(self, request):
         day = parse_date(str(request.data.get("day", ""))) or timezone.localdate()
         start, end = services.week_bounds(day)
-        n = services.publish(_week_services(start, end), by=request.user, request=request)
-        return Response({"notified": n})
+        items = _week_services(start, end)
+        try:
+            n = services.publish(items, by=request.user, request=request)
+        except services.PlanningRule as e:
+            return _rule(e)
+        past = [s.event.title for s in items if s.published_at is None and services.is_past(s)]
+        return Response({"notified": n, "past": past})
+
+
+class ReuseView(APIView):
+    """GET: upcoming events this lineup can be reused for. POST {event}: a
+    new draft lineup for that event, copied from this one."""
+
+    permission_classes = [require("calendar.planning", "change")]
+
+    def get(self, request, pk):
+        source = get_object_or_404(Service, pk=pk)
+        return Response([{"event": e.pk, "title": e.title, "starts_at": e.starts_at} for e in services.reuse_targets(source)])
+
+    def post(self, request, pk):
+        source = get_object_or_404(Service.objects.select_related("event", "group"), pk=pk)
+        event = get_object_or_404(Event, pk=request.data.get("event"))
+        try:
+            target, skipped = services.reuse(source, event, by=request.user, request=request)
+        except services.PlanningRule as e:
+            return _rule(e)
+        target = Service.objects.select_related("event__chef", "group").prefetch_related("assignments__member").get(pk=target.pk)
+        return Response({**_service_json(target), "skipped": skipped}, status=201)
 
 
 class GroupsView(APIView):

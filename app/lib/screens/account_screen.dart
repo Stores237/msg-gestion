@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../data/biometrics.dart';
 import '../data/current_user.dart';
 import '../data/offline.dart';
-import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
@@ -18,7 +17,7 @@ import '../widgets/ui.dart';
 import 'help_screens.dart';
 import 'downloads_screen.dart';
 import 'storage_screen.dart';
-import 'login_phone_screen.dart';
+import 'sign_out.dart';
 import 'pin_screens.dart';
 
 /// "Mon compte" (opened from the avatar on Accueil): roles, language, sign-out.
@@ -50,15 +49,10 @@ class AccountScreen extends StatelessWidget {
       );
       if (ok != true) return;
     }
-    await RepositoryLocator.instance.auth.logout();
-    await OfflineState.instance.forget();
-    await GroupController.instance.select(null);
-    currentUser.value = null;
     if (!context.mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPhoneScreen()),
-      (_) => false,
-    );
+    final nav = Navigator.of(context);
+    await RepositoryLocator.instance.auth.logout();
+    await leaveSession(nav);
   }
 
   @override

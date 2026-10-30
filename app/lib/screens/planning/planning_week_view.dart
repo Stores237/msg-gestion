@@ -283,6 +283,89 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
     }
   }
 
+  /// "Réutiliser" on a published lineup (owner, 2026-10-30): the same posts
+  /// and guards for an upcoming event, as a draft; the week view then
+  /// shows that event's week.
+  Future<void> _reuse(PlannedService s) async {
+    final l = AppLocalizations.of(context);
+    final d = Dates(context);
+    final List<UnplannedEvent> targets;
+    try {
+      targets = await RepositoryLocator.instance.planning.reuseTargets(s.id);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+      return;
+    }
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<UnplannedEvent>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        builder: (context, scroll) => ListView(
+          controller: scroll,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          children: [
+            Text(l.reuseTitle, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              '${s.title} · ${d.fullDateTime(s.startsAt)}',
+              style: TextStyle(fontSize: 13, color: context.msg.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            if (targets.isEmpty)
+              Notice(key: const Key('reuse-none'), text: l.reuseNoTarget)
+            else ...[
+              GroupCard(
+                children: [
+                  for (final t in targets)
+                    ListRow(
+                      key: Key('reuse-target-${t.eventId}'),
+                      title: Text(t.title),
+                      subtitle: Text(d.fullDateTime(t.startsAt)),
+                      trailing: const Icon(Icons.content_copy_outlined),
+                      onTap: () => Navigator.of(context).pop(t),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Notice(text: l.reuseHint),
+            ],
+          ],
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    try {
+      final skipped = await RepositoryLocator.instance.planning.reuse(
+        s.id,
+        picked.eventId,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              [
+                l.reuseDone(picked.title),
+                if (skipped.isNotEmpty) l.reuseSkipped(skipped.join(', ')),
+              ].join(' '),
+            ),
+          ),
+        );
+      setState(() {
+        _day = picked.startsAt;
+        _week = null;
+      });
+      await _load();
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    }
+  }
+
   Future<void> _publish() async {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
@@ -317,6 +400,27 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
               );
     }
   }
+
+  Widget _columns(List<PlannedService> list) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final s in list)
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: _Column(
+              service: s,
+              onTap: (slot) => _tapSlot(s, slot),
+              onGroup: _canEdit ? () => _assignGroup(s) : null,
+              onChef: _canEdit ? () => _chooseChef(s) : null,
+              onDrop: _canEdit ? (a, slot) => _move(a, s, slot) : null,
+              onReuse: _canEdit && s.published ? () => _reuse(s) : null,
+            ),
+          ),
+      ],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -425,30 +529,33 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
                       icon: Icons.event_busy_outlined,
                       title: l.noServicesWeek,
                     ),
-                  if (w.services.isNotEmpty)
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (final s in w.services)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: _Column(
-                                service: s,
-                                onTap: (slot) => _tapSlot(s, slot),
-                                onGroup: _canEdit
-                                    ? () => _assignGroup(s)
-                                    : null,
-                                onChef: _canEdit ? () => _chooseChef(s) : null,
-                                onDrop: _canEdit
-                                    ? (a, slot) => _move(a, s, slot)
-                                    : null,
-                              ),
-                            ),
-                        ],
-                      ),
+                  if (_canEdit && w.pastDrafts > 0) ...[
+                    Notice(
+                      key: const Key('past-drafts-notice'),
+                      tone: NoticeTone.warn,
+                      text: l.pastDraftsNotice(w.pastDrafts),
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                  // Drafts on top; a lineup goes down once published
+                  // (owner, 2026-10-30), where it can be reused.
+                  if (w.drafts.isNotEmpty && w.done.isNotEmpty) ...[
+                    SectionLabel(
+                      l.draftsSection,
+                      key: const Key('drafts-section'),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (w.drafts.isNotEmpty) _columns(w.drafts),
+                  if (w.done.isNotEmpty) ...[
+                    if (w.drafts.isNotEmpty) const SizedBox(height: 16),
+                    SectionLabel(
+                      l.publishedSection,
+                      key: const Key('published-section'),
+                    ),
+                    const SizedBox(height: 8),
+                    _columns(w.done),
+                  ],
                   if (_canEdit && w.unplanned.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     SectionLabel(l.setServiceSize),
@@ -480,11 +587,16 @@ class _PlanningWeekViewState extends State<PlanningWeekView> {
             ),
             child: SizedBox(
               width: double.infinity,
-              child: w.published
+              child: w.publishable == 0
                   ? OutlinedButton.icon(
+                      key: const Key('nothing-to-publish'),
                       onPressed: null,
-                      icon: const Icon(Icons.check),
-                      label: Text(l.published),
+                      icon: Icon(
+                        w.pastDrafts > 0 ? Icons.event_busy : Icons.check,
+                      ),
+                      label: Text(
+                        w.pastDrafts > 0 ? l.datePassed : l.published,
+                      ),
                     )
                   : Row(
                       children: [
@@ -524,6 +636,7 @@ class _Column extends StatelessWidget {
     this.onGroup,
     this.onChef,
     this.onDrop,
+    this.onReuse,
   });
   final PlannedService service;
   final ValueChanged<Slot> onTap;
@@ -532,6 +645,7 @@ class _Column extends StatelessWidget {
   /// A guard dropped on a cell of this service (null: can't edit).
   final void Function(DutyAssignment, Slot)? onDrop;
   final VoidCallback? onChef;
+  final VoidCallback? onReuse;
 
   @override
   Widget build(BuildContext context) {
@@ -571,6 +685,25 @@ class _Column extends StatelessWidget {
             '${s.title} · ${l.filledOf(s.filled, s.size)}',
             style: TextStyle(fontSize: 12, color: c.textSecondary),
           ),
+          if (s.past && !s.published)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                key: Key('past-${s.id}'),
+                children: [
+                  Icon(Icons.event_busy, size: 14, color: c.warnText),
+                  const SizedBox(width: 4),
+                  Text(
+                    l.datePassed,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: c.warnText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           if (s.chef != null || onChef != null)
             InkWell(
               key: Key('chef-btn-${s.id}'),
@@ -655,6 +788,15 @@ class _Column extends StatelessWidget {
               onPressed: onGroup,
               icon: const Icon(Icons.groups_outlined, size: 18),
               label: Text(l.assignGroup),
+            ),
+          ],
+          if (onReuse != null) ...[
+            const SizedBox(height: 4),
+            TextButton.icon(
+              key: Key('reuse-${s.id}'),
+              onPressed: onReuse,
+              icon: const Icon(Icons.content_copy_outlined, size: 18),
+              label: Text(l.reuse),
             ),
           ],
         ],

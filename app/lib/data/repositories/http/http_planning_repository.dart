@@ -90,6 +90,24 @@ class HttpPlanningRepository implements PlanningRepository {
           as int;
 
   @override
+  Future<List<UnplannedEvent>> reuseTargets(int serviceId) async => [
+    for (final e
+        in await _api.get('/planning/services/$serviceId/reuse/') as List)
+      UnplannedEvent.fromJson(e as Map<String, dynamic>),
+  ];
+
+  @override
+  Future<List<String>> reuse(int serviceId, int eventId) async {
+    final j =
+        await _api.post(
+              '/planning/services/$serviceId/reuse/',
+              body: {'event': eventId},
+            )
+            as Map<String, dynamic>;
+    return [for (final n in j['skipped'] as List) n as String];
+  }
+
+  @override
   Future<List<DutyAssignment>> mine() async => [
     for (final a in await _api.get('/planning/mine/') as List)
       DutyAssignment.fromJson(a as Map<String, dynamic>),

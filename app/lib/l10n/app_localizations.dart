@@ -4051,6 +4051,78 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Choisir'**
   String get choose;
+
+  /// No description provided for @draftsSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillons à publier'**
+  String get draftsSection;
+
+  /// No description provided for @publishedSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publiés'**
+  String get publishedSection;
+
+  /// No description provided for @reuse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réutiliser'**
+  String get reuse;
+
+  /// No description provided for @reuseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réutiliser ce planning pour…'**
+  String get reuseTitle;
+
+  /// No description provided for @reuseHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mêmes postes et mêmes gardes, en brouillon : vérifiez puis publiez.'**
+  String get reuseHint;
+
+  /// No description provided for @reuseNoTarget.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun événement à venir sans planning. Créez d’abord l’événement dans le Calendrier.'**
+  String get reuseNoTarget;
+
+  /// No description provided for @reuseDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Planning repris pour {title}, en brouillon.'**
+  String reuseDone(String title);
+
+  /// No description provided for @reuseSkipped.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non repris (congé, inactif ou déjà de service ce jour-là) : {names}.'**
+  String reuseSkipped(String names);
+
+  /// No description provided for @datePassed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date passée'**
+  String get datePassed;
+
+  /// No description provided for @pastDraftsNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =1{Un planning dont la date est passée ne peut plus être publié : réutilisez-le pour un événement à venir.} other{{n} plannings dont la date est passée ne peuvent plus être publiés : réutilisez-les pour un événement à venir.}}'**
+  String pastDraftsNotice(int n);
+
+  /// No description provided for @errorDatePassed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date est passée : ce planning ne peut plus être publié. Réutilisez-le pour un événement à venir.'**
+  String get errorDatePassed;
+
+  /// No description provided for @signedOutOtherDevice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte a été ouvert sur un autre téléphone, celui-ci a donc été déconnecté. Si ce n’est pas vous, reconnectez-vous et changez votre code PIN.'**
+  String get signedOutOtherDevice;
 }
 
 class _AppLocalizationsDelegate

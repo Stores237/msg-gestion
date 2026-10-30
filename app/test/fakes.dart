@@ -929,6 +929,9 @@ class FakeFinancesRepository implements FinancesRepository {
 class FakePlanningRepository implements PlanningRepository {
   final calls = <String>[];
   bool doubleOnce = false;
+
+  /// More services in the week (e.g. a draft whose date has passed).
+  List<PlannedService> extra = [];
   late DateTime now = DateTime.now();
 
   PlannedService get _service => PlannedService(
@@ -975,7 +978,7 @@ class FakePlanningRepository implements PlanningRepository {
   Future<PlanningWeek> week(DateTime day) async => PlanningWeek(
     start: now,
     end: now.add(const Duration(days: 6)),
-    services: [_service],
+    services: [_service, ...extra],
     alerts: const [
       PlanningAlert(code: 'understaffed', serviceId: 5, filled: 1, size: 4),
       PlanningAlert(code: 'double_service', member: 'Essomba K.'),
@@ -1061,6 +1064,21 @@ class FakePlanningRepository implements PlanningRepository {
   Future<int> publish(DateTime day) async {
     calls.add('publish');
     return 4;
+  }
+
+  @override
+  Future<List<UnplannedEvent>> reuseTargets(int serviceId) async => [
+    UnplannedEvent(
+      eventId: 70,
+      title: 'Messe du dimanche',
+      startsAt: now.add(const Duration(days: 9)),
+    ),
+  ];
+
+  @override
+  Future<List<String>> reuse(int serviceId, int eventId) async {
+    calls.add('reuse:$serviceId:$eventId');
+    return const ['Mbella G.'];
   }
 
   @override

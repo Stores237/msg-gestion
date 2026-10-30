@@ -28,7 +28,17 @@ abstract class PlanningRepository {
 
   /// Designates the service's chef de groupe among its guards (null removes).
   Future<void> setChef(int serviceId, int? member);
+
+  /// Publishes the week's drafts still to come. ApiException `date_passed`
+  /// when every draft left is for a date already passed.
   Future<int> publish(DateTime day);
+
+  /// Upcoming events without a lineup that [serviceId]'s can be reused for.
+  Future<List<UnplannedEvent>> reuseTargets(int serviceId);
+
+  /// A draft lineup for [eventId] copied from [serviceId]; returns the names
+  /// left out (on leave, no longer active, already on duty that day).
+  Future<List<String>> reuse(int serviceId, int eventId);
   Future<List<DutyAssignment>> mine();
   Future<void> confirm(int assignmentId);
   Future<List<Candidate>> swapCandidates(int assignmentId);

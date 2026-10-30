@@ -7,15 +7,17 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from apps.core import audit, sms
 
-from .authentication import BACKOFFICE_ONLY
+from .authentication import BACKOFFICE_ONLY, other_device
 from .models import User
 from .serializers import LogoutSerializer, MeSerializer, PhoneLookupSerializer, PinLoginSerializer
-from .services import check_pin_login, pin_problem
+from .services import check_pin_login, open_app_session, pin_problem, session_ended
 
 # Every error carries a stable `code` (+ numbers) so the app can word it in
 # the member's chosen language (FR/EN); `detail` is the French fallback.
@@ -122,13 +124,30 @@ class PinLoginView(APIView):
         if refused := _terms_refusal(user, request):
             return refused
         _record_terms(user, request)
-        refresh = RefreshToken.for_user(result.user)
+        refresh = open_app_session(result.user, request=request)
         User.objects.filter(pk=user.pk).update(last_login=timezone.now())
         return Response({"access": str(refresh.access_token), "refresh": str(refresh), "pin_must_change": result.user.pin_must_change})
 
 
+class SessionTokenRefreshSerializer(TokenRefreshSerializer):
+    """A phone signed out by a newer sign-in can't renew its tokens; it is
+    told why (`other_device`) rather than a bare "token not valid"."""
+
+    def validate(self, attrs):
+        try:
+            token = UntypedToken(attrs["refresh"])
+        except TokenError:
+            token = None  # expired or forged: the usual answer below
+        if token is not None:
+            user = User.objects.filter(pk=token.get(api_settings.USER_ID_CLAIM)).first()
+            if user is not None and session_ended(user, token):
+                raise other_device()
+        return super().validate(attrs)
+
+
 class ThrottledTokenRefreshView(TokenRefreshView):
     throttle_scope = "token_refresh"
+    serializer_class = SessionTokenRefreshSerializer
 
 
 class LogoutView(APIView):
@@ -226,7 +245,7 @@ class ForgotPinConfirmView(APIView):
         user.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
         audit.record("PIN réinitialisé par SMS", actor=user, obj=user, request=request)
         _record_terms(user, request)
-        refresh = RefreshToken.for_user(user)
+        refresh = open_app_session(user, request=request)
         return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
 
 

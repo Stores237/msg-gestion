@@ -981,3 +981,45 @@ couldn't be changed whereas it has to be", "also add the possibility to form gra
 selected after reload; tick Dégradé, pick a second colour, save. In the app (after reopening it),
 Accueil's header shows the gradient. Apparence → Autre couleur… → move Teinte → Choisir.
 `pytest apps/backoffice/test_admin.py -k color`, `flutter test test/appearance_test.dart`.
+
+## 45. One phone at a time
+
+Owner, 2026-10-30: "restrict account usage for multi device, that is only one login per device";
+when asked, the owner chose "the new phone wins".
+
+- Signing in on a phone (PIN, or "Code oublié ?") signs the account out of any other phone. The
+  other phone is told at its next request (opening the app, pulling to refresh, any tap that
+  reaches the server): it goes back to the login screen with "Votre compte a été ouvert sur un
+  autre téléphone, celui-ci a donc été déconnecté. Si ce n'est pas vous, reconnectez-vous et
+  changez votre code PIN." Its offline copy, photos seen and downloads are erased, as on sign-out.
+- A lost or broken phone never locks anyone out: signing in on the new one is enough.
+- Server: `User.app_session` (migration accounts 0018), the `sid` claim in the tokens, `401
+  other_device` from every endpoint and from `/api/auth/refresh/`; journal "Connexion sur un autre
+  téléphone". Phones signed in before the deploy keep working until the member signs in elsewhere.
+
+**Verify.** Sign in with the same account on two phones (or the emulator and a phone): the first
+one, on its next action, shows the login screen with the message. `pytest
+apps/accounts/test_one_phone.py`, `flutter test test/one_phone_test.dart`.
+
+## 46. Planning: published lineups go down and can be reused; the date matters
+
+Owner, 2026-10-30: "after published the lineup have to go down, given possible to create a new
+planning but also reusing the published one; the date is very important: a planning whose due date
+is passed [can't] be published (should notify the user)" — the owner chose "can't publish, the user
+is told".
+
+- **Planning · semaine**: drafts on top ("Brouillons à publier"), published lineups below
+  ("Publiés"). A new lineup is still made from "Prévoir le service".
+- **Réutiliser** on a published lineup: pick an upcoming event that has no lineup yet (next 90
+  days); the same size, team and posts are copied as a **draft** (nobody is notified) and the view
+  jumps to that week to check and publish. Guards who can't serve that day (on leave, no longer
+  active, already on duty) are left out and named in the message.
+- **Date passed**: a draft whose event has started shows "Date passée"; "Publier et notifier"
+  publishes only the drafts still to come, and when only past ones are left the button reads "Date
+  passée" with a notice saying to reuse them for an upcoming event (server: `400 date_passed`). A
+  new lineup can't be made for a past event either.
+
+**Verify.** Calendrier → Planning: publish a week → its columns move under "Publiés" with
+**Réutiliser** → pick next Sunday's mass → snack "Planning repris pour …", the next week shows it as
+a draft. Go back to a past week with an unpublished lineup: "Date passée", nothing to publish.
+`pytest apps/planning/test_reuse.py`, `flutter test test/planning_reuse_test.dart`.

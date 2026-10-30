@@ -17,6 +17,7 @@ import 'finances/finances_screen.dart';
 import 'home_screen.dart';
 import 'lock_screen.dart';
 import 'members/members_screen.dart';
+import 'sign_out.dart';
 
 /// Bottom navigation with only the tabs the server granted (design: "la
 /// barre d’onglets change avec le rôle"). Never computed client-side: the
@@ -47,6 +48,7 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
       ),
     );
     WidgetsBinding.instance.addObserver(this);
+    RepositoryLocator.instance.authSession.addListener(_onAuth);
     // While saves wait for the network, try again every 30 s.
     _flushTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (OfflineState.instance.pending > 0) {
@@ -58,8 +60,25 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     _flushTimer?.cancel();
+    RepositoryLocator.instance.authSession.removeListener(_onAuth);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  bool _left = false;
+
+  /// The account was opened on another phone (one phone at a time): this
+  /// one leaves at once, whatever screen is open, and says why.
+  void _onAuth() {
+    final session = RepositoryLocator.instance.authSession;
+    if (_left || session.isLoggedIn || session.endedBy != 'other_device') {
+      return;
+    }
+    _left = true;
+    leaveSession(
+      Navigator.of(context, rootNavigator: true),
+      notice: AppLocalizations.of(context).signedOutOtherDevice,
+    );
   }
 
   DateTime? _hiddenAt;

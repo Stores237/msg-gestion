@@ -34,6 +34,10 @@ class AuthSession extends ChangeNotifier {
 
   bool get isLoggedIn => refreshToken != null;
 
+  /// Why the server ended the session, when it did: `other_device` when the
+  /// account was opened on another phone (one phone at a time, 2026-10-30).
+  String? endedBy;
+
   Future<void>? _inFlightRefresh;
   bool _lastRefreshOk = false;
 
@@ -44,6 +48,7 @@ class AuthSession extends ChangeNotifier {
   }
 
   Future<void> store({required String access, required String refresh}) async {
+    endedBy = null;
     accessToken = access;
     refreshToken = refresh;
     await _storage.write(_accessKey, access);
@@ -142,8 +147,10 @@ class AuthSession extends ChangeNotifier {
         refresh: data['refresh'] as String,
       );
       _lastRefreshOk = true;
-    } on ApiException {
-      // Refresh token expired or blacklisted: a real sign-out.
+    } on ApiException catch (e) {
+      // Refresh token expired or blacklisted, or the account opened on
+      // another phone: a real sign-out.
+      endedBy = e.code == 'other_device' ? e.code : null;
       await clear();
       _lastRefreshOk = false;
     } on NetworkException {

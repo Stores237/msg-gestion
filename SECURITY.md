@@ -18,6 +18,14 @@
 - **Tokens**: JWT access token 15 min, refresh token 30 days, rotated on every use, old one
   blacklisted. The app shares one in-flight refresh between concurrent requests
   (`AuthSession.refreshAccessToken`) so rotation never logs a member out.
+- **One phone at a time** (owner, 2026-10-30): each app sign-in (PIN, or "Code oublié ?")
+  gives the account a new session id (`User.app_session`), carried in the tokens as `sid`, and
+  blacklists the account's other refresh tokens. A token with an older `sid` is refused on every
+  request and on refresh (401 `other_device`), so the previous phone is signed out at its next
+  request — within seconds, not when its 15-minute access token runs out — erases its offline copy
+  and shows why. The newest phone wins, so a lost phone never locks its owner out; the sign-in is
+  journaled ("Connexion sur un autre téléphone"). Tokens from before the rule (no `sid`) work
+  until the member's next sign-in.
 
 ### Conditions of use at login (owner, 2026-10-26)
 

@@ -81,6 +81,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     # secretary): the app makes the member pick their own on next login.
     pin_must_change = models.BooleanField(default=False)
 
+    # One phone at a time (owner, 2026-10-30): each app sign-in opens a new
+    # session and its id rides in the tokens; a phone holding an older id is
+    # signed out at its next request ("ouvert sur un autre appareil").
+    app_session = models.CharField(max_length=32, blank=True)
+    app_session_at = models.DateTimeField("connecté sur ce téléphone depuis", null=True, blank=True)
+
     # Reminder preferences (design: event detail → "Rappels").
     remind_eve = models.BooleanField(default=True, help_text="La veille à 20:00")
     remind_2h = models.BooleanField(default=False, help_text="2 heures avant")

@@ -11,6 +11,7 @@ import '../widgets/errors.dart';
 import '../widgets/msg_logo.dart';
 import 'lock_screen.dart';
 import 'login_phone_screen.dart';
+import 'sign_out.dart';
 import 'pin_screens.dart';
 import 'shell_screen.dart';
 
@@ -80,6 +81,12 @@ class _SplashScreenState extends State<SplashScreen> {
       if (e.code == 'not_in_group') {
         await GroupController.instance.select(null);
         if (mounted) unawaited(_start());
+        return;
+      }
+      // Opened on another phone since: leave, and say why.
+      if (repos.authSession.endedBy == 'other_device' && mounted) {
+        final notice = AppLocalizations.of(context).signedOutOtherDevice;
+        await leaveSession(Navigator.of(context), notice: notice);
         return;
       }
       // Session no longer valid server-side (refresh failed and cleared).
