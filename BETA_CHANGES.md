@@ -1061,3 +1061,26 @@ description → refused. As the trésorier: tap one of them → Modifier → cha
 shows Modifié → Valider → À finaliser. As the commissaire: tap it → Finaliser (or Renvoyer with a
 reason). `pytest apps/finances/test_corrections.py`, `flutter test
 test/finance_corrections_test.dart`.
+
+## 48. Cash book: Modifier on the line, grouping, a cleaner card
+
+Owner, 2026-10-30 (with a screenshot of the cash book): "the trésorier can't still edit; cash-book
+contributions should be grouped by day (who contributed on a date), by contribution type, by
+validity, and others; correctly render the card". The server already accepted the edit (build 26,
+staging at 7a09cf8, replayed with the app's exact request); the edit was only reachable through the
+dialog that opens when the line is tapped, so it wasn't found.
+
+- **Actions on the line**: for the trésorier, each line "À valider" shows **Modifier** (opens the
+  form directly) and **Valider** buttons; for the commissaire, a line "À finaliser" shows
+  **Finaliser**. Tapping the line still opens the dialog.
+- **Grouping**: "Grouper par" Jour (default, newest day first: who paid on that date) · Type
+  (category) · Statut (pas encore envoyé, à valider, à finaliser, validé) · Membre (A→Z, "Sans
+  membre" last). Each group shows its name, the number of operations and the net total; tapping
+  the header folds it. The choice and folded groups stay while the app is open.
+- **Card**: the member (or the description when there is none) and the amount on the first line;
+  the category below, followed by the description only when it differs, so "Contributions de
+  solidarité · Contributions de solidarité" no longer appears; then who entered, edited, validated,
+  the badges and the buttons. Long names wrap to two lines; the amount shrinks to fit at large text.
+- How to verify: sign in as the trésorier → Finances: a pending line shows Modifier and Valider;
+  Modifier opens "Modifier l'opération". Switch Grouper par between Jour, Type, Statut, Membre; tap
+  a header to fold it. App only, no server change.

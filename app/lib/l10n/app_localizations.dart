@@ -4273,6 +4273,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{n, plural, =1{1 opération à finaliser} other{{n} opérations à finaliser}}'**
   String entriesToConfirm(int n);
+
+  /// No description provided for @groupBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grouper par'**
+  String get groupBy;
+
+  /// No description provided for @groupByDay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jour'**
+  String get groupByDay;
+
+  /// No description provided for @groupByType.
+  ///
+  /// In fr, this message translates to:
+  /// **'Type'**
+  String get groupByType;
+
+  /// No description provided for @groupByStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut'**
+  String get groupByStatus;
+
+  /// No description provided for @groupByMember.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membre'**
+  String get groupByMember;
+
+  /// No description provided for @noMemberGroup.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans membre'**
+  String get noMemberGroup;
+
+  /// No description provided for @entriesCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 opération} other{{count} opérations}}'**
+  String entriesCount(int count);
 }
 
 class _AppLocalizationsDelegate

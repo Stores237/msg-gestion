@@ -2532,4 +2532,33 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get groupBy => 'Grouper par';
+
+  @override
+  String get groupByDay => 'Jour';
+
+  @override
+  String get groupByType => 'Type';
+
+  @override
+  String get groupByStatus => 'Statut';
+
+  @override
+  String get groupByMember => 'Membre';
+
+  @override
+  String get noMemberGroup => 'Sans membre';
+
+  @override
+  String entriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count opérations',
+      one: '1 opération',
+    );
+    return '$_temp0';
+  }
 }

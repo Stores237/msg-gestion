@@ -1615,5 +1615,19 @@
         "type": "int"
       }
     }
+  },
+  "groupBy": "Grouper par",
+  "groupByDay": "Jour",
+  "groupByType": "Type",
+  "groupByStatus": "Statut",
+  "groupByMember": "Membre",
+  "noMemberGroup": "Sans membre",
+  "entriesCount": "{count, plural, =1{1 opération} other{{count} opérations}}",
+  "@entriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
