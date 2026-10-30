@@ -1084,3 +1084,22 @@ dialog that opens when the line is tapped, so it wasn't found.
 - How to verify: sign in as the trésorier → Finances: a pending line shows Modifier and Valider;
   Modifier opens "Modifier l'opération". Switch Grouper par between Jour, Type, Statut, Membre; tap
   a header to fold it. App only, no server change.
+
+## 49. Sign-in: shared carrier addresses and a safer session refresh
+
+Owner, 2026-10-30: "don't know why I can't login, check that and fix". Checked on staging (commit
+600f351): health, number check, conditions, PIN sign-in, /me and refresh all answer correctly for a
+verified tester. Two causes found that stop members signing in or keep signing them out:
+
+- **Limits per address too low.** In Cameroon many phones share one carrier address (CGNAT), and
+  the limits were per address: 30 sign-ins/h, 30 number checks/h, 120 session refreshes/h for
+  everyone behind that address. Raised to 120 sign-ins and number checks, 600 conditions, 1200
+  refreshes per hour. Wrong PINs stay limited per account (3 → locked 15 min).
+- **The app signed out on any refused refresh.** A "too many requests" (429) or the server
+  restarting after a deploy (502/503) ended the session like a revoked token. Now only a refused
+  token (401/400, including "opened on another phone") signs out; the others keep the session and
+  the screen shows the error. A refresh that fails after the member has signed in again no longer
+  wipes the new session.
+- How to verify: deploy, install build 28, sign in on several phones on the same mobile network
+  one after the other; all get in. Restart the service on Render while the app is open: it shows
+  an error and stays signed in.

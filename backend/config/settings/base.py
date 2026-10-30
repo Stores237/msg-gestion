@@ -195,12 +195,16 @@ REST_FRAMEWORK = {
     # Without this, a view's throttle_scope does nothing at all — caught
     # by test_login_is_throttled_with_429_not_500.
     "DEFAULT_THROTTLE_CLASSES": ("apps.core.throttling.ClientIPScopedRateThrottle",),
+    # Per address. In Cameroon many phones share one carrier address
+    # (CGNAT), so these are sized for a whole group signing in together;
+    # wrong PINs are stopped per account by the lockout (owner, 2026-10-30:
+    # "I can't login").
     "DEFAULT_THROTTLE_RATES": {
-        "phone_lookup": "30/hour",
-        "terms": "120/hour",
-        "pin_login": "30/hour",
+        "phone_lookup": "120/hour",
+        "terms": "600/hour",
+        "pin_login": "120/hour",
         "pin_forgot": "10/hour",
-        "token_refresh": "120/hour",
+        "token_refresh": "1200/hour",
         "backoffice_login": "20/hour",
         "backoffice_otp": "20/hour",
     },

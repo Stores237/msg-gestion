@@ -71,6 +71,55 @@ void main() {
     expect(session.isLoggedIn, isFalse);
   });
 
+  test('busy or restarting server keeps the session (429, 502)', () async {
+    var status = 429;
+    final client = MockClient((req) async {
+      if (req.url.path.endsWith('/auth/refresh/')) {
+        return http.Response('{"detail":"Throttled."}', status);
+      }
+      return http.Response('{"detail":"expired"}', 401);
+    });
+    final session = AuthSession(storage: InMemoryTokenStorage());
+    await session.store(access: 'a1', refresh: 'r1');
+    final api = ApiClient(
+      authSession: session,
+      httpClient: client,
+      baseUrl: 'http://x/api',
+    );
+    await expectLater(api.get('/me/'), throwsA(isA<ApiException>()));
+    expect(session.refreshToken, 'r1');
+    status = 502;
+    await expectLater(api.get('/me/'), throwsA(isA<ApiException>()));
+    expect(session.refreshToken, 'r1');
+  });
+
+  test('a refused refresh that lands after a new sign-in keeps it', () async {
+    final client = MockClient((req) async {
+      if (req.url.path.endsWith('/auth/refresh/')) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        return http.Response(
+          '{"detail":"other phone","code":"other_device"}',
+          401,
+        );
+      }
+      return http.Response('{"detail":"expired"}', 401);
+    });
+    final session = AuthSession(storage: InMemoryTokenStorage());
+    await session.store(access: 'a1', refresh: 'old');
+    final api = ApiClient(
+      authSession: session,
+      httpClient: client,
+      baseUrl: 'http://x/api',
+    );
+    final call = api.get('/me/');
+    // The member signs in while the old session's refresh is on its way.
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    await session.store(access: 'a9', refresh: 'new');
+    await expectLater(call, throwsA(isA<ApiException>()));
+    expect(session.refreshToken, 'new');
+    expect(session.endedBy, isNull);
+  });
+
   test(
     'no response at all is a NetworkException, not a server error',
     () async {

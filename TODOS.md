@@ -8,6 +8,7 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 28 (2026-10-30):** deploy on Render (raised sign-in limits, no migration) and install build 28 (it includes build 27).
 - [ ] **Owner — build 27 (2026-10-30):** install build 27 (app only: Modifier/Valider on cash-book lines, grouping). No server change.
 - [ ] **Owner — build 26 (2026-10-30):** deploy on Render (migrations accounts 0018 and finances
   0003) and install build 26 (it includes build 25). From then on an account works on one phone
@@ -68,7 +69,7 @@ These need an account, a decision or a person — not code.
 - [ ] Encrypt the phone's offline copy with a key kept in secure storage.
 - [ ] Content-Security-Policy for the back-office (move the inline handlers to scripts first).
 - [ ] 6-digit PIN before opening to the public.
-- [ ] Watch for 429s on login from shared carrier addresses; raise `pin_login` if needed.
+- [ ] Watch for 429s on login from shared carrier addresses (limits raised 2026-10-30: login 120/h, refresh 1200/h).
 
 ### P0 — before the first tester
 - [ ] PIN setup and reset by SMS (imported members get an SMS to create their PIN; "Code

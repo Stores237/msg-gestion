@@ -9,11 +9,12 @@
   `PIN_LOCKOUT_MINUTES`). Counted on the server under a row lock, so parallel guesses can't share
   an attempt. A lock is written to the audit log.
 - **Throttles** (Redis-backed, per client address, see "Client address" below): phone lookup
-  30/h, PIN login 30/h, PIN reset 10/h, terms 120/h, token refresh 120/h. Without a reachable
+  120/h, PIN login 120/h, PIN reset 10/h, terms 600/h, token refresh 1200/h (raised 2026-10-30 for
+  shared carrier addresses, below). Without a reachable
   Redis these endpoints fail rather than run unthrottled.
 - **Deliberate disclosure**: `POST /api/auth/phone/` returns the member's first name, because the
   design greets the member on the PIN screen ("Bonjour Ingrid"). Anyone can therefore check
-  whether a number belongs to a member, up to 30 times an hour per IP. Unknown, suspended and
+  whether a number belongs to a member, up to 120 times an hour per IP. Unknown, suspended and
   archived numbers get the same answer.
 - **Tokens**: JWT access token 15 min, refresh token 30 days, rotated on every use, old one
   blacklisted. The app shares one in-flight refresh between concurrent requests
@@ -215,8 +216,9 @@ offline cache and the Android manifest; the staging response headers (one `/heal
   reliable, finding 1) and the app lock. Revisit (6 digits) before opening to the public.
 - **Number check discloses membership** (deliberate, above). Rate-limited.
 - **Shared mobile addresses**: in Cameroon many phones share one carrier address (CGNAT), so
-  30 logins/h per address can be reached by a group signing in together after an assise. Watch
-  for 429s in Sentry; raise `pin_login` if it happens.
+  30 logins/h per address was reached by testers signing in together (owner, 2026-10-30: "I can't
+  login"); raised to 120/h, refresh to 1200/h. Guessing stays bounded per account by the lockout.
+  The app no longer signs out when a refresh gets 429 or a 5xx (only a refused token signs out).
 - **Offline copy is not encrypted on the phone**: private to the app, erased as above, never
   backed up; a rooted or forensically examined phone could read it. Encrypting it with a key in
   secure storage is in the engineering backlog.

@@ -142,17 +142,31 @@ class AuthSession extends ChangeNotifier {
     }
     try {
       final data = await client.refresh(token);
+      // Signed in again while this was on its way: keep the new session.
+      if (refreshToken != token) {
+        _lastRefreshOk = refreshToken != null;
+        return;
+      }
       await store(
         access: data['access'] as String,
         refresh: data['refresh'] as String,
       );
       _lastRefreshOk = true;
     } on ApiException catch (e) {
-      // Refresh token expired or blacklisted, or the account opened on
-      // another phone: a real sign-out.
+      _lastRefreshOk = false;
+      // Only a refused token is a sign-out (expired, blacklisted, or the
+      // account opened on another phone). Too many requests from the
+      // network's shared address (429) or the server restarting (5xx) is
+      // not: keep the session and let the caller fail (owner, 2026-10-30:
+      // "I can't login").
+      if (e.statusCode != 401 && e.statusCode != 400) return;
+      // A sign-in since this left: its tokens aren't the refused ones.
+      if (refreshToken != token) {
+        _lastRefreshOk = refreshToken != null;
+        return;
+      }
       endedBy = e.code == 'other_device' ? e.code : null;
       await clear();
-      _lastRefreshOk = false;
     } on NetworkException {
       // Offline is not a sign-out; keep the tokens and let the caller fail.
       _lastRefreshOk = false;
