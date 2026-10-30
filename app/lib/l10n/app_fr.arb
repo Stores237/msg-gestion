@@ -1848,5 +1848,18 @@
         "type": "int"
       }
     }
+  },
+  "expAttachments": "Pièces jointes",
+  "expAddFile": "Joindre une photo ou un PDF",
+  "expRemoveFile": "Retirer",
+  "expAttachmentsHint": "Facultatif : devis, facture, photo de l’article (JPEG, PNG ou PDF, 10 Mo, 3 au plus).",
+  "expAttachmentBody": "Pièce jointe à la demande",
+  "expSentFilesMissed": "{count, plural, =0{Demande envoyée.} =1{Demande envoyée, mais 1 pièce jointe n’est pas partie : ajoutez-la dans les échanges.} other{Demande envoyée, mais {count} pièces jointes ne sont pas parties : ajoutez-les dans les échanges.}}",
+  "@expSentFilesMissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

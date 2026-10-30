@@ -4873,6 +4873,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} à traiter'**
   String expTodoCount(int count);
+
+  /// No description provided for @expAttachments.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièces jointes'**
+  String get expAttachments;
+
+  /// No description provided for @expAddFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Joindre une photo ou un PDF'**
+  String get expAddFile;
+
+  /// No description provided for @expRemoveFile.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer'**
+  String get expRemoveFile;
+
+  /// No description provided for @expAttachmentsHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif : devis, facture, photo de l’article (JPEG, PNG ou PDF, 10 Mo, 3 au plus).'**
+  String get expAttachmentsHint;
+
+  /// No description provided for @expAttachmentBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pièce jointe à la demande'**
+  String get expAttachmentBody;
+
+  /// No description provided for @expSentFilesMissed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Demande envoyée.} =1{Demande envoyée, mais 1 pièce jointe n’est pas partie : ajoutez-la dans les échanges.} other{Demande envoyée, mais {count} pièces jointes ne sont pas parties : ajoutez-les dans les échanges.}}'**
+  String expSentFilesMissed(int count);
 }
 
 class _AppLocalizationsDelegate

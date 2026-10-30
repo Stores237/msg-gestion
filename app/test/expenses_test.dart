@@ -125,6 +125,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('exp-replaces')), findsOneWidget);
     await tester.enterText(find.byKey(const Key('exp-amount')), '4800');
+    // The "Demande annulée" bar would cover the button.
+    for (final m in tester.stateList<ScaffoldMessengerState>(
+      find.byType(ScaffoldMessenger),
+    )) {
+      m.clearSnackBars();
+    }
+    await tester.pumpAndSettle();
     await tester.ensureVisible(find.byKey(const Key('exp-send')));
     await tester.tap(find.byKey(const Key('exp-send')));
     await tester.pumpAndSettle();
@@ -160,5 +167,45 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('1 À TRAITER'), findsOneWidget);
+  });
+
+  testWidgets('photos and PDFs joined on the form go into the thread', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    var n = 0;
+    debugPickExpenseFile = (_) async =>
+        (name: ++n == 1 ? 'devis.pdf' : 'photo-$n.jpg', bytes: const [1, 2]);
+    addTearDown(() => debugPickExpenseFile = null);
+    await _openFromHome(tester);
+    await tester.tap(find.byKey(const Key('new-expense')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('exp-domain')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Formation').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('exp-title')), 'Papier');
+    await tester.enterText(find.byKey(const Key('exp-amount')), '5000');
+    for (var i = 0; i < 3; i++) {
+      await tester.ensureVisible(find.byKey(const Key('exp-add-file')));
+      await tester.tap(find.byKey(const Key('exp-add-file')));
+      await tester.pumpAndSettle();
+    }
+    // Three at most: the button goes.
+    expect(find.byKey(const Key('exp-add-file')), findsNothing);
+    await tester.tap(find.byKey(const Key('exp-file-remove-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('devis.pdf'), findsOneWidget);
+    expect(find.byKey(const Key('exp-file-2')), findsNothing);
+    await tester.ensureVisible(find.byKey(const Key('exp-send')));
+    await tester.tap(find.byKey(const Key('exp-send')));
+    await tester.pumpAndSettle();
+    final sent = f.finances.expenseCalls.where((c) => c.startsWith('message'));
+    expect(sent, [
+      'message:41:Pièce jointe à la demande:devis.pdf:initial',
+      'message:41:Pièce jointe à la demande:photo-2.jpg:initial',
+    ]);
+    // The request opens with its files in the thread.
+    expect(find.text('Demande de dépense'), findsOneWidget);
   });
 }

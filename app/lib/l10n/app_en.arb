@@ -885,5 +885,11 @@
   "homeExpensesHint": "Ask for a purchase, follow your requests",
   "fromExpense": "Paid on expense request no. {id} · see the proof",
   "selectLines": "Select",
-  "expTodoCount": "{count} to handle"
+  "expTodoCount": "{count} to handle",
+  "expAttachments": "Attachments",
+  "expAddFile": "Attach a photo or a PDF",
+  "expRemoveFile": "Remove",
+  "expAttachmentsHint": "Optional: quote, invoice, photo of the item (JPEG, PNG or PDF, 10 MB, 3 at most).",
+  "expAttachmentBody": "Attached to the request",
+  "expSentFilesMissed": "{count, plural, =0{Request sent.} =1{Request sent, but 1 attachment didn't go: add it in the thread.} other{Request sent, but {count} attachments didn't go: add them in the thread.}}"
 }

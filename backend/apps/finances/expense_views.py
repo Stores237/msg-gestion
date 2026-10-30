@@ -209,7 +209,8 @@ class RequestMessageView(APIView):
             return refusal
         try:
             expenses.comment(req, by=request.user, body=str(request.data.get("body") or ""),
-                             upload=got[0] if got else None, content_type=got[1] if got else "", request=request)
+                             upload=got[0] if got else None, content_type=got[1] if got else "",
+                             initial=str(request.data.get("initial")) in ("1", "true", "True"), request=request)
         except FinanceRule as e:
             return _rule(e)
         return Response(DetailSerializer(req, context={"request": request}).data, status=status.HTTP_201_CREATED)

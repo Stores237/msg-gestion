@@ -1220,3 +1220,19 @@ parsed by the app's models. Found and fixed:
 - **A Sortie paid on a request** says so in the cash book ("Payée sur la demande n° …") and opens
   the request with its proof (`expense` on each cash-book line).
 - Back-office Finances footnote updated to the mutual rule.
+
+## 55. Expense requests: attach a photo or a PDF on the form
+
+Owner, 2026-10-30: "add the possibility to add an attachment on the expense request form like a
+picture or pdf".
+
+- New request → **Pièces jointes** → "Joindre une photo ou un PDF" (quote, invoice, photo of the
+  item): JPEG, PNG or PDF, 10 MB each, 3 at most; each can be removed before sending.
+- They are sent with the request and appear first in its thread ("Pièce jointe à la demande"),
+  where the lead, the commissaire, the trésorier and the back-office see and open them. Joining
+  them doesn't send a second notice (`initial` on `POST …/messages/`, the requester's own files
+  while the request waits for the lead).
+- If a file fails to upload, the request is still sent and the member is told to add it again
+  from the thread.
+- How to verify: Accueil → Demandes de dépense → Nouvelle demande → join a photo and a PDF →
+  Envoyer: both are in the request's Échanges.

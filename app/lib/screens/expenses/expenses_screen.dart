@@ -244,8 +244,17 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
   List<ExpenseDomain> _domains = const [];
   ExpenseDomain? _domain;
   List<(int, String)> _tagged = [];
+
+  /// Photos or PDFs joined to the request (quote, receipt…), 3 at most.
+  final List<PickedFile> _files = [];
+  static const maxFiles = 3;
   String? _error;
   bool _busy = false;
+
+  Future<void> _addFile() async {
+    final f = await (debugPickExpenseFile ?? pickProof)(context);
+    if (f != null && mounted) setState(() => _files.add(f));
+  }
 
   @override
   void initState() {
@@ -311,10 +320,27 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
         tagged: [for (final t in _tagged) t.$1],
         replaces: widget.replacing?.id,
       );
+      // The files go into the request's thread; a failed one doesn't undo
+      // the request: the member adds it again from the thread.
+      var missed = 0;
+      for (final f in _files) {
+        try {
+          await RepositoryLocator.instance.finances.expenseMessage(
+            made.id,
+            body: l.expAttachmentBody,
+            file: f,
+            initial: true,
+          );
+        } catch (_) {
+          missed++;
+        }
+      }
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l.expSent)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(missed == 0 ? l.expSent : l.expSentFilesMissed(missed)),
+        ),
+      );
       Navigator.of(context).pop(made);
     } catch (e) {
       if (mounted) setState(() => _error = describeError(context, e));
@@ -385,6 +411,42 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                     maxLines: 3,
                     maxLength: 1000,
                     decoration: InputDecoration(labelText: l.expDescription),
+                  ),
+                  SectionLabel(l.expAttachments),
+                  const SizedBox(height: 4),
+                  for (final (i, f) in _files.indexed)
+                    ListRow(
+                      key: Key('exp-file-$i'),
+                      lead: IconChip(
+                        f.name.toLowerCase().endsWith('.pdf')
+                            ? Icons.picture_as_pdf_outlined
+                            : Icons.image_outlined,
+                        tone: Tone.neutral,
+                      ),
+                      title: Text(f.name, overflow: TextOverflow.ellipsis),
+                      trailing: IconButton(
+                        key: Key('exp-file-remove-$i'),
+                        tooltip: l.expRemoveFile,
+                        icon: const Icon(Icons.close),
+                        onPressed: () => setState(() => _files.removeAt(i)),
+                      ),
+                    ),
+                  if (_files.length < maxFiles)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: OutlinedButton.icon(
+                        key: const Key('exp-add-file'),
+                        onPressed: _busy ? null : _addFile,
+                        icon: const Icon(Icons.attach_file),
+                        label: Text(l.expAddFile),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 12),
+                    child: Text(
+                      l.expAttachmentsHint,
+                      style: TextStyle(fontSize: 12, color: c.textSecondary),
+                    ),
                   ),
                   ListRow(
                     key: const Key('exp-tag'),
@@ -1045,6 +1107,10 @@ class _PayExpenseScreenState extends State<PayExpenseScreen> {
     );
   }
 }
+
+/// Tests put a file here instead of the phone's picker.
+@visibleForTesting
+Future<PickedFile?> Function(BuildContext)? debugPickExpenseFile;
 
 /// An image (screenshot, photo) or a PDF, 10 MB at most.
 Future<PickedFile?> pickProof(BuildContext context) async {

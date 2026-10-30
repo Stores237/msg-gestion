@@ -229,7 +229,10 @@ def _close(req, by, status, reason):
     _step(req, by, f"{word} : {reason.strip()}")
 
 
-def comment(req, *, by, body, upload=None, content_type="", request=None):
+def comment(req, *, by, body, upload=None, content_type="", initial=False, request=None):
+    """A message in the thread. [initial]: a file the requester joins while
+    sending the request (owner, 2026-10-30: a photo or a PDF on the form);
+    the request's own notice already told everyone, so no second one."""
     if not can_see(req, by):
         _refuse("not_involved", "Cette demande ne vous concerne pas.", by=by, req=req, request=request)
     if not (body or "").strip() and upload is None:
@@ -238,6 +241,8 @@ def comment(req, *, by, body, upload=None, content_type="", request=None):
     if upload is not None:
         file = {"file": upload, "file_name": (upload.name or "fichier").rsplit("/", 1)[-1][:160], "content_type": content_type}
     msg = _step(req, by, (body or "").strip()[:1000], kind=ExpenseMessage.Kind.COMMENT, **file)
+    if initial and req.requester_id == by.pk and req.status == S.SUBMITTED:
+        return msg
     others = [u for u in [req.requester, *req.tagged.all(), req.lead_by, req.audit_by, req.paid_by]
               if u and u.pk != by.pk]
     notify(others, "payment", "Nouveau message · demande de dépense", f"{by.short_name} · {req.title}", _target(req))

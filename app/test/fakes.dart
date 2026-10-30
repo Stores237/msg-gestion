@@ -917,8 +917,12 @@ class FakeFinancesRepository implements FinancesRepository {
     int id, {
     String body = '',
     PickedFile? file,
+    bool initial = false,
   }) async {
-    expenseCalls.add('message:$id:$body');
+    expenseCalls.add(
+      'message:$id:$body${file == null ? '' : ':${file.name}'}'
+      '${initial ? ':initial' : ''}',
+    );
     final r = expenseItems.firstWhere((e) => e.id == id);
     return _put(
       _expense(

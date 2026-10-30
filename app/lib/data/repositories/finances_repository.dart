@@ -77,9 +77,12 @@ abstract class FinancesRepository {
     required PickedFile proof,
     String note = '',
   });
+
+  /// [initial]: a file joined on the request form (no second notice).
   Future<ExpenseRequest> expenseMessage(
     int id, {
     String body = '',
     PickedFile? file,
+    bool initial = false,
   });
 }

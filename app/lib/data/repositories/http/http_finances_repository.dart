@@ -290,6 +290,7 @@ class HttpFinancesRepository implements FinancesRepository {
     int id, {
     String body = '',
     PickedFile? file,
+    bool initial = false,
   }) async => ExpenseRequest.fromJson(
     (file == null
             ? await _api.post(
@@ -301,7 +302,7 @@ class HttpFinancesRepository implements FinancesRepository {
                 field: 'file',
                 bytes: file.bytes,
                 filename: file.name,
-                fields: {'body': body},
+                fields: {'body': body, if (initial) 'initial': '1'},
               ))
         as Map<String, dynamic>,
   );

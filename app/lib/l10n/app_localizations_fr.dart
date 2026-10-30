@@ -2944,4 +2944,34 @@ class AppLocalizationsFr extends AppLocalizations {
   String expTodoCount(int count) {
     return '$count à traiter';
   }
+
+  @override
+  String get expAttachments => 'Pièces jointes';
+
+  @override
+  String get expAddFile => 'Joindre une photo ou un PDF';
+
+  @override
+  String get expRemoveFile => 'Retirer';
+
+  @override
+  String get expAttachmentsHint =>
+      'Facultatif : devis, facture, photo de l’article (JPEG, PNG ou PDF, 10 Mo, 3 au plus).';
+
+  @override
+  String get expAttachmentBody => 'Pièce jointe à la demande';
+
+  @override
+  String expSentFilesMissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Demande envoyée, mais $count pièces jointes ne sont pas parties : ajoutez-les dans les échanges.',
+      one:
+          'Demande envoyée, mais 1 pièce jointe n’est pas partie : ajoutez-la dans les échanges.',
+      zero: 'Demande envoyée.',
+    );
+    return '$_temp0';
+  }
 }

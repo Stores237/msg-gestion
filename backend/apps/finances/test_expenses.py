@@ -216,3 +216,17 @@ def test_group_setting_is_in_me():
     assert api.get("/api/me/").json()["group"]["finance_code_required"] is False
     Settings.objects.update(finance_code_required=True)
     assert api.get("/api/me/").json()["group"]["finance_code_required"] is True
+
+
+def test_files_joined_on_the_form_dont_notify_twice():
+    member_api, _ = api_for("membre")
+    lead_api, lead = api_for("formateur")
+    rid = ask(member_api).json()["id"]
+    before = Notification.objects.filter(user=lead).count()
+    r = member_api.post(f"/api/finances/expenses/{rid}/messages/", {"body": "Pièce jointe", "file": proof("devis.pdf"),
+                                                                      "initial": "1"}, format="multipart")
+    assert r.status_code == 201 and r.json()["messages"][-1]["file_name"] == "devis.pdf"
+    assert Notification.objects.filter(user=lead).count() == before
+    # Only the requester's own files while it's being sent are quiet.
+    lead_api.post(f"/api/finances/expenses/{rid}/messages/", {"body": "Vu", "initial": "1"}, format="multipart")
+    assert Notification.objects.filter(title="Nouveau message · demande de dépense").exists()

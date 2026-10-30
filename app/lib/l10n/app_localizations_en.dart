@@ -2900,4 +2900,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String expTodoCount(int count) {
     return '$count to handle';
   }
+
+  @override
+  String get expAttachments => 'Attachments';
+
+  @override
+  String get expAddFile => 'Attach a photo or a PDF';
+
+  @override
+  String get expRemoveFile => 'Remove';
+
+  @override
+  String get expAttachmentsHint =>
+      'Optional: quote, invoice, photo of the item (JPEG, PNG or PDF, 10 MB, 3 at most).';
+
+  @override
+  String get expAttachmentBody => 'Attached to the request';
+
+  @override
+  String expSentFilesMissed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Request sent, but $count attachments didn\'t go: add them in the thread.',
+      one: 'Request sent, but 1 attachment didn\'t go: add it in the thread.',
+      zero: 'Request sent.',
+    );
+    return '$_temp0';
+  }
 }
