@@ -8,7 +8,7 @@ its settings, not in the code.
 
 Developed and powered by **STORES** ("Propulsé par [S] STORES").
 
-**Version 0.1.0 (build 28)** · staging: <https://msg-staging.onrender.com>
+**Version 0.1.0 (build 29)** · staging: <https://msg-staging.onrender.com>
 (`/healthz/` reports the deployed version and commit).
 
 ## Two surfaces

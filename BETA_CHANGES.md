@@ -1103,3 +1103,15 @@ verified tester. Two causes found that stop members signing in or keep signing t
 - How to verify: deploy, install build 28, sign in on several phones on the same mobile network
   one after the other; all get in. Restart the service on Render while the app is open: it shows
   an error and stays signed in.
+
+## 50. Builds 27 and 28 withdrawn: built without the server address
+
+Owner, 2026-10-30: "I have tried many different accounts and the message is still the same: can't
+connect, check your network". Builds 27 and 28 were built with a bare `flutter build apk`, so they
+pointed at the emulator's local server (`http://10.0.2.2:8000/api`) instead of staging: no phone
+could reach anything. Builds 25 and 26 were correct. Build 29 is the same code as build 28, built
+with the staging address. New `app/tool/build_apk.sh` builds with the address and refuses to
+finish if it isn't inside the APK; RELEASING.md now uses it. The two broken APKs were removed
+from the download folder.
+
+- How to verify: install build 29 over 27/28 and sign in; the login works on mobile data and Wi-Fi.

@@ -38,9 +38,13 @@ One version for the whole platform, `MAJOR.MINOR.PATCH`, plus a build number for
 
    ```sh
    cd app
-   flutter build apk --release \
-     --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api
+   tool/build_apk.sh            # staging; or: tool/build_apk.sh https://<production>/api
    ```
+
+   It runs `flutter build apk --release --dart-define=API_BASE_URL=…` and fails if that address
+   is not inside the APK. Never run a bare `flutter build apk`: without the address the app
+   talks to the emulator's `10.0.2.2` and every phone says it can't connect (builds 27 and 28,
+   withdrawn 2026-10-30).
 
    Production: the production API URL instead (`RENDER_PRODUCTION.md`). The release key is
    `app/android/key.properties` + `app/android/keystore/` (git-ignored; back them up).
