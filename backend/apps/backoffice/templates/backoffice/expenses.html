@@ -8,7 +8,7 @@
     <a class="fsel{% if not statut %} on{% endif %}" href="?">Toutes</a>
     {% for value, label in statuses %}<a class="fsel{% if statut == value %} on{% endif %}" href="?statut={{ value }}">{{ label }} · {{ counts|get:value }}</a>{% endfor %}
   </form>
-  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Demande</th><th>Domaine</th><th>Demandeur</th><th>Étape</th><th class="amt">Montant</th><th></th></tr></thead><tbody>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Demande</th><th>Type</th><th>Demandeur</th><th>Étape</th><th class="amt">Montant</th><th></th></tr></thead><tbody>
     {% for r in items %}<tr><td><a class="who" href="{% url 'backoffice:expense' r.pk %}" style="color:inherit"><span><b>n° {{ r.pk }} · {{ r.title }}</b><small>{{ r.created_at|date:"d/m/Y H:i" }}</small></span></a></td>
       <td>{{ r.domain.name }}</td><td>{{ r.requester.short_name }}</td>
       <td><span class="status{% if r.status == 'paid' %} ok{% elif r.status == 'refused' %} alert{% elif r.status != 'cancelled' %} warn{% endif %}"><i></i>{{ r.get_status_display }}</span></td>

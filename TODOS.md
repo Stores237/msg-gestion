@@ -8,6 +8,7 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 34 (2026-10-30):** deploy on Render (migration accounts 0022) and install build 34 (includes 33). Then back-office → Paramètres → Approbation des dépenses (check the types and who approves) and Sécurité des finances.
 - [ ] **Owner — build 33 (2026-10-30):** deploy on Render and install build 33 (includes 30–32: attachments on the expense request form).
 - [ ] **Owner — build 32 (2026-10-30):** deploy on Render (staging was still on build 30: the back-office's Domaines de dépense and Code finances arrive with this deploy; migrations accounts 0020, 0021; core 0014; finances 0004, 0005) and install build 32 (includes 30 and 31).
 - [ ] **Owner — build 31 (2026-10-30):** deploy on Render (migrations accounts 0020, 0021; core 0014; finances 0004, 0005) and install build 31 (includes 30). In the back-office: check Paramètres → Domaines de dépense (names, lead roles) and decide whether to turn on Sécurité des finances → Code finances obligatoire. Tell members about Accueil → Demandes de dépense.

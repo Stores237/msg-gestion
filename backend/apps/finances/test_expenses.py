@@ -230,3 +230,20 @@ def test_files_joined_on_the_form_dont_notify_twice():
     # Only the requester's own files while it's being sent are quiet.
     lead_api.post(f"/api/finances/expenses/{rid}/messages/", {"body": "Vu", "initial": "1"}, format="multipart")
     assert Notification.objects.filter(title="Nouveau message · demande de dépense").exists()
+
+
+def test_a_member_turns_the_code_on_for_himself():
+    u = UserFactory(pin="4821")
+    api = APIClient()
+    api.force_authenticate(u)
+    assert api.post("/api/auth/finance-code/switch/", {"on": True}, format="json").status_code == 409
+    api.post("/api/auth/finance-code/", {"pin": "4821", "code": "7395"}, format="json")
+    u.refresh_from_db()
+    assert api.post("/api/auth/finance-code/switch/", {"on": True}, format="json").status_code == 204
+    u.refresh_from_db()
+    assert api.get("/api/me/").json()["finance_code_on"] is True
+    # Off needs the code.
+    assert api.post("/api/auth/finance-code/switch/", {"on": False, "code": "1357"}, format="json").status_code == 401
+    assert api.post("/api/auth/finance-code/switch/", {"on": False, "code": "7395"}, format="json").status_code == 204
+    u.refresh_from_db()
+    assert not u.finance_code_on

@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('exp-send')));
     await tester.pumpAndSettle();
-    expect(find.text('Choisissez le domaine.'), findsOneWidget);
+    expect(find.text('Choisissez le type de dépense.'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('exp-domain')));
     await tester.pumpAndSettle();

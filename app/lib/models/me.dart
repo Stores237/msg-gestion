@@ -86,7 +86,15 @@ class Me {
     this.groups = const [],
     this.photo,
     this.financeCodeSet = false,
+    this.financeCodeOn = false,
   });
+
+  /// The member asked for the finance code on their own Finances.
+  final bool financeCodeOn;
+
+  /// Finances asks the code: the group requires it, or the member chose it.
+  bool get financeCodeAsked =>
+      (group?.financeCodeRequired ?? false) || financeCodeOn;
 
   /// The member has chosen a finance code (second code for Finances).
   final bool financeCodeSet;
@@ -113,6 +121,7 @@ class Me {
     groups: groups,
     photo: photo,
     financeCodeSet: financeCodeSet,
+    financeCodeOn: financeCodeOn,
   );
 
   /// The group this session works in, and every group the member is in.
@@ -155,6 +164,7 @@ class Me {
     },
     photo: json['photo'] as String?,
     financeCodeSet: json['finance_code_set'] == true,
+    financeCodeOn: json['finance_code_on'] == true,
     group: json['group'] == null
         ? null
         : GroupInfo.fromJson(json['group'] as Map<String, dynamic>),

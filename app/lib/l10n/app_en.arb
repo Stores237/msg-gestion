@@ -832,8 +832,8 @@
   "expStatusCancelled": "Cancelled",
   "expReplaces": "Replaces request no. {id}.",
   "expReplacedBy": "Redone: request no. {id}.",
-  "expDomain": "Domain",
-  "expDomainRequired": "Choose the domain.",
+  "expDomain": "Expense type",
+  "expDomainRequired": "Choose the expense type.",
   "expTitleRequired": "Say what the expense is for.",
   "expLeadHint": "Approved first by: {role} (or a coordinator you tag).",
   "expNoLeadHint": "Tag the coordinator who will approve it.",
@@ -891,5 +891,15 @@
   "expRemoveFile": "Remove",
   "expAttachmentsHint": "Optional: quote, invoice, photo of the item (JPEG, PNG or PDF, 10 MB, 3 at most).",
   "expAttachmentBody": "Attached to the request",
-  "expSentFilesMissed": "{count, plural, =0{Request sent.} =1{Request sent, but 1 attachment didn't go: add it in the thread.} other{Request sent, but {count} attachments didn't go: add them in the thread.}}"
+  "expSentFilesMissed": "{count, plural, =0{Request sent.} =1{Request sent, but 1 attachment didn't go: add it in the thread.} other{Request sent, but {count} attachments didn't go: add them in the thread.}}",
+  "financeSettingsTitle": "Finance settings",
+  "financeCodeAskTitle": "Ask for my finance code",
+  "financeCodeAskHint": "Opening Finances on this account will ask your 4-digit code.",
+  "financeCodeForced": "Required by your group for everyone: it can't be turned off.",
+  "financeCodeChange": "Change my finance code",
+  "financeCodeChangeHint": "With your PIN, also if you forgot it.",
+  "financeCodeAbout": "The finance code is a second code, different from the PIN. Once typed, Finances stays open 5 minutes; it closes when the app locks.",
+  "financeCodeTurnOffTitle": "Turn the finance code off?",
+  "financeCodeTurnedOn": "Finance code turned on.",
+  "financeCodeTurnedOff": "Finance code turned off."
 }

@@ -2763,10 +2763,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get expDomain => 'Domaine';
+  String get expDomain => 'Type de dépense';
 
   @override
-  String get expDomainRequired => 'Choisissez le domaine.';
+  String get expDomainRequired => 'Choisissez le type de dépense.';
 
   @override
   String get expTitleRequired => 'Indiquez l’objet de la dépense.';
@@ -2974,4 +2974,38 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeSettingsTitle => 'Réglages des finances';
+
+  @override
+  String get financeCodeAskTitle => 'Demander mon code finances';
+
+  @override
+  String get financeCodeAskHint =>
+      'Ouvrir Finances sur ce compte demandera votre code à 4 chiffres.';
+
+  @override
+  String get financeCodeForced =>
+      'Exigé par votre groupe pour tous : il ne peut pas être désactivé.';
+
+  @override
+  String get financeCodeChange => 'Changer mon code finances';
+
+  @override
+  String get financeCodeChangeHint =>
+      'Avec votre PIN, aussi si vous l’avez oublié.';
+
+  @override
+  String get financeCodeAbout =>
+      'Le code finances est un second code, différent du PIN. Une fois saisi, Finances reste ouvert 5 minutes ; il se referme quand l’application se verrouille.';
+
+  @override
+  String get financeCodeTurnOffTitle => 'Désactiver le code finances ?';
+
+  @override
+  String get financeCodeTurnedOn => 'Code finances activé.';
+
+  @override
+  String get financeCodeTurnedOff => 'Code finances désactivé.';
 }

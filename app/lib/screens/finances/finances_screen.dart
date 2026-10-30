@@ -14,6 +14,7 @@ import '../../widgets/ui.dart';
 import '../expenses/expenses_screen.dart';
 import 'collection_screen.dart';
 import 'entry_form_screen.dart';
+import 'finance_gate.dart';
 import 'report_screen.dart';
 
 /// Finances tab (design: "Finances · livre de caisse"): balance, then the
@@ -98,6 +99,16 @@ class _FinancesScreenState extends State<FinancesScreen> {
             title: l.tabFinances,
             sync: true,
             actions: [
+              IconButton(
+                key: const Key('finance-settings'),
+                tooltip: l.financeSettingsTitle,
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => FinanceSettingsScreen(me: widget.me),
+                  ),
+                ),
+              ),
               if (widget.me.can('finances.cashbook', 'export'))
                 IconButton(
                   key: const Key('export-statement'),

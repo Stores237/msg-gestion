@@ -8,7 +8,7 @@
     <div class="row"><div class="row-main"><div class="row-t">Étape</div></div><span class="status{% if r.status == 'paid' %} ok{% elif r.status == 'refused' %} alert{% elif r.status != 'cancelled' %} warn{% endif %}"><i></i>{{ r.get_status_display }}</span></div>
     <div class="row"><div class="row-main"><div class="row-t">Montant demandé</div></div><b class="tnum">{{ r.amount|fcfa }}</b></div>
     {% if r.paid_amount %}<div class="row"><div class="row-main"><div class="row-t">Montant payé</div><div class="row-s">{% if r.entry_id %}Opération n° {{ r.entry_id }} au livre de caisse{% endif %}</div></div><b class="tnum">{{ r.paid_amount|fcfa }}</b></div>{% endif %}
-    <div class="row"><div class="row-main"><div class="row-t">Domaine</div></div><span>{{ r.domain.name }}</span></div>
+    <div class="row"><div class="row-main"><div class="row-t">Type de dépense</div></div><span>{{ r.domain.name }}</span></div>
     <div class="row"><div class="row-main"><div class="row-t">Demandeur</div><div class="row-s">{{ r.created_at|date:"d/m/Y H:i" }}</div></div><span>{{ r.requester.full_name }}</span></div>
     {% if r.tagged.exists %}<div class="row"><div class="row-main"><div class="row-t">Coordinateurs identifiés</div></div><span>{% for u in r.tagged.all %}{{ u.short_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></div>{% endif %}
     {% if r.description %}<div class="row"><div class="row-main"><div class="row-t">Détails</div><div class="row-s">{{ r.description|linebreaksbr }}</div></div></div>{% endif %}

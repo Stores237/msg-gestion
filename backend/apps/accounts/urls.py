@@ -13,6 +13,7 @@ urlpatterns = [
     path("auth/pin/change/", views.ChangePinView.as_view(), name="pin-change"),
     path("auth/finance-code/", views.FinanceCodeView.as_view(), name="finance-code"),
     path("auth/finance-code/check/", views.FinanceCodeCheckView.as_view(), name="finance-code-check"),
+    path("auth/finance-code/switch/", views.FinanceCodeSwitchView.as_view(), name="finance-code-switch"),
     path("auth/pin/forgot/", views.ForgotPinView.as_view(), name="pin-forgot"),
     path("auth/pin/forgot/confirm/", views.ForgotPinConfirmView.as_view(), name="pin-forgot-confirm"),
     path("me/", views.MeView.as_view(), name="me"),

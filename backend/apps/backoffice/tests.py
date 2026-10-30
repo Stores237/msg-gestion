@@ -178,7 +178,7 @@ def test_finance_code_switch_and_expense_domains(logged_in):
     from apps.finances.models import ExpenseDomain
 
     page = logged_in.get("/bo/parametres/").content.decode()
-    assert "Code finances obligatoire" in page and "Domaines de dépense" in page
+    assert "Exiger le code finances pour tous" in page and "Approbation des dépenses" in page
     st = Settings.get()
     logged_in.post("/bo/parametres/", {"finance_code_form": "1", "finance_code_required": "on"})
     st.refresh_from_db()

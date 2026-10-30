@@ -1718,8 +1718,8 @@
   "expStatusCancelled": "Annulée",
   "expReplaces": "Remplace la demande n° {id}.",
   "expReplacedBy": "Refaite : demande n° {id}.",
-  "expDomain": "Domaine",
-  "expDomainRequired": "Choisissez le domaine.",
+  "expDomain": "Type de dépense",
+  "expDomainRequired": "Choisissez le type de dépense.",
   "expTitleRequired": "Indiquez l’objet de la dépense.",
   "expLeadHint": "Approuvée d’abord par : {role} (ou un coordinateur que vous identifiez).",
   "expNoLeadHint": "Identifiez le coordinateur qui l’approuvera.",
@@ -1861,5 +1861,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "financeSettingsTitle": "Réglages des finances",
+  "financeCodeAskTitle": "Demander mon code finances",
+  "financeCodeAskHint": "Ouvrir Finances sur ce compte demandera votre code à 4 chiffres.",
+  "financeCodeForced": "Exigé par votre groupe pour tous : il ne peut pas être désactivé.",
+  "financeCodeChange": "Changer mon code finances",
+  "financeCodeChangeHint": "Avec votre PIN, aussi si vous l’avez oublié.",
+  "financeCodeAbout": "Le code finances est un second code, différent du PIN. Une fois saisi, Finances reste ouvert 5 minutes ; il se referme quand l’application se verrouille.",
+  "financeCodeTurnOffTitle": "Désactiver le code finances ?",
+  "financeCodeTurnedOn": "Code finances activé.",
+  "financeCodeTurnedOff": "Code finances désactivé."
 }

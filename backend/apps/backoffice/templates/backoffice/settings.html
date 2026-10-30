@@ -32,7 +32,7 @@
     </div></section>
     <section class="panel"><div class="panel-h"><h2>Sécurité des finances</h2></div><div class="panel-b"><div class="list" style="padding:0">
       <input type="hidden" name="finance_code_form" value="1">
-      <label class="row" style="cursor:pointer"><div class="row-main"><div class="row-t">Code finances obligatoire</div><div class="row-s">Ouvrir Finances dans l’application demande un second code à 4 chiffres, propre à chacun et différent du PIN. Il se définit et se réinitialise avec le PIN.</div></div><input type="checkbox" name="finance_code_required"{% if s.finance_code_required %} checked{% endif %} aria-label="Code finances obligatoire"></label>
+      <label class="row" style="cursor:pointer"><div class="row-main"><div class="row-t">Exiger le code finances pour tous</div><div class="row-s">Coché : dans l’application, ouvrir Finances demande à chacun un second code à 4 chiffres, différent de son PIN (choisi la première fois avec le PIN). Décoché : chacun peut quand même l’activer pour lui-même dans Finances → ⚙. Pris en compte à la prochaine ouverture de Finances.</div></div><input type="checkbox" name="finance_code_required"{% if s.finance_code_required %} checked{% endif %} aria-label="Code finances obligatoire"></label>
     </div></div></section>
     <section class="panel"><div class="panel-h"><h2>Données et sauvegarde</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
       <span class="status ok"><i></i>Sauvegardes quotidiennes automatiques de la base (Supabase)</span>
@@ -67,15 +67,16 @@
     </tbody></table></div>
     <div class="tbl-f"><span>« Détail » s’affiche sous la tenue dans l’événement (ce que la tenue comprend dans ce groupe).</span></div></section>
 </div>
-<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Domaines de dépense</h2></div>
-  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Domaine</th><th>Approuvé d’abord par</th><th>Retiré</th></tr></thead><tbody>
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Approbation des dépenses</h2></div>
+  <div class="panel-b" style="padding-bottom:0"><span style="font-size:14px;color:var(--text-secondary)">Les types proposés quand un membre fait une <b>demande de dépense</b> dans l’application (Accueil → Demandes de dépense), et pour chacun le rôle qui l’approuve en premier. Ex. « Formation » → Formateur : une demande de papier pour l’examen va d’abord au formateur.</span></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Type de dépense</th><th>Approuvé d’abord par</th><th>Retiré</th></tr></thead><tbody>
     {% for x in expense_domains %}<tr><td><span class="fld-box" style="min-height:40px"><input name="x{{ x.pk }}_name" value="{{ x.name }}" maxlength="60" aria-label="Nom"></span></td>
       <td><span class="fld-box" style="min-height:40px"><select name="x{{ x.pk }}_lead" aria-label="Rôle qui approuve {{ x.name }}"><option value="">— aucun (coordinateur identifié) —</option>{% for r in roles %}<option value="{{ r.pk }}"{% if x.lead_role_id == r.pk %} selected{% endif %}>{{ r.name }}</option>{% endfor %}</select></span></td>
       <td><input type="checkbox" name="x{{ x.pk }}_archived"{% if x.is_archived %} checked{% endif %} aria-label="Retirer {{ x.name }}"></td></tr>{% endfor %}
-    <tr><td><span class="fld-box" style="min-height:40px"><input name="x_new_name" maxlength="60" placeholder="Nouveau domaine (ex. Matériel)" aria-label="Nouveau domaine"></span></td>
+    <tr><td><span class="fld-box" style="min-height:40px"><input name="x_new_name" maxlength="60" placeholder="Nouveau type (ex. Matériel)" aria-label="Nouveau type de dépense"></span></td>
       <td><span class="fld-box" style="min-height:40px"><select name="x_new_lead" aria-label="Rôle qui approuve le nouveau domaine"><option value="">— aucun —</option>{% for r in roles %}<option value="{{ r.pk }}">{{ r.name }}</option>{% endfor %}</select></span></td><td></td></tr>
   </tbody></table></div>
-  <div class="tbl-f"><span>Une demande de dépense est d’abord approuvée par le titulaire de ce rôle (le responsable, pas son adjoint) ou par un coordinateur que le demandeur identifie ; puis par le commissaire aux comptes ; puis le trésorier paie et joint la preuve. Un domaine retiré reste sur les demandes passées.</span></div></section>
+  <div class="tbl-f"><span>Une demande de dépense est d’abord approuvée par le titulaire de ce rôle (le responsable, pas son adjoint) ou par un coordinateur que le demandeur identifie ; puis par le commissaire aux comptes ; puis le trésorier paie et joint la preuve. Un type retiré n’est plus proposé mais reste sur les demandes passées.</span></div></section>
 <div style="margin-top:16px"><button class="btn btn-primary">Enregistrer les listes</button></div>
 </form>
 {% endblock %}

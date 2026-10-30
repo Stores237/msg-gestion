@@ -120,6 +120,26 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> switchFinanceCode({required bool on, String code = ''}) async {
+    try {
+      await _api.post(
+        '/auth/finance-code/switch/',
+        body: {'on': on, 'code': code},
+      );
+    } on ApiException catch (e) {
+      if (e.statusCode == 401) {
+        throw WrongFinanceCode(
+          (e.json?['attempts_left'] as num?)?.toInt() ?? 0,
+        );
+      }
+      if (e.statusCode == 423) {
+        throw AccountLocked((e.json?['minutes'] as num?)?.toInt() ?? 15);
+      }
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> checkFinanceCode(String code) async {
     try {
       await _api.post('/auth/finance-code/check/', body: {'code': code});

@@ -84,7 +84,7 @@ void main() {
         of: find.byType(ScreenHeader),
         matching: find.byType(IconButton),
       );
-      expect(buttons, findsNWidgets(2)); // CSV and PDF
+      expect(buttons, findsNWidgets(3)); // ⚙, statement and PDF
       final right = tester.getRect(buttons.last).right;
       expect(width - right, lessThan(24), reason: 'right edge at $right');
     });

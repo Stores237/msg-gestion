@@ -24,9 +24,19 @@ class FinanceGate extends StatefulWidget {
   /// Closed again (sign-out, app locked).
   static void lock() => _openUntil = null;
 
+  @visibleForTesting
+  static void debugReset() {
+    _openUntil = null;
+    _askedLatest = null;
+  }
+
+  /// What the server said last (the back-office switch and the member's own
+  /// may change while the app is open).
+  static bool? _askedLatest;
+
   /// Finance figures may show (Accueil): no code needed, or opened lately.
   static bool showsFigures(Me me) {
-    if (!(me.group?.financeCodeRequired ?? false)) return true;
+    if (!(_askedLatest ?? me.financeCodeAsked)) return true;
     final until = _openUntil;
     return until != null && DateTime.now().isBefore(until);
   }
@@ -36,13 +46,43 @@ class FinanceGate extends StatefulWidget {
 }
 
 class _FinanceGateState extends State<FinanceGate> {
+  late Me _me = widget.me;
   late bool _codeSet = widget.me.financeCodeSet;
   bool _choosing = false;
   String _code = '';
   String? _error;
   bool _busy = false;
 
-  bool get _required => widget.me.group?.financeCodeRequired ?? false;
+  /// Re-reading the settings when Finances opens: switched on in the
+  /// back-office a minute ago must count now, not at the next app start.
+  bool _checking = true;
+
+  bool get _required => _me.financeCodeAsked;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isOpen) {
+      _checking = false;
+      return;
+    }
+    RepositoryLocator.instance.profile
+        .fetchMe()
+        .then((me) {
+          FinanceGate._askedLatest = me.financeCodeAsked;
+          if (mounted) {
+            setState(() {
+              _me = me;
+              _codeSet = me.financeCodeSet;
+              _checking = false;
+            });
+          }
+        })
+        .catchError((Object _) {
+          // Offline: what the app knew when it started.
+          if (mounted) setState(() => _checking = false);
+        });
+  }
 
   bool get _isOpen {
     final until = FinanceGate._openUntil;
@@ -103,9 +143,11 @@ class _FinanceGateState extends State<FinanceGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_required || _isOpen) return widget.child;
+    if (_isOpen) return widget.child;
+    if (_checking) return const Center(child: CircularProgressIndicator());
+    if (!_required) return widget.child;
     if (!_codeSet || _choosing) {
-      return _ChooseCode(
+      return FinanceCodeForm(
         first: !_codeSet,
         onCancel: _codeSet ? () => setState(() => _choosing = false) : null,
         onSaved: () {
@@ -161,8 +203,9 @@ class _FinanceGateState extends State<FinanceGate> {
 }
 
 /// Choose (first time) or reset the finance code: PIN, new code twice.
-class _ChooseCode extends StatefulWidget {
-  const _ChooseCode({
+class FinanceCodeForm extends StatefulWidget {
+  const FinanceCodeForm({
+    super.key,
     required this.first,
     required this.onSaved,
     this.onCancel,
@@ -172,10 +215,10 @@ class _ChooseCode extends StatefulWidget {
   final VoidCallback? onCancel;
 
   @override
-  State<_ChooseCode> createState() => _ChooseCodeState();
+  State<FinanceCodeForm> createState() => _FinanceCodeFormState();
 }
 
-class _ChooseCodeState extends State<_ChooseCode> {
+class _FinanceCodeFormState extends State<FinanceCodeForm> {
   final _pin = TextEditingController();
   final _code = TextEditingController();
   final _again = TextEditingController();
@@ -272,6 +315,213 @@ class _ChooseCodeState extends State<_ChooseCode> {
         ),
         if (widget.onCancel != null)
           TextButton(onPressed: widget.onCancel, child: Text(l.cancel)),
+      ],
+    );
+  }
+}
+
+/// Finances → ⚙ (owner, 2026-10-30): change one's finance code, and ask for
+/// it on one's own Finances even when the group doesn't require it.
+class FinanceSettingsScreen extends StatefulWidget {
+  const FinanceSettingsScreen({super.key, required this.me});
+  final Me me;
+
+  @override
+  State<FinanceSettingsScreen> createState() => _FinanceSettingsScreenState();
+}
+
+class _FinanceSettingsScreenState extends State<FinanceSettingsScreen> {
+  late Me _me = widget.me;
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  Future<void> _refresh() async {
+    try {
+      final me = await RepositoryLocator.instance.profile.fetchMe();
+      FinanceGate._askedLatest = me.financeCodeAsked;
+      if (mounted) setState(() => _me = me);
+    } catch (_) {
+      // Offline: the settings as last known.
+    }
+  }
+
+  Future<bool> _chooseCode() async {
+    final done = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          body: SafeArea(
+            child: Column(
+              children: [
+                ScreenHeader(
+                  title: AppLocalizations.of(context).financeCodeChooseTitle,
+                  back: true,
+                  small: true,
+                ),
+                Expanded(
+                  child: FinanceCodeForm(
+                    first: !_me.financeCodeSet,
+                    onSaved: () => Navigator.of(context).pop(true),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (done == true) {
+      // The member just typed it: Finances stays open.
+      FinanceGate._openUntil = DateTime.now().add(FinanceGate.open);
+      await _refresh();
+    }
+    return done == true;
+  }
+
+  Future<void> _switch(bool on) async {
+    final l = AppLocalizations.of(context);
+    final auth = RepositoryLocator.instance.auth;
+    if (on && !_me.financeCodeSet && !await _chooseCode()) return;
+    if (!mounted) return;
+    var code = '';
+    if (!on) {
+      final typed = await showDialog<String>(
+        context: context,
+        builder: (_) => const _CodeDialog(),
+      );
+      if (typed == null || !mounted) return;
+      code = typed;
+    }
+    setState(() => _busy = true);
+    try {
+      await auth.switchFinanceCode(on: on, code: code);
+      await _refresh();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(on ? l.financeCodeTurnedOn : l.financeCodeTurnedOff),
+        ),
+      );
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final c = context.msg;
+    final forced = _me.group?.financeCodeRequired ?? false;
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            ScreenHeader(
+              title: l.financeSettingsTitle,
+              back: true,
+              small: true,
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                children: [
+                  GroupCard(
+                    children: [
+                      Material(
+                        type: MaterialType.transparency,
+                        child: SwitchListTile(
+                          key: const Key('finance-code-switch'),
+                          contentPadding: EdgeInsets.zero,
+                          value: forced || _me.financeCodeOn,
+                          onChanged: forced || _busy ? null : _switch,
+                          title: Text(l.financeCodeAskTitle),
+                          subtitle: Text(
+                            forced ? l.financeCodeForced : l.financeCodeAskHint,
+                          ),
+                        ),
+                      ),
+                      ListRow(
+                        key: const Key('finance-code-change'),
+                        lead: const IconChip(
+                          Icons.password,
+                          tone: Tone.neutral,
+                        ),
+                        title: Text(
+                          _me.financeCodeSet
+                              ? l.financeCodeChange
+                              : l.financeCodeChooseTitle,
+                        ),
+                        subtitle: Text(l.financeCodeChangeHint),
+                        chevron: true,
+                        onTap: _busy ? null : _chooseCode,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    l.financeCodeAbout,
+                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The current finance code, to turn it off.
+class _CodeDialog extends StatefulWidget {
+  const _CodeDialog();
+
+  @override
+  State<_CodeDialog> createState() => _CodeDialogState();
+}
+
+class _CodeDialogState extends State<_CodeDialog> {
+  final _code = TextEditingController();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.financeCodeTurnOffTitle),
+      content: TextField(
+        key: const Key('finance-code-current'),
+        controller: _code,
+        autofocus: true,
+        obscureText: true,
+        keyboardType: TextInputType.number,
+        maxLength: 4,
+        decoration: InputDecoration(
+          labelText: l.financeCodeTitle,
+          counterText: '',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l.cancel),
+        ),
+        FilledButton(
+          key: const Key('finance-code-current-ok'),
+          onPressed: () => Navigator.of(context).pop(_code.text.trim()),
+          child: Text(l.confirm),
+        ),
       ],
     );
   }

@@ -4553,13 +4553,13 @@ abstract class AppLocalizations {
   /// No description provided for @expDomain.
   ///
   /// In fr, this message translates to:
-  /// **'Domaine'**
+  /// **'Type de dépense'**
   String get expDomain;
 
   /// No description provided for @expDomainRequired.
   ///
   /// In fr, this message translates to:
-  /// **'Choisissez le domaine.'**
+  /// **'Choisissez le type de dépense.'**
   String get expDomainRequired;
 
   /// No description provided for @expTitleRequired.
@@ -4909,6 +4909,66 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =0{Demande envoyée.} =1{Demande envoyée, mais 1 pièce jointe n’est pas partie : ajoutez-la dans les échanges.} other{Demande envoyée, mais {count} pièces jointes ne sont pas parties : ajoutez-les dans les échanges.}}'**
   String expSentFilesMissed(int count);
+
+  /// No description provided for @financeSettingsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglages des finances'**
+  String get financeSettingsTitle;
+
+  /// No description provided for @financeCodeAskTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander mon code finances'**
+  String get financeCodeAskTitle;
+
+  /// No description provided for @financeCodeAskHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrir Finances sur ce compte demandera votre code à 4 chiffres.'**
+  String get financeCodeAskHint;
+
+  /// No description provided for @financeCodeForced.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exigé par votre groupe pour tous : il ne peut pas être désactivé.'**
+  String get financeCodeForced;
+
+  /// No description provided for @financeCodeChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer mon code finances'**
+  String get financeCodeChange;
+
+  /// No description provided for @financeCodeChangeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec votre PIN, aussi si vous l’avez oublié.'**
+  String get financeCodeChangeHint;
+
+  /// No description provided for @financeCodeAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code finances est un second code, différent du PIN. Une fois saisi, Finances reste ouvert 5 minutes ; il se referme quand l’application se verrouille.'**
+  String get financeCodeAbout;
+
+  /// No description provided for @financeCodeTurnOffTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désactiver le code finances ?'**
+  String get financeCodeTurnOffTitle;
+
+  /// No description provided for @financeCodeTurnedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances activé.'**
+  String get financeCodeTurnedOn;
+
+  /// No description provided for @financeCodeTurnedOff.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code finances désactivé.'**
+  String get financeCodeTurnedOff;
 }
 
 class _AppLocalizationsDelegate

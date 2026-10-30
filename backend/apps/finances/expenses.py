@@ -95,7 +95,7 @@ def _refuse(code, message, *, by, req, request):
 
 def submit(*, by, domain, title, amount, description="", tagged=(), replaces=None, request=None):
     if domain.is_archived:
-        raise FinanceRule("domain_archived", "Ce domaine n’est plus utilisé.")
+        raise FinanceRule("domain_archived", "Ce type de dépense n’est plus utilisé.")
     if amount <= 0:
         raise FinanceRule("amount_required", "Indiquez le montant demandé.")
     if not (title or "").strip():
@@ -105,7 +105,7 @@ def submit(*, by, domain, title, amount, description="", tagged=(), replaces=Non
         raise FinanceRule("bad_replaces", "Seule votre demande annulée peut être refaite, une fois.")
     tagged = [u for u in tagged if u.pk != by.pk]
     if not [u for u in [*leads(domain), *tagged] if u.pk != by.pk]:
-        raise FinanceRule("no_decider", "Personne d’autre que vous ne peut approuver ce domaine : identifiez un "
+        raise FinanceRule("no_decider", "Personne d’autre que vous ne peut approuver ce type de dépense : identifiez un "
                                         "coordinateur.")
     with transaction.atomic():
         req = ExpenseRequest.objects.create(requester=by, domain=domain, title=title.strip()[:140],
@@ -124,7 +124,7 @@ def decide(req, *, by, approve, note="", request=None):
     if req.status != S.SUBMITTED:
         raise FinanceRule("wrong_step", "Cette demande n’en est plus à cette étape.")
     if not any(u.pk == by.pk for u in deciders(req)):
-        _refuse("not_decider", "Cette étape revient au responsable du domaine ou à un coordinateur identifié.",
+        _refuse("not_decider", "Cette étape revient au responsable de ce type de dépense ou à un coordinateur identifié.",
                 by=by, req=req, request=request)
     if not approve and not (note or "").strip():
         raise FinanceRule("reason_required", "Indiquez pourquoi vous refusez.")

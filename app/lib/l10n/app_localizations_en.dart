@@ -2720,10 +2720,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get expDomain => 'Domain';
+  String get expDomain => 'Expense type';
 
   @override
-  String get expDomainRequired => 'Choose the domain.';
+  String get expDomainRequired => 'Choose the expense type.';
 
   @override
   String get expTitleRequired => 'Say what the expense is for.';
@@ -2929,4 +2929,37 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get financeSettingsTitle => 'Finance settings';
+
+  @override
+  String get financeCodeAskTitle => 'Ask for my finance code';
+
+  @override
+  String get financeCodeAskHint =>
+      'Opening Finances on this account will ask your 4-digit code.';
+
+  @override
+  String get financeCodeForced =>
+      'Required by your group for everyone: it can\'t be turned off.';
+
+  @override
+  String get financeCodeChange => 'Change my finance code';
+
+  @override
+  String get financeCodeChangeHint => 'With your PIN, also if you forgot it.';
+
+  @override
+  String get financeCodeAbout =>
+      'The finance code is a second code, different from the PIN. Once typed, Finances stays open 5 minutes; it closes when the app locks.';
+
+  @override
+  String get financeCodeTurnOffTitle => 'Turn the finance code off?';
+
+  @override
+  String get financeCodeTurnedOn => 'Finance code turned on.';
+
+  @override
+  String get financeCodeTurnedOff => 'Finance code turned off.';
 }

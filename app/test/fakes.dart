@@ -132,6 +132,14 @@ class FakeAuthRepository implements AuthRepository {
     financeCode = code;
   }
 
+  final switches = <bool>[];
+
+  @override
+  Future<void> switchFinanceCode({required bool on, String code = ''}) async {
+    if (!on && code != financeCode) throw const WrongFinanceCode(2);
+    switches.add(on);
+  }
+
   @override
   Future<void> checkFinanceCode(String code) async {
     financeChecks++;

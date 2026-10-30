@@ -64,6 +64,8 @@ class MeSerializer(serializers.Serializer):
     def get_finance_code_set(self, user) -> bool:
         return bool(user.finance_code)
 
+    finance_code_on = serializers.BooleanField(read_only=True)
+
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_group(self, user) -> dict:
         """The group this request works in, with its welcome message."""

@@ -106,4 +106,8 @@ abstract class AuthRepository {
 
   /// Throws [WrongFinanceCode] or [AccountLocked] (code locked).
   Future<void> checkFinanceCode(String code);
+
+  /// The member's own switch; turning it off needs the finance code.
+  /// Throws [WrongFinanceCode] or [AccountLocked].
+  Future<void> switchFinanceCode({required bool on, String code = ''});
 }

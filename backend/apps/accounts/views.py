@@ -218,6 +218,37 @@ class FinanceCodeView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class FinanceCodeSwitchView(APIView):
+    """POST {on, code}: ask for the finance code on one's own Finances even
+    when the group doesn't require it. Turning it off needs the code, so a
+    phone left open can't drop it (owner, 2026-10-30)."""
+
+    throttle_scope = "pin_login"
+
+    @extend_schema(request=None, responses={204: None})
+    def post(self, request):
+        from .services import check_finance_code
+
+        on = bool(request.data.get("on"))
+        user = request.user
+        if not user.finance_code:
+            return Response({"detail": "Choisissez d’abord votre code finances.", "code": "no_finance_code"}, status=409)
+        if not on:
+            result = check_finance_code(user, str(request.data.get("code", "")), request=request)
+            if not result.ok:
+                if result.locked_until is not None:
+                    return Response({"detail": "Code finances bloqué.", "code": "locked",
+                                     "minutes": settings.PIN_LOCKOUT_MINUTES}, status=423)
+                return Response({"detail": "Code finances incorrect.", "code": "wrong_code",
+                                 "attempts_left": result.attempts_left}, status=401)
+            user = result.user
+        user.finance_code_on = on
+        user.save(update_fields=["finance_code_on"])
+        audit.record("Code finances " + ("activé" if on else "désactivé") + " par le membre", actor=user, obj=user,
+                     request=request, sensitive=True)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class FinanceCodeCheckView(APIView):
     """POST {code}: 204 when right; 401 with attempts left; 423 locked."""
 

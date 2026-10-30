@@ -91,6 +91,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     finance_code = models.CharField(max_length=128, blank=True)
     finance_code_fails = models.PositiveSmallIntegerField(default=0)
     finance_code_locked_until = models.DateTimeField(null=True, blank=True)
+    # The member asks for the code on their own phone even when the group
+    # doesn't require it (owner, 2026-10-30: Finances → ⚙).
+    finance_code_on = models.BooleanField(default=False)
 
     # Reminder preferences (design: event detail → "Rappels").
     remind_eve = models.BooleanField(default=True, help_text="La veille à 20:00")

@@ -1236,3 +1236,27 @@ picture or pdf".
   from the thread.
 - How to verify: Accueil → Demandes de dépense → Nouvelle demande → join a photo and a PDF →
   Envoyer: both are in the request's Échanges.
+
+## 56. Finance code that applies at once, Finances ⚙, and "Approbation des dépenses"
+
+Owner, 2026-10-30: "Domaines de dépense and Code finances do nothing; I don't see the use of the
+domaines de dépense, the name is weird; on the finance page add a settings button where the user
+can change the code and set it on or off".
+
+- **The switch applied only at the next app start**: the app read the group's settings once.
+  Opening Finances now asks the server again (a short wait), so "Exiger le code finances pour
+  tous" counts the next time anyone opens Finances. Offline, the last known settings apply.
+- **Finances → ⚙ Réglages des finances** (everyone with Finances): "Demander mon code finances"
+  turns the code on for one's own account even when the group doesn't require it (choosing the
+  code first if needed); turning it off asks the current code. When the group requires it, the
+  switch is on and locked ("Exigé par votre groupe"). "Changer mon code finances" (with the PIN,
+  also when forgotten). Server: `User.finance_code_on` (migration accounts 0022),
+  `POST /api/auth/finance-code/switch/` {on, code}, `finance_code_on` in /me; audited.
+- **Back-office wording**: Sécurité des finances → "Exiger le code finances pour tous", with what
+  happens when it's on or off. "Domaines de dépense" is now **Approbation des dépenses**: an
+  explanation (the types offered on the app's expense request form, and the role that approves
+  each first, e.g. Formation → Formateur), columns "Type de dépense" / "Approuvé d'abord par".
+  In the app the form says "Type de dépense".
+- How to verify: back-office → Paramètres → tick "Exiger le code finances pour tous" → in the
+  app, open Finances (no restart): the code is asked. Untick it; Finances → ⚙ → turn "Demander
+  mon code finances" on: asked again next time; turning it off asks the code.
