@@ -112,7 +112,7 @@ def submit(event, *, by, body, upload=None, request=None):
         who = r.read_by.short_name if r.read_by else "un membre du bureau"
         raise ReportRule("report_read", f"Le rapport a été ouvert par {who} : il ne peut plus être modifié.", status=409)
     if _has_report(event) and now > event.report_due_at:
-        raise ReportRule("report_locked", "Le délai de 24 h est passé : le rapport remis ne peut plus être modifié.", status=409)
+        raise ReportRule("report_locked", "Le délai du rapport est passé : le rapport remis ne peut plus être modifié.", status=409)
     body = (body or "").strip()
     report = event.report if _has_report(event) else None
     if not body and upload is None and not (report and report.file):
@@ -163,7 +163,7 @@ def remind(events, now=None):
         elif e.report_overdue_at is None and now > e.report_due_at:
             when = _when(e)
             title = f"Rapport non remis : {e.title} du {when:%d/%m}"
-            body = f"{e.chef.short_name}, chef de groupe, n’a pas remis son rapport dans les 24 h."
+            body = f"{e.chef.short_name}, chef de groupe, n’a pas remis son rapport dans le délai."
             sent += notify([*holders(REPORT_TO), *holders(REPORT_CC), e.chef], "report", title, body,
                            {"type": "event", "id": e.pk})
             e.report_overdue_at = now

@@ -242,6 +242,14 @@ class MemberRow extends StatelessWidget {
       subtitle: Text(sub),
       trailing: m.status != 'actif'
           ? Badge2(memberStatusLabel(l, m.status), tone: statusTone(m.status))
+          : m.inactive
+          ? Badge2(
+              l.memberInactive,
+              key: Key('inactive-${m.id}'),
+              tone: Tone.amber,
+            )
+          : m.onProbation
+          ? Badge2(l.memberOnProbation, key: Key('probation-${m.id}'))
           : null,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => MemberProfileScreen(memberId: m.id)),

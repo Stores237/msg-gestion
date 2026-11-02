@@ -90,6 +90,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('export-cashbook')));
     await tester.pumpAndSettle();
+    // Told what it is before anything downloads (owner, 2026-11-02).
+    expect(find.byKey(const Key('download-ask')), findsOneWidget);
+    expect(
+      find.textContaining('Livre de caisse : toutes les opérations'),
+      findsOneWidget,
+    );
+    expect(f.finances.exports, isEmpty);
+    await tester.tap(find.byKey(const Key('confirm-download')));
+    await tester.pumpAndSettle();
     expect(f.finances.exports, ['cashbook']);
   });
 
@@ -116,6 +125,9 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('member-statement')));
     await tester.pumpAndSettle();
+    expect(find.textContaining('Relevé de '), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirm-download')));
+    await tester.pumpAndSettle();
     expect(f.finances.exports.single, startsWith('statement:'));
   });
 
@@ -136,6 +148,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('new-entry')), findsNothing);
     await tester.tap(find.byKey(const Key('export-statement')));
+    await tester.pumpAndSettle();
+    // Cancelled: nothing downloads.
+    await tester.tap(find.text('Annuler'));
+    await tester.pumpAndSettle();
+    expect(f.finances.exports, isEmpty);
+    await tester.tap(find.byKey(const Key('export-statement')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Bilan général des membres'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('confirm-download')));
     await tester.pumpAndSettle();
     expect(f.finances.exports, ['statement']);
   });

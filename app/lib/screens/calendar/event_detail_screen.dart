@@ -298,6 +298,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ),
                               ],
                               if (e.myAttendance == null &&
+                                  !e.ended &&
                                   (!e.hasLineup || e.myDuty != null) &&
                                   e.startsAt.isAfter(
                                     DateTime.now().subtract(
@@ -364,6 +365,20 @@ class _RemindersState extends State<_Reminders> {
   late bool _eve = currentUser.value?.remindEve ?? true;
   late bool _twoHours = currentUser.value?.remind2h ?? false;
 
+  /// The group's delay (Paramètres, owner 2026-11-02), 2 h by default.
+  int _beforeHours = 2;
+
+  @override
+  void initState() {
+    super.initState();
+    RepositoryLocator.instance.profile
+        .settings()
+        .then((s) {
+          if (mounted) setState(() => _beforeHours = s.remindBeforeHours);
+        })
+        .catchError((_) {});
+  }
+
   Future<void> _set({bool? eve, bool? twoHours}) async {
     final before = (_eve, _twoHours);
     setState(() {
@@ -399,7 +414,7 @@ class _RemindersState extends State<_Reminders> {
           ),
         ),
         ListRow(
-          title: Text(l.remind2h),
+          title: Text(l.remindBefore(_beforeHours)),
           trailing: Switch(
             key: const Key('remind-2h'),
             value: _twoHours,

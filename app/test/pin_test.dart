@@ -70,7 +70,7 @@ void main() {
       await tester.tap(find.byKey(const Key('forgot-submit')));
       await tester.pumpAndSettle();
       expect(
-        find.textContaining('Demandez au responsable de votre groupe'),
+        find.textContaining('Demandez un code de récupération'),
         findsOneWidget,
       );
     },

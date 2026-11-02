@@ -31,7 +31,7 @@ def _doc(title, story_builder):
     styles = getSampleStyleSheet()
     doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=16 * mm, title=title)
     story = [
-        Paragraph(f"<font color='#2E7D46'><b>MSG</b></font> · {st.name}", styles["Normal"]),
+        Paragraph(f"<font color='#0E9F8F'><b>Huddle</b></font> · {st.name}", styles["Normal"]),
         Paragraph(st.parish, styles["Normal"]),
         Spacer(1, 8 * mm),
         Paragraph(f"<b>{title}</b>", styles["Title"]),

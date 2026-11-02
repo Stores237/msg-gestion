@@ -14,8 +14,20 @@ import 'calendar/event_detail_screen.dart';
 import 'planning/my_duties_view.dart';
 import 'planning/requests_screen.dart';
 import 'expenses/expenses_screen.dart';
+import 'account_screen.dart';
+import 'help_screens.dart';
+import 'members/member_profile_screen.dart';
+import 'shell_screen.dart';
+import '../models/me.dart';
 
 /// Notifications (design): grouped by day; the green dot goes when opened.
+/// Notices that open a tab of the app rather than a page.
+const _tabFor = {
+  'cashbook': AppTab.finances,
+  'dues': AppTab.accueil,
+  'planning': AppTab.calendrier,
+};
+
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -65,6 +77,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       page = ExpenseDetailScreen(expenseId: n.target['id'] as int);
     } else if (type == 'access_request') {
       page = const AccessRequestsScreen();
+    } else if (type == 'member' && n.target['id'] is int) {
+      page = MemberProfileScreen(memberId: n.target['id'] as int);
+    } else if (type == 'role' && me != null) {
+      page = AccountScreen(me: me);
+    } else if (type == 'faq') {
+      page = const FaqScreen();
+    } else if (_tabFor[type] case final tab?) {
+      // Cash book, my dues, the planning: their tab (owner, 2026-11-02:
+      // these opened nothing).
+      Navigator.of(context).popUntil((r) => r.isFirst);
+      requestedTab.value = tab;
+      return;
     } else if (type == 'announcement') {
       // Opens the announcement itself (owner, 2026-10-29).
       try {
@@ -87,6 +111,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   IconData _icon(String kind) => switch (kind) {
     'duty' => Icons.event_available_outlined,
+    'expense' => Icons.receipt_long_outlined,
+    'faq' => Icons.help_outline,
+    'reminder' => Icons.alarm,
     'announcement' || 'convocation' => Icons.campaign_outlined,
     'payment' => Icons.check_circle_outline,
     'member' => Icons.person_add_alt,

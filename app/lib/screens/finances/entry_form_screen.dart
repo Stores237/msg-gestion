@@ -232,7 +232,7 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
                           ),
                         ),
                         Text(
-                          'FCFA',
+                          Currency.code,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,

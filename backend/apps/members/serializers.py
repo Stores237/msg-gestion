@@ -30,11 +30,19 @@ class MemberListSerializer(serializers.ModelSerializer):
     joined_year = serializers.SerializerMethodField()
     photo = serializers.SerializerMethodField()
     leave_until = serializers.SerializerMethodField()
+    on_probation = serializers.SerializerMethodField()
+    inactive = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ["id", "last_name", "first_name", "full_name", "status", "is_diaspora", "city", "age", "is_minor", "joined_year", "roles",
-                  "photo", "leave_until"]
+                  "photo", "leave_until", "on_probation", "inactive"]
+
+    def get_on_probation(self, user) -> bool:
+        return user.pk in self.context.get("probation", ())
+
+    def get_inactive(self, user) -> bool:
+        return user.pk in self.context.get("inactive", ())
 
     def get_leave_until(self, user):
         """On leave in this group: the last day, when known."""

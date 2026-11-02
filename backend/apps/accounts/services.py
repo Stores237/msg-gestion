@@ -49,6 +49,48 @@ def reset_pin(member, *, by, request=None):
     return pin
 
 
+RECOVERY_HOURS = 24
+RECOVERY_TRIES = 5
+
+
+def issue_recovery_code(member, *, by, request=None):
+    """An 8-digit code for "Code oublié ?" (owner, 2026-11-02): random, shown
+    once in the back-office, valid RECOVERY_HOURS, one use. A new code
+    replaces the previous one."""
+    import secrets
+
+    from django.contrib.auth.hashers import make_password
+
+    code = f"{secrets.randbelow(10**8):08d}"
+    member.recovery_code = make_password(code)
+    member.recovery_code_until = timezone.now() + timedelta(hours=RECOVERY_HOURS)
+    member.recovery_code_fails = 0
+    member.save(update_fields=["recovery_code", "recovery_code_until", "recovery_code_fails"])
+    audit.record("Code de récupération créé", actor=by, obj=member, request=request, sensitive=True,
+                 detail={"valable_heures": RECOVERY_HOURS})
+    return code
+
+
+def use_recovery_code(user, code):
+    """True once for the right code before it expires; RECOVERY_TRIES wrong
+    tries cancel it."""
+    from django.contrib.auth.hashers import check_password
+
+    with transaction.atomic():
+        user = User.objects.select_for_update().get(pk=user.pk)
+        if not user.recovery_code or not user.recovery_code_until or user.recovery_code_until <= timezone.now():
+            return False
+        if check_password(code, user.recovery_code):
+            user.recovery_code, user.recovery_code_until, user.recovery_code_fails = "", None, 0
+            user.save(update_fields=["recovery_code", "recovery_code_until", "recovery_code_fails"])
+            return True
+        user.recovery_code_fails += 1
+        if user.recovery_code_fails >= RECOVERY_TRIES:
+            user.recovery_code, user.recovery_code_until = "", None
+        user.save(update_fields=["recovery_code", "recovery_code_until", "recovery_code_fails"])
+        return False
+
+
 # --- PIN login ---------------------------------------------------------------
 
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../data/balance_privacy.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/finance.dart';
@@ -40,8 +41,15 @@ class _FinancesScreenState extends State<FinancesScreen> {
   Future<void> _export(
     String source,
     String name,
+    String about,
     Future<String> Function() link,
-  ) => openDocument(context, source: source, name: name, link: link);
+  ) => openDocument(
+    context,
+    source: source,
+    name: name,
+    link: link,
+    about: about,
+  );
 
   Future<void> _newEntry() async {
     final saved = await Navigator.of(
@@ -117,6 +125,7 @@ class _FinancesScreenState extends State<FinancesScreen> {
                   onPressed: () => _export(
                     'fin-statement',
                     l.pdfStatementName(fileDate()),
+                    l.aboutStatementPdf,
                     RepositoryLocator.instance.finances.statementPdf,
                   ),
                 ),
@@ -128,6 +137,7 @@ class _FinancesScreenState extends State<FinancesScreen> {
                   onPressed: () => _export(
                     'fin-cashbook',
                     l.pdfCashbookName(fileDate()),
+                    l.aboutCashbookPdf,
                     RepositoryLocator.instance.finances.cashbookPdf,
                   ),
                 ),
@@ -187,45 +197,83 @@ class _Balance extends StatelessWidget {
       future: RepositoryLocator.instance.finances.summary(),
       builder: (context, snap) {
         final s = snap.data;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l.cashBalance.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            const SizedBox(height: 4),
-            if (s == null)
-              const SizedBox(
-                height: 38,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              )
-            else ...[
-              Amount(
-                s.balance,
-                size: 32,
-                weight: FontWeight.w800,
-                key: const Key('balance'),
+        return ValueListenableBuilder<bool>(
+          valueListenable: BalancePrivacy.hidden,
+          builder: (context, hidden, _) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l.cashBalance.toUpperCase(),
+                style: Theme.of(context).textTheme.labelSmall,
               ),
-              if (s.validatedUntil != null)
-                Text(
-                  l.validatedUntil(Dates(context).fullDate(s.validatedUntil!)),
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
+              const SizedBox(height: 4),
+              if (s == null)
+                const SizedBox(
+                  height: 38,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                )
+              else ...[
+                Row(
+                  children: [
+                    Flexible(
+                      child: hidden
+                          ? Text(
+                              hiddenAmount,
+                              key: const Key('balance-hidden'),
+                              style: TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.w800,
+                                color: c.textPrimary,
+                                letterSpacing: 2,
+                              ),
+                            )
+                          : Amount(
+                              s.balance,
+                              size: 32,
+                              weight: FontWeight.w800,
+                              key: const Key('balance'),
+                            ),
+                    ),
+                    const SizedBox(width: 4),
+                    // Masquer le solde (owner, 2026-11-02), remembered on
+                    // this phone; also hides it on Accueil.
+                    IconButton(
+                      key: const Key('toggle-balance'),
+                      tooltip: hidden ? l.showBalance : l.hideBalance,
+                      color: c.textSecondary,
+                      icon: Icon(
+                        hidden
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                      ),
+                      onPressed: BalancePrivacy.toggle,
+                    ),
+                  ],
                 ),
-              if (s.pending > 0)
-                Text(
-                  l.withPending(fcfa(s.balanceWithPending)),
-                  style: TextStyle(fontSize: 13, color: c.textSecondary),
-                ),
+                if (!hidden) ...[
+                  if (s.validatedUntil != null)
+                    Text(
+                      l.validatedUntil(
+                        Dates(context).fullDate(s.validatedUntil!),
+                      ),
+                      style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    ),
+                  if (s.pending > 0)
+                    Text(
+                      l.withPending(fcfa(s.balanceWithPending)),
+                      style: TextStyle(fontSize: 13, color: c.textSecondary),
+                    ),
+                ],
+              ],
             ],
-          ],
+          ),
         );
       },
     );

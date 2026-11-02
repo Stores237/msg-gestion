@@ -17,7 +17,7 @@ from apps.core import audit, sms
 from .authentication import BACKOFFICE_ONLY, other_device
 from .models import User
 from .serializers import LogoutSerializer, MeSerializer, PhoneLookupSerializer, PinLoginSerializer
-from .services import check_pin_login, open_app_session, pin_problem, session_ended
+from .services import check_pin_login, open_app_session, pin_problem, session_ended, use_recovery_code
 
 # Every error carries a stable `code` (+ numbers) so the app can word it in
 # the member's chosen language (FR/EN); `detail` is the French fallback.
@@ -287,7 +287,7 @@ class ForgotPinView(APIView):
             sms.send_code(user.phone)
         except sms.SmsUnavailable:
             # No SMS provider yet (Twilio): say so, the app points to the secretary.
-            return Response({"detail": "SMS indisponible. Demandez au responsable de votre groupe.", "code": "sms_unavailable"}, status=503)
+            return Response({"detail": "SMS indisponible. Demandez un code de récupération au responsable de votre groupe.", "code": "sms_unavailable"}, status=503)
         return Response(status=status.HTTP_202_ACCEPTED)
 
 
@@ -311,15 +311,20 @@ class ForgotPinConfirmView(APIView):
             return Response({"detail": UNKNOWN_PHONE, "code": "unknown_member"}, status=status.HTTP_404_NOT_FOUND)
         if refused := _terms_refusal(user, request):
             return refused  # before the SMS code is used up, so the member can tick and retry
-        try:
-            ok = sms.check_code(user.phone, str(request.data.get("code", "")))
-        except sms.SmsUnavailable:
-            return Response({"detail": "SMS indisponible.", "code": "sms_unavailable"}, status=503)
+        code = "".join(str(request.data.get("code", "")).split())
+        if len(code) == 8 and code.isdigit():
+            # The recovery code given by the back-office (owner, 2026-11-02).
+            ok, how = use_recovery_code(user, code), "PIN réinitialisé (code de récupération)"
+        else:
+            try:
+                ok, how = sms.check_code(user.phone, code), "PIN réinitialisé par SMS"
+            except sms.SmsUnavailable:
+                return Response({"detail": "SMS indisponible.", "code": "sms_unavailable"}, status=503)
         if not ok:
             return Response({"detail": "Code incorrect ou expiré.", "code": "bad_code"}, status=400)
         user.set_pin(new)
         user.save(update_fields=["pin", "pin_failed_attempts", "pin_locked_until", "pin_must_change"])
-        audit.record("PIN réinitialisé par SMS", actor=user, obj=user, request=request)
+        audit.record(how, actor=user, obj=user, request=request)
         _record_terms(user, request)
         refresh = open_app_session(user, request=request)
         return Response({"access": str(refresh.access_token), "refresh": str(refresh)})

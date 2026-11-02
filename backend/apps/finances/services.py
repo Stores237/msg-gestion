@@ -85,8 +85,8 @@ def tell_approvers(entries, *, by):
     if not entries:
         return
     first = entries[0]
-    body = (f"{first.label} · {first.amount} FCFA" if len(entries) == 1
-            else f"{len(entries)} opérations · {sum(e.amount for e in entries)} FCFA")
+    body = (f"{first.label} · {first.amount} {cur()}" if len(entries) == 1
+            else f"{len(entries)} opérations · {sum(e.amount for e in entries)} {cur()}")
     notify(approvers(exclude=by), "payment", "Opération à approuver", f"{body}, saisie par {by.short_name}.",
            {"type": "cashbook"})
 
@@ -121,7 +121,7 @@ def edit_entry(entry, changes, *, by, request=None):
                  detail={f: {"avant": a, "apres": b} for f, (a, b) in diff.items()})
     others = [entry.created_by] if entry.created_by_id != by.pk else approvers(exclude=by)
     notify(others, "payment", "Opération modifiée · à approuver",
-           f"{entry.label} · {entry.amount} FCFA, modifiée par {by.short_name}.", {"type": "cashbook"})
+           f"{entry.label} · {entry.amount} {cur()}, modifiée par {by.short_name}.", {"type": "cashbook"})
     return entry
 
 
@@ -164,8 +164,32 @@ def validate_entry(entry, *, by, request=None):
     entry.save(update_fields=["status", "validated_by", "validated_at"])
     audit.record("Opération validée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
     notify([u for u in {entry.created_by, entry.edited_by} if u and u.pk != by.pk], "payment", "Opération approuvée",
-           f"{entry.label} · {entry.amount} FCFA, approuvée par {by.short_name}.", {"type": "cashbook"})
+           f"{entry.label} · {entry.amount} {cur()}, approuvée par {by.short_name}.", {"type": "cashbook"})
     _tell_member(entry)
+    if entry.direction == "out":
+        warn_low_balance(entry.amount)
+
+
+def cur():
+    """The group's currency (Settings.currency, owner 2026-11-02)."""
+    from apps.core.models import Settings
+
+    return Settings.get().currency
+
+
+def warn_low_balance(spent):
+    """The balance just went under the group's alert level
+    (Settings.low_balance_alert): the finance team is told, once per crossing."""
+    from apps.core.models import Settings
+
+    st = Settings.get()
+    if not st.low_balance_alert:
+        return
+    now = balance(Entry.objects.filter(status=Entry.Status.VALIDATED))
+    if now < st.low_balance_alert <= now + spent:
+        notify(approvers(), "payment", "Solde bas",
+               f"Le solde de la caisse est de {now} {st.currency}, sous le seuil de {st.low_balance_alert} {st.currency}.",
+               {"type": "cashbook"})
 
 
 def validate_entries(ids, *, by, request=None):
@@ -185,7 +209,7 @@ def validate_entries(ids, *, by, request=None):
 
 def _tell_member(entry):
     if entry.member_id:
-        notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} FCFA", {"type": "dues"})
+        notify([entry.member], "payment", "Paiement validé", f"{entry.label} · {entry.amount} {cur()}", {"type": "dues"})
 
 
 def _check_finaliser(entry, by, request):
@@ -204,7 +228,7 @@ def confirm_entry(entry, *, by, request=None):
     entry.confirmed_at = timezone.now()
     entry.save(update_fields=["status", "confirmed_by", "confirmed_at"])
     audit.record("Opération finalisée", actor=by, obj=entry, request=request, detail={"montant": entry.amount})
-    notify([entry.validated_by], "payment", "Opération finalisée", f"{entry.label} · {entry.amount} FCFA", {"type": "cashbook"})
+    notify([entry.validated_by], "payment", "Opération finalisée", f"{entry.label} · {entry.amount} {cur()}", {"type": "cashbook"})
     _tell_member(entry)
 
 

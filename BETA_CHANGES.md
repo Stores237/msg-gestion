@@ -1311,3 +1311,49 @@ was still `cm.msgyapoma.msg_gestion`.
 - How to verify: `aapt2 dump badging huddle-0.1.0-build36.apk` → `package: name='cm.stores.huddle'`,
   label `Huddle`. On a phone: the app's details (long press → App info) show Huddle; share it
   with Xender → Huddle icon and name.
+
+## 59. Build 37: the owner's list of 2026-11-02
+
+1. **Tagging on an expense request**: the list shows each person's roles under the name
+   (coordinators first; the search finds roles too), and the request shows "J. Mballa
+   (Formateur)" for the people tagged.
+2. **Hide the balance**: an eye beside the balance in Finances hides it (•••••) on this phone,
+   on Finances and Accueil, until tapped again.
+3. **Know what you download**: the bilan général, the livre de caisse, the quarterly report and a
+   member's relevé first say what the PDF contains and where it goes, then download on
+   "Télécharger" (Annuler downloads nothing).
+4. **Notifications**: cash-book and low-balance notices open Finances, dues notices open Accueil
+   (Mes contributions), planning notices open the Calendar, a role of the day opens Mon compte,
+   absence alerts open the member's profile, FAQ answers open the FAQ. Before, these opened
+   nothing.
+5. **Ended events** (end time, or start + the group's default length): no more editing,
+   deleting, announcing an absence or changing the lineup (`event_ended`, 409); the roll call
+   stays open. The edit buttons disappear in the app.
+6. **FAQ**: Aide → Questions fréquentes shows the group's own questions, then the common ones
+   (the built-in six plus those the platform adds). Members propose a question with its answer
+   ("Proposer une question"); back-office → Questions fréquentes lists the suggestions to correct
+   and publish (for the group or for all groups) or decline with a reason; the author is told.
+7. **Recovery code**: back-office → a person → "Code de récupération" shows an 8-digit code once,
+   valid 24 h, one use. In the app: "Code oublié ?" → "J'ai un code de récupération" → the code
+   and a new PIN. The SMS message now points to it.
+8. **Group settings** (back-office → Paramètres; 0 or empty = off):
+   - Cotisations et caisse: currency (on every amount, PDF and back-office), monthly dues and
+     their day (the evening job adds the month's due for each active member, once, and tells
+     them), low-balance alert (trésorier and commissaire told when a validated expense takes
+     the balance under it).
+   - Règles des membres: probation days ("À l'essai" badge), longest leave (back-office refuses
+     longer), absences in 90 days before an alert (member and roll-call keepers told once),
+     months without presence before "Inactif".
+   - Calendrier: default event length (decides when an event without an end is over), reminder
+     delay ("N heures avant"), report deadline for the chef de groupe.
+   - Langue et contacts: default language (the app's until the member picks one), group phone,
+     e-mail, link and rules, shown in Mon compte → Aide → Mon groupe.
+   Left for later: per-group time zone, fees as an editable list.
+- Server: migrations core 0016, accounts 0025, finances 0006; `/api/faq/`,
+  `/api/faq/suggestions/`; /me `group.currency` and `group.language`; `/api/settings/` carries the
+  new values. PDFs now say "Huddle · <group>".
+- How to verify: back-office → Paramètres → set Monnaie "EUR" → amounts in the app show EUR.
+  Back-office → a member → Code de récupération → in the app "Code oublié ?" → "J'ai un code de
+  récupération" → code + new PIN signs in. Open a past event → no Modifier; Appel still works.
+  Finances → eye → balance hidden on Finances and Accueil. Finances → PDF → the dialog explains it.
+

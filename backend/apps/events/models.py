@@ -60,8 +60,15 @@ class DressCode(models.Model):
         return self.name
 
 
-# Hours after an event ends for its chef de groupe to hand in the report.
+# Hours after an event ends for its chef de groupe to hand in the report;
+# each group sets its own (Settings.report_hours, owner 2026-11-02).
 REPORT_HOURS = 24
+
+
+def _settings(group_id):
+    from apps.core.models import Settings
+
+    return Settings.all_groups.filter(group_id=group_id).first()
 
 
 class Event(models.Model):
@@ -120,7 +127,23 @@ class Event(models.Model):
 
     @property
     def report_due_at(self):
-        return (self.ends_at or self.starts_at) + timedelta(hours=REPORT_HOURS)
+        st = _settings(self.group_id)
+        return (self.ends_at or self.starts_at) + timedelta(hours=st.report_hours if st else REPORT_HOURS)
+
+    @property
+    def ends_or_default(self):
+        """The end, or the start plus the group's default length."""
+        if self.ends_at:
+            return self.ends_at
+        st = _settings(self.group_id)
+        return self.starts_at + timedelta(minutes=st.event_minutes if st else 120)
+
+    def has_ended(self, now=None):
+        """Once over, an event can't be changed any more: only its roll call
+        stays open (owner, 2026-11-02)."""
+        from django.utils import timezone
+
+        return self.ends_or_default <= (now or timezone.now())
 
     class Meta:
         ordering = ["starts_at"]

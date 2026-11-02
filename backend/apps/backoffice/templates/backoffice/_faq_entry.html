@@ -1,0 +1,10 @@
+<details class="panel" style="padding:12px 16px">
+  <summary style="cursor:pointer;font-weight:700">{% if e %}{{ e.question }}{% else %}+ Ajouter une question{% endif %}</summary>
+  <form method="post" style="display:flex;flex-direction:column;gap:12px;margin-top:12px">{% csrf_token %}
+    {% if e %}<input type="hidden" name="id" value="{{ e.pk }}">{% endif %}<input type="hidden" name="scope" value="{{ scope }}">
+    <label class="fld"><span class="fld-l">Question</span><span class="fld-box"><input name="question" value="{{ e.question|default:'' }}" maxlength="200" required></span></label>
+    <label class="fld"><span class="fld-l">Réponse</span><span class="fld-box multi"><textarea name="answer" rows="4" maxlength="3000" required>{{ e.answer|default:'' }}</textarea></span></label>
+    <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" name="action" value="save">Enregistrer</button>
+      {% if e %}<button class="btn btn-outline btn-sm" name="action" value="delete" formnovalidate onclick="return confirm('Supprimer cette question ?')">Supprimer</button>{% endif %}</div>
+  </form>
+</details>

@@ -3,7 +3,8 @@
 {% block crumb %}<div class="crumb"><a href="{% url 'backoffice:users' %}">Utilisateurs</a> ›</div>{% endblock %}
 {% block heading %}{{ member.full_name }}{% endblock %}
 {% block acts %}{% if can_edit %}
-  <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="reset_pin">{% icon 'key-round' %}Réinitialiser le PIN</button></form>
+  <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="recovery_code" title="8 chiffres, valable 24 h, une seule fois : le membre le saisit dans « Code oublié ? » et choisit lui-même son nouveau PIN.">{% icon 'key-round' %}Code de récupération</button></form>
+  <form method="post">{% csrf_token %}<button class="btn btn-outline" name="action" value="reset_pin">Réinitialiser le PIN</button></form>
   {% if member.group_status == 'suspendu' %}
   <button class="btn btn-outline" onclick="document.getElementById('dlg-status').showModal()">Réactiver</button>
   {% elif member.group_status == 'conge' %}
@@ -15,7 +16,7 @@
 {% endif %}{% endblock %}
 {% block body %}
 {% if once %}
-<div class="notice warn" role="status">{% icon 'triangle-alert' %}<span><b>{{ once.label }} :</b> <span class="tnum" style="font:800 18px var(--font-mono)">{{ once.value }}</span> — notez-le et communiquez-le en personne ; il ne sera plus affiché.
+<div class="notice warn" role="status">{% icon 'triangle-alert' %}<span><b>{{ once.label }} :</b> <span class="tnum" style="font:800 18px var(--font-mono)">{{ once.value }}</span> — notez-le et communiquez-le en personne ; il ne sera plus affiché.{% if once.hint %}<br>{{ once.hint }}{% endif %}
   {% if once.codes %}<br>Codes de secours : <span class="tnum" style="font-family:var(--font-mono)">{{ once.codes|join:"  ·  " }}</span>{% endif %}</span></div>
 {% endif %}
 <div class="bo-cols">

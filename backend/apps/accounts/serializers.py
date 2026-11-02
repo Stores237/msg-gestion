@@ -76,7 +76,9 @@ class MeSerializer(serializers.Serializer):
         return {**group_identity(st.group, self.context.get("request")), "place": st.parish, "motto": st.motto,
                 "welcome_message": st.welcome_message, "color": st.color, "color2": st.color2,
                 # Finances asks the finance code first (owner, 2026-10-30).
-                "finance_code_required": st.finance_code_required}
+                "finance_code_required": st.finance_code_required,
+                # Shown on every amount; the app's language until the member picks one (2026-11-02).
+                "currency": st.currency, "language": st.language}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:

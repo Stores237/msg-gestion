@@ -710,7 +710,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get smsUnavailable =>
-      'Text messages aren’t available yet. Ask your group’s organiser to reset your PIN.';
+      'Text messages aren’t available yet. Ask your group’s organiser for a recovery code, then tap “I have a recovery code”.';
 
   @override
   String get resetPin => 'Reset PIN';
@@ -3006,4 +3006,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get huddleBy => 'Huddle ·';
+
+  @override
+  String get eventEnded =>
+      'This event is over: it can no longer be changed. Only the roll call is still possible.';
+
+  @override
+  String get showBalance => 'Show the balance';
+
+  @override
+  String get hideBalance => 'Hide the balance';
+
+  @override
+  String get downloadAskTitle => 'Download this document?';
+
+  @override
+  String get downloadAskWhere =>
+      'PDF · saved in Downloads/Huddle and readable later without a connection.';
+
+  @override
+  String get download => 'Download';
+
+  @override
+  String get aboutStatementPdf =>
+      'Members\' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, as of today.';
+
+  @override
+  String get aboutCashbookPdf =>
+      'Cash book: every operation (money in and out) with its date, description, the member concerned, who entered and validated it, and its amount.';
+
+  @override
+  String aboutReportPdf(int quarter, int year) {
+    return 'Financial report for quarter $quarter $year: opening balance, money in and out, closing balance and income by category.';
+  }
+
+  @override
+  String aboutMemberStatementPdf(String name) {
+    return 'Statement for $name: what they owe (dues, fines), what they paid, what awaits validation and what is left to pay.';
+  }
+
+  @override
+  String get faqGroupSection => 'Group questions';
+
+  @override
+  String get faqCommonSection => 'Common questions';
+
+  @override
+  String get faqSuggest => 'Suggest a question';
+
+  @override
+  String get faqSuggestHint =>
+      'A question others ask too? Suggest it with its answer: the Huddle team reviews it and adds it to the help.';
+
+  @override
+  String get faqMine => 'My suggestions';
+
+  @override
+  String get faqPublished => 'Published';
+
+  @override
+  String get faqDeclined => 'Not kept';
+
+  @override
+  String get faqPending => 'Under review';
+
+  @override
+  String get faqSent => 'Thank you! Your question was sent to the Huddle team.';
+
+  @override
+  String get faqQuestion => 'The question';
+
+  @override
+  String get faqQuestionRequired => 'Write the question.';
+
+  @override
+  String get faqAnswer => 'The answer (if you know it)';
+
+  @override
+  String get faqAnswerHint =>
+      'The team corrects or completes it before publishing.';
+
+  @override
+  String get faqSend => 'Send';
+
+  @override
+  String get myGroupSection => 'My group';
+
+  @override
+  String get groupRules => 'Group rules';
+
+  @override
+  String get groupCall => 'Call the group';
+
+  @override
+  String get groupMail => 'Email the group';
+
+  @override
+  String get groupLink => 'Group link';
+
+  @override
+  String get recoveryCode => 'Recovery code (8 digits)';
+
+  @override
+  String get recoveryCodeHint =>
+      'Given by your group leader or the Huddle team. Valid 24 h, once.';
+
+  @override
+  String get haveRecoveryCode => 'I have a recovery code';
+
+  @override
+  String get memberInactive => 'Inactive';
+
+  @override
+  String get memberOnProbation => 'On probation';
+
+  @override
+  String remindBefore(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours hours before',
+      one: '1 hour before',
+    );
+    return '$_temp0';
+  }
 }

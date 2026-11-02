@@ -4,8 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// The app is bilingual (French / English). The member picks the language
-/// in the app; until they do, it follows the phone (French unless the
-/// phone is in English). The choice is also sent to the server as
+/// in the app; until they do, it follows the group's default language
+/// (back-office → Paramètres, owner 2026-11-02) or else the phone (French
+/// unless the phone is in English). The choice is also sent to the server as
 /// Accept-Language.
 class LocaleController extends ChangeNotifier {
   LocaleController({Locale? initial}) : _locale = initial;
@@ -19,13 +20,22 @@ class LocaleController extends ChangeNotifier {
   static const _key = 'msg_language';
 
   Locale? _locale;
+  Locale? _group;
 
   /// null = follow the phone.
-  Locale? get locale => _locale;
+  Locale? get locale => _locale ?? _group;
+
+  /// The group's default; ignored once the member chose a language.
+  void setGroupLanguage(String? code) {
+    final next = supported.contains(code) ? Locale(code!) : null;
+    if (next == _group) return;
+    _group = next;
+    if (_locale == null) notifyListeners();
+  }
 
   /// What is actually on screen right now.
   String get languageCode {
-    final chosen = _locale?.languageCode;
+    final chosen = locale?.languageCode;
     if (chosen != null) return chosen;
     final device = PlatformDispatcher.instance.locale.languageCode;
     return supported.contains(device) ? device : 'fr';

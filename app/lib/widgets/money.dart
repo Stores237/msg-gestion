@@ -11,10 +11,20 @@ String groupDigits(int n) => n.abs().toString().replaceAllMapped(
   (_) => _narrowNbsp,
 );
 
+/// The group's currency (back-office → Paramètres, owner 2026-11-02), set
+/// from /me when the app opens; FCFA until then.
+class Currency {
+  Currency._();
+  static String code = 'FCFA';
+}
+
+/// A hidden amount (Masquer le solde).
+const hiddenAmount = '•••••';
+
 /// "186 500 FCFA", with "+ " / "− " when [sign].
 String fcfa(int n, {bool sign = false}) {
   final prefix = sign ? (n < 0 ? '− ' : '+ ') : (n < 0 ? '− ' : '');
-  return '$prefix${groupDigits(n)} FCFA';
+  return '$prefix${groupDigits(n)} ${Currency.code}';
 }
 
 /// Amount with the currency smaller and greyer (design: Amt).
@@ -42,7 +52,7 @@ class Amount extends StatelessWidget {
         children: [
           TextSpan(text: '$prefix${groupDigits(value)}'),
           TextSpan(
-            text: ' FCFA',
+            text: ' ${Currency.code}',
             style: TextStyle(
               fontSize: size * 0.78,
               fontWeight: FontWeight.w600,

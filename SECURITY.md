@@ -101,10 +101,21 @@ login limit; fix `CLIENT_IP_HEADER` on Render.
 - Photos seen and downloaded files (`FileStore`, `msg_files/` in the app's private files) are
   erased with the offline copy. Only `msg_files/downloads/` is shared, read-only and one file at a
   time, with the phone's PDF viewer (FileProvider, not exported). A copy the member puts in the
-  phone's Pictures/MSG or Download/MSG is outside the app and stays after sign-out; that is the
+  phone's Pictures/Huddle or Download/Huddle is outside the app and stays after sign-out; that is the
   member's choice. The storage permission is requested only on Android 7–9 (`maxSdkVersion=28`).
 - Android backup is off (`allowBackup="false"`, `data_extraction_rules.xml`): member data never
   leaves the phone in a Google backup or a device transfer.
+
+## PIN recovery code (build 37)
+
+- A forgotten PIN without SMS: back-office → the person → "Code de récupération" makes an
+  8-digit code (`secrets.randbelow`), shown once, stored hashed (`User.recovery_code`), valid
+  24 h (`RECOVERY_HOURS`), one use; 5 wrong tries (`RECOVERY_TRIES`) cancel it, and a new code
+  replaces the old one. The member types it in "Code oublié ?" with a PIN they choose; the
+  terms check runs first. Creating and using a code are journaled. 10⁸ codes with 5 tries and the
+  `pin_forgot` throttle (30/hour per address) make guessing useless.
+- Back-office users with the accounts right (`backoffice.users` change) can make one, as for the
+  temporary PIN; a platform account's code is the super admin's alone.
 
 ## Groups
 

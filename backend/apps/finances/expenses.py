@@ -21,7 +21,7 @@ from apps.core import audit
 from apps.core.notify import notify
 
 from .models import Entry, ExpenseDomain, ExpenseMessage, ExpenseRequest
-from .services import FinanceRule
+from .services import FinanceRule, cur
 
 S = ExpenseRequest.Status
 OPEN = (S.SUBMITTED, S.APPROVED, S.TO_PAY)
@@ -116,7 +116,7 @@ def submit(*, by, domain, title, amount, description="", tagged=(), replaces=Non
     audit.record("Demande de dépense envoyée", actor=by, obj=req, request=request,
                  detail={"montant": amount, "domaine": domain.name})
     notify(deciders(req), "payment", "Demande de dépense à approuver",
-           f"{by.short_name} · {req.title} · {amount} FCFA ({domain.name}).", _target(req))
+           f"{by.short_name} · {req.title} · {amount} {cur()} ({domain.name}).", _target(req))
     return req
 
 
@@ -135,7 +135,7 @@ def decide(req, *, by, approve, note="", request=None):
         req.save(update_fields=["status", "lead_by", "lead_at"])
         _step(req, by, "Approuvée" + (f" : {note.strip()}" if note.strip() else "") + ". Transmise au commissaire aux comptes.")
         notify(with_right("validate"), "payment", "Demande de dépense à examiner",
-               f"{req.title} · {req.amount} FCFA, approuvée par {by.short_name}.", _target(req))
+               f"{req.title} · {req.amount} {cur()}, approuvée par {by.short_name}.", _target(req))
     else:
         _close(req, by, S.REFUSED, note)
     notify([req.requester], "payment", "Demande approuvée par le responsable" if approve else "Demande refusée",
@@ -163,7 +163,7 @@ def review(req, *, by, approve, note="", request=None):
         _step(req, by, "Approuvée par le commissaire aux comptes" + (f" : {note.strip()}" if note.strip() else "")
               + ". Transmise au trésorier pour le paiement.")
         notify(with_right("change"), "payment", "Dépense à payer",
-               f"{req.title} · {req.amount} FCFA pour {req.requester.short_name}.", _target(req))
+               f"{req.title} · {req.amount} {cur()} pour {req.requester.short_name}.", _target(req))
     else:
         req.save(update_fields=["audit_by", "audit_at"])
         _close(req, by, S.REFUSED, note)
@@ -186,7 +186,7 @@ def pay(req, *, by, amount, proof, content_type, note="", request=None):
         _refuse("own_request", "Vous avez déjà pris part à cette demande : un autre doit payer.",
                 by=by, req=req, request=request)
     if not 0 < amount <= req.amount:
-        raise FinanceRule("amount_over", f"Le montant payé va de 1 à {req.amount} FCFA (le montant approuvé). "
+        raise FinanceRule("amount_over", f"Le montant payé va de 1 à {req.amount} {cur()} (le montant approuvé). "
                                          "Pour plus, la demande est annulée et refaite.")
     if proof is None:
         raise FinanceRule("proof_required", "Joignez la capture de la transaction.")
@@ -198,13 +198,13 @@ def pay(req, *, by, amount, proof, content_type, note="", request=None):
             created_by=by, status=Entry.Status.VALIDATED, validated_by=req.audit_by, validated_at=now)
         req.status, req.paid_by, req.paid_at, req.paid_amount, req.entry = S.PAID, by, now, amount, entry
         req.save(update_fields=["status", "paid_by", "paid_at", "paid_amount", "entry"])
-        _step(req, by, f"Payée : {amount} FCFA." + (f" {note.strip()}" if note.strip() else ""),
+        _step(req, by, f"Payée : {amount} {cur()}." + (f" {note.strip()}" if note.strip() else ""),
               kind=ExpenseMessage.Kind.PROOF, file=proof, file_name=(proof.name or "preuve").rsplit("/", 1)[-1][:160],
               content_type=content_type)
     audit.record("Dépense payée", actor=by, obj=req, request=request, sensitive=True,
                  detail={"montant": amount, "approuve": req.amount, "operation": entry.pk})
     notify([req.requester, req.audit_by, req.lead_by], "payment", "Dépense payée",
-           f"{req.title} · {amount} FCFA, payée par {by.short_name}. Preuve dans la demande.", _target(req))
+           f"{req.title} · {amount} {cur()}, payée par {by.short_name}. Preuve dans la demande.", _target(req))
     return req
 
 

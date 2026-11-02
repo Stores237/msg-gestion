@@ -35,6 +35,8 @@ class GroupInfo {
     this.color,
     this.color2,
     this.financeCodeRequired = false,
+    this.currency = 'FCFA',
+    this.language = '',
     this.logo,
     this.shortName = '',
     String? initials,
@@ -49,6 +51,12 @@ class GroupInfo {
   /// Opening Finances asks the finance code (owner, 2026-10-30; set per
   /// group in the back-office).
   final bool financeCodeRequired;
+
+  /// The group's currency, shown on every amount (owner, 2026-11-02).
+  final String currency;
+
+  /// The group's default language, "" = the phone's.
+  final String language;
 
   /// The group's app colour, "#RRGGBB" (back-office → Paramètres).
   final String? color;
@@ -73,6 +81,10 @@ class GroupInfo {
     color: j['color'] as String?,
     color2: j['color2'] as String?,
     financeCodeRequired: j['finance_code_required'] == true,
+    currency: (j['currency'] as String?)?.trim().isNotEmpty == true
+        ? j['currency'] as String
+        : 'FCFA',
+    language: (j['language'] as String?) ?? '',
     logo: j['logo'] as String?,
     shortName: (j['short_name'] as String?) ?? '',
     initials: j['initials'] as String?,

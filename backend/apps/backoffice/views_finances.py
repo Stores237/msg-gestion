@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.core import audit
+from apps.core.models import Settings
 from apps.finances import services
 from apps.finances.models import Entry
 from apps.finances.pdf import member_statement_pdf, statement_pdf
@@ -69,7 +70,8 @@ def statement_csv(request):
     rows = services.statement_rows()
     buf = io.StringIO()
     w = csv.writer(buf, delimiter=";")
-    w.writerow(["Nom", "Téléphone", "Statut", "Dû (FCFA)", "Versé validé (FCFA)", "À valider (FCFA)", "Reste à payer (FCFA)"])
+    c = Settings.get().currency
+    w.writerow(["Nom", "Téléphone", "Statut", f"Dû ({c})", f"Versé validé ({c})", f"À valider ({c})", f"Reste à payer ({c})"])
     status = dict(User.Status.choices)
     for r in rows:
         w.writerow([r["full_name"], r["phone"], status.get(r["status"], r["status"]), r["owed"], r["paid"], r["pending"], r["remaining"]])

@@ -91,6 +91,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     finance_code = models.CharField(max_length=128, blank=True)
     finance_code_fails = models.PositiveSmallIntegerField(default=0)
     finance_code_locked_until = models.DateTimeField(null=True, blank=True)
+    # An 8-digit recovery code for a forgotten PIN, made in the back-office
+    # and handed over in person (owner, 2026-11-02). Hashed; one use; expires.
+    recovery_code = models.CharField(max_length=128, blank=True)
+    recovery_code_until = models.DateTimeField(null=True, blank=True)
+    recovery_code_fails = models.PositiveSmallIntegerField(default=0)
     # The member asks for the code on their own phone even when the group
     # doesn't require it (owner, 2026-10-30: Finances → ⚙).
     finance_code_on = models.BooleanField(default=False)

@@ -206,6 +206,10 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
   final _new = TextEditingController();
   final _confirm = TextEditingController();
   bool _sent = false;
+
+  /// The 8-digit code from the back-office instead of an SMS
+  /// (owner, 2026-11-02).
+  bool _recovery = false;
   bool _busy = false;
   String? _error;
 
@@ -287,15 +291,19 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
                           ],
-                          maxLength: 6,
+                          maxLength: _recovery ? 8 : 6,
                           decoration: InputDecoration(
-                            labelText: l.smsCode,
+                            labelText: _recovery ? l.recoveryCode : l.smsCode,
+                            helperText: _recovery ? l.recoveryCodeHint : null,
+                            helperMaxLines: 3,
                             counterText: '',
                             filled: true,
                             fillColor: c.surfaceCard,
                           ),
                           validator: (v) =>
-                              (v ?? '').length == 6 ? null : l.required,
+                              (v ?? '').length == (_recovery ? 8 : 6)
+                              ? null
+                              : l.required,
                         ),
                       ),
                       _PinField(
@@ -330,6 +338,20 @@ class _ForgotPinScreenState extends State<ForgotPinScreen> {
                       onPressed: _busy ? null : (_sent ? _confirmPin : _send),
                       child: Text(_sent ? l.save : l.sendCode),
                     ),
+                    if (!_recovery) ...[
+                      const SizedBox(height: 8),
+                      TextButton(
+                        key: const Key('forgot-recovery'),
+                        onPressed: _busy
+                            ? null
+                            : () => setState(() {
+                                _recovery = _sent = true;
+                                _error = null;
+                                _code.clear();
+                              }),
+                        child: Text(l.haveRecoveryCode),
+                      ),
+                    ],
                   ],
                 ),
               ),

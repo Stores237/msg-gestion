@@ -55,7 +55,10 @@ def test_list_query_count_does_not_grow_with_members(django_assert_max_num_queri
     api, _ = client_for("secretaire-general")
     for _ in range(15):
         give_role(UserFactory(), "membre")
-    with django_assert_max_num_queries(8):
+    from apps.core.models import Settings
+
+    Settings.get()  # made on first use; the list then reads it (membership rules)
+    with django_assert_max_num_queries(10):
         api.get("/api/members/")
 
 

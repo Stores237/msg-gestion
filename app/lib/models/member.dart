@@ -27,9 +27,16 @@ class MemberSummary {
     required this.roles,
     this.photo,
     this.leaveUntil,
+    this.onProbation = false,
+    this.inactive = false,
   });
 
   final String? photo;
+
+  /// The group's membership rules (owner, 2026-11-02): still in the
+  /// probation period; not marked present for months.
+  final bool onProbation;
+  final bool inactive;
 
   /// On leave in this group: the last day, when known.
   final DateTime? leaveUntil;
@@ -54,6 +61,8 @@ class MemberSummary {
     leaveUntil: j['leave_until'] == null
         ? null
         : DateTime.parse(j['leave_until'] as String),
+    onProbation: j['on_probation'] == true,
+    inactive: j['inactive'] == true,
     isDiaspora: j['is_diaspora'] as bool,
     city: (j['city'] as String?) ?? '',
     age: j['age'] as int?,

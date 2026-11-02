@@ -58,7 +58,75 @@ class SettingsView(APIView):
                                for a in ActivityType.objects.filter(is_archived=False)],
             "dress_codes": [{"slug": d.slug, "name": d.name, "description": d.description}
                             for d in DressCode.objects.filter(is_archived=False)],
+            # Wider group settings (owner, 2026-11-02).
+            **{f: getattr(st, f) for f in SETTINGS_FOR_APP},
         })
+
+
+SETTINGS_FOR_APP = ("currency", "dues_monthly", "dues_day", "max_leave_days", "report_hours", "remind_before_hours",
+                    "event_minutes", "language", "contact_phone", "contact_email", "rules_text", "website")
+
+
+def _group_or_none():
+    """The group the app works in (or the only one); None when unclear."""
+    from .groups import NoGroupContext, default_group_id
+
+    try:
+        return default_group_id()
+    except NoGroupContext:
+        return None
+
+
+def _faq_json(e):
+    return {"id": e.pk, "question": e.question, "answer": e.answer}
+
+
+class FaqView(APIView):
+    """GET Aide → Questions fréquentes: the platform's common questions and
+    the current group's own (owner, 2026-11-02)."""
+
+    def get(self, request):
+        from .models import FaqEntry
+
+        gid = _group_or_none()
+        return Response({
+            "common": [_faq_json(e) for e in FaqEntry.objects.filter(group__isnull=True)],
+            "group": [_faq_json(e) for e in FaqEntry.objects.filter(group_id=gid)] if gid else [],
+        })
+
+
+class FaqSuggestionView(APIView):
+    """GET my suggestions with their outcome; POST {question, answer} to
+    propose a question to the platform team."""
+
+    throttle_scope = "faq_suggest"
+
+    def get_throttles(self):
+        return super().get_throttles() if self.request.method == "POST" else []
+
+    def get(self, request):
+        from .models import FaqSuggestion
+
+        rows = FaqSuggestion.objects.filter(author=request.user)[:50]
+        return Response([{"id": s.pk, "question": s.question, "answer": s.answer, "status": s.status, "note": s.note,
+                          "created_at": s.created_at} for s in rows])
+
+    def post(self, request):
+        from . import audit
+        from .models import FaqSuggestion
+
+        q = str(request.data.get("question", "")).strip()
+        a = str(request.data.get("answer", "")).strip()
+        if len(q) < 5:
+            return Response({"detail": "Écrivez la question.", "code": "question_required"}, status=400)
+        if len(q) > 200 or len(a) > 3000:
+            return Response({"detail": "Texte trop long.", "code": "too_long"}, status=400)
+        gid = _group_or_none()
+        if gid is None:
+            return Response({"detail": "Choisissez d’abord un groupe.", "code": "no_group"}, status=400)
+        s = FaqSuggestion.objects.create(group_id=gid, author=request.user, question=q, answer=a)
+        audit.record("Question proposée pour l’aide", actor=request.user, obj=s, request=request)
+        return Response({"id": s.pk, "status": s.status}, status=201)
 
 
 class PlatformView(APIView):

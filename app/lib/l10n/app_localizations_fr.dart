@@ -718,7 +718,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get smsUnavailable =>
-      'L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.';
+      'L’envoi de SMS n’est pas encore disponible. Demandez un code de récupération au responsable de votre groupe, puis touchez « J’ai un code de récupération ».';
 
   @override
   String get resetPin => 'Réinitialiser le code PIN';
@@ -3052,4 +3052,128 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get huddleBy => 'Huddle ·';
+
+  @override
+  String get eventEnded =>
+      'Cet événement est passé : il ne peut plus être modifié. Seul l’appel reste possible.';
+
+  @override
+  String get showBalance => 'Afficher le solde';
+
+  @override
+  String get hideBalance => 'Masquer le solde';
+
+  @override
+  String get downloadAskTitle => 'Télécharger ce document ?';
+
+  @override
+  String get downloadAskWhere =>
+      'PDF · enregistré dans Téléchargements/Huddle et lisible ensuite sans connexion.';
+
+  @override
+  String get download => 'Télécharger';
+
+  @override
+  String get aboutStatementPdf =>
+      'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.';
+
+  @override
+  String get aboutCashbookPdf =>
+      'Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.';
+
+  @override
+  String aboutReportPdf(int quarter, int year) {
+    return 'Rapport financier du trimestre $quarter $year : solde d’ouverture, entrées et sorties, solde de clôture et entrées par catégorie.';
+  }
+
+  @override
+  String aboutMemberStatementPdf(String name) {
+    return 'Relevé de $name : ce qu’il doit (cotisations, amendes), ce qu’il a versé, ce qui attend une validation et ce qui reste à payer.';
+  }
+
+  @override
+  String get faqGroupSection => 'Questions du groupe';
+
+  @override
+  String get faqCommonSection => 'Questions courantes';
+
+  @override
+  String get faqSuggest => 'Proposer une question';
+
+  @override
+  String get faqSuggestHint =>
+      'Une question que d’autres se posent ? Proposez-la avec sa réponse : l’équipe Huddle la relit puis l’ajoute à l’aide.';
+
+  @override
+  String get faqMine => 'Mes propositions';
+
+  @override
+  String get faqPublished => 'Publiée';
+
+  @override
+  String get faqDeclined => 'Non retenue';
+
+  @override
+  String get faqPending => 'En lecture';
+
+  @override
+  String get faqSent => 'Merci ! Votre question est envoyée à l’équipe Huddle.';
+
+  @override
+  String get faqQuestion => 'La question';
+
+  @override
+  String get faqQuestionRequired => 'Écrivez la question.';
+
+  @override
+  String get faqAnswer => 'La réponse (si vous la connaissez)';
+
+  @override
+  String get faqAnswerHint =>
+      'L’équipe la corrige ou la complète avant de la publier.';
+
+  @override
+  String get faqSend => 'Envoyer';
+
+  @override
+  String get myGroupSection => 'Mon groupe';
+
+  @override
+  String get groupRules => 'Règlement du groupe';
+
+  @override
+  String get groupCall => 'Appeler le groupe';
+
+  @override
+  String get groupMail => 'Écrire au groupe';
+
+  @override
+  String get groupLink => 'Lien du groupe';
+
+  @override
+  String get recoveryCode => 'Code de récupération (8 chiffres)';
+
+  @override
+  String get recoveryCodeHint =>
+      'Donné par le responsable de votre groupe ou l’équipe Huddle. Valable 24 h, une seule fois.';
+
+  @override
+  String get haveRecoveryCode => 'J’ai un code de récupération';
+
+  @override
+  String get memberInactive => 'Inactif';
+
+  @override
+  String get memberOnProbation => 'À l’essai';
+
+  @override
+  String remindBefore(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: '$hours heures avant',
+      one: '1 heure avant',
+    );
+    return '$_temp0';
+  }
 }

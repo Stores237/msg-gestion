@@ -57,6 +57,7 @@ class Due(models.Model):
         SOLIDARITY = "solidarite", "Contribution de solidarité"
         FINE = "amende", "Amende"
         REGISTRATION = "inscription", "Inscription"
+        MONTHLY = "mensuelle", "Cotisation mensuelle"
 
     member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dues")
     kind = models.CharField(max_length=12, choices=Kind.choices)
@@ -227,7 +228,7 @@ class ExpenseRequest(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.title} · {self.amount} FCFA"
+        return f"{self.title} · {self.amount}"
 
 
 class ExpenseMessage(models.Model):

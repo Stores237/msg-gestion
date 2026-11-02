@@ -1,0 +1,42 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Questions fréquentes{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme Huddle · aide de l’application</div>{% endblock %}
+{% block heading %}Questions fréquentes{% endblock %}
+{% block body %}
+<div class="notice">{% icon 'info' %}<span>Affichées dans l’application, Mon compte → Aide → Questions fréquentes : d’abord celles du groupe, puis les questions communes à tous les groupes. Les membres peuvent proposer une question (et sa réponse) : elle arrive ici, vous la corrigez puis la publiez.</span></div>
+
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Suggestions des membres{% if pending %} · {{ pending|length }} à traiter{% endif %}</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+  {% for s in pending %}
+  <form method="post" class="panel" style="padding:16px;display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="id" value="{{ s.pk }}">
+    <div style="font-size:13px;color:var(--text-secondary)">{{ s.author.full_name|default:"—" }} · {% group_logo s.group 18 %} {{ s.group.name }} · {{ s.created_at|date:"d/m/Y H:i" }}</div>
+    <label class="fld"><span class="fld-l">Question</span><span class="fld-box"><input name="question" value="{{ s.question }}" maxlength="200" required></span></label>
+    <label class="fld"><span class="fld-l">Réponse</span><span class="fld-box multi"><textarea name="answer" rows="4" maxlength="3000" placeholder="Écrivez ou corrigez la réponse avant de publier.">{{ s.answer }}</textarea></span></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select name="scope" aria-label="Où publier"><option value="group">Pour {{ s.group.name }} seulement</option><option value="common">Pour tous les groupes</option></select>
+      <button class="btn btn-primary btn-sm" name="action" value="publish">Publier</button>
+      <input name="note" maxlength="300" placeholder="Motif (si non retenue)" aria-label="Motif" style="flex:1;min-width:160px">
+      <button class="btn btn-outline btn-sm" name="action" value="decline" formnovalidate>Ne pas retenir</button>
+    </div>
+  </form>
+  {% empty %}<span style="color:var(--text-secondary)">Aucune suggestion en attente.</span>{% endfor %}
+</div></section>
+
+<div class="bo-cols half" style="margin-top:24px">
+  <section class="panel"><div class="panel-h"><h2>{% if group %}{{ group.name }} · questions du groupe{% else %}Questions du groupe{% endif %}</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+    {% if group %}
+      {% for e in own %}{% include "backoffice/_faq_entry.html" with e=e scope="group" %}{% empty %}<span style="color:var(--text-secondary)">Aucune question propre à ce groupe.</span>{% endfor %}
+      {% include "backoffice/_faq_entry.html" with e=None scope="group" %}
+    {% else %}<span style="color:var(--text-secondary)">Choisissez un groupe en haut du menu.</span>{% endif %}
+  </div></section>
+  <section class="panel"><div class="panel-h"><h2>Communes à tous les groupes</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:12px">
+    {% for e in common %}{% include "backoffice/_faq_entry.html" with e=e scope="common" %}{% empty %}<span style="color:var(--text-secondary)">Les questions de base sont dans l’application ; ajoutez-en ici.</span>{% endfor %}
+    {% include "backoffice/_faq_entry.html" with e=None scope="common" %}
+  </div></section>
+</div>
+
+{% if done %}
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Suggestions traitées</h2></div><div class="list">
+  {% for s in done %}<div class="row"><div class="row-main"><div class="row-t">{{ s.question }}</div><div class="row-s">{{ s.author.full_name|default:"—" }} · {{ s.group.name }} · {{ s.get_status_display }} par {{ s.decided_by.full_name|default:"—" }}, {{ s.decided_at|date:"d/m/Y" }}{% if s.note %} · {{ s.note }}{% endif %}</div></div></div>{% endfor %}
+</div></section>
+{% endif %}
+{% endblock %}

@@ -5,12 +5,14 @@ import 'dart:async';
 
 import '../data/current_user.dart';
 import '../data/offline.dart';
+import '../data/locale_controller.dart';
 import '../data/repository_locator.dart';
 import '../data/theme_controller.dart';
 import '../widgets/sync_widgets.dart';
 import '../l10n/app_localizations.dart';
 import '../models/me.dart';
 import '../theme/tokens.dart';
+import '../widgets/money.dart';
 import 'announcements/announcements_screen.dart';
 import 'calendar/calendar_screen.dart';
 import 'finances/finance_gate.dart';
@@ -32,6 +34,9 @@ class ShellScreen extends StatefulWidget {
   State<ShellScreen> createState() => _ShellScreenState();
 }
 
+/// Another screen (a notification) asks the shell to show a tab.
+final requestedTab = ValueNotifier<AppTab?>(null);
+
 class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
   Timer? _flushTimer;
   int _index = 0;
@@ -41,15 +46,19 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     currentUser.value = widget.me;
-    // After this frame: the whole app rebuilds in the group's colour.
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => ThemeController.instance.setGroupColor(
+    Currency.code = widget.me.group?.currency ?? 'FCFA';
+    // After this frame: the whole app rebuilds in the group's colour (and
+    // its language, when the member hasn't picked one).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ThemeController.instance.setGroupColor(
         ThemeController.parse(widget.me.group?.color),
         ThemeController.parse(widget.me.group?.color2),
-      ),
-    );
+      );
+      LocaleController.instance.setGroupLanguage(widget.me.group?.language);
+    });
     WidgetsBinding.instance.addObserver(this);
     RepositoryLocator.instance.authSession.addListener(_onAuth);
+    requestedTab.addListener(_onTabRequest);
     // While saves wait for the network, try again every 30 s.
     _flushTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (OfflineState.instance.pending > 0) {
@@ -60,6 +69,7 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    requestedTab.removeListener(_onTabRequest);
     _flushTimer?.cancel();
     RepositoryLocator.instance.authSession.removeListener(_onAuth);
     WidgetsBinding.instance.removeObserver(this);
@@ -135,6 +145,13 @@ class _ShellScreenState extends State<ShellScreen> with WidgetsBindingObserver {
   void _openTab(AppTab t) {
     final i = _tabs.indexOf(t);
     if (i >= 0) setState(() => _index = i);
+  }
+
+  void _onTabRequest() {
+    final t = requestedTab.value;
+    if (t == null || !mounted) return;
+    requestedTab.value = null;
+    _openTab(t);
   }
 
   Widget _screen(AppTab t) => switch (t) {

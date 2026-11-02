@@ -40,7 +40,30 @@ class AppSettings {
     this.dressCodes = defaultDressCodes,
     this.scopedTypes = defaultScopedTypes,
     this.typesWithoutChef = defaultTypesWithoutChef,
+    this.eventMinutes = 120,
+    this.remindBeforeHours = 2,
+    this.reportHours = 24,
+    this.contactPhone = '',
+    this.contactEmail = '',
+    this.website = '',
+    this.rulesText = '',
   });
+
+  /// Wider group settings (back-office → Paramètres, owner 2026-11-02).
+  /// An event without an end time lasts this long.
+  final int eventMinutes;
+
+  /// "N h avant" reminders.
+  final int remindBeforeHours;
+
+  /// The chef de groupe's report is due this long after the end.
+  final int reportHours;
+
+  /// The group's own contacts and rules (Aide → Mon groupe).
+  final String contactPhone;
+  final String contactEmail;
+  final String website;
+  final String rulesText;
 
   /// Types whose events say intérieur or extérieur (Messe).
   final Set<String> scopedTypes;
@@ -110,6 +133,30 @@ class BureauHome {
       unfilled.isEmpty;
 }
 
+/// One question of Aide → Questions fréquentes, from the server.
+typedef FaqItem = (String question, String answer);
+
+/// The platform's common questions and the group's own (owner, 2026-11-02).
+class FaqData {
+  const FaqData({this.common = const [], this.group = const []});
+  final List<FaqItem> common;
+  final List<FaqItem> group;
+}
+
+/// A question the member proposed: pending | published | declined.
+class FaqSuggestion {
+  const FaqSuggestion({
+    required this.id,
+    required this.question,
+    required this.status,
+    this.note = '',
+  });
+  final int id;
+  final String question;
+  final String status;
+  final String note;
+}
+
 abstract class ProfileRepository {
   Future<Me> fetchMe();
   Future<AppSettings> settings();
@@ -134,4 +181,8 @@ abstract class ProfileRepository {
   Future<GroupInfo> removeGroupLogo();
 
   Future<PlatformInfo> platform();
+
+  Future<FaqData> faq();
+  Future<List<FaqSuggestion>> myFaqSuggestions();
+  Future<void> suggestFaq({required String question, String answer = ''});
 }

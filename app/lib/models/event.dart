@@ -18,6 +18,7 @@ class CalendarEvent {
     this.createdByName,
     this.createdByRole = '',
     this.canEdit = false,
+    this.ended = false,
     this.canDelete = false,
     this.kindOther = '',
     this.scope = '',
@@ -69,6 +70,9 @@ class CalendarEvent {
 
   /// The viewer may edit / delete it (they added it, or manage the calendar).
   final bool canEdit;
+
+  /// Over (owner, 2026-11-02): nothing changes any more but the roll call.
+  final bool ended;
   final bool canDelete;
 
   /// Who added it, and their role then (owner, 2026-10-26).
@@ -106,6 +110,7 @@ class CalendarEvent {
     createdByName: j['created_by_name'] as String?,
     createdByRole: (j['created_by_role'] as String?) ?? '',
     canEdit: (j['can_edit'] as bool?) ?? false,
+    ended: j['ended'] == true,
     canDelete: (j['can_delete'] as bool?) ?? false,
     kindOther: (j['kind_other'] as String?) ?? '',
     scope: (j['scope'] as String?) ?? '',

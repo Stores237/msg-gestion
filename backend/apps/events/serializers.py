@@ -14,6 +14,7 @@ class EventSerializer(serializers.ModelSerializer):
     created_by_name = serializers.SerializerMethodField()
     created_by_role = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
+    ended = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
     chef = serializers.PrimaryKeyRelatedField(queryset=User.objects.none(), allow_null=True, required=False)
     chef_name = serializers.SerializerMethodField()
@@ -28,10 +29,10 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "place_detail", "dress", "dress_name", "dress_detail",
-                  "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete",
+                  "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete", "ended",
                   "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
                   "has_lineup", "my_duty"]
-        read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete"]
+        read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete", "ended"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,11 +73,14 @@ class EventSerializer(serializers.ModelSerializer):
     # the calendar's change / delete rights can for any event.
     def get_can_edit(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and (event.created_by_id == v.pk or v.can("calendar.events", "change"))
+        return bool(v) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "change"))
 
     def get_can_delete(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and (event.created_by_id == v.pk or v.can("calendar.events", "delete"))
+        return bool(v) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "delete"))
+
+    def get_ended(self, event) -> bool:
+        return event.has_ended()
 
     def get_created_by_name(self, event) -> str | None:
         return event.created_by.short_name if event.created_by else None

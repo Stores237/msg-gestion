@@ -479,7 +479,7 @@ class _NewCollectionState extends State<_NewCollection> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: InputDecoration(
               labelText: l.amountPerMember,
-              suffixText: 'FCFA',
+              suffixText: Currency.code,
             ),
           ),
           const SizedBox(height: 16),

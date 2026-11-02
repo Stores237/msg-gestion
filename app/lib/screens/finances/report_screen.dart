@@ -113,6 +113,7 @@ class _ReportViewState extends State<ReportView> {
                       context,
                       source: 'fin-report-$_year-$_quarter',
                       name: l.pdfReportName(_quarter, _year),
+                      about: l.aboutReportPdf(_quarter, _year),
                       link: () => RepositoryLocator.instance.finances.reportPdf(
                         _year,
                         _quarter,

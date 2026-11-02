@@ -150,3 +150,69 @@ def platform(request):
         messages.success(request, "Enregistré. L’application l’affiche dans Mon compte → Aide.")
         return redirect("backoffice:platform")
     return render(request, "backoffice/platform.html", {"nav": "platform", "p": p})
+
+
+@backoffice_view("backoffice.platform", "view")
+def faq(request):
+    """Aide → Questions fréquentes (owner, 2026-11-02): the questions common
+    to every group, the current group's own, and the members' suggestions,
+    which the platform team edits and publishes or declines."""
+    from django.utils import timezone
+
+    from apps.core.groups import in_group
+    from apps.core.models import FaqEntry, FaqSuggestion
+    from apps.core.notify import notify
+
+    group = getattr(request, "group", None)
+    if request.method == "POST":
+        if not request.user.can("backoffice.platform", "change"):
+            return render(request, "backoffice/forbidden.html", status=403)
+        P = request.POST
+        action = P.get("action")
+        question, answer = P.get("question", "").strip()[:200], P.get("answer", "").strip().replace("\r\n", "\n")[:3000]
+        scope_group = None if P.get("scope") == "common" else group
+        if action in ("save", "publish") and (len(question) < 5 or not answer):
+            messages.error(request, "Écrivez la question et sa réponse.")
+            return redirect("backoffice:faq")
+        if action == "save":
+            entry = FaqEntry.objects.filter(pk=P.get("id")).first() if P.get("id") else None
+            if entry is None:
+                entry = FaqEntry(group=scope_group, position=FaqEntry.objects.filter(group=scope_group).count() * 10)
+            entry.question, entry.answer, entry.updated_by = question, answer, request.user
+            entry.save()
+            audit.record("Question d’aide enregistrée", actor=request.user, obj=entry, request=request, platform=entry.group_id is None,
+                         detail={"question": question})
+            messages.success(request, "Question enregistrée : elle est dans l’application.")
+        elif action == "delete":
+            entry = get_object_or_404(FaqEntry, pk=P.get("id"))
+            audit.record("Question d’aide supprimée", actor=request.user, obj=entry, request=request, platform=entry.group_id is None,
+                         detail={"question": entry.question})
+            entry.delete()
+            messages.success(request, "Question supprimée.")
+        elif action in ("publish", "decline"):
+            s = get_object_or_404(FaqSuggestion, pk=P.get("id"), status=FaqSuggestion.Status.PENDING)
+            s.decided_by, s.decided_at = request.user, timezone.now()
+            if action == "publish":
+                target = None if P.get("scope") == "common" else s.group
+                s.entry = FaqEntry.objects.create(group=target, question=question, answer=answer, updated_by=request.user,
+                                                  position=FaqEntry.objects.filter(group=target).count() * 10)
+                s.status = FaqSuggestion.Status.PUBLISHED
+                title, body = "Votre question est dans l’aide", f"« {question} » est publiée dans Aide → Questions fréquentes. Merci !"
+            else:
+                s.status, s.note = FaqSuggestion.Status.DECLINED, P.get("note", "").strip()[:300]
+                title, body = "Votre question pour l’aide", f"« {s.question} » n’a pas été retenue." + (f" {s.note}" if s.note else "")
+            s.save()
+            audit.record("Suggestion d’aide " + ("publiée" if action == "publish" else "non retenue"), actor=request.user, obj=s,
+                         request=request, platform=True)
+            if s.author:
+                with in_group(s.group):
+                    notify([s.author], "faq", title, body, {"type": "faq"})
+            messages.success(request, "Suggestion publiée." if action == "publish" else "Suggestion classée ; son auteur est prévenu.")
+        return redirect("backoffice:faq")
+    return render(request, "backoffice/faq.html", {
+        "nav": "faq", "group": group,
+        "common": FaqEntry.objects.filter(group__isnull=True),
+        "own": FaqEntry.objects.filter(group=group) if group else [],
+        "pending": FaqSuggestion.objects.filter(status=FaqSuggestion.Status.PENDING).select_related("group", "author"),
+        "done": FaqSuggestion.objects.exclude(status=FaqSuggestion.Status.PENDING).select_related("group", "author", "decided_by")[:20],
+    })

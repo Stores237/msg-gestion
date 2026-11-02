@@ -286,9 +286,18 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
     final ms = await pickMembers(
       context,
       selected: [for (final t in _tagged) t.$1],
+      withRoles: true,
     );
     if (ms != null && mounted) {
-      setState(() => _tagged = [for (final m in ms) (m.id, m.fullName)]);
+      setState(
+        () => _tagged = [
+          for (final m in ms)
+            (
+              m.id,
+              m.roles.isEmpty ? m.fullName : '${m.fullName} (${rolesOf(m)})',
+            ),
+        ],
+      );
     }
   }
 
@@ -401,7 +410,7 @@ class _NewExpenseScreenState extends State<NewExpenseScreen> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: l.expAmount,
-                      suffixText: 'FCFA',
+                      suffixText: Currency.code,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -1059,7 +1068,7 @@ class _PayExpenseScreenState extends State<PayExpenseScreen> {
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: l.expAmountPaid,
-                      suffixText: 'FCFA',
+                      suffixText: Currency.code,
                       helperText: l.expAmountMaxHint,
                     ),
                   ),

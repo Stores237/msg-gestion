@@ -4,6 +4,7 @@ import '../data/repositories/profile_repository.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
+import '../widgets/errors.dart';
 import '../widgets/launch.dart';
 import '../widgets/ui.dart';
 
@@ -20,10 +21,18 @@ class HelpAboutSection extends StatefulWidget {
 
 class _HelpAboutSectionState extends State<HelpAboutSection> {
   PlatformInfo _p = const PlatformInfo();
+  AppSettings? _g;
 
   @override
   void initState() {
     super.initState();
+    // The group's own contacts and rules (owner, 2026-11-02).
+    RepositoryLocator.instance.profile
+        .settings()
+        .then((s) {
+          if (mounted) setState(() => _g = s);
+        })
+        .catchError((_) {});
     RepositoryLocator.instance.profile
         .platform()
         .then((p) {
@@ -44,9 +53,59 @@ class _HelpAboutSectionState extends State<HelpAboutSection> {
     void open(Uri uri) => openUri(context, uri);
     void push(Widget w) =>
         Navigator.of(context).push(MaterialPageRoute(builder: (_) => w));
+    final g = _g;
+    final hasGroup =
+        g != null &&
+        (g.rulesText.isNotEmpty ||
+            g.contactPhone.isNotEmpty ||
+            g.contactEmail.isNotEmpty ||
+            g.website.isNotEmpty);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (hasGroup) ...[
+          SectionLabel(l.myGroupSection),
+          const SizedBox(height: 8),
+          GroupCard(
+            children: [
+              if (g.rulesText.isNotEmpty)
+                _HelpRow(
+                  key: const Key('group-rules'),
+                  icon: Icons.gavel_outlined,
+                  title: l.groupRules,
+                  onTap: () => push(
+                    TextPageScreen(title: l.groupRules, text: g.rulesText),
+                  ),
+                ),
+              if (g.contactPhone.isNotEmpty)
+                _HelpRow(
+                  key: const Key('group-call'),
+                  icon: Icons.phone_outlined,
+                  title: l.groupCall,
+                  subtitle: g.contactPhone,
+                  onTap: () => open(telUri('+${_intl(g.contactPhone)}')),
+                ),
+              if (g.contactEmail.isNotEmpty)
+                _HelpRow(
+                  key: const Key('group-mail'),
+                  icon: Icons.mail_outline,
+                  title: l.groupMail,
+                  subtitle: g.contactEmail,
+                  onTap: () =>
+                      open(Uri(scheme: 'mailto', path: g.contactEmail)),
+                ),
+              if (g.website.isNotEmpty)
+                _HelpRow(
+                  key: const Key('group-link'),
+                  icon: Icons.link,
+                  title: l.groupLink,
+                  subtitle: g.website,
+                  onTap: () => open(Uri.parse(g.website)),
+                ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
         SectionLabel(l.helpSection),
         const SizedBox(height: 8),
         GroupCard(
@@ -89,7 +148,7 @@ class _HelpAboutSectionState extends State<HelpAboutSection> {
                       Uri(
                         scheme: 'mailto',
                         path: _p.supportEmail,
-                        query: 'subject=MSG',
+                        query: 'subject=Huddle',
                       ),
                     ),
             ),
@@ -186,22 +245,87 @@ class _HelpRow extends StatelessWidget {
   }
 }
 
-/// Questions fréquentes: built into the app, in both languages.
-class FaqScreen extends StatelessWidget {
+/// Questions fréquentes (owner, 2026-11-02): the group's own questions,
+/// then the common ones (built into the app in both languages, plus those
+/// the platform team adds), and "Proposer une question" for members.
+class FaqScreen extends StatefulWidget {
   const FaqScreen({super.key});
+
+  @override
+  State<FaqScreen> createState() => _FaqScreenState();
+}
+
+class _FaqScreenState extends State<FaqScreen> {
+  FaqData _data = const FaqData();
+  List<FaqSuggestion> _mine = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    final repo = RepositoryLocator.instance.profile;
+    repo
+        .faq()
+        .then((d) {
+          if (mounted) setState(() => _data = d);
+        })
+        .catchError((_) {}); // offline: the built-in questions
+    repo
+        .myFaqSuggestions()
+        .then((s) {
+          if (mounted) setState(() => _mine = s);
+        })
+        .catchError((_) {});
+  }
+
+  Future<void> _suggest() async {
+    final sent = await Navigator.of(
+      context,
+    ).push<bool>(MaterialPageRoute(builder: (_) => const FaqSuggestScreen()));
+    if (sent == true) _load();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final c = context.msg;
-    final items = [
+    final common = [
       (l.faqQ1, l.faqA1),
       (l.faqQ2, l.faqA2),
       (l.faqQ3, l.faqA3),
       (l.faqQ4, l.faqA4),
       (l.faqQ5, l.faqA5),
       (l.faqQ6, l.faqA6),
+      ..._data.common,
     ];
+    Widget card(List<FaqItem> items) => GroupCard(
+      children: [
+        for (final (q, a) in items)
+          Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: Material(
+              type: MaterialType.transparency,
+              child: ExpansionTile(
+                title: Text(
+                  q,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                expandedAlignment: Alignment.centerLeft,
+                children: [
+                  Text(
+                    a,
+                    style: TextStyle(height: 1.5, color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -211,44 +335,163 @@ class FaqScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 children: [
-                  GroupCard(
-                    children: [
-                      for (final (q, a) in items)
-                        Theme(
-                          data: Theme.of(
-                            context,
-                          ).copyWith(dividerColor: Colors.transparent),
-                          child: Material(
-                            type: MaterialType.transparency,
-                            child: ExpansionTile(
-                              title: Text(
-                                q,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              childrenPadding: const EdgeInsets.fromLTRB(
-                                16,
-                                0,
-                                16,
-                                16,
-                              ),
-                              expandedAlignment: Alignment.centerLeft,
-                              children: [
-                                Text(
-                                  a,
-                                  style: TextStyle(
-                                    height: 1.5,
-                                    color: c.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
+                  if (_data.group.isNotEmpty) ...[
+                    SectionLabel(l.faqGroupSection),
+                    const SizedBox(height: 8),
+                    KeyedSubtree(
+                      key: const Key('faq-group'),
+                      child: card(_data.group),
+                    ),
+                    const SizedBox(height: 24),
+                    SectionLabel(l.faqCommonSection),
+                    const SizedBox(height: 8),
+                  ],
+                  card(common),
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    key: const Key('faq-suggest'),
+                    onPressed: _suggest,
+                    icon: const Icon(Icons.add_comment_outlined),
+                    label: Text(l.faqSuggest),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(48),
+                      shape: const StadiumBorder(),
+                    ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l.faqSuggestHint,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: c.textSecondary),
+                  ),
+                  if (_mine.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    SectionLabel(l.faqMine),
+                    const SizedBox(height: 8),
+                    GroupCard(
+                      children: [
+                        for (final s in _mine)
+                          ListRow(
+                            key: Key('faq-mine-${s.id}'),
+                            title: Text(s.question),
+                            subtitle: s.note.isEmpty ? null : Text(s.note),
+                            trailing: switch (s.status) {
+                              'published' => Badge2(
+                                l.faqPublished,
+                                tone: Tone.green,
+                              ),
+                              'declined' => Badge2(
+                                l.faqDeclined,
+                                tone: Tone.neutral,
+                              ),
+                              _ => Badge2(l.faqPending, tone: Tone.amber),
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Proposer une question": a question and, if the member knows it, its
+/// answer, for the platform team to correct and publish.
+class FaqSuggestScreen extends StatefulWidget {
+  const FaqSuggestScreen({super.key});
+
+  @override
+  State<FaqSuggestScreen> createState() => _FaqSuggestScreenState();
+}
+
+class _FaqSuggestScreenState extends State<FaqSuggestScreen> {
+  final _form = GlobalKey<FormState>();
+  final _q = TextEditingController();
+  final _a = TextEditingController();
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _q.dispose();
+    _a.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (!_form.currentState!.validate()) return;
+    setState(() => _busy = true);
+    try {
+      await RepositoryLocator.instance.profile.suggestFaq(
+        question: _q.text.trim(),
+        answer: _a.text.trim(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).faqSent)),
+      );
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) showErrorSnack(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            ScreenHeader(title: l.faqSuggest, back: true, small: true),
+            Expanded(
+              child: Form(
+                key: _form,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  children: [
+                    TextFormField(
+                      key: const Key('faq-question'),
+                      controller: _q,
+                      maxLength: 200,
+                      minLines: 1,
+                      maxLines: 3,
+                      decoration: InputDecoration(labelText: l.faqQuestion),
+                      validator: (v) => (v ?? '').trim().length < 5
+                          ? l.faqQuestionRequired
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      key: const Key('faq-answer'),
+                      controller: _a,
+                      maxLength: 3000,
+                      minLines: 3,
+                      maxLines: 8,
+                      decoration: InputDecoration(
+                        labelText: l.faqAnswer,
+                        helperText: l.faqAnswerHint,
+                        helperMaxLines: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      key: const Key('faq-send'),
+                      onPressed: _busy ? null : _send,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                        shape: const StadiumBorder(),
+                      ),
+                      child: Text(l.faqSend),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

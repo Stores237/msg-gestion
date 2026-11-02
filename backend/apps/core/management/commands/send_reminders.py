@@ -26,6 +26,7 @@ class Command(BaseCommand):
 
     def run_for_group(self):
         self.end_leaves()
+        self.monthly_dues()
         tomorrow = timezone.localdate() + timedelta(days=1)
         lo = timezone.make_aware(datetime.combine(tomorrow, time.min))
         events = Event.objects.filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1))
@@ -40,6 +41,25 @@ class Command(BaseCommand):
             body = " · ".join(x for x in [dresses.get(e.dress, "") if e.dress else "", e.place] if x)
             sent += notify(members, "reminder", f"Rappel : {e.title} demain {when:%H:%M}", body, {"type": "event", "id": e.pk})
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")
+
+    def monthly_dues(self):
+        """The group's monthly contribution (Settings.dues_monthly, owner
+        2026-11-02): on its day, one due per active member, once a month."""
+        from apps.core.models import Settings
+        from apps.finances.models import Due
+
+        st = Settings.get()
+        today = timezone.localdate()
+        if not st.dues_monthly or today.day < st.dues_day:
+            return
+        label = f"Cotisation {today:%m/%Y}"
+        members = User.objects.members().filter(gstatus=User.Status.ACTIVE, is_active=True)
+        have = set(Due.objects.filter(kind=Due.Kind.MONTHLY, label=label).values_list("member_id", flat=True))
+        new = [m for m in members if m.pk not in have]
+        Due.objects.bulk_create([Due(member=m, kind=Due.Kind.MONTHLY, label=label, amount=st.dues_monthly, due_on=today) for m in new])
+        if new:
+            notify(new, "payment", "Cotisation du mois", f"{label} · {st.dues_monthly} {st.currency}.", {"type": "dues"})
+            self.stdout.write(f"{len(new)} monthly due(s).")
 
     def end_leaves(self):
         """A member whose leave ended (Membership.leave_until in the past)

@@ -53,7 +53,12 @@ class RequestSerializer(serializers.ModelSerializer):
                   "paid_amount", "entry", "close_reason", "closed_at", "replaces", "replaced_by", "created_at", "actions"]
 
     def get_tagged_names(self, r) -> list[str]:
-        return [u.short_name for u in r.tagged.all()]
+        # With their role (owner, 2026-11-02): "J. Mballa (Formateur)".
+        out = []
+        for u in r.tagged.all():
+            role = u.display_role()
+            out.append(f"{u.short_name} ({role})" if role else u.short_name)
+        return out
 
     def get_actions(self, r) -> list[str]:
         return expenses.actions(r, self.context["request"].user)

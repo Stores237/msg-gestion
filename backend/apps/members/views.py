@@ -64,7 +64,9 @@ class MemberListView(APIView):
             qs = qs.filter(gstatus=st)
         if request.query_params.get("diaspora") in ("1", "true"):
             qs = qs.filter(is_diaspora=True)
-        data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate(), "request": request}).data
+        qs = list(qs)
+        data = MemberListSerializer(qs, many=True, context={"today": timezone.localdate(), "request": request,
+                                                            **member_flags([m.pk for m in qs])}).data
         return Response({"counts": counts, "results": data})
 
     @extend_schema(responses={410: None})
@@ -75,13 +77,44 @@ class MemberListView(APIView):
                          "code": "use_access_request"}, status=status.HTTP_410_GONE)
 
 
+def member_flags(ids):
+    """The group's membership rules (owner, 2026-11-02): who is still on
+    probation (Settings.probation_days after joining the group) and who has
+    not been marked present for Settings.inactive_months. Two queries for the
+    whole list."""
+    from datetime import timedelta
+
+    from django.db.models import Max
+
+    from apps.core.models import Membership, Settings
+    from apps.events.models import Attendance
+
+    st = Settings.get()
+    today = timezone.localdate()
+    probation, inactive = set(), set()
+    joined = {}
+    if st.probation_days or st.inactive_months:
+        for uid, on, created in Membership.objects.filter(user_id__in=ids).values_list("user_id", "joined_on", "created_at"):
+            joined[uid] = on or timezone.localdate(created)
+    if st.probation_days:
+        probation = {uid for uid, d in joined.items() if (today - d).days < st.probation_days}
+    if st.inactive_months:
+        since = today - timedelta(days=30 * st.inactive_months)
+        last = dict(Attendance.objects.filter(member_id__in=ids, status=Attendance.Status.PRESENT)
+                    .values("member").annotate(last=Max("event__starts_at")).values_list("member", "last"))
+        inactive = {uid for uid, d in joined.items()
+                    if d < since and (uid not in last or timezone.localdate(last[uid]) < since)}
+    return {"probation": probation, "inactive": inactive}
+
+
 class MemberDetailView(APIView):
     permission_classes = [require("members.profile", "view")]
 
     @extend_schema(responses=MemberDetailSerializer)
     def get(self, request, pk):
         user = get_object_or_404(_members(), pk=pk)
-        return Response(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user, "request": request}).data)
+        return Response(MemberDetailSerializer(user, context={"today": timezone.localdate(), "viewer": request.user, "request": request,
+                                                              **member_flags([user.pk])}).data)
 
 
 class BureauView(APIView):

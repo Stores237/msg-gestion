@@ -276,9 +276,13 @@ class _RecipientPickerState extends State<_RecipientPicker> {
 
 /// Tick several members, with "Tout cocher" (owner, 2026-10-30: finances).
 /// Returns the ticked members in list order, or null when dismissed.
+/// [withRoles]: each person's roles beside the name, those with a role
+/// first, and the search finds roles too (owner, 2026-11-02: tagging a
+/// coordinator on an expense request).
 Future<List<MemberSummary>?> pickMembers(
   BuildContext context, {
   List<int> selected = const [],
+  bool withRoles = false,
 }) {
   return showModalBottomSheet<List<MemberSummary>>(
     context: context,
@@ -287,16 +291,27 @@ Future<List<MemberSummary>?> pickMembers(
     builder: (context) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.85,
-      builder: (context, scroll) =>
-          _MultiPicker(scroll: scroll, selected: selected.toSet()),
+      builder: (context, scroll) => _MultiPicker(
+        scroll: scroll,
+        selected: selected.toSet(),
+        withRoles: withRoles,
+      ),
     ),
   );
 }
 
+/// "Formateur · Chef de groupe": the roles shown beside a name.
+String rolesOf(MemberSummary m) => m.roles.map((r) => r.name).join(' · ');
+
 class _MultiPicker extends StatefulWidget {
-  const _MultiPicker({required this.scroll, required this.selected});
+  const _MultiPicker({
+    required this.scroll,
+    required this.selected,
+    this.withRoles = false,
+  });
   final ScrollController scroll;
   final Set<int> selected;
+  final bool withRoles;
 
   @override
   State<_MultiPicker> createState() => _MultiPickerState();
@@ -331,8 +346,19 @@ class _MultiPickerState extends State<_MultiPicker> {
     final all = _all ?? const <MemberSummary>[];
     final q = _RecipientPickerState._fold(_q);
     final shown = all
-        .where((m) => _RecipientPickerState._fold(m.fullName).contains(q))
+        .where(
+          (m) =>
+              _RecipientPickerState._fold(m.fullName).contains(q) ||
+              (widget.withRoles &&
+                  _RecipientPickerState._fold(rolesOf(m)).contains(q)),
+        )
         .toList();
+    if (widget.withRoles) {
+      // Coordinators first: they are the ones usually tagged.
+      shown.sort(
+        (a, b) => (a.roles.isEmpty ? 1 : 0).compareTo(b.roles.isEmpty ? 1 : 0),
+      );
+    }
     // "Tout cocher" works on what the search shows.
     final allOn = shown.isNotEmpty && shown.every((m) => _on.contains(m.id));
     return Column(
@@ -409,6 +435,14 @@ class _MultiPickerState extends State<_MultiPicker> {
                           size: 36,
                         ),
                         title: Text(m.fullName),
+                        subtitle: widget.withRoles && m.roles.isNotEmpty
+                            ? Text(
+                                rolesOf(m),
+                                key: Key('pick-role-${m.id}'),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
                         trailing: Checkbox(
                           value: _on.contains(m.id),
                           onChanged: (_) => _toggle(m.id),

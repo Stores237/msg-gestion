@@ -7,6 +7,7 @@ import 'data/file_store.dart';
 import 'data/group_controller.dart';
 import 'data/locale_controller.dart';
 import 'data/offline.dart';
+import 'data/balance_privacy.dart';
 import 'data/theme_controller.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/splash_screen.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
   await LocaleController.instance.load();
   await GroupController.instance.load();
   await ThemeController.instance.load();
+  await BalancePrivacy.load();
   await initializeDateFormatting();
   await OfflineState.instance.load();
   await DataSettings.instance.load();

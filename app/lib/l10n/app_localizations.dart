@@ -1331,7 +1331,7 @@ abstract class AppLocalizations {
   /// No description provided for @smsUnavailable.
   ///
   /// In fr, this message translates to:
-  /// **'L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.'**
+  /// **'L’envoi de SMS n’est pas encore disponible. Demandez un code de récupération au responsable de votre groupe, puis touchez « J’ai un code de récupération ».'**
   String get smsUnavailable;
 
   /// No description provided for @resetPin.
@@ -5053,6 +5053,216 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Huddle ·'**
   String get huddleBy;
+
+  /// No description provided for @eventEnded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cet événement est passé : il ne peut plus être modifié. Seul l’appel reste possible.'**
+  String get eventEnded;
+
+  /// No description provided for @showBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher le solde'**
+  String get showBalance;
+
+  /// No description provided for @hideBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masquer le solde'**
+  String get hideBalance;
+
+  /// No description provided for @downloadAskTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger ce document ?'**
+  String get downloadAskTitle;
+
+  /// No description provided for @downloadAskWhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'PDF · enregistré dans Téléchargements/Huddle et lisible ensuite sans connexion.'**
+  String get downloadAskWhere;
+
+  /// No description provided for @download.
+  ///
+  /// In fr, this message translates to:
+  /// **'Télécharger'**
+  String get download;
+
+  /// No description provided for @aboutStatementPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.'**
+  String get aboutStatementPdf;
+
+  /// No description provided for @aboutCashbookPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.'**
+  String get aboutCashbookPdf;
+
+  /// No description provided for @aboutReportPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport financier du trimestre {quarter} {year} : solde d’ouverture, entrées et sorties, solde de clôture et entrées par catégorie.'**
+  String aboutReportPdf(int quarter, int year);
+
+  /// No description provided for @aboutMemberStatementPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Relevé de {name} : ce qu’il doit (cotisations, amendes), ce qu’il a versé, ce qui attend une validation et ce qui reste à payer.'**
+  String aboutMemberStatementPdf(String name);
+
+  /// No description provided for @faqGroupSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions du groupe'**
+  String get faqGroupSection;
+
+  /// No description provided for @faqCommonSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Questions courantes'**
+  String get faqCommonSection;
+
+  /// No description provided for @faqSuggest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Proposer une question'**
+  String get faqSuggest;
+
+  /// No description provided for @faqSuggestHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une question que d’autres se posent ? Proposez-la avec sa réponse : l’équipe Huddle la relit puis l’ajoute à l’aide.'**
+  String get faqSuggestHint;
+
+  /// No description provided for @faqMine.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes propositions'**
+  String get faqMine;
+
+  /// No description provided for @faqPublished.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publiée'**
+  String get faqPublished;
+
+  /// No description provided for @faqDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non retenue'**
+  String get faqDeclined;
+
+  /// No description provided for @faqPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En lecture'**
+  String get faqPending;
+
+  /// No description provided for @faqSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Merci ! Votre question est envoyée à l’équipe Huddle.'**
+  String get faqSent;
+
+  /// No description provided for @faqQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'La question'**
+  String get faqQuestion;
+
+  /// No description provided for @faqQuestionRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrivez la question.'**
+  String get faqQuestionRequired;
+
+  /// No description provided for @faqAnswer.
+  ///
+  /// In fr, this message translates to:
+  /// **'La réponse (si vous la connaissez)'**
+  String get faqAnswer;
+
+  /// No description provided for @faqAnswerHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'L’équipe la corrige ou la complète avant de la publier.'**
+  String get faqAnswerHint;
+
+  /// No description provided for @faqSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get faqSend;
+
+  /// No description provided for @myGroupSection.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon groupe'**
+  String get myGroupSection;
+
+  /// No description provided for @groupRules.
+  ///
+  /// In fr, this message translates to:
+  /// **'Règlement du groupe'**
+  String get groupRules;
+
+  /// No description provided for @groupCall.
+  ///
+  /// In fr, this message translates to:
+  /// **'Appeler le groupe'**
+  String get groupCall;
+
+  /// No description provided for @groupMail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrire au groupe'**
+  String get groupMail;
+
+  /// No description provided for @groupLink.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lien du groupe'**
+  String get groupLink;
+
+  /// No description provided for @recoveryCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de récupération (8 chiffres)'**
+  String get recoveryCode;
+
+  /// No description provided for @recoveryCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Donné par le responsable de votre groupe ou l’équipe Huddle. Valable 24 h, une seule fois.'**
+  String get recoveryCodeHint;
+
+  /// No description provided for @haveRecoveryCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai un code de récupération'**
+  String get haveRecoveryCode;
+
+  /// No description provided for @memberInactive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inactif'**
+  String get memberInactive;
+
+  /// No description provided for @memberOnProbation.
+  ///
+  /// In fr, this message translates to:
+  /// **'À l’essai'**
+  String get memberOnProbation;
+
+  /// No description provided for @remindBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'{hours, plural, =1{1 heure avant} other{{hours} heures avant}}'**
+  String remindBefore(int hours);
 }
 
 class _AppLocalizationsDelegate

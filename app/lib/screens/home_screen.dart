@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/current_user.dart';
+import '../data/balance_privacy.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
@@ -391,10 +392,24 @@ class _Stats extends StatelessWidget {
                         style: TextStyle(fontSize: 12, color: c.textSecondary),
                       ),
                       const SizedBox(height: 4),
-                      Amount(
-                        summary.balance,
-                        size: 20,
-                        weight: FontWeight.w800,
+                      // Hidden with the eye on Finances (owner, 2026-11-02).
+                      ValueListenableBuilder<bool>(
+                        valueListenable: BalancePrivacy.hidden,
+                        builder: (context, hidden, _) => hidden
+                            ? Text(
+                                hiddenAmount,
+                                key: const Key('home-balance-hidden'),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: c.textPrimary,
+                                ),
+                              )
+                            : Amount(
+                                summary.balance,
+                                size: 20,
+                                weight: FontWeight.w800,
+                              ),
                       ),
                     ],
                   ),

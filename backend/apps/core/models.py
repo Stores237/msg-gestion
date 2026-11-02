@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.validators import RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
 from .groups import default_group_id, scoped
@@ -248,6 +248,31 @@ class Settings(models.Model):
     reminder_time = models.TimeField(default="20:00")
     # A second, finance-only code to open Finances (owner, 2026-10-30).
     finance_code_required = models.BooleanField("code finances obligatoire", default=False)
+    # --- Wider group settings (owner, 2026-11-02) -----------------------
+    # Money & dues.
+    currency = models.CharField("monnaie", max_length=8, default="FCFA")
+    dues_monthly = models.PositiveIntegerField("cotisation mensuelle", default=0, help_text="0 = pas de cotisation mensuelle")
+    dues_day = models.PositiveSmallIntegerField("jour de la cotisation", default=5, validators=[MinValueValidator(1), MaxValueValidator(28)])
+    low_balance_alert = models.PositiveIntegerField("alerte de solde bas", default=0, help_text="0 = pas d’alerte")
+    # Membership rules.
+    probation_days = models.PositiveSmallIntegerField("période d’essai (jours)", default=0)
+    max_leave_days = models.PositiveSmallIntegerField("congé maximum (jours)", default=0, help_text="0 = sans limite")
+    absence_alert = models.PositiveSmallIntegerField("absences avant alerte", default=0, help_text="sur 90 jours ; 0 = pas d’alerte")
+    inactive_months = models.PositiveSmallIntegerField("inactif après (mois)", default=0, help_text="0 = jamais signalé")
+    # Events & duty.
+    report_hours = models.PositiveSmallIntegerField("délai du rapport (heures)", default=24,
+                                                    validators=[MinValueValidator(1), MaxValueValidator(168)])
+    remind_before_hours = models.PositiveSmallIntegerField("rappel avant l’événement (heures)", default=2,
+                                                           validators=[MinValueValidator(1), MaxValueValidator(12)])
+    event_minutes = models.PositiveSmallIntegerField("durée par défaut d’un événement (minutes)", default=120,
+                                                     validators=[MinValueValidator(15), MaxValueValidator(1440)])
+    # Language & identity.
+    language = models.CharField("langue par défaut", max_length=2, blank=True, default="",
+                                choices=[("", "Celle du téléphone"), ("fr", "Français"), ("en", "English")])
+    contact_phone = models.CharField("téléphone de contact", max_length=20, blank=True)
+    contact_email = models.EmailField("e-mail de contact", blank=True)
+    rules_text = models.TextField("règlement du groupe", max_length=6000, blank=True)
+    website = models.URLField("lien (site, page, groupe WhatsApp)", blank=True)
     duty_template = models.CharField(
         max_length=300,
         default="Bonjour {prénom}, tu es de service {date} à {heure} : {poste} ({côté}). Confirme dans l’app.",
@@ -269,3 +294,47 @@ class Settings(models.Model):
 
     def quick_amounts(self):
         return sorted({self.fee_registration, self.fee_illness, self.fee_medal, self.fee_death})
+
+
+class FaqEntry(models.Model):
+    """A question and its answer in the app's Aide → Questions fréquentes
+    (owner, 2026-11-02): common to every group (group empty) or one group's
+    own. Written in the back-office by the platform team, often from a
+    member's suggestion. Not scoped: the API picks common + current group."""
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True, related_name="faq")
+    question = models.CharField(max_length=200)
+    answer = models.TextField(max_length=3000)
+    position = models.PositiveSmallIntegerField(default=0)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["position", "pk"]
+
+    def __str__(self):
+        return self.question
+
+
+class FaqSuggestion(models.Model):
+    """A member's proposed question (and answer) for the FAQ, sent from the
+    app to the platform team, who edit and publish it or decline it."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "À traiter"
+        PUBLISHED = "published", "Publiée"
+        DECLINED = "declined", "Non retenue"
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    question = models.CharField(max_length=200)
+    answer = models.TextField(max_length=3000, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    decided_at = models.DateTimeField(null=True, blank=True)
+    note = models.CharField(max_length=300, blank=True)
+    entry = models.ForeignKey(FaqEntry, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+
+    class Meta:
+        ordering = ["-created_at"]

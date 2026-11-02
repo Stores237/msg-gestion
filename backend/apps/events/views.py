@@ -20,6 +20,8 @@ from .serializers import AttendanceSheetSerializer, EventReportSerializer, Event
 
 EVENT_RELATED = ("created_by", "chef", "report__read_by")
 
+ENDED = {"detail": "Cet événement est passé : il ne peut plus être modifié. Seul l’appel reste possible.", "code": "event_ended"}
+
 METHOD_ACTION = {"GET": "view", "POST": "create", "PATCH": "change", "DELETE": "delete"}
 
 
@@ -85,6 +87,8 @@ class EventDetailView(APIView):
         event = get_object_or_404(Event, pk=pk)
         if not (event.created_by_id == request.user.pk or request.user.can("calendar.events", "change")):
             return Response({"detail": "Seul l’auteur peut modifier cet événement.", "code": "author_only"}, status=403)
+        if event.has_ended():
+            return Response(ENDED, status=409)
         previous_chef = event.chef_id
         s = EventSerializer(event, data=request.data, partial=True, context={"viewer": request.user})
         s.is_valid(raise_exception=True)
@@ -98,6 +102,8 @@ class EventDetailView(APIView):
         event = get_object_or_404(Event, pk=pk)
         if not (event.created_by_id == request.user.pk or request.user.can("calendar.events", "delete")):
             return Response({"detail": "Seul l’auteur peut supprimer cet événement.", "code": "author_only"}, status=403)
+        if event.has_ended():
+            return Response(ENDED, status=409)
         audit.record("Événement supprimé", actor=request.user, obj=event, request=request, detail={"titre": event.title})
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -195,7 +201,34 @@ class AttendanceView(APIView):
                     event=event, member_id=mark["member"], defaults={"status": mark["status"], "marked_by": request.user}
                 )
         audit.record("Appel enregistré", actor=request.user, obj=event, request=request, detail={"lignes": len(s.validated_data["marks"])})
+        _absence_alerts(event, [m["member"] for m in s.validated_data["marks"] if m["status"] == Attendance.Status.ABSENT and m["member"] in known])
         return Response(self._sheet(event))
+
+
+def _absence_alerts(event, absent_ids):
+    """Settings.absence_alert (owner, 2026-11-02): the Nth unexcused absence
+    in 90 days tells the member and those who keep the roll call, once."""
+    from apps.accounts.models import RoleAssignment
+    from apps.core.models import Settings
+    from apps.core.notify import notify
+
+    limit = Settings.get().absence_alert
+    if not limit or not absent_ids:
+        return
+    since = timezone.now() - timedelta(days=90)
+    keepers = None
+    for member in User.objects.members().filter(pk__in=absent_ids):
+        n = Attendance.objects.filter(member=member, status=Attendance.Status.ABSENT, event__starts_at__gte=since).count()
+        if n != limit:
+            continue
+        if keepers is None:
+            ids = RoleAssignment.objects.active().filter(
+                role__permissions__resource="calendar.attendance", role__permissions__action="change").values("user")
+            keepers = list(User.objects.members().filter(pk__in=ids, is_active=True))
+        notify([member], "member", "Absences", f"{n} absences en 90 jours (dernière : {event.title}). Prévenez quand vous ne pouvez pas venir.",
+               {"type": "event", "id": event.pk})
+        notify([k for k in keepers if k.pk != member.pk], "member", "Absences répétées",
+               f"{member.short_name} : {n} absences en 90 jours (dernière : {event.title}).", {"type": "member", "id": member.pk})
 
 
 class ExcuseView(APIView):
@@ -207,6 +240,8 @@ class ExcuseView(APIView):
     @extend_schema(request=ExcuseSerializer)
     def post(self, request, pk):
         event = get_object_or_404(Event, pk=pk)
+        if event.has_ended():
+            return Response(ENDED, status=409)
         s = ExcuseSerializer(data=request.data)
         s.is_valid(raise_exception=True)
         duties = lineup.lineup(event)

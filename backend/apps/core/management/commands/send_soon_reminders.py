@@ -26,8 +26,13 @@ class Command(BaseCommand):
                 self.run_for_group()
 
     def run_for_group(self):
+        from apps.core.models import Settings
+
         now = timezone.now()
-        events = Event.objects.filter(starts_at__gte=now + timedelta(minutes=90), starts_at__lt=now + timedelta(minutes=150))
+        # The group's delay (Settings.remind_before_hours, 2 h by default),
+        # within the half-hour either side this job runs.
+        ahead = timedelta(hours=Settings.get().remind_before_hours)
+        events = Event.objects.filter(starts_at__gte=now + ahead - timedelta(minutes=30), starts_at__lt=now + ahead + timedelta(minutes=30))
         members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_2h=True))
         sent = 0
         for e in events:

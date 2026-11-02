@@ -7,6 +7,7 @@ import '../data/file_store.dart';
 import '../l10n/app_localizations.dart';
 import 'dates.dart';
 import 'errors.dart';
+import '../theme/tokens.dart';
 
 void _snack(BuildContext context, String text) => ScaffoldMessenger.of(context)
   ..hideCurrentSnackBar()
@@ -28,14 +29,24 @@ String mimeFor(String name) {
 /// A PDF (report, statement, cash book, attachment): downloaded, kept in
 /// Téléchargements, copied to the phone's Download/MSG and opened. Without
 /// network, the copy kept last time opens instead.
+///
+/// With [about], the member is first told what the document is and says
+/// yes before the download starts (owner, 2026-11-02: "user don't know what
+/// they are downloading").
 Future<void> openDocument(
   BuildContext context, {
   required String source,
   required String name,
   required Future<String> Function() link,
   String mime = 'application/pdf',
+  String? about,
 }) async {
   final l = AppLocalizations.of(context);
+  if (about != null &&
+      !await confirmDownload(context, name: name, about: about)) {
+    return;
+  }
+  if (!context.mounted) return;
   final store = FileStore.instance;
   DownloadedFile file;
   String? note;
@@ -60,6 +71,49 @@ Future<void> openDocument(
   }
   if (!context.mounted) return;
   await showDownloaded(context, file, note: note);
+}
+
+/// "Télécharger ce document ?": its name, what it holds, where it goes.
+Future<bool> confirmDownload(
+  BuildContext context, {
+  required String name,
+  required String about,
+}) async {
+  final l = AppLocalizations.of(context);
+  final yes = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      key: const Key('download-ask'),
+      icon: const Icon(Icons.picture_as_pdf_outlined),
+      title: Text(l.downloadAskTitle),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Text(about),
+          const SizedBox(height: 8),
+          Text(
+            l.downloadAskWhere,
+            style: TextStyle(fontSize: 13, color: context.msg.textSecondary),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l.cancel),
+        ),
+        FilledButton(
+          key: const Key('confirm-download'),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l.download),
+        ),
+      ],
+    ),
+  );
+  return yes == true;
 }
 
 /// Opens a kept file: photos in the app, PDFs in the phone's viewer.

@@ -199,6 +199,8 @@ void main() {
     });
     await tester.tap(find.byKey(const Key('export-cashbook')));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('confirm-download')));
+    await tester.pumpAndSettle();
     expect(f.finances.exports, ['cashbook']);
     expect(
       find.textContaining('Aucune application ne peut ouvrir'),

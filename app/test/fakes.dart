@@ -158,7 +158,10 @@ class FakeAuthRepository implements AuthRepository {
     required String newPin,
     required int acceptedTerms,
   }) async {
-    if (code != '123456') throw ApiException(400, '{"code":"bad_code"}');
+    // 123456: the SMS; 12345678: the back-office's recovery code.
+    if (code != '123456' && code != '12345678') {
+      throw ApiException(400, '{"code":"bad_code"}');
+    }
     changed.add(newPin);
   }
 
@@ -228,6 +231,32 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<PlatformInfo> platform() async => platformInfo;
+
+  FaqData faqData = const FaqData();
+  final faqSuggestions = <FaqSuggestion>[];
+  final suggested = <(String, String)>[];
+
+  @override
+  Future<FaqData> faq() async => faqData;
+
+  @override
+  Future<List<FaqSuggestion>> myFaqSuggestions() async => faqSuggestions;
+
+  @override
+  Future<void> suggestFaq({
+    required String question,
+    String answer = '',
+  }) async {
+    suggested.add((question, answer));
+    faqSuggestions.insert(
+      0,
+      FaqSuggestion(
+        id: suggested.length,
+        question: question,
+        status: 'pending',
+      ),
+    );
+  }
 
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
@@ -1530,6 +1559,9 @@ class FakePlanningRepository implements PlanningRepository {
 class FakeNotificationsRepository implements NotificationsRepository {
   bool allRead = false;
 
+  /// Added after the two default notices.
+  final extra = <AppNotification>[];
+
   @override
   Future<(int, List<AppNotification>)> list() async {
     final now = DateTime.now();
@@ -1552,6 +1584,7 @@ class FakeNotificationsRepository implements NotificationsRepository {
         createdAt: now.subtract(const Duration(days: 2)),
         unread: false,
       ),
+      ...extra,
     ];
     return (items.where((n) => n.unread).length, items);
   }

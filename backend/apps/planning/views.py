@@ -100,6 +100,13 @@ class ServiceCreateView(APIView):
         return Response(_service_json(Service.objects.select_related("event__chef", "group").get(pk=s.pk)), status=201)
 
 
+def _ended(service):
+    """An event that is over keeps its lineup as it was (owner, 2026-11-02)."""
+    if service.event.has_ended():
+        return Response({"detail": "Cet événement est passé : son équipe ne peut plus être modifiée.", "code": "event_ended"}, status=409)
+    return None
+
+
 class SlotView(APIView):
     """PUT {post, side, index, member, force?} to fill a slot; member null clears it."""
 
@@ -107,6 +114,8 @@ class SlotView(APIView):
 
     def put(self, request, pk):
         s = get_object_or_404(Service.objects.select_related("event"), pk=pk)
+        if refused := _ended(s):
+            return refused
         post, side, index = request.data.get("post"), request.data.get("side"), int(request.data.get("index") or 0)
         member_id = request.data.get("member")
         if member_id is None:
@@ -129,6 +138,8 @@ class MoveView(APIView):
     def put(self, request, pk):
         a = get_object_or_404(Assignment.objects.select_related("service__event", "member"), pk=pk)
         target = get_object_or_404(Service.objects.select_related("event"), pk=request.data.get("service") or a.service_id)
+        if refused := _ended(a.service) or _ended(target):
+            return refused
         try:
             moved = services.move(a, target, request.data.get("post"), request.data.get("side"), int(request.data.get("index") or 0),
                                   by=request.user, force=bool(request.data.get("force")), request=request)
@@ -149,6 +160,8 @@ class AssignGroupView(APIView):
 
     def post(self, request, pk):
         s = get_object_or_404(Service.objects.select_related("event"), pk=pk)
+        if refused := _ended(s):
+            return refused
         group = get_object_or_404(ServiceGroup, pk=request.data.get("group"))
         created, missing = services.assign_group(s, group, by=request.user, request=request)
         return Response({"assigned": len(created), "still_empty": missing})
@@ -162,6 +175,8 @@ class ChefView(APIView):
 
     def put(self, request, pk):
         s = get_object_or_404(Service.objects.select_related("event__chef", "group"), pk=pk)
+        if refused := _ended(s):
+            return refused
         member = get_object_or_404(User.objects.members(), pk=request.data["member"]) if request.data.get("member") else None
         try:
             services.set_chef(s, member, by=request.user, request=request)

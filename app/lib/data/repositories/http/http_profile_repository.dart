@@ -91,8 +91,44 @@ class HttpProfileRepository implements ProfileRepository {
         for (final d in (j['dress_codes'] as List?) ?? const [])
           (d['slug'] as String, d['name'] as String),
       ],
+      eventMinutes: (j['event_minutes'] as int?) ?? 120,
+      remindBeforeHours: (j['remind_before_hours'] as int?) ?? 2,
+      reportHours: (j['report_hours'] as int?) ?? 24,
+      contactPhone: (j['contact_phone'] as String?) ?? '',
+      contactEmail: (j['contact_email'] as String?) ?? '',
+      website: (j['website'] as String?) ?? '',
+      rulesText: (j['rules_text'] as String?) ?? '',
     );
   }
+
+  static List<FaqItem> _faq(Object? rows) => [
+    for (final r in (rows as List?) ?? const [])
+      (r['question'] as String, r['answer'] as String),
+  ];
+
+  @override
+  Future<FaqData> faq() async {
+    final j = await _api.get('/faq/') as Map<String, dynamic>;
+    return FaqData(common: _faq(j['common']), group: _faq(j['group']));
+  }
+
+  @override
+  Future<List<FaqSuggestion>> myFaqSuggestions() async => [
+    for (final s in await _api.get('/faq/suggestions/') as List)
+      FaqSuggestion(
+        id: s['id'] as int,
+        question: s['question'] as String,
+        status: s['status'] as String,
+        note: (s['note'] as String?) ?? '',
+      ),
+  ];
+
+  @override
+  Future<void> suggestFaq({required String question, String answer = ''}) =>
+      _api.post(
+        '/faq/suggestions/',
+        body: {'question': question, 'answer': answer},
+      );
 
   @override
   Future<void> setReminders({bool? eve, bool? twoHours}) => _api.patch(

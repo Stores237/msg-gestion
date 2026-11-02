@@ -24,10 +24,12 @@ from apps.accounts import registry
 from apps.accounts.models import Role, RoleAssignment, RolePermission, RoleRequest, User
 from apps.accounts.phone import InvalidPhone, format_phone, normalize_phone
 from apps.accounts.services import (
+    RECOVERY_HOURS,
     RuleViolation,
     assign_role,
     change_phone,
     default_end,
+    issue_recovery_code,
     reset_pin,
     revoke_assignment,
     set_role_duration,
@@ -176,6 +178,11 @@ def user_detail(request, pk):
                 messages.success(request, f"Rôle « {a.role.name} » retiré.")
             elif action == "reset_pin":
                 once = {"label": "Nouveau code PIN provisoire", "value": reset_pin(member, by=request.user, request=request)}
+            elif action == "recovery_code":
+                code = issue_recovery_code(member, by=request.user, request=request)
+                once = {"label": "Code de récupération", "value": f"{code[:4]} {code[4:]}",
+                        "hint": f"Valable {RECOVERY_HOURS} h, une seule fois. Dans l’application : « Code oublié ? », "
+                                "puis ce code et un nouveau PIN choisi par le membre."}
             elif action in ("suspend", "reactivate", "leave"):
                 if not reason:
                     raise RuleViolation("Le motif est obligatoire : il est inscrit au journal.")
@@ -184,6 +191,10 @@ def user_detail(request, pk):
                     until = parse_date(request.POST["until"])
                     if until is None or until < date.today():
                         raise RuleViolation("La date de fin de congé doit être aujourd’hui ou plus tard.")
+                if action == "leave" and (most := Settings.get().max_leave_days):
+                    # The group's longest leave (Paramètres → Membres, owner 2026-11-02).
+                    if until is None or (until - date.today()).days > most:
+                        raise RuleViolation(f"Un congé dure au plus {most} jours dans ce groupe : indiquez une date de fin.")
                 status = {"suspend": User.Status.SUSPENDED, "reactivate": User.Status.ACTIVE, "leave": User.Status.LEAVE}[action]
                 # In the group being worked on; the person's other groups are untouched.
                 Membership.join(member, request.group.pk)
@@ -719,7 +730,11 @@ def role_manage(request, slug=None):
 
 
 SETTING_FIELDS = ["parish", "welcome_message", "motto", "color", "color2", "fee_registration", "fee_medal", "fee_illness", "fee_death", "installments",
-                  "assise_time", "vigil_time", "reminder_time", "duty_template"]
+                  "assise_time", "vigil_time", "reminder_time", "duty_template",
+                  # Wider settings (owner, 2026-11-02).
+                  "currency", "dues_monthly", "dues_day", "low_balance_alert", "probation_days", "max_leave_days", "absence_alert",
+                  "inactive_months", "report_hours", "remind_before_hours", "event_minutes", "language", "contact_phone",
+                  "contact_email", "rules_text", "website"]
 
 
 @backoffice_view("backoffice.settings", "view")
@@ -745,8 +760,13 @@ def settings_view(request):
             except Exception:
                 messages.error(request, f"Valeur invalide : {field.verbose_name}.")
                 return redirect("backoffice:settings")
+            if f == "language" and value not in ("", "fr", "en"):
+                messages.error(request, "Valeur invalide : langue par défaut.")
+                return redirect("backoffice:settings")
+            if f == "currency":
+                value = value.upper() or "FCFA"
             if getattr(st, f) != value:
-                changed[f] = str(value)
+                changed[f] = str(value) if f != "rules_text" else "(texte modifié)"
                 setattr(st, f, value)
         short = "".join(request.POST.get("short_name", st.group.short_name).split())[:8].upper()
         if short != st.group.short_name:

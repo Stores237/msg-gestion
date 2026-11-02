@@ -23,6 +23,13 @@ def pending_access():
 
 
 @register.simple_tag
+def faq_pending():
+    from apps.core.models import FaqSuggestion
+
+    return FaqSuggestion.objects.filter(status=FaqSuggestion.Status.PENDING).count()
+
+
+@register.simple_tag
 def pending_group_deletions():
     from apps.core.models import GroupDeletion
 
@@ -51,7 +58,9 @@ def group_settings():
 
 @register.filter
 def fcfa(n):
-    return f"{n or 0:,}".replace(",", "\u00a0") + "\u00a0FCFA"
+    from apps.core.models import Settings
+
+    return f"{n or 0:,}".replace(",", "\u00a0") + "\u00a0" + Settings.get().currency
 
 
 @register.filter

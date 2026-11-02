@@ -138,6 +138,8 @@ void main() {
     await tester.tap(find.byKey(const Key('pick-all')));
     await tester.pumpAndSettle();
     expect(find.text('2 sélectionnées'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('entry-3')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('entry-3')));
     await tester.pumpAndSettle();
     expect(find.text('1 sélectionnée'), findsOneWidget);

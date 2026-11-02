@@ -386,7 +386,7 @@
   "sendCode": "Envoyer le code",
   "smsCode": "Code reçu par SMS",
   "badCode": "Code incorrect ou expiré.",
-  "smsUnavailable": "L’envoi de SMS n’est pas encore disponible. Demandez au responsable de votre groupe de réinitialiser votre code.",
+  "smsUnavailable": "L’envoi de SMS n’est pas encore disponible. Demandez un code de récupération au responsable de votre groupe, puis touchez « J’ai un code de récupération ».",
   "resetPin": "Réinitialiser le code PIN",
   "resetPinConfirm": "Un nouveau code provisoire sera créé pour {name}. L’ancien ne fonctionnera plus.",
   "@resetPinConfirm": {
@@ -1885,5 +1885,64 @@
   "groupShortNameHint": "8 caractères au plus, ex. MSG",
   "groupNameRequired": "Le nom du groupe est obligatoire.",
   "groupProfileSaved": "Groupe enregistré.",
-  "huddleBy": "Huddle ·"
+  "huddleBy": "Huddle ·",
+  "eventEnded": "Cet événement est passé : il ne peut plus être modifié. Seul l’appel reste possible.",
+  "showBalance": "Afficher le solde",
+  "hideBalance": "Masquer le solde",
+  "downloadAskTitle": "Télécharger ce document ?",
+  "downloadAskWhere": "PDF · enregistré dans Téléchargements/Huddle et lisible ensuite sans connexion.",
+  "download": "Télécharger",
+  "aboutStatementPdf": "Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.",
+  "aboutCashbookPdf": "Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.",
+  "aboutReportPdf": "Rapport financier du trimestre {quarter} {year} : solde d’ouverture, entrées et sorties, solde de clôture et entrées par catégorie.",
+  "@aboutReportPdf": {
+    "placeholders": {
+      "quarter": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutMemberStatementPdf": "Relevé de {name} : ce qu’il doit (cotisations, amendes), ce qu’il a versé, ce qui attend une validation et ce qui reste à payer.",
+  "@aboutMemberStatementPdf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faqGroupSection": "Questions du groupe",
+  "faqCommonSection": "Questions courantes",
+  "faqSuggest": "Proposer une question",
+  "faqSuggestHint": "Une question que d’autres se posent ? Proposez-la avec sa réponse : l’équipe Huddle la relit puis l’ajoute à l’aide.",
+  "faqMine": "Mes propositions",
+  "faqPublished": "Publiée",
+  "faqDeclined": "Non retenue",
+  "faqPending": "En lecture",
+  "faqSent": "Merci ! Votre question est envoyée à l’équipe Huddle.",
+  "faqQuestion": "La question",
+  "faqQuestionRequired": "Écrivez la question.",
+  "faqAnswer": "La réponse (si vous la connaissez)",
+  "faqAnswerHint": "L’équipe la corrige ou la complète avant de la publier.",
+  "faqSend": "Envoyer",
+  "myGroupSection": "Mon groupe",
+  "groupRules": "Règlement du groupe",
+  "groupCall": "Appeler le groupe",
+  "groupMail": "Écrire au groupe",
+  "groupLink": "Lien du groupe",
+  "recoveryCode": "Code de récupération (8 chiffres)",
+  "recoveryCodeHint": "Donné par le responsable de votre groupe ou l’équipe Huddle. Valable 24 h, une seule fois.",
+  "haveRecoveryCode": "J’ai un code de récupération",
+  "memberInactive": "Inactif",
+  "memberOnProbation": "À l’essai",
+  "remindBefore": "{hours, plural, =1{1 heure avant} other{{hours} heures avant}}",
+  "@remindBefore": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  }
 }

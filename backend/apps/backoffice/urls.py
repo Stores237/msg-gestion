@@ -16,6 +16,7 @@ urlpatterns = [
     path("groupes/<int:pk>/modifier/", views_groups.group_edit, name="group_edit"),
     path("groupes/<int:pk>/supprimer/", views_groups.group_delete, name="group_delete"),
     path("plateforme/", views_groups.platform, name="platform"),
+    path("aide/questions/", views_groups.faq, name="faq"),
     path("equipe/", views_staff.staff, name="staff"),
     path("integrations/", views_integrations.integrations, name="integrations"),
     path("integrations/test-stockage/", views_staff.integration_check, name="integration_check"),

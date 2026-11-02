@@ -117,6 +117,9 @@ class _ProfileBody extends StatelessWidget {
     ).pdfMemberStatementName(m.summary.fullName, fileDate()),
     link: () =>
         RepositoryLocator.instance.finances.memberStatementPdf(m.summary.id),
+    about: AppLocalizations.of(
+      context,
+    ).aboutMemberStatementPdf(m.summary.fullName),
   );
 
   Future<void> _resetPin(BuildContext context) async {
@@ -237,6 +240,9 @@ class _ProfileBody extends StatelessWidget {
                         key: const Key('member-status'),
                         tone: statusTone(s.status),
                       ),
+                      if (s.onProbation) Badge2(l.memberOnProbation),
+                      if (s.inactive)
+                        Badge2(l.memberInactive, tone: Tone.amber),
                       if (s.isMinor) Badge2(l.minor),
                       if (s.isDiaspora)
                         Badge2(

@@ -7,6 +7,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core.api import (
     BureauHomeView,
+    FaqSuggestionView,
+    FaqView,
     GroupLogoView,
     GroupProfileView,
     NotificationListView,
@@ -29,6 +31,8 @@ urlpatterns = [
     path("api/finances/", include("apps.finances.urls")),
     path("api/settings/", SettingsView.as_view(), name="settings"),
     path("api/platform/", PlatformView.as_view(), name="platform"),
+    path("api/faq/", FaqView.as_view(), name="faq"),
+    path("api/faq/suggestions/", FaqSuggestionView.as_view(), name="faq-suggestions"),
     path("api/group/", GroupProfileView.as_view(), name="group-profile"),
     path("api/group/logo/", GroupLogoView.as_view(), name="group-logo"),
     path("api/home/bureau/", BureauHomeView.as_view(), name="home-bureau"),

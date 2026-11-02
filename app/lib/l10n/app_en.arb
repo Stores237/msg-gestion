@@ -205,7 +205,7 @@
   "sendCode": "Send the code",
   "smsCode": "Code received by SMS",
   "badCode": "Wrong or expired code.",
-  "smsUnavailable": "Text messages aren’t available yet. Ask your group’s organiser to reset your PIN.",
+  "smsUnavailable": "Text messages aren’t available yet. Ask your group’s organiser for a recovery code, then tap “I have a recovery code”.",
   "resetPin": "Reset PIN",
   "resetPinConfirm": "A new temporary PIN will be created for {name}. The old one will stop working.",
   "resetPinDone": "{name}’s new temporary PIN: {pin}. Give it in person; it won’t be shown again.",
@@ -915,5 +915,64 @@
   "groupShortNameHint": "8 characters at most, e.g. MSG",
   "groupNameRequired": "The group's name is required.",
   "groupProfileSaved": "Group saved.",
-  "huddleBy": "Huddle ·"
+  "huddleBy": "Huddle ·",
+  "eventEnded": "This event is over: it can no longer be changed. Only the roll call is still possible.",
+  "showBalance": "Show the balance",
+  "hideBalance": "Hide the balance",
+  "downloadAskTitle": "Download this document?",
+  "downloadAskWhere": "PDF · saved in Downloads/Huddle and readable later without a connection.",
+  "download": "Download",
+  "aboutStatementPdf": "Members' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, as of today.",
+  "aboutCashbookPdf": "Cash book: every operation (money in and out) with its date, description, the member concerned, who entered and validated it, and its amount.",
+  "aboutReportPdf": "Financial report for quarter {quarter} {year}: opening balance, money in and out, closing balance and income by category.",
+  "@aboutReportPdf": {
+    "placeholders": {
+      "quarter": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "aboutMemberStatementPdf": "Statement for {name}: what they owe (dues, fines), what they paid, what awaits validation and what is left to pay.",
+  "@aboutMemberStatementPdf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faqGroupSection": "Group questions",
+  "faqCommonSection": "Common questions",
+  "faqSuggest": "Suggest a question",
+  "faqSuggestHint": "A question others ask too? Suggest it with its answer: the Huddle team reviews it and adds it to the help.",
+  "faqMine": "My suggestions",
+  "faqPublished": "Published",
+  "faqDeclined": "Not kept",
+  "faqPending": "Under review",
+  "faqSent": "Thank you! Your question was sent to the Huddle team.",
+  "faqQuestion": "The question",
+  "faqQuestionRequired": "Write the question.",
+  "faqAnswer": "The answer (if you know it)",
+  "faqAnswerHint": "The team corrects or completes it before publishing.",
+  "faqSend": "Send",
+  "myGroupSection": "My group",
+  "groupRules": "Group rules",
+  "groupCall": "Call the group",
+  "groupMail": "Email the group",
+  "groupLink": "Group link",
+  "recoveryCode": "Recovery code (8 digits)",
+  "recoveryCodeHint": "Given by your group leader or the Huddle team. Valid 24 h, once.",
+  "haveRecoveryCode": "I have a recovery code",
+  "memberInactive": "Inactive",
+  "memberOnProbation": "On probation",
+  "remindBefore": "{hours, plural, =1{1 hour before} other{{hours} hours before}}",
+  "@remindBefore": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  }
 }

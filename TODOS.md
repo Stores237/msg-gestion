@@ -8,6 +8,13 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render
+  (migrations core 0016, accounts 0025, finances 0006; also builds 35–36's if not yet deployed),
+  then fill back-office → Paramètres → Cotisations et caisse, Règles des membres, Calendrier and
+  Langue et contacts for each group (everything defaults to "off" / today's behaviour), and add
+  questions in back-office → Questions fréquentes. Install build 37 (over build 36).
+- [ ] **Engineering — later:** per-group time zone (all jobs run on Douala time today), and fees
+  as an editable list instead of the 4 fixed amounts.
 - [ ] **Owner — build 36 (2026-11-02, Huddle's own app ID):** every tester installs build 36 (a new app for Android), signs in again and uninstalls the old MSG app.
 - [ ] **Owner — build 35 (2026-11-02, Huddle):** deploy on Render (migrations core 0015, accounts 0023 and 0024). Upload each group's logo (back-office → Paramètres, or the président in the app). Optional: send the Huddle logo as SVG if a designer has it (the app uses a redrawn version, design/brand/).
 - [ ] **Owner — build 34 (2026-10-30):** deploy on Render (migration accounts 0022) and install build 34 (includes 33). Then back-office → Paramètres → Approbation des dépenses (check the types and who approves) and Sécurité des finances.
