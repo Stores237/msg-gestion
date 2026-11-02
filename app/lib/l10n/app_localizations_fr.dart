@@ -9,7 +9,7 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get appTitle => 'MSG';
+  String get appTitle => 'Huddle';
 
   @override
   String get motto => 'Service · Ordre · Accueil';
@@ -1553,11 +1553,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get accessSentBody =>
-      'Le partenaire MSG crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.';
+      'Le partenaire Huddle crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.';
 
   @override
   String get accessIntro =>
-      'Le partenaire MSG ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.';
+      'Le partenaire Huddle ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.';
 
   @override
   String get accessPending => 'En attente';
@@ -1594,7 +1594,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get switchGroup => 'Changer de groupe';
 
   @override
-  String get chooseGroup => 'Choisir un groupe';
+  String get chooseGroup => 'Choisissez votre groupe';
 
   @override
   String get errorNoGroup =>
@@ -1665,7 +1665,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unlockTitle => 'Entrez votre code PIN';
 
   @override
-  String get unlockSubtitle => 'Pour ouvrir MSG.';
+  String get unlockSubtitle => 'Pour ouvrir Huddle.';
 
   @override
   String unlockWrong(int n) {
@@ -1684,7 +1684,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unlockOtherAccount => 'Se connecter autrement';
 
   @override
-  String get biometricReason => 'Déverrouiller MSG';
+  String get biometricReason => 'Déverrouiller Huddle';
 
   @override
   String get biometricUnlock => 'Déverrouiller avec l’empreinte ou le visage';
@@ -2320,11 +2320,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteFile => 'Supprimer';
 
   @override
-  String get savedToDownloads => 'Enregistré dans Téléchargements › MSG';
+  String get savedToDownloads => 'Enregistré dans Téléchargements › Huddle';
 
   @override
   String get photoSavedToGallery =>
-      'Photo enregistrée dans la galerie (Images › MSG)';
+      'Photo enregistrée dans la galerie (Images › Huddle)';
 
   @override
   String get keptInDownloads => 'Gardé dans Mon compte › Téléchargements';
@@ -3008,4 +3008,48 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get financeCodeTurnedOff => 'Code finances désactivé.';
+
+  @override
+  String get chooseGroupHint =>
+      'Vous faites partie de plusieurs groupes. Vous pourrez changer à tout moment depuis l’Accueil.';
+
+  @override
+  String get groupLabel => 'Groupe';
+
+  @override
+  String get groupProfileTitle => 'Nom et logo du groupe';
+
+  @override
+  String get groupProfileHint => 'Ce que les membres voient dans Huddle';
+
+  @override
+  String get groupLogoChange => 'Changer le logo';
+
+  @override
+  String get groupLogoRemove => 'Retirer le logo';
+
+  @override
+  String get groupLogoSaved => 'Logo du groupe enregistré.';
+
+  @override
+  String get groupLogoHint =>
+      'Image carrée de préférence (JPEG ou PNG, 5 Mo). Sans logo, le sigle s’affiche sur la couleur du groupe.';
+
+  @override
+  String get groupName => 'Nom du groupe';
+
+  @override
+  String get groupShortName => 'Sigle';
+
+  @override
+  String get groupShortNameHint => '8 caractères au plus, ex. MSG';
+
+  @override
+  String get groupNameRequired => 'Le nom du groupe est obligatoire.';
+
+  @override
+  String get groupProfileSaved => 'Groupe enregistré.';
+
+  @override
+  String get huddleBy => 'Huddle ·';
 }

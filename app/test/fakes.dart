@@ -173,6 +173,37 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<Me> fetchMe() async => me;
 
+  final groupCalls = <String>[];
+
+  @override
+  Future<GroupInfo> updateGroup({String? name, String? shortName}) async {
+    groupCalls.add('update:$name:$shortName');
+    return GroupInfo(
+      id: me.group?.id ?? 1,
+      name: name ?? '',
+      initials: shortName,
+    );
+  }
+
+  @override
+  Future<GroupInfo> uploadGroupLogo({
+    required List<int> bytes,
+    required String filename,
+  }) async {
+    groupCalls.add('logo:$filename');
+    return GroupInfo(
+      id: me.group?.id ?? 1,
+      name: me.group?.name ?? '',
+      logo: 'https://x/logo.png',
+    );
+  }
+
+  @override
+  Future<GroupInfo> removeGroupLogo() async {
+    groupCalls.add('remove-logo');
+    return GroupInfo(id: me.group?.id ?? 1, name: me.group?.name ?? '');
+  }
+
   final photos = <String>[];
 
   @override

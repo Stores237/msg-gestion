@@ -1,6 +1,6 @@
 {% extends "backoffice/shell.html" %}{% load bo %}
 {% block title %}Équipe du back-office{% endblock %}
-{% block crumb %}<div class="crumb">Plateforme MSG · {{ rows|length }} compte{{ rows|length|pluralize }}</div>{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme Huddle · {{ rows|length }} compte{{ rows|length|pluralize }}</div>{% endblock %}
 {% block heading %}Équipe du back-office{% endblock %}
 {% block acts %}{% if can_manage %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-staff').showModal()">{% icon 'user-plus' %}Ajouter un membre de l’équipe</button>{% endif %}{% endblock %}
 {% block body %}

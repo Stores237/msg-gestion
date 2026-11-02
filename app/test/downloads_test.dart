@@ -132,9 +132,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('gallery-download')));
     await tester.pumpAndSettle();
-    expect(f.files.platform.saved, ['MSG-a2.jpg']);
+    expect(f.files.platform.saved, ['Huddle-a2.jpg']);
     expect(
-      find.text('Photo enregistrée dans la galerie (Images › MSG)'),
+      find.text('Photo enregistrée dans la galerie (Images › Huddle)'),
       findsOneWidget,
     );
     expect(f.files.store.downloads.single.mime, 'image/jpeg');
@@ -179,7 +179,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(f.files.platform.opened, hasLength(1));
     expect(f.files.platform.saved, ['Programme.pdf']);
-    expect(find.text('Enregistré dans Téléchargements › MSG'), findsOneWidget);
+    expect(
+      find.text('Enregistré dans Téléchargements › Huddle'),
+      findsOneWidget,
+    );
 
     f.files.online = false;
     await tester.tap(find.byKey(const Key('att-file-7')));

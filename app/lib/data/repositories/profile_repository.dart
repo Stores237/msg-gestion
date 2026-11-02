@@ -123,5 +123,15 @@ abstract class ProfileRepository {
   });
   Future<void> removeMyPhoto();
 
+  /// The group's name and sigle (the group.profile right: the président).
+  Future<GroupInfo> updateGroup({String? name, String? shortName});
+
+  /// Its logo (JPEG/PNG, cropped to a square by the server), or none.
+  Future<GroupInfo> uploadGroupLogo({
+    required List<int> bytes,
+    required String filename,
+  });
+  Future<GroupInfo> removeGroupLogo();
+
   Future<PlatformInfo> platform();
 }

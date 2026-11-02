@@ -8,11 +8,12 @@ import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/errors.dart';
-import '../widgets/msg_logo.dart';
+import '../widgets/huddle_logo.dart';
 import 'lock_screen.dart';
 import 'login_phone_screen.dart';
 import 'sign_out.dart';
 import 'pin_screens.dart';
+import 'group_screens.dart';
 import 'shell_screen.dart';
 
 /// Restores the stored session and routes to the shell or to login.
@@ -66,6 +67,10 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     try {
       var me = await repos.profile.fetchMe();
+      // In several groups and none chosen yet: pick one, like Slack's
+      // workspace list (owner, 2026-11-02).
+      if (!mounted) return;
+      me = await chooseGroupIfNeeded(Navigator.of(context), me);
       if (me.pinMustChange && mounted) {
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const SetPinScreen(forced: true)),
@@ -118,11 +123,16 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const MsgLogo(size: 112),
-                    const SizedBox(height: 24),
+                    // Huddle only, like Slack before a workspace is chosen
+                    // (owner, 2026-11-02); the group shows once inside.
+                    const HuddleMark(size: 112),
+                    const SizedBox(height: 20),
                     Text(
-                      l.appTitle,
-                      style: Theme.of(context).textTheme.displaySmall,
+                      'huddle',
+                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: c.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -133,11 +143,6 @@ class _SplashScreenState extends State<SplashScreen> {
                         height: 1.5,
                         color: c.textSecondary,
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      l.motto.toUpperCase(),
-                      style: Theme.of(context).textTheme.labelSmall,
                     ),
                   ],
                 ),

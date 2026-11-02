@@ -28,6 +28,35 @@ class HttpProfileRepository implements ProfileRepository {
   Future<void> removeMyPhoto() async => _api.delete('/me/photo/');
 
   @override
+  Future<GroupInfo> updateGroup({String? name, String? shortName}) async =>
+      GroupInfo.fromJson(
+        await _api.patch(
+              '/group/',
+              body: {'name': ?name, 'short_name': ?shortName},
+            )
+            as Map<String, dynamic>,
+      );
+
+  @override
+  Future<GroupInfo> uploadGroupLogo({
+    required List<int> bytes,
+    required String filename,
+  }) async => GroupInfo.fromJson(
+    await _api.postFile(
+          '/group/logo/',
+          field: 'logo',
+          bytes: bytes,
+          filename: filename,
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<GroupInfo> removeGroupLogo() async => GroupInfo.fromJson(
+    await _api.delete('/group/logo/') as Map<String, dynamic>,
+  );
+
+  @override
   Future<PlatformInfo> platform() async => PlatformInfo.fromJson(
     await _api.get('/platform/') as Map<String, dynamic>,
   );

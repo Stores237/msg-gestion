@@ -24,7 +24,7 @@ class MainActivity : FlutterFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         // Downloads (lib/data/file_store.dart): a copy in the phone's
-        // Pictures/MSG or Download/MSG, and PDFs opened in the phone's viewer.
+        // Pictures/Huddle or Download/Huddle, and PDFs opened in the phone's viewer.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "msg/files")
             .setMethodCallHandler { call, result ->
                 val file = File(call.argument<String>("path")!!)
@@ -77,7 +77,7 @@ class MainActivity : FlutterFragmentActivity() {
             put(MediaStore.MediaColumns.MIME_TYPE, mime)
             put(
                 MediaStore.MediaColumns.RELATIVE_PATH,
-                (if (image) Environment.DIRECTORY_PICTURES else Environment.DIRECTORY_DOWNLOADS) + "/MSG",
+                (if (image) Environment.DIRECTORY_PICTURES else Environment.DIRECTORY_DOWNLOADS) + "/Huddle",
             )
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
@@ -107,7 +107,7 @@ class MainActivity : FlutterFragmentActivity() {
             Environment.getExternalStoragePublicDirectory(
                 if (image) Environment.DIRECTORY_PICTURES else Environment.DIRECTORY_DOWNLOADS,
             ),
-            "MSG",
+            "Huddle",
         )
         dir.mkdirs()
         val base = name.substringBeforeLast('.')

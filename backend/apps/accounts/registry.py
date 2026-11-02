@@ -24,6 +24,7 @@ MODULES = {
     "calendar": "Calendrier et planning",
     "announcements": "Annonces",
     "backoffice": "Back-office",
+    "group": "Groupe",
 }
 
 # resource key -> (module, label, applicable actions, sensitive?)
@@ -43,6 +44,10 @@ RESOURCES = {
     # always reads their own.
     "calendar.reports": ("calendar", "Rapports des chefs de groupe", [VIEW], False),
     "announcements.posts": ("announcements", "Annonces et convocations", [VIEW, CREATE, CHANGE, DELETE], False),
+    # The group's name, sigle and logo, as members see them in the app
+    # (owner, 2026-11-02: the président changes them; the super admin in the
+    # back-office).
+    "group.profile": ("group", "Nom et logo du groupe", [CHANGE], False),
     # The back-office, area by area, so each staff team gets only its part
     # (owner, 2026-10-26).
     "backoffice.users": ("backoffice", "Comptes et membres (PIN, suspension)", [VIEW, CREATE, CHANGE, DELETE, EXPORT], True),

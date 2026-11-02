@@ -2,12 +2,18 @@
 {% block title %}Paramètres{% endblock %}
 {% block heading %}Paramètres{% endblock %}
 {% block body %}
-<form method="post">{% csrf_token %}
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
 <div class="bo-cols half">
   <div style="display:flex;flex-direction:column;gap:24px">
     <section class="panel"><div class="panel-h"><h2>Groupe</h2></div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
-      <div style="display:flex;gap:16px;align-items:center"><div class="msg-logo" style="width:80px;height:80px;border-radius:24px;font-size:24px">MSG</div><div style="font-size:13px;color:var(--text-secondary);line-height:1.5">Logo actuel : le monogramme MSG.<br>Un logo dessiné le remplacera (PNG ou SVG, 512 px).</div></div>
+      <div style="display:flex;gap:16px;align-items:center">{% group_logo s.group 80 %}<div style="display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text-secondary);line-height:1.5">
+        <span>Logo du groupe, affiché dans l’application (comme l’icône d’un espace Slack). Sans logo : le sigle sur la couleur du groupe.</span>
+        <input type="file" name="logo" accept="image/png,image/jpeg" aria-label="Nouveau logo (PNG ou JPEG)">
+        <span>PNG ou JPEG, 5 Mo maximum ; recadré en carré.</span>
+        {% if s.group.logo %}<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="logo_remove"> Retirer le logo</label>{% endif %}
+      </div></div>
       <label class="fld"><span class="fld-l">Nom</span><span class="fld-box"><input name="name" value="{{ s.name }}"></span></label>
+      <label class="fld"><span class="fld-l">Sigle</span><span class="fld-box"><input name="short_name" value="{{ s.group.short_name }}" maxlength="8" placeholder="{{ s.group.initials }}"></span><span style="font-size:12px;color:var(--text-secondary)">Affiché à la place du logo quand il n’y en a pas (8 caractères au plus).</span></label>
       <label class="fld"><span class="fld-l">Lieu ou rattachement</span><span class="fld-box"><input name="parish" value="{{ s.parish }}"></span></label>
       <label class="fld"><span class="fld-l">Devise</span><span class="fld-box"><input name="motto" value="{{ s.motto }}"></span></label>
       <label class="fld"><span class="fld-l">Message de bienvenue</span><span class="fld-box" style="align-items:flex-start;padding-top:10px;padding-bottom:10px"><textarea name="welcome_message" rows="4" maxlength="600" style="width:100%;border:none;background:transparent;font:inherit;color:inherit;resize:vertical" placeholder="Affiché aux membres du groupe à l’ouverture de l’application.">{{ s.welcome_message }}</textarea></span><span style="font-size:12px;color:var(--text-secondary)">Affiché aux membres de ce groupe à l’ouverture de l’application.</span></label>

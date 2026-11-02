@@ -1,6 +1,6 @@
 {% extends "backoffice/shell.html" %}{% load bo %}
 {% block title %}Groupes{% endblock %}
-{% block crumb %}<div class="crumb">Plateforme MSG · {{ rows|length }} groupe{{ rows|length|pluralize }}{% if deleted %} · {{ deleted|length }} supprimé{{ deleted|length|pluralize }}{% endif %}</div>{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme Huddle · {{ rows|length }} groupe{{ rows|length|pluralize }}{% if deleted %} · {{ deleted|length }} supprimé{{ deleted|length|pluralize }}{% endif %}</div>{% endblock %}
 {% block heading %}Groupes{% endblock %}
 {% block acts %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-group').showModal()">{% icon 'plus' %}Nouveau groupe</button>{% endblock %}
 {% block body %}

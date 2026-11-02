@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 170" width="640" height="170">
+  <title>Huddle</title>
+  <g><path d="M45.5 27.5V147.5" fill="none" stroke="#1B1D24" stroke-width="35" stroke-linecap="round"/><path d="M45.5 102A39.5 39.5 0 0 1 124.5 102V147.5" fill="none" stroke="#0E9F8F" stroke-width="35" stroke-linecap="round"/><circle cx="123.5" cy="29.5" r="20.5" fill="#E8553D"/></g>
+  <text x="180" y="126" font-family="Plus Jakarta Sans, Manrope, Inter, sans-serif" font-weight="800" font-size="104" letter-spacing="-2" fill="#1B1D24">huddle</text>
+</svg>

@@ -1260,3 +1260,36 @@ can change the code and set it on or off".
 - How to verify: back-office → Paramètres → tick "Exiger le code finances pour tous" → in the
   app, open Finances (no restart): the code is asked. Untick it; Finances → ⚙ → turn "Demander
   mon code finances" on: asked again next time; turning it off asks the code.
+
+## 57. Huddle: the app's name and logo; each group's own, like Slack
+
+Owner, 2026-11-02: "the main app is Huddle with this logo; groups choose their name and logo,
+visible in the app, like Slack; keep the in-app logo but the main app logo and name are Huddle".
+Chosen with the owner: the président (and the super admin in the back-office) changes the group's
+name and logo; several groups → a pick screen after signing in; opening and sign-in screens show
+Huddle only; signature "Huddle · Propulsé par STORES".
+
+- **Huddle everywhere outside a group**: phone icon (redrawn as a vector from the owner's image:
+  `design/brand/` — mark, icon, Android adaptive foreground, wordmark), app name "Huddle"
+  (Android label, iOS display name), the Android opening screen, the app's opening, sign-in and
+  lock screens, the signature, the download page, and the back-office (sidebar, sign-in page,
+  page titles, "Plateforme Huddle"). On a dark background the mark's bar turns white. Downloads now
+  go to Pictures/Huddle and Download/Huddle. Internal names stay (package `cm.msg.gestion`, so it
+  installs over the current app; repo; server addresses).
+- **Each group's identity, like a Slack workspace**: a logo (JPEG/PNG, cropped to a 512 px square
+  on the server) and a sigle; without a logo, the sigle (or the name's initials) on the group's
+  colour, so the Garde Suisse shows "MSG" until a logo is set. Shown on top of Accueil (logo and
+  name), in the group list and on the pick screen.
+- **Who changes it**: the président in the app (Accueil → the group's name → "Nom et logo du
+  groupe": logo from the gallery or camera, remove, name, sigle; new right `group.profile` change,
+  migration accounts 0024, editable per role in the back-office), the super admin in back-office →
+  Paramètres (logo upload or remove, Sigle). Every change is journaled.
+- **Signing in**: someone in several groups and none chosen yet sees "Choisissez votre groupe"
+  (Huddle mark, each group's logo and name); one group goes straight in; the choice is remembered.
+  Accueil → the group's name switches group.
+- Server: `core.Group.short_name`, `logo` (migration core 0015), `initials`; /me `group` and
+  `groups` carry name, initials, sigle, logo and colours; `GET/PATCH /api/group/`,
+  `POST/DELETE /api/group/logo/`.
+- How to verify: install over the current app → the icon and name are Huddle; open → Huddle, then
+  Accueil shows the group's sigle and name. As the président: tap the group's name → Nom et logo
+  du groupe → pick a logo → it shows on Accueil. Back-office → Paramètres → upload a logo.

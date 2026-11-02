@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/errors.dart';
 import '../widgets/pin_pad.dart';
 import 'pin_screens.dart';
+import 'group_screens.dart';
 import 'shell_screen.dart';
 
 /// Login step 2 (design: "Connexion · code PIN"). Submits on the 4th digit.
@@ -68,7 +69,9 @@ class _LoginPinScreenState extends State<LoginPinScreen> {
           ),
         );
       }
-      final me = await repos.profile.fetchMe();
+      var me = await repos.profile.fetchMe();
+      if (!mounted) return;
+      me = await chooseGroupIfNeeded(Navigator.of(context), me);
       await OfflineState.instance.belongsTo(me.id);
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(

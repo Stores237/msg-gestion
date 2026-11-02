@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In fr, this message translates to:
-  /// **'MSG'**
+  /// **'Huddle'**
   String get appTitle;
 
   /// No description provided for @motto.
@@ -2645,13 +2645,13 @@ abstract class AppLocalizations {
   /// No description provided for @accessSentBody.
   ///
   /// In fr, this message translates to:
-  /// **'Le partenaire MSG crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.'**
+  /// **'Le partenaire Huddle crée l’accès. Vous serez prévenu ici, avec le code provisoire à remettre au membre.'**
   String get accessSentBody;
 
   /// No description provided for @accessIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Le partenaire MSG ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.'**
+  /// **'Le partenaire Huddle ouvre le compte. Vous recevrez ensuite le code provisoire à remettre au membre.'**
   String get accessIntro;
 
   /// No description provided for @accessPending.
@@ -2717,7 +2717,7 @@ abstract class AppLocalizations {
   /// No description provided for @chooseGroup.
   ///
   /// In fr, this message translates to:
-  /// **'Choisir un groupe'**
+  /// **'Choisissez votre groupe'**
   String get chooseGroup;
 
   /// No description provided for @errorNoGroup.
@@ -2843,7 +2843,7 @@ abstract class AppLocalizations {
   /// No description provided for @unlockSubtitle.
   ///
   /// In fr, this message translates to:
-  /// **'Pour ouvrir MSG.'**
+  /// **'Pour ouvrir Huddle.'**
   String get unlockSubtitle;
 
   /// No description provided for @unlockWrong.
@@ -2873,7 +2873,7 @@ abstract class AppLocalizations {
   /// No description provided for @biometricReason.
   ///
   /// In fr, this message translates to:
-  /// **'Déverrouiller MSG'**
+  /// **'Déverrouiller Huddle'**
   String get biometricReason;
 
   /// No description provided for @biometricUnlock.
@@ -3929,13 +3929,13 @@ abstract class AppLocalizations {
   /// No description provided for @savedToDownloads.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistré dans Téléchargements › MSG'**
+  /// **'Enregistré dans Téléchargements › Huddle'**
   String get savedToDownloads;
 
   /// No description provided for @photoSavedToGallery.
   ///
   /// In fr, this message translates to:
-  /// **'Photo enregistrée dans la galerie (Images › MSG)'**
+  /// **'Photo enregistrée dans la galerie (Images › Huddle)'**
   String get photoSavedToGallery;
 
   /// No description provided for @keptInDownloads.
@@ -4969,6 +4969,90 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Code finances désactivé.'**
   String get financeCodeTurnedOff;
+
+  /// No description provided for @chooseGroupHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous faites partie de plusieurs groupes. Vous pourrez changer à tout moment depuis l’Accueil.'**
+  String get chooseGroupHint;
+
+  /// No description provided for @groupLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe'**
+  String get groupLabel;
+
+  /// No description provided for @groupProfileTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom et logo du groupe'**
+  String get groupProfileTitle;
+
+  /// No description provided for @groupProfileHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que les membres voient dans Huddle'**
+  String get groupProfileHint;
+
+  /// No description provided for @groupLogoChange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer le logo'**
+  String get groupLogoChange;
+
+  /// No description provided for @groupLogoRemove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer le logo'**
+  String get groupLogoRemove;
+
+  /// No description provided for @groupLogoSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo du groupe enregistré.'**
+  String get groupLogoSaved;
+
+  /// No description provided for @groupLogoHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Image carrée de préférence (JPEG ou PNG, 5 Mo). Sans logo, le sigle s’affiche sur la couleur du groupe.'**
+  String get groupLogoHint;
+
+  /// No description provided for @groupName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom du groupe'**
+  String get groupName;
+
+  /// No description provided for @groupShortName.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sigle'**
+  String get groupShortName;
+
+  /// No description provided for @groupShortNameHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'8 caractères au plus, ex. MSG'**
+  String get groupShortNameHint;
+
+  /// No description provided for @groupNameRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nom du groupe est obligatoire.'**
+  String get groupNameRequired;
+
+  /// No description provided for @groupProfileSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe enregistré.'**
+  String get groupProfileSaved;
+
+  /// No description provided for @huddleBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Huddle ·'**
+  String get huddleBy;
 }
 
 class _AppLocalizationsDelegate

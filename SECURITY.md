@@ -125,6 +125,9 @@ Defined in `apps/accounts/registry.py`:
   bulk `POST /api/finances/entries/validate/`; refusals audited). A line is deleted only by who
   entered it. Before 2026-10-30 the roles were split (commissaire enters, trésorier validates).
 - One person can't be both trésorier and commissaire aux comptes.
+- A group's name, sigle and logo change only with `group.profile` change (the président by
+  default) or in the back-office; logos are checked on their bytes (JPEG/PNG, 5 MB), re-encoded as a
+  512 px PNG, and every change is journaled.
 - Expense requests (owner, 2026-10-30, `apps/finances/expenses.py`): nobody decides any step of
   their own request; the commissaire who approves can't have asked or decided the first step; the
   trésorier who pays can't have asked or approved; payment is at most the approved amount and needs

@@ -748,6 +748,21 @@ def settings_view(request):
             if getattr(st, f) != value:
                 changed[f] = str(value)
                 setattr(st, f, value)
+        short = "".join(request.POST.get("short_name", st.group.short_name).split())[:8].upper()
+        if short != st.group.short_name:
+            changed["sigle"] = short
+            st.group.short_name = short
+            st.group.save(update_fields=["short_name"])
+        if request.FILES.get("logo"):
+            from apps.core.api import save_logo
+
+            problem = save_logo(st.group, request.FILES["logo"], by=request.user, request=request)
+            if problem:
+                messages.error(request, problem[0])
+                return redirect("backoffice:settings")
+        elif request.POST.get("logo_remove") and st.group.logo:
+            st.group.logo.delete(save=True)
+            audit.record("Logo du groupe retiré", actor=request.user, obj=st.group, request=request)
         if "finance_code_form" in request.POST:
             on = bool(request.POST.get("finance_code_required"))
             if on != st.finance_code_required:

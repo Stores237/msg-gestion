@@ -98,3 +98,37 @@ def status(user):
 def get(mapping, key):
     """{{ counts|get:value }}: a dict lookup in a template."""
     return mapping.get(key, "") if hasattr(mapping, "get") else ""
+
+
+HUDDLE_MARK = (
+    '<svg class="huddle-mark" viewBox="0 0 170 170" width="{size}" height="{size}" role="img" aria-label="Huddle">'
+    '<path d="M45.5 27.5V147.5" fill="none" stroke="#1B1D24" stroke-width="35" stroke-linecap="round"/>'
+    '<path d="M45.5 102A39.5 39.5 0 0 1 124.5 102V147.5" fill="none" stroke="#0E9F8F" stroke-width="35" '
+    'stroke-linecap="round"/><circle cx="123.5" cy="29.5" r="20.5" fill="#E8553D"/></svg>'
+)
+
+
+@register.simple_tag
+def huddle_mark(size=36):
+    """The Huddle mark (owner, 2026-11-02; design/brand/huddle-mark.svg)."""
+    return mark_safe(HUDDLE_MARK.format(size=int(size)))
+
+
+@register.simple_tag
+def group_logo(group, size=40):
+    """A group's logo, or its initials on its colour (like a Slack workspace)."""
+    from apps.core.identity import logo_url
+    from apps.core.models import Settings
+
+    if group is None:
+        return ""
+    radius = max(8, int(size) // 4)
+    url = logo_url(group)
+    if url:
+        return format_html('<img class="group-logo" src="{}" width="{}" height="{}" alt="{}" style="border-radius:{}px;object-fit:cover">',
+                           url, size, size, group.name, radius)
+    color = Settings.get(group).color
+    return format_html('<span class="group-logo" role="img" aria-label="{}" style="width:{}px;height:{}px;border-radius:{}px;'
+                       'background:{};color:#fff;font-weight:800;font-size:{}px;display:inline-flex;align-items:center;'
+                       'justify-content:center;flex-shrink:0;letter-spacing:.02em">{}</span>',
+                       group.name, size, size, radius, color, max(10, int(size) * 3 // 10), group.initials)

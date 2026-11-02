@@ -43,7 +43,7 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   SharedPreferences.setMockInitialValues({});
   DataSettings.debugSetInstance(DataSettings());
   PackageInfo.setMockInitialValues(
-    appName: 'MSG',
+    appName: 'Huddle',
     packageName: 'cm.msg.gestion',
     version: '0.1.0',
     buildNumber: '18',

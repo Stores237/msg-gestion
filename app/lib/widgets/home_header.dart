@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_localizations.dart';
+import '../models/me.dart';
 import '../theme/tokens.dart';
 import 'appearance_sheet.dart';
+import 'group_logo.dart';
 import 'language_switch.dart';
 import 'notification_bell.dart';
 import 'ui.dart';
@@ -18,9 +20,16 @@ class HomeHeader extends StatelessWidget {
     required this.role,
     required this.onOpenAccount,
     this.photo,
+    this.group,
+    this.onGroupTap,
   });
 
   final String? photo;
+
+  /// The group the app works in, its logo and name on top, like a Slack
+  /// workspace (owner, 2026-11-02); tapped: switch group, or edit it.
+  final GroupInfo? group;
+  final VoidCallback? onGroupTap;
 
   final String firstName;
   final String fullName;
@@ -76,6 +85,10 @@ class HomeHeader extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (group != null) ...[
+                  _GroupLine(group: group!, onTap: onGroupTap),
+                  const SizedBox(height: 12),
+                ],
                 Row(
                   children: [
                     Semantics(
@@ -241,4 +254,64 @@ class _Diamonds extends CustomPainter {
 
   @override
   bool shouldRepaint(_Diamonds old) => false;
+}
+
+/// The group's logo and name at the top of Accueil.
+class _GroupLine extends StatelessWidget {
+  const _GroupLine({required this.group, this.onTap});
+  final GroupInfo group;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final line = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: GroupLogo(group: group, size: 30),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              group.name,
+              key: const Key('home-group-name'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          if (onTap != null) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.expand_more,
+              color: Colors.white70,
+              semanticLabel: l.switchGroup,
+            ),
+          ],
+        ],
+      ),
+    );
+    return KeyedSubtree(
+      key: const Key('home-group'),
+      child: onTap == null
+          ? line
+          : InkWell(
+              key: const Key('switch-group'),
+              borderRadius: BorderRadius.circular(10),
+              onTap: onTap,
+              child: line,
+            ),
+    );
+  }
 }

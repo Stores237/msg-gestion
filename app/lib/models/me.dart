@@ -35,7 +35,16 @@ class GroupInfo {
     this.color,
     this.color2,
     this.financeCodeRequired = false,
-  });
+    this.logo,
+    this.shortName = '',
+    String? initials,
+  }) : initials = initials ?? '';
+
+  /// Like a Slack workspace (owner, 2026-11-02): the group's logo (signed
+  /// URL), its sigle, and what shows without a logo (sigle or initials).
+  final String? logo;
+  final String shortName;
+  final String initials;
 
   /// Opening Finances asks the finance code (owner, 2026-10-30; set per
   /// group in the back-office).
@@ -64,6 +73,9 @@ class GroupInfo {
     color: j['color'] as String?,
     color2: j['color2'] as String?,
     financeCodeRequired: j['finance_code_required'] == true,
+    logo: j['logo'] as String?,
+    shortName: (j['short_name'] as String?) ?? '',
+    initials: j['initials'] as String?,
   );
 }
 

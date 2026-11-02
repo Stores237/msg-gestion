@@ -69,17 +69,20 @@ class MeSerializer(serializers.Serializer):
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_group(self, user) -> dict:
         """The group this request works in, with its welcome message."""
+        from apps.core.identity import group_identity
         from apps.core.models import Settings
 
         st = Settings.get()
-        return {"id": st.group_id, "name": st.group.name, "place": st.parish, "motto": st.motto,
+        return {**group_identity(st.group, self.context.get("request")), "place": st.parish, "motto": st.motto,
                 "welcome_message": st.welcome_message, "color": st.color, "color2": st.color2,
                 # Finances asks the finance code first (owner, 2026-10-30).
                 "finance_code_required": st.finance_code_required}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:
-        return [{"id": g.pk, "name": g.name} for g in user.groups_joined()]
+        from apps.core.identity import group_identity
+
+        return [group_identity(g, self.context.get("request")) for g in user.groups_joined()]
 
     @extend_schema_field(AssignmentSerializer(many=True))
     def get_roles(self, user):

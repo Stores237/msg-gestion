@@ -59,6 +59,15 @@ class PoweredBy extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Huddle, developed and powered by STORES (owner, 2026-11-02).
+            Text(
+              l.huddleBy,
+              style: small.copyWith(
+                fontWeight: FontWeight.w800,
+                color: c.textPrimary,
+              ),
+            ),
+            const SizedBox(width: 4),
             Text(l.poweredBy, style: small),
             const SizedBox(width: 6),
             const StoresLogo(size: 18),

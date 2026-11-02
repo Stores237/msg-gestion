@@ -7,7 +7,7 @@ import '../data/group_controller.dart';
 import '../data/repository_locator.dart';
 import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
-import '../widgets/msg_logo.dart';
+import '../widgets/huddle_logo.dart';
 import '../widgets/pin_pad.dart';
 import 'login_phone_screen.dart';
 
@@ -131,7 +131,7 @@ class _LockScreenState extends State<LockScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 40, 16, 24),
             children: [
-              const Center(child: MsgLogo(size: 56)),
+              const Center(child: HuddleMark(size: 56)),
               const SizedBox(height: 20),
               Text(
                 l.unlockTitle,

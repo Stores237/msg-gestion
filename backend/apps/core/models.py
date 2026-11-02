@@ -6,12 +6,17 @@ from .groups import default_group_id, scoped
 
 
 class Group(models.Model):
-    """A group using the MSG platform (e.g. the Mouvement Garde Suisse).
+    """A group using the Huddle platform (e.g. the Mouvement Garde Suisse).
     Its people are linked through Membership; its roles, money, calendar,
-    planning and announcements all carry it."""
+    planning and announcements all carry it. Like a Slack workspace, it shows
+    its own name and logo inside the app (owner, 2026-11-02)."""
 
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True)
+    # Shown where the logo would be when there is none ("MSG"); else the
+    # initials of the name.
+    short_name = models.CharField("sigle", max_length=8, blank=True)
+    logo = models.ImageField(upload_to="groups/", null=True, blank=True)
     # False = deleted by two super admins: hidden from the app and the
     # back-office's group list, its data kept; a super admin can restore it.
     is_active = models.BooleanField(default=True)
@@ -25,6 +30,17 @@ class Group(models.Model):
 
     def __str__(self):
         return self.name
+
+    SMALL_WORDS = {"de", "du", "des", "la", "le", "les", "et", "d", "l", "of", "the", "and"}
+
+    @property
+    def initials(self):
+        """The sigle, else the first letters of the name's main words (3 at
+        most): "Chorale Saint Joseph" → "CSJ"."""
+        if self.short_name:
+            return self.short_name.upper()
+        words = [w for w in self.name.replace("’", " ").replace("'", " ").split() if w.lower() not in self.SMALL_WORDS]
+        return "".join(w[0] for w in words[:3]).upper() or "?"
 
 
 class GroupDeletion(models.Model):

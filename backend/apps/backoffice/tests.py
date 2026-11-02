@@ -210,3 +210,23 @@ def test_expense_requests_pages(logged_in):
     detail = logged_in.get(f"/bo/finances/depenses/{r.pk}/").content.decode()
     assert "Demande envoyée" in detail and "Responsable du domaine" in detail
     assert "Demandes de dépense" in logged_in.get("/bo/finances/").content.decode()
+
+
+def test_back_office_is_huddle_and_sets_the_group_logo(logged_in):
+    """Owner, 2026-11-02: the platform is Huddle; each group has its logo."""
+    import io
+
+    from django.core.files.uploadedfile import SimpleUploadedFile
+    from PIL import Image
+
+    from apps.core.models import Settings
+
+    page = logged_in.get("/bo/parametres/").content.decode()
+    assert "Huddle" in page and "huddle-mark" in page and "Sigle" in page
+    buf = io.BytesIO()
+    Image.new("RGB", (300, 300), (200, 30, 30)).save(buf, "PNG")
+    logged_in.post("/bo/parametres/", {"short_name": "msg", "logo": SimpleUploadedFile("l.png", buf.getvalue(), content_type="image/png")})
+    g = Settings.get().group
+    g.refresh_from_db()
+    assert g.short_name == "MSG" and g.logo
+    assert 'class="group-logo"' in logged_in.get("/bo/").content.decode() or 'group-logo' in logged_in.get("/bo/parametres/").content.decode()

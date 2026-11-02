@@ -21,4 +21,4 @@ def test_server_and_app_share_one_version():
 @pytest.mark.django_db
 def test_back_office_shows_powered_by_stores_and_the_version():
     page = Client().get("/bo/connexion/").content.decode()
-    assert "STORES" in page and f"MSG {VERSION}" in page
+    assert "STORES" in page and f"Huddle {VERSION}" in page

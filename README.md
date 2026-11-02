@@ -1,6 +1,6 @@
-# MSG Gestion
+# Huddle (formerly MSG Gestion)
 
-**MSG** is a group management platform: members, roles, cash book, calendar and duty
+**Huddle** is a group management platform: members, roles, cash book, calendar and duty
 planning, reports and announcements, for any number of groups on one platform. Its first group
 is the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de Yapoma (Douala); each group's
 own facts (name, place, amounts, activity types, dress codes, welcome message, colour) live in
@@ -8,7 +8,7 @@ its settings, not in the code.
 
 Developed and powered by **STORES** ("Propulsé par [S] STORES").
 
-**Version 0.1.0 (build 34)** · staging: <https://msg-staging.onrender.com>
+**Version 0.1.0 (build 35)** · staging: <https://msg-staging.onrender.com>
 (`/healthz/` reports the deployed version and commit).
 
 ## Two surfaces

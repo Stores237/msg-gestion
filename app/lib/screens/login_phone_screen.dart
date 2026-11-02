@@ -8,7 +8,7 @@ import '../l10n/app_localizations.dart';
 import '../theme/tokens.dart';
 import '../widgets/errors.dart';
 import '../widgets/language_switch.dart';
-import '../widgets/msg_logo.dart';
+import '../widgets/huddle_logo.dart';
 import '../widgets/notice.dart';
 import '../widgets/powered_by.dart';
 import 'help_screens.dart';
@@ -111,7 +111,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
           padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
           children: [
             const Row(
-              children: [MsgLogo(size: 64), Spacer(), LanguageSwitch()],
+              children: [HuddleWordmark(size: 44), Spacer(), LanguageSwitch()],
             ),
             const SizedBox(height: 24),
             Text(

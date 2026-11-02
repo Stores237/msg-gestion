@@ -91,14 +91,14 @@ Future<void> showDownloaded(
 }
 
 /// "Télécharger" on a photo: kept in Téléchargements and copied to the
-/// phone's Pictures/MSG (its gallery).
+/// phone's Pictures/Huddle (its gallery).
 Future<void> downloadPhoto(BuildContext context, String url) async {
   final l = AppLocalizations.of(context);
   try {
     final name = Uri.parse(url).pathSegments.lastOrNull ?? 'photo.jpg';
     final file = await FileStore.instance.keep(
       source: 'photo-${FileStore.keyFor(url)}',
-      name: 'MSG-$name',
+      name: 'Huddle-$name',
       mime: mimeFor(name),
       url: url,
     );

@@ -1,4 +1,11 @@
-# MSG Gestion
+# Huddle (formerly MSG Gestion)
+
+**The product is Huddle** (owner, 2026-11-02), set up like Slack: the app, its icon, opening and
+sign-in screens, the back-office and the download page are Huddle (mark: `HuddleMark` /
+`huddle_mark`, source `design/brand/`). Each group is like a Slack workspace: its own name, sigle
+and logo (`core.Group.short_name` / `logo`, `GroupLogo` / `group_logo`, initials on the group's
+colour when there is no logo), shown once inside it; someone in several groups picks one after
+signing in. Internal names stay "msg" (package `cm.msg.gestion`, repo, server addresses).
 
 A group management platform: members, cash book, calendar and duty planning, announcements.
 Its first group is the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de Yapoma
@@ -58,7 +65,7 @@ building and publishing an APK).
 
 ## Versioning and signature
 
-MSG is developed and powered by STORES ("Propulsé par STORES", mark: "S" — `StoresLogo` /
+Huddle is developed and powered by STORES ("Propulsé par STORES", mark: "S" — `StoresLogo` /
 `.stores-mark`, in the text colour, never a group's). One version for app and server:
 `app/pubspec.yaml` `X.Y.Z+BUILD` and `backend/config/version.py` `X.Y.Z`, bumped together
 (`test_version` checks). Every APK gets the next build number. See `RELEASING.md`.

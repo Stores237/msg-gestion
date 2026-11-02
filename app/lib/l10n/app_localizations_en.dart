@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'MSG';
+  String get appTitle => 'Huddle';
 
   @override
   String get motto => 'Service · Order · Welcome';
@@ -1535,11 +1535,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accessSentBody =>
-      'The MSG partner will create the access. You’ll be told here, with the temporary PIN to hand over.';
+      'The Huddle partner will create the access. You’ll be told here, with the temporary PIN to hand over.';
 
   @override
   String get accessIntro =>
-      'The MSG partner opens the account. You’ll then receive the temporary PIN to hand over to the member.';
+      'The Huddle partner opens the account. You’ll then receive the temporary PIN to hand over to the member.';
 
   @override
   String get accessPending => 'Pending';
@@ -1576,7 +1576,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get switchGroup => 'Switch group';
 
   @override
-  String get chooseGroup => 'Choose a group';
+  String get chooseGroup => 'Choose your group';
 
   @override
   String get errorNoGroup =>
@@ -1647,7 +1647,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlockTitle => 'Enter your PIN';
 
   @override
-  String get unlockSubtitle => 'To open MSG.';
+  String get unlockSubtitle => 'To open Huddle.';
 
   @override
   String unlockWrong(int n) {
@@ -1666,7 +1666,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unlockOtherAccount => 'Sign in another way';
 
   @override
-  String get biometricReason => 'Unlock MSG';
+  String get biometricReason => 'Unlock Huddle';
 
   @override
   String get biometricUnlock => 'Unlock with fingerprint or face';
@@ -2291,11 +2291,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteFile => 'Delete';
 
   @override
-  String get savedToDownloads => 'Saved in Downloads › MSG';
+  String get savedToDownloads => 'Saved in Downloads › Huddle';
 
   @override
   String get photoSavedToGallery =>
-      'Photo saved to the gallery (Pictures › MSG)';
+      'Photo saved to the gallery (Pictures › Huddle)';
 
   @override
   String get keptInDownloads => 'Kept in My account › Downloads';
@@ -2962,4 +2962,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get financeCodeTurnedOff => 'Finance code turned off.';
+
+  @override
+  String get chooseGroupHint =>
+      'You belong to several groups. You can switch any time from Home.';
+
+  @override
+  String get groupLabel => 'Group';
+
+  @override
+  String get groupProfileTitle => 'Group name and logo';
+
+  @override
+  String get groupProfileHint => 'What members see in Huddle';
+
+  @override
+  String get groupLogoChange => 'Change the logo';
+
+  @override
+  String get groupLogoRemove => 'Remove the logo';
+
+  @override
+  String get groupLogoSaved => 'Group logo saved.';
+
+  @override
+  String get groupLogoHint =>
+      'A square image is best (JPEG or PNG, 5 MB). Without a logo, the short name shows on the group\'s colour.';
+
+  @override
+  String get groupName => 'Group name';
+
+  @override
+  String get groupShortName => 'Short name';
+
+  @override
+  String get groupShortNameHint => '8 characters at most, e.g. MSG';
+
+  @override
+  String get groupNameRequired => 'The group\'s name is required.';
+
+  @override
+  String get groupProfileSaved => 'Group saved.';
+
+  @override
+  String get huddleBy => 'Huddle ·';
 }
