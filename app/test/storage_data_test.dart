@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/data_settings.dart';
-import 'package:msg_gestion/data/offline.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/screens/account_screen.dart';
+import 'package:huddle/data/data_settings.dart';
+import 'package:huddle/data/offline.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/screens/account_screen.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

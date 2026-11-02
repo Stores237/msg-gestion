@@ -6,18 +6,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:msg_gestion/data/data_settings.dart';
-import 'package:msg_gestion/data/file_store.dart';
-import 'package:msg_gestion/data/auth_session.dart';
-import 'package:msg_gestion/data/group_controller.dart';
-import 'package:msg_gestion/data/theme_controller.dart';
-import 'package:msg_gestion/data/locale_controller.dart';
-import 'package:msg_gestion/data/offline.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
-import 'package:msg_gestion/data/token_storage.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/me.dart';
-import 'package:msg_gestion/screens/shell_screen.dart';
+import 'package:huddle/data/data_settings.dart';
+import 'package:huddle/data/file_store.dart';
+import 'package:huddle/data/auth_session.dart';
+import 'package:huddle/data/group_controller.dart';
+import 'package:huddle/data/theme_controller.dart';
+import 'package:huddle/data/locale_controller.dart';
+import 'package:huddle/data/offline.dart';
+import 'package:huddle/data/repository_locator.dart';
+import 'package:huddle/data/token_storage.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/me.dart';
+import 'package:huddle/screens/shell_screen.dart';
 
 import 'fakes.dart';
 
@@ -44,7 +44,7 @@ Future<Fakes> setUpApp(WidgetTester tester, {Me? me}) async {
   DataSettings.debugSetInstance(DataSettings());
   PackageInfo.setMockInitialValues(
     appName: 'Huddle',
-    packageName: 'cm.msg.gestion',
+    packageName: 'cm.stores.huddle',
     version: '0.1.0',
     buildNumber: '18',
     buildSignature: '',

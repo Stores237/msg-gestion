@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/models/planning.dart';
+import 'package:huddle/models/planning.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

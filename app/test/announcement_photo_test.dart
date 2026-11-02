@@ -3,12 +3,12 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:msg_gestion/data/data_settings.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/announcement.dart';
-import 'package:msg_gestion/screens/announcements/compose_screen.dart';
-import 'package:msg_gestion/widgets/photo_frame.dart';
-import 'package:msg_gestion/widgets/ui.dart';
+import 'package:huddle/data/data_settings.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/announcement.dart';
+import 'package:huddle/screens/announcements/compose_screen.dart';
+import 'package:huddle/widgets/photo_frame.dart';
+import 'package:huddle/widgets/ui.dart';
 
 import 'helpers.dart';
 

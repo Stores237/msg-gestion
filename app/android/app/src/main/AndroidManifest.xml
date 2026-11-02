@@ -2,7 +2,7 @@
     <!-- Release builds talk to the API; Flutter only adds this to debug/profile. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
-    <!-- Downloads copied to Pictures/MSG or Download/MSG: only Android 7–9
+    <!-- Downloads copied to Pictures/Huddle or Download/Huddle: only Android 7–9
          need a permission for that (10+ use MediaStore without one). -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/group_controller.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/screens/group_screens.dart';
-import 'package:msg_gestion/screens/splash_screen.dart';
-import 'package:msg_gestion/widgets/group_logo.dart';
-import 'package:msg_gestion/widgets/huddle_logo.dart';
+import 'package:huddle/data/group_controller.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/screens/group_screens.dart';
+import 'package:huddle/screens/splash_screen.dart';
+import 'package:huddle/widgets/group_logo.dart';
+import 'package:huddle/widgets/huddle_logo.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

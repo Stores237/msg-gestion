@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/announcement.dart';
-import 'package:msg_gestion/screens/announcements/announcement_detail_screen.dart';
-import 'package:msg_gestion/screens/notifications_screen.dart';
-import 'package:msg_gestion/widgets/photo_frame.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/announcement.dart';
+import 'package:huddle/screens/announcements/announcement_detail_screen.dart';
+import 'package:huddle/screens/notifications_screen.dart';
+import 'package:huddle/widgets/photo_frame.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

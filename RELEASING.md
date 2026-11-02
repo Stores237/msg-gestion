@@ -49,7 +49,7 @@ One version for the whole platform, `MAJOR.MINOR.PATCH`, plus a build number for
    Production: the production API URL instead (`RENDER_PRODUCTION.md`). The release key is
    `app/android/key.properties` + `app/android/keystore/` (git-ignored; back them up).
 6. **Publish** for testers: copy `build/app/outputs/flutter-apk/app-release.apk` to
-   `~/msg-beta/msg-X.Y.Z-buildN.apk`, update `~/msg-beta/index.html` (version and file name),
+   `~/msg-beta/huddle-X.Y.Z-buildN.apk`, update `~/msg-beta/index.html` (version and file name),
    serve and tunnel it (`python3 -m http.server 8790` + `cloudflared tunnel --url
    http://127.0.0.1:8790`), and check the download's SHA-256 matches the file three times.
 7. **Check** on a phone: login screen and Mon compte show `Version X.Y.Z (N)`.

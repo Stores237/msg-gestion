@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/group_controller.dart';
-import 'package:msg_gestion/data/repositories/profile_repository.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
+import 'package:huddle/data/group_controller.dart';
+import 'package:huddle/data/repositories/profile_repository.dart';
+import 'package:huddle/data/repository_locator.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/models/me.dart';
-import 'package:msg_gestion/screens/finances/finance_gate.dart';
-import 'package:msg_gestion/widgets/pin_pad.dart';
+import 'package:huddle/models/me.dart';
+import 'package:huddle/screens/finances/finance_gate.dart';
+import 'package:huddle/widgets/pin_pad.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

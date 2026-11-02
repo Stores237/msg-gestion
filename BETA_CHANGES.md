@@ -1274,8 +1274,8 @@ Huddle only; signature "Huddle · Propulsé par STORES".
   (Android label, iOS display name), the Android opening screen, the app's opening, sign-in and
   lock screens, the signature, the download page, and the back-office (sidebar, sign-in page,
   page titles, "Plateforme Huddle"). On a dark background the mark's bar turns white. Downloads now
-  go to Pictures/Huddle and Download/Huddle. Internal names stay (package `cm.msg.gestion`, so it
-  installs over the current app; repo; server addresses).
+  go to Pictures/Huddle and Download/Huddle. Internal names stayed in build 35; build 36 renamed the app's ID
+  (§58).
 - **Each group's identity, like a Slack workspace**: a logo (JPEG/PNG, cropped to a 512 px square
   on the server) and a sigle; without a logo, the sigle (or the name's initials) on the group's
   colour, so the Garde Suisse shows "MSG" until a logo is set. Shown on top of Accueil (logo and
@@ -1293,3 +1293,21 @@ Huddle only; signature "Huddle · Propulsé par STORES".
 - How to verify: install over the current app → the icon and name are Huddle; open → Huddle, then
   Accueil shows the group's sigle and name. As the président: tap the group's name → Nom et logo
   du groupe → pick a logo → it shows on Accueil. Back-office → Paramètres → upload a logo.
+
+## 58. Huddle's own app ID (build 36)
+
+The owner saw the MSG icon and name when sharing the app with Xender (2026-11-02) and asked for
+the project's name to change too. The build 35 file was already "Huddle" with the Huddle icon
+(`aapt2 dump badging`); Xender showed the older copy installed on the phone, and the app's ID
+was still `cm.msgyapoma.msg_gestion`.
+
+- Android application ID and namespace `cm.stores.huddle` (Kotlin package moved), iOS bundle ID
+  `cm.stores.huddle`, Flutter project `huddle` (imports `package:huddle/…`).
+- **Android sees a new app**: build 36 installs beside the old MSG app instead of over it.
+  Each tester installs it, signs in again (phone number + PIN), and uninstalls the old "MSG"
+  or "Huddle" app with the old ID. Nothing is lost: the data is on the server; only this phone's
+  downloads and offline copy start empty. Same release key.
+- Server addresses (msg-staging…), the repo and on-device storage keys keep their names.
+- How to verify: `aapt2 dump badging huddle-0.1.0-build36.apk` → `package: name='cm.stores.huddle'`,
+  label `Huddle`. On a phone: the app's details (long press → App info) show Huddle; share it
+  with Xender → Huddle icon and name.

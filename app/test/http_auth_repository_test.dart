@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:msg_gestion/data/api_client.dart';
-import 'package:msg_gestion/data/auth_session.dart';
-import 'package:msg_gestion/data/repositories/auth_repository.dart';
-import 'package:msg_gestion/data/repositories/http/http_auth_repository.dart';
-import 'package:msg_gestion/data/token_storage.dart';
-import 'package:msg_gestion/models/me.dart';
+import 'package:huddle/data/api_client.dart';
+import 'package:huddle/data/auth_session.dart';
+import 'package:huddle/data/repositories/auth_repository.dart';
+import 'package:huddle/data/repositories/http/http_auth_repository.dart';
+import 'package:huddle/data/token_storage.dart';
+import 'package:huddle/models/me.dart';
 
 HttpAuthRepository repoReturning(
   int status,

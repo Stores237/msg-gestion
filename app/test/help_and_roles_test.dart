@@ -2,9 +2,9 @@
 // announcements and calendar events; a clear message when storage fails.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/api_client.dart';
-import 'package:msg_gestion/data/repositories/profile_repository.dart';
-import 'package:msg_gestion/widgets/errors.dart';
+import 'package:huddle/data/api_client.dart';
+import 'package:huddle/data/repositories/profile_repository.dart';
+import 'package:huddle/widgets/errors.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

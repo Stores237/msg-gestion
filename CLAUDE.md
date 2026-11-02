@@ -5,7 +5,8 @@ sign-in screens, the back-office and the download page are Huddle (mark: `Huddle
 `huddle_mark`, source `design/brand/`). Each group is like a Slack workspace: its own name, sigle
 and logo (`core.Group.short_name` / `logo`, `GroupLogo` / `group_logo`, initials on the group's
 colour when there is no logo), shown once inside it; someone in several groups picks one after
-signing in. Internal names stay "msg" (package `cm.msg.gestion`, repo, server addresses).
+signing in. App ID `cm.stores.huddle`, Flutter project `huddle` (build 36); the repo, server
+addresses and on-device storage keys keep "msg".
 
 A group management platform: members, cash book, calendar and duty planning, announcements.
 Its first group is the Mouvement Garde Suisse, Paroisse Notre-Dame de Lourdes de Yapoma

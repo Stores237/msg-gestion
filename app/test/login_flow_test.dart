@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/locale_controller.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/screens/login_phone_screen.dart';
+import 'package:huddle/data/locale_controller.dart';
+import 'package:huddle/data/repository_locator.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/screens/login_phone_screen.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

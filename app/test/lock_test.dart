@@ -3,12 +3,12 @@
 // (owner, 2026-10-23).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/biometrics.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/screens/lock_screen.dart';
-import 'package:msg_gestion/screens/login_phone_screen.dart';
-import 'package:msg_gestion/screens/shell_screen.dart';
+import 'package:huddle/data/biometrics.dart';
+import 'package:huddle/data/repository_locator.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/screens/lock_screen.dart';
+import 'package:huddle/screens/login_phone_screen.dart';
+import 'package:huddle/screens/shell_screen.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

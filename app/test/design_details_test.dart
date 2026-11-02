@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/announcement.dart';
-import 'package:msg_gestion/models/event.dart';
-import 'package:msg_gestion/models/member.dart';
-import 'package:msg_gestion/screens/announcements/compose_screen.dart';
-import 'package:msg_gestion/screens/calendar/event_detail_screen.dart';
-import 'package:msg_gestion/screens/members/member_profile_screen.dart';
-import 'package:msg_gestion/widgets/ui.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/announcement.dart';
+import 'package:huddle/models/event.dart';
+import 'package:huddle/models/member.dart';
+import 'package:huddle/screens/announcements/compose_screen.dart';
+import 'package:huddle/screens/calendar/event_detail_screen.dart';
+import 'package:huddle/screens/members/member_profile_screen.dart';
+import 'package:huddle/widgets/ui.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

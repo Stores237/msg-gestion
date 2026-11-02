@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/models/finance.dart';
+import 'package:huddle/models/finance.dart';
 
 import 'downloads_test.dart' show openFinances;
 import 'helpers.dart';

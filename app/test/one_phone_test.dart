@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:msg_gestion/data/api_client.dart';
-import 'package:msg_gestion/data/auth_session.dart';
-import 'package:msg_gestion/data/offline.dart';
-import 'package:msg_gestion/data/repository_locator.dart';
-import 'package:msg_gestion/data/token_storage.dart';
-import 'package:msg_gestion/screens/login_phone_screen.dart';
+import 'package:huddle/data/api_client.dart';
+import 'package:huddle/data/auth_session.dart';
+import 'package:huddle/data/offline.dart';
+import 'package:huddle/data/repository_locator.dart';
+import 'package:huddle/data/token_storage.dart';
+import 'package:huddle/screens/login_phone_screen.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

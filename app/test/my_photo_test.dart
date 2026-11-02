@@ -1,8 +1,8 @@
 // Every member changes their own profile picture (owner, 2026-10-23).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/widgets/my_photo.dart';
-import 'package:msg_gestion/widgets/ui.dart';
+import 'package:huddle/widgets/my_photo.dart';
+import 'package:huddle/widgets/ui.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

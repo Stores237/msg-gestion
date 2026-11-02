@@ -1,3 +1,3 @@
-# msg_gestion
+# huddle
 
 A new Flutter project.

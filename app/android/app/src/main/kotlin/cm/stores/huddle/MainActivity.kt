@@ -1,4 +1,4 @@
-package cm.msgyapoma.msg_gestion
+package cm.stores.huddle
 
 import android.Manifest
 import android.content.ActivityNotFoundException

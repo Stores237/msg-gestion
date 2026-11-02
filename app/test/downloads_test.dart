@@ -2,15 +2,15 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/data_settings.dart';
-import 'package:msg_gestion/data/file_store.dart';
-import 'package:msg_gestion/data/offline.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/announcement.dart';
-import 'package:msg_gestion/screens/downloads_screen.dart';
-import 'package:msg_gestion/widgets/attachments.dart';
-import 'package:msg_gestion/widgets/photo_frame.dart';
-import 'package:msg_gestion/widgets/store_image.dart';
+import 'package:huddle/data/data_settings.dart';
+import 'package:huddle/data/file_store.dart';
+import 'package:huddle/data/offline.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/announcement.dart';
+import 'package:huddle/screens/downloads_screen.dart';
+import 'package:huddle/widgets/attachments.dart';
+import 'package:huddle/widgets/photo_frame.dart';
+import 'package:huddle/widgets/store_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fakes.dart';

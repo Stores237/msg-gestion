@@ -1,19 +1,19 @@
-import 'package:msg_gestion/data/api_client.dart';
-import 'package:msg_gestion/data/repositories/announcements_repository.dart';
-import 'package:msg_gestion/data/repositories/auth_repository.dart';
-import 'package:msg_gestion/data/repositories/events_repository.dart';
-import 'package:msg_gestion/data/repositories/finances_repository.dart';
-import 'package:msg_gestion/data/repositories/members_repository.dart';
-import 'package:msg_gestion/data/repositories/planning_repository.dart';
-import 'package:msg_gestion/data/repositories/profile_repository.dart';
-import 'package:msg_gestion/models/announcement.dart';
-import 'package:msg_gestion/models/event.dart';
-import 'package:msg_gestion/models/expense.dart';
-import 'package:msg_gestion/models/finance.dart';
-import 'package:msg_gestion/models/me.dart';
-import 'package:msg_gestion/models/access_request.dart';
-import 'package:msg_gestion/models/member.dart';
-import 'package:msg_gestion/models/planning.dart';
+import 'package:huddle/data/api_client.dart';
+import 'package:huddle/data/repositories/announcements_repository.dart';
+import 'package:huddle/data/repositories/auth_repository.dart';
+import 'package:huddle/data/repositories/events_repository.dart';
+import 'package:huddle/data/repositories/finances_repository.dart';
+import 'package:huddle/data/repositories/members_repository.dart';
+import 'package:huddle/data/repositories/planning_repository.dart';
+import 'package:huddle/data/repositories/profile_repository.dart';
+import 'package:huddle/models/announcement.dart';
+import 'package:huddle/models/event.dart';
+import 'package:huddle/models/expense.dart';
+import 'package:huddle/models/finance.dart';
+import 'package:huddle/models/me.dart';
+import 'package:huddle/models/access_request.dart';
+import 'package:huddle/models/member.dart';
+import 'package:huddle/models/planning.dart';
 
 Me fakeMe({
   String firstName = 'Ingrid',

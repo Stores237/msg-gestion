@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/main.dart';
-import 'package:msg_gestion/models/event.dart';
-import 'package:msg_gestion/screens/calendar/attendance_screen.dart';
-import 'package:msg_gestion/screens/calendar/event_detail_screen.dart';
-import 'package:msg_gestion/screens/calendar/event_form_screen.dart';
-import 'package:msg_gestion/widgets/ui.dart';
+import 'package:huddle/main.dart';
+import 'package:huddle/models/event.dart';
+import 'package:huddle/screens/calendar/attendance_screen.dart';
+import 'package:huddle/screens/calendar/event_detail_screen.dart';
+import 'package:huddle/screens/calendar/event_form_screen.dart';
+import 'package:huddle/widgets/ui.dart';
 
 import 'fakes.dart';
 import 'helpers.dart';

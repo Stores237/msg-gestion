@@ -2,9 +2,9 @@
 // header buttons pinned to the right.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:msg_gestion/data/theme_controller.dart';
-import 'package:msg_gestion/theme/tokens.dart';
-import 'package:msg_gestion/widgets/ui.dart';
+import 'package:huddle/data/theme_controller.dart';
+import 'package:huddle/theme/tokens.dart';
+import 'package:huddle/widgets/ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fakes.dart';
