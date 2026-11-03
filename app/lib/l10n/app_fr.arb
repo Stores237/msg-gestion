@@ -2358,5 +2358,6 @@
   },
   "reportNetNone": "Aucune quote-part réglée sur le trimestre",
   "reportNetOwedOpen": "Restant à verser au groupe au-dessus",
-  "reportNetAskedOpen": "Restant à recevoir des groupes rattachés"
+  "reportNetAskedOpen": "Restant à recevoir des groupes rattachés",
+  "groupNetWaiting": "À compléter (pas encore de président)"
 }

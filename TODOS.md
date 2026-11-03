@@ -22,6 +22,11 @@
   install build 43.
 - [ ] **Owner — build 44 (2026-11-03, contributions):** deploy (migration finances 0007); install
   build 44. Networks phases 1–6 are all in (39–44): try them together on staging.
+- [ ] **Owner — build 46 (2026-11-03, network setup):** deploy (migration core 0020). In the
+  back-office, name the MGS network's levels (Paroisse · Zone paroissiale · Diocèse · Province
+  ecclésiastique · National), import the archdiocese, its zones and parishes (« Nom ; niveau ;
+  rattaché à »), check the roles of the first zone and of the archdiocese (they become the
+  models), then give Yapoma's président the Zone Wouri 9 code. Province and national: later.
 - [ ] **Owner — build 45 (2026-11-03):** deploy (no migration) and install build 45. To try the
   networks end to end, run the demo network (see RUNNING_LOCALLY.md "Demo network").
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.

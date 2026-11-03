@@ -9,19 +9,46 @@
 {% for n in networks %}
 <section class="panel" style="margin-top:24px" id="network-{{ n.pk }}">
   <div class="panel-h"><h2>{{ n.name }}</h2><span class="muted" style="font-size:13px">{% for i, label in n.levels %}{{ i }}. {{ label }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
-    {% if 'backoffice.groups:change' in p %}<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('dlg-net-{{ n.pk }}').showModal()">{% icon 'pencil' 16 %}Modifier</button>{% endif %}</div>
+    {% if 'backoffice.groups:change' in p %}<span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary btn-sm" type="button" data-new-in="{{ n.pk }}" onclick="document.getElementById('dlg-new-{{ n.pk }}').showModal()">{% icon 'plus' 16 %}Nouveau groupe</button><button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('dlg-import-{{ n.pk }}').showModal()">{% icon 'list-plus' 16 %}Importer une liste</button><button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('dlg-net-{{ n.pk }}').showModal()">{% icon 'pencil' 16 %}Modifier</button></span>{% endif %}</div>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupe</th><th>Niveau</th><th>Partage vers le haut</th><th>Codes d’invitation</th><th></th></tr></thead><tbody>
-    {% for g in n.rows %}<tr id="net-group-{{ g.pk }}"><td><span style="display:inline-flex;align-items:center;gap:8px;padding-left:{{ g.indent }}px">{% if g.depth %}<span class="muted" aria-hidden="true">└</span>{% endif %}{% group_logo g 22 %}<b>{{ g.name }}</b></span>{% if g.parent and g.parent.network_id != n.pk %}<br><small class="muted">rattaché à {{ g.parent.name }}</small>{% endif %}</td>
+    {% for g in n.rows %}<tr id="net-group-{{ g.pk }}"><td><span style="display:inline-flex;align-items:center;gap:8px;padding-left:{{ g.indent }}px">{% if g.depth %}<span class="muted" aria-hidden="true">└</span>{% endif %}{% group_logo g 22 %}<b>{{ g.name }}</b>{% if g.waiting %} <span class="status warn" title="Pas encore de président"><i></i>À compléter</span>{% endif %}</span>{% if g.parent and g.parent.network_id != n.pk %}<br><small class="muted">rattaché à {{ g.parent.name }}</small>{% endif %}</td>
       <td>{{ g.level_name }}</td>
       <td><small>{{ g.share_text|default:"Rien" }}</small></td>
       <td>{% for inv in g.invites %}<span style="display:inline-flex;gap:6px;align-items:center;margin:2px 8px 2px 0"><code class="tnum">{{ inv.pretty }}</code><small class="muted">jusqu’au {{ inv.expires_at|date:"d/m" }}</small>{% if 'backoffice.groups:change' in p %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="revoke"><input type="hidden" name="id" value="{{ inv.pk }}"><button class="btn btn-ghost btn-sm" title="Annuler ce code" aria-label="Annuler le code {{ inv.pretty }}">{% icon 'x' 14 %}</button></form>{% endif %}</span>{% empty %}{% if g.level > 1 %}<span class="muted">—</span>{% endif %}{% endfor %}</td>
       <td class="amt">{% if 'backoffice.groups:change' in p %}<span style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
         {% if g.level > 1 %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="invite"><input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">{% icon 'ticket' 16 %}Code d’invitation</button></form>{% endif %}
-        {% if g.parent %}<button class="btn btn-ghost btn-sm" type="button" style="color:var(--red-500)" onclick="document.getElementById('dlg-detach-{{ g.pk }}').showModal()">{% icon 'unlink' 16 %}Détacher</button>{% endif %}</span>{% endif %}</td></tr>
+        {% if g.parent %}<button class="btn btn-ghost btn-sm" type="button" style="color:var(--red-500)" onclick="document.getElementById('dlg-detach-{{ g.pk }}').showModal()">{% icon 'unlink' 16 %}Détacher</button>
+        {% elif g.waiting %}<form method="post" style="display:inline-flex;gap:6px">{% csrf_token %}<input type="hidden" name="action" value="attach"><input type="hidden" name="group" value="{{ g.pk }}"><select name="parent" aria-label="Rattacher {{ g.name }} à" required><option value="">Rattacher à…</option>{% for u in n.rows %}{% if u.level > g.level %}<option value="{{ u.pk }}">{{ u.name }}</option>{% endif %}{% endfor %}</select><button class="btn btn-secondary btn-sm">Rattacher</button></form>{% endif %}</span>{% endif %}</td></tr>
     {% empty %}<tr class="empty-row"><td colspan="5">Aucun groupe dans ce réseau. Placez-en un ci-dessous.</td></tr>{% endfor %}
   </tbody></table></div>
+  <div class="panel-b" style="border-top:1px solid var(--border-subtle)"><b style="font-size:13px">Rôles des nouveaux groupes, par niveau</b>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">{% for lv in n.level_rows %}
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px">{% csrf_token %}<input type="hidden" name="action" value="model"><input type="hidden" name="network" value="{{ n.pk }}"><input type="hidden" name="level" value="{{ lv.level }}">
+        <span style="min-width:160px"><b>{{ lv.level }}. {{ lv.label }}</b></span>
+        {% if lv.model %}<span>Comme <b>{{ lv.model.name }}</b> <small class="muted">(modifiez ses rôles dans « Rôles et permissions » en travaillant sur ce groupe)</small></span>{% else %}<span class="muted">Pas encore de groupe : le premier créé prendra le préréglage choisi, puis servira de modèle.</span>{% endif %}
+        {% if lv.choices|length > 1 and 'backoffice.groups:change' in p %}<select name="model" aria-label="Modèle du niveau {{ lv.label }}">{% for g in lv.choices %}<option value="{{ g.pk }}"{% if lv.model and g.pk == lv.model.pk %} selected{% endif %}>{{ g.name }}</option>{% endfor %}</select><button class="btn btn-ghost btn-sm">Prendre comme modèle</button>{% endif %}
+      </form>{% endfor %}</div></div>
 </section>
 {% if 'backoffice.groups:change' in p %}
+<dialog id="dlg-new-{{ n.pk }}" class="dialog" style="border:none;padding:24px;max-width:560px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="create"><input type="hidden" name="network" value="{{ n.pk }}">
+  <h3>Nouveau groupe · {{ n.name }}</h3>
+  <label class="fld"><span class="fld-l">Nom du groupe<em> *</em></span><span class="fld-box"><input name="name" required maxlength="120" placeholder="Ex. Zone Wouri 9"></span></label>
+  <label class="fld"><span class="fld-l">Niveau</span><span class="fld-box"><select name="level">{% for i, label in n.levels %}<option value="{{ i }}">{{ i }} · {{ label }}</option>{% endfor %}</select></span></label>
+  <label class="fld"><span class="fld-l">Rattaché à</span><span class="fld-box"><select name="parent"><option value="">— (pas encore)</option>{% for g in n.rows %}<option value="{{ g.pk }}">{{ g.name }} · {{ g.level_name }}</option>{% endfor %}</select></span></label>
+  <label class="fld"><span class="fld-l">Rôles (si le niveau n’a pas encore de modèle)</span><span class="fld-box"><select name="preset"><option value="">Selon le niveau</option>{% for k, label in presets %}<option value="{{ k }}">{{ label }}</option>{% endfor %}</select></span></label>
+  <label class="fld"><span class="fld-l">Lieu</span><span class="fld-box"><input name="place" maxlength="160" placeholder="Ex. Paroisse Notre-Dame de Lourdes, Yapoma"></span></label>
+  <div class="notice">{% icon 'info' %}<span>Le groupe est créé directement à sa place, « à compléter » jusqu’à ce qu’il ait un président. Un groupe qui a déjà un président rejoint avec un code d’invitation.</span></div>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Créer</button></div>
+</form></dialog>
+<dialog id="dlg-import-{{ n.pk }}" class="dialog" style="border:none;padding:24px;max-width:640px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="import"><input type="hidden" name="network" value="{{ n.pk }}">
+  <h3>Importer une liste · {{ n.name }}</h3>
+  <p class="muted" style="font-size:13px;margin:0">Une ligne par groupe : <b>Nom ; niveau ; rattaché à</b>. Le niveau est son numéro ou son nom ({% for i, label in n.levels %}{{ i }} = {{ label }}{% if not forloop.last %}, {% endif %}{% endfor %}). « Rattaché à » est un groupe du réseau, ou une ligne plus haut. Tout est créé, ou rien si une ligne est fausse.</p>
+  <label class="fld"><span class="fld-l">Groupes</span><span class="fld-box multi"><textarea name="lines" rows="10" required style="font-family:ui-monospace,monospace" placeholder="Archidiocèse de Douala ; 3 ;
+Zone Wouri 9 ; 2 ; Archidiocèse de Douala
+GS Yapoma ; 1 ; Zone Wouri 9
+GS Paroisse 2 ; 1 ; Zone Wouri 9"></textarea></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Importer</button></div>
+</form></dialog>
 <dialog id="dlg-net-{{ n.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%">{% include "backoffice/_network_form.html" with n=n %}</dialog>
 {% for g in n.rows %}{% if g.parent %}
 <dialog id="dlg-detach-{{ g.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="detach"><input type="hidden" name="group" value="{{ g.pk }}">

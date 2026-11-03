@@ -12,13 +12,17 @@ class Network(models.Model):
     group of level 2 or more is an umbrella: a full group of its own (its
     bureau, cash book, calendar) with groups of lower levels attached."""
 
-    LEVELS = (1, 2, 3, 4)
+    # Up to six (owner, 2026-11-03: the Church goes paroisse › zone ›
+    # diocèse › province › national; other organisations may need more).
+    LEVELS = (1, 2, 3, 4, 5, 6)
 
     name = models.CharField("nom du réseau", max_length=120)
     level1 = models.CharField("niveau 1", max_length=40, default="Groupe local")
     level2 = models.CharField("niveau 2", max_length=40, default="Zone")
     level3 = models.CharField("niveau 3", max_length=40, default="Région")
     level4 = models.CharField("niveau 4", max_length=40, default="National")
+    level5 = models.CharField("niveau 5", max_length=40, blank=True)
+    level6 = models.CharField("niveau 6", max_length=40, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
 
@@ -31,6 +35,24 @@ class Network(models.Model):
 
     def level_name(self, level):
         return getattr(self, f"level{level}", "") if level in self.LEVELS else ""
+
+    @property
+    def labels(self):
+        return [self.level_name(n) for n in self.LEVELS]
+
+
+class NetworkLevelModel(models.Model):
+    """For a level of a network, the group whose roles (names, mandates,
+    permissions) every new group of that level starts with (owner,
+    2026-11-03: a zone or a diocese has its own roles — coordinateur,
+    aumônier… — not a parish's). Edited like any group's roles."""
+
+    network = models.ForeignKey(Network, on_delete=models.CASCADE, related_name="models")
+    level = models.PositiveSmallIntegerField()
+    group = models.ForeignKey("Group", on_delete=models.CASCADE, related_name="+")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["network", "level"], name="one_model_per_level")]
 
 
 class Group(models.Model):

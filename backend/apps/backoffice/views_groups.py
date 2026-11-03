@@ -256,7 +256,7 @@ def networks(request):
             if action == "network":
                 n = Network.objects.filter(pk=P.get("id")).first() if P.get("id") else None
                 n = net.save_network(by=request.user, request=request, network=n, name=P.get("name"),
-                                     levels=[P.get(f"level{i}", "") for i in range(1, 5)])
+                                     levels=[P.get(f"level{i}", "") for i in Network.LEVELS])
                 messages.success(request, f"Réseau « {n.name} » enregistré.")
             elif action == "place" and group is not None:
                 n = Network.objects.filter(pk=P.get("network")).first() if P.get("network") else None
@@ -271,6 +271,26 @@ def networks(request):
                 inv = get_object_or_404(GroupInvitation, pk=P.get("id"))
                 net.revoke_invitation(inv, by=request.user, request=request, platform=True)
                 messages.success(request, "Invitation annulée : le code ne marche plus.")
+            elif action == "create":
+                n = get_object_or_404(Network, pk=P.get("network"))
+                parent = Group.objects.filter(pk=P.get("parent"), network=n, is_active=True).first() if P.get("parent") else None
+                g = net.create_in_network(name=P.get("name"), network=n, level=P.get("level"), parent=parent,
+                                          preset=P.get("preset"), place=P.get("place", ""), by=request.user, request=request)
+                messages.success(request, f"« {g.name} » créé ({g.level_name}{', rattaché à ' + parent.name if parent else ''}). "
+                                          "Il est « à compléter » jusqu’à ce que vous lui donniez un président (Utilisateurs).")
+            elif action == "import":
+                n = get_object_or_404(Network, pk=P.get("network"))
+                made = net.import_groups(n, P.get("lines", ""), by=request.user, request=request)
+                messages.success(request, f"{len(made)} groupe{'s' if len(made) > 1 else ''} créé{'s' if len(made) > 1 else ''} et placé{'s' if len(made) > 1 else ''} dans « {n.name} ».")
+            elif action == "model":
+                n = get_object_or_404(Network, pk=P.get("network"))
+                g = get_object_or_404(Group, pk=P.get("model"), is_active=True)
+                net.set_level_model(n, int(P.get("level") or 0), g, by=request.user, request=request)
+                messages.success(request, f"Les nouveaux groupes de niveau « {n.level_name(g.level)} » prendront les rôles de « {g.name} ».")
+            elif action == "attach" and group is not None:
+                parent = get_object_or_404(Group, pk=P.get("parent"), is_active=True)
+                net.attach_direct(group, parent, by=request.user, request=request)
+                messages.success(request, f"« {group.name} » rattaché à « {parent.name} ».")
             elif action == "end_twin":
                 link = get_object_or_404(GroupLink, pk=P.get("id"), is_active=True)
                 net.end_twin(link.a, link.b, by=request.user, reason=P.get("reason"), request=request, platform=True)
@@ -283,10 +303,16 @@ def networks(request):
                          refused=True, detail={"action": action, "raison": e.message})
             messages.error(request, e.message)
         return redirect("backoffice:networks")
+    from apps.core.group_admin import ROLE_PRESETS, default_preset
+
     nets = list(Network.objects.all())
     for n in nets:
         n.rows = _tree(n)
         n.levels = [(i, n.level_name(i)) for i in Network.LEVELS if n.level_name(i)]
+        n.level_rows = [{"level": i, "label": label, "model": net.level_model(n, i), "default": default_preset(i),
+                         "choices": [g for g in n.rows if g.level == i]} for i, label in n.levels]
+        for g in n.rows:
+            g.waiting = not net.has_president(g)
     pending = {}
     for inv in GroupInvitation.objects.filter(status=GroupInvitation.Status.PENDING,
                                               kind=GroupInvitation.Kind.ATTACH).select_related("created_by"):
@@ -303,6 +329,7 @@ def networks(request):
         "outside": Group.objects.filter(network__isnull=True, is_active=True).order_by("name"),
         "all_groups": Group.objects.filter(is_active=True).select_related("network").order_by("name"),
         "days": net.INVITATION_DAYS,
+        "presets": [(k, v[0]) for k, v in ROLE_PRESETS.items()],
         "links": GroupLink.objects.filter(is_active=True).select_related("a", "b").order_by("-created_at"),
     })
 

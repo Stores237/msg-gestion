@@ -1134,5 +1134,6 @@
   "reportNetReceived": "Received from {group}",
   "reportNetNone": "No contribution settled this quarter",
   "reportNetOwedOpen": "Still to pay to the group above",
-  "reportNetAskedOpen": "Still to receive from attached groups"
+  "reportNetAskedOpen": "Still to receive from attached groups",
+  "groupNetWaiting": "To complete (no president yet)"
 }

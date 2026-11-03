@@ -187,6 +187,11 @@ void main() {
           levelName: 'Paroisse',
           shares: ['members', 'finances'],
         ),
+        NetworkGroup(
+          group: GroupInfo(id: 4, name: 'GS Paroisse 2', initials: 'GP'),
+          levelName: 'Paroisse',
+          waiting: true,
+        ),
       ],
     );
     f.profile.shared = const SharedGroup(
@@ -216,6 +221,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('Partage : membres, finances'), findsOneWidget);
+    expect(
+      find.textContaining('À compléter (pas encore de président)'),
+      findsOneWidget,
+    );
     await tester.tap(find.byKey(const Key('network-child-3')));
     await tester.pumpAndSettle();
     expect(find.text('Ewane Brice'), findsOneWidget);

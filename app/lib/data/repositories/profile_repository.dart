@@ -164,9 +164,13 @@ class NetworkGroup {
     this.levelName = '',
     this.below = 0,
     this.shares = const [],
+    this.waiting = false,
   });
   final GroupInfo group;
   final String levelName;
+
+  /// Set up by the platform team, no président yet (build 46).
+  final bool waiting;
 
   /// The kinds it shares with the groups above (children list only).
   final List<String> shares;
@@ -179,6 +183,7 @@ class NetworkGroup {
     levelName: (j['level_name'] as String?) ?? '',
     below: (j['children'] as int?) ?? 0,
     shares: [for (final k in (j['shares'] as List?) ?? const []) k as String],
+    waiting: j['waiting'] == true,
   );
 }
 

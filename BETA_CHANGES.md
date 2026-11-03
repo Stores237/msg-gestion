@@ -1560,3 +1560,40 @@ Owner (2026-11-03): the three items left after build 44.
 - How to verify: a zone event sent down for tomorrow with a named parish member → after the
   evening job the member has "Rappel : vous êtes attendu(e)…". Finances → Rapport shows the
   contributions of the quarter. Back-office → Réseaux de groupes → Quotes-parts.
+
+## 68. Build 46: networks — six levels, roles per level, setting up a network, « à compléter »
+
+Owner (2026-11-03), after sharing the Church's hierarchy (paroisse › zone, e.g. Zone Wouri 9 with
+7 parishes › archidiocèse de Douala › province ecclésiastique › Église au Cameroun): "go ahead with
+the 4"; groups stop at the diocese for now, national later; and Huddle is not only for the Garde
+Suisse, which is a good starting point.
+
+1. **Up to six levels** per network (was four). Back-office → Réseaux de groupes → Modifier: six
+   level names; a level can stay named but empty (e.g. Province ecclésiastique, National).
+2. **Roles per level.** A new group of a level copies the roles of that level's **model group**
+   (the first group created there, changeable on the network's panel "Rôles des nouveaux groupes,
+   par niveau"). The first one takes a preset: *Bureau de zone* (coordinateur de zone,
+   coordinateur adjoint, secrétaire, trésorier, commissaire aux comptes, membre), *Bureau
+   diocésain* (aumônier diocésain, président diocésain, vice-président diocésain, secrétaire,
+   trésorier, commissaire aux comptes, membre), *Bureau simple* (président, vice-président,
+   secrétaire, finances) or *Bureau complet* (like the first group). Each keeps a parish role's
+   rights and rules underneath; names and rights are edited in Rôles et permissions as usual.
+3. **Setting up a network from the back-office**: on each network, **Nouveau groupe** (name,
+   level, attached to, roles, place) creates the group in place, and **Importer une liste** takes
+   one line per group, « Nom ; niveau ; rattaché à », all or nothing (the error names the line).
+   A group the platform team set up and that has no président can be attached directly
+   ("Rattacher à…"); a group that runs itself (has a président) still joins with a code.
+4. **« À compléter »**: a group with no président yet shows that badge in the back-office tree and
+   "À compléter (pas encore de président)" in the app's Réseau. It fills in once someone is given
+   its président role.
+- The demo network now mirrors the real one: Archidiocèse de Douala (démo) › Zone Wouri 9 (GS
+  Yapoma, GS Bonamoussadi, GS Kotto + GS Paroisse 4–7 à compléter) and Zone Akwa (2 parishes);
+  GS Yapoma joins its zone with a code; the diocese has its aumônier diocésain, the zones their
+  coordinateur de zone.
+- Server: `Network.level5/level6`, `core.NetworkLevelModel` (migration core 0020);
+  `group_admin.ROLE_PRESETS`, `network.create_in_network`, `import_groups`, `attach_direct`,
+  `set_level_model`, `has_president`; `/api/network/` items carry `waiting`.
+- How to verify: back-office → Réseaux de groupes → Modifier → add "Province ecclésiastique",
+  "National" → Importer une liste with the archdiocese, Zone Wouri 9 and its parishes → the tree
+  shows them, « À compléter »; the zone's roles are "Coordinateur de zone"…; give GS Yapoma's
+  président the zone's code → it joins.

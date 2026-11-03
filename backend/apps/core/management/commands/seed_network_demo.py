@@ -7,15 +7,19 @@
 It builds, through the same code the app and back-office use (invitation
 codes, sharing, sending down, contingents, contributions, twinning):
 
-    MGS Cameroun (démo): Paroisse › Zone paroissiale › Diocèse › National
-      Diocèse de Douala (démo)
-        Zone Bonamoussadi (démo)  ── GS Bonamoussadi (démo), GS Kotto (démo)
-        Zone Akwa (démo)          ── GS Akwa (démo), GS Bonapriso (démo)
+    MGS Cameroun (démo): Paroisse › Zone paroissiale › Diocèse › Province ecclésiastique › National
+      Archidiocèse de Douala (démo)                       (groups stop at the diocese for now)
+        Zone Wouri 9 (démo) ── GS Yapoma, GS Bonamoussadi, GS Kotto, and
+                               GS Paroisse 4–7 « à compléter » (no président yet)
+        Zone Akwa (démo)    ── GS Akwa, GS Bonapriso
     Chorale Sainte-Cécile (démo), in no network, twinned with GS Kotto (démo)
 
-Every group gets a président, trésorier, commissaire aux comptes, formateur
-and four members (made-up names, phone numbers 600 000 1xx, which no
-operator gives out). They all share one PIN, written to --out (or printed
+The upper groups get their level's roles (owner, 2026-11-03): the diocese an
+aumônier diocésain and its bureau, the zones a coordinateur de zone and
+theirs. The platform team places the groups it sets up; GS Yapoma, which
+"already runs itself", joins Zone Wouri 9 with an invitation code. Every
+active group gets its officers and four members (made-up names, phone
+numbers 600 000 1xx, which no operator gives out). They all share one PIN, written to --out (or printed
 when there is no --out). Nothing outside the "(démo)" groups is touched;
 --delete removes them and their people.
 """
@@ -29,21 +33,27 @@ from django.utils import timezone
 
 SUFFIX = " (démo)"
 NETWORK = "MGS Cameroun" + SUFFIX
-LEVELS = ["Paroisse", "Zone paroissiale", "Diocèse", "National"]
+LEVELS = ["Paroisse", "Zone paroissiale", "Diocèse", "Province ecclésiastique", "National"]
 PHONE_BASE = 600000100
 
 # name, sigle, level, parent name (without the suffix), colour
+DIOCESE, ZONE, ZONE2 = "Archidiocèse de Douala", "Zone Wouri 9", "Zone Akwa"
 GROUPS = [
-    ("Diocèse de Douala", "DDD", 3, None, "#5B3A8C"),
-    ("Zone Bonamoussadi", "ZBO", 2, "Diocèse de Douala", "#1E6FB8"),
-    ("Zone Akwa", "ZAK", 2, "Diocèse de Douala", "#B8541E"),
-    ("GS Bonamoussadi", "GSB", 1, "Zone Bonamoussadi", "#2E7D46"),
-    ("GS Kotto", "GSK", 1, "Zone Bonamoussadi", "#0E9F8F"),
-    ("GS Akwa", "GSA", 1, "Zone Akwa", "#8C6D1F"),
-    ("GS Bonapriso", "GSP", 1, "Zone Akwa", "#A33B5C"),
+    (DIOCESE, "ADD", 3, None, "#5B3A8C"),
+    (ZONE, "ZW9", 2, DIOCESE, "#1E6FB8"),
+    (ZONE2, "ZAK", 2, DIOCESE, "#B8541E"),
+    ("GS Yapoma", "GSY", 1, ZONE, "#2E7D46"),
+    ("GS Bonamoussadi", "GSB", 1, ZONE, "#0E9F8F"),
+    ("GS Kotto", "GSK", 1, ZONE, "#3E6B2E"),
+    ("GS Akwa", "GSA", 1, ZONE2, "#8C6D1F"),
+    ("GS Bonapriso", "GSP", 1, ZONE2, "#A33B5C"),
 ]
+WAITING = [f"GS Paroisse {i}" for i in range(4, 8)]  # « à compléter »: in place, no président yet
 CHOIR = "Chorale Sainte-Cécile"
-OFFICERS = ["president", "tresorier", "commissaire-aux-comptes", "formateur"]
+# Officers by level (role slugs; their names come from the level's roles).
+OFFICERS = {1: ["president", "tresorier", "commissaire-aux-comptes", "formateur"],
+            2: ["president", "vice-president", "tresorier", "commissaire-aux-comptes"],
+            3: ["conseiller", "president", "tresorier", "commissaire-aux-comptes"]}
 LAST = ["Ewane", "Ngo Bassa", "Mbarga", "Tchoupo", "Fouda", "Nkoulou", "Abena", "Ekotto", "Manga", "Essomba",
         "Ndjock", "Etoundi", "Mvondo", "Kamga", "Bilong", "Owona"]
 FIRST = ["Brice", "Sandrine", "Arnaud", "Clarisse", "Joël", "Prisca", "Hervé", "Larissa", "Serge", "Nadège",
@@ -99,25 +109,28 @@ class Command(BaseCommand):
         from apps.core.group_admin import create_group
         from apps.core.groups import in_group
         from apps.core.models import GroupInvitation, Settings
-        from apps.core.network import accept_invitation, accept_twin, create_invitation, place_group, save_network
+        from apps.core.network import accept_invitation, accept_twin, create_in_network, create_invitation, save_network
 
         net = save_network(by=None, name=NETWORK, levels=LEVELS)
         groups, officers, members, listing = {}, {}, {}, []
         phone = PHONE_BASE
         names = iter([(ln, fn) for ln in LAST for fn in FIRST][::3])
-        for name, short, level, _parent, color in [*GROUPS, (CHOIR, "CSC", 1, None, "#C0392B")]:
-            g = create_group(name=demo(name), place="Douala", motto="Groupe de démonstration")
+        for name, short, level, parent, color in [*GROUPS, (CHOIR, "CSC", 1, None, "#C0392B")]:
+            if name == CHOIR:
+                g = create_group(name=demo(name), place="Douala", motto="Groupe de démonstration")
+            else:
+                # Set up by the platform team, in place — except GS Yapoma, which joins with a code below.
+                up = groups[parent] if parent and name != "GS Yapoma" else None
+                g = create_in_network(name=demo(name), network=net, level=level, parent=up, place="Douala", by=None)
             g.short_name = short
             g.save(update_fields=["short_name"])
             st = Settings.get(g)
-            st.color = color
-            st.save(update_fields=["color"])
-            if name != CHOIR:
-                g = place_group(g, network=net, level=level, by=None)
+            st.color, st.motto = color, "Groupe de démonstration"
+            st.save(update_fields=["color", "motto"])
             groups[name] = g
             rows = []
             with in_group(g):
-                for slug in [*OFFICERS, "membre", "membre", "membre", "membre"]:
+                for slug in [*OFFICERS[level], "membre", "membre", "membre", "membre"]:
                     last, first = next(names)
                     u = self.person(g, slug, last, first, phone, pin)
                     rows.append((u.role_name, u.full_name, u.phone))
@@ -127,15 +140,16 @@ class Command(BaseCommand):
                         officers.setdefault(name, {})[slug] = u
                     phone += 1
             listing.append((demo(name), rows))
+        for name in WAITING:
+            groups[name] = create_in_network(name=demo(name), network=net, level=1, parent=groups[ZONE], by=None)
+            listing.append((demo(name), [("(à compléter : pas encore de président)", "", "")]))
 
-        # Attach each group to its parent with an invitation code, as présidents would.
-        for name, _s, _l, parent, _c in GROUPS:
-            if parent is None:
-                continue
-            code = create_invitation(groups[parent], by=officers[parent]["president"]).code
-            with in_group(groups[name]):
-                accept_invitation(code, groups[name], by=officers[name]["president"])
-            groups[name].refresh_from_db()
+        # GS Yapoma already runs itself: its président joins the zone with the zone's code.
+        code = create_invitation(groups[ZONE], by=officers[ZONE]["president"]).code
+        with in_group(groups["GS Yapoma"]):
+            accept_invitation(code, groups["GS Yapoma"], by=officers["GS Yapoma"]["president"])
+        for g in groups.values():
+            g.refresh_from_db()
 
         # Twinning: the choir with GS Kotto.
         twin = create_invitation(groups[CHOIR], by=officers[CHOIR]["president"], kind=GroupInvitation.Kind.TWIN)
@@ -166,10 +180,10 @@ class Command(BaseCommand):
     def share(self, groups, officers):
         from apps.core.sharing import save_settings
 
-        for name in ("GS Bonamoussadi", "GS Kotto", "GS Akwa", "GS Bonapriso"):
+        for name in ("GS Yapoma", "GS Bonamoussadi", "GS Kotto", "GS Akwa", "GS Bonapriso"):
             save_settings(groups[name], {"members": "detail", "finances": "summary", "calendar": "detail",
                                          "reports": "summary"}, by=officers[name]["president"])
-        for name in ("Zone Bonamoussadi", "Zone Akwa"):
+        for name in (ZONE, ZONE2):
             save_settings(groups[name], {"members": "summary", "finances": "summary", "announcements": "detail"},
                           by=officers[name]["president"])
         # GS Bonapriso keeps its finances to itself.
@@ -191,7 +205,10 @@ class Command(BaseCommand):
 
         today = timezone.localdate()
         for i, (name, g) in enumerate(groups.items()):
-            o = officers[name]
+            if name not in officers:
+                continue  # « à compléter »
+            o = dict(officers[name])
+            o.setdefault("formateur", o["president"])
             with in_group(g):
                 for days, kind, title in ((2 + i % 3, "assise", "Assise hebdomadaire"), (9 + i, "reunion", "Réunion du bureau")):
                     Event.objects.create(kind=kind, title=title, place="Salle paroissiale", created_by=o["president"],
@@ -227,27 +244,28 @@ class Command(BaseCommand):
         from apps.finances import network_dues
 
         today = timezone.localdate()
-        d, zb, za = groups["Diocèse de Douala"], groups["Zone Bonamoussadi"], groups["Zone Akwa"]
+        d, zb, za = groups[DIOCESE], groups[ZONE], groups[ZONE2]
         with in_group(d):
             a = Announcement.objects.create(title="Pèlerinage diocésain à Marienberg",
                                             body="Toutes les paroisses du diocèse sont invitées le dernier samedi du mois.",
-                                            author=officers["Diocèse de Douala"]["president"], author_role="Président",
+                                            author=officers[DIOCESE]["conseiller"], author_role="Aumônier diocésain",
                                             cascade=True)
-            Read.objects.create(announcement=a, member=officers["Diocèse de Douala"]["president"])
+            Read.objects.create(announcement=a, member=officers[DIOCESE]["conseiller"])
             send_down(d, f"Annonce de {d.name}", a.title, {"type": "announcement", "id": a.pk})
 
         for zone, when, title in ((zb, today + timedelta(days=3), "Messe de zone"), (za, today + timedelta(days=1), "Service extérieur de zone")):
             o = officers[zone.name.removesuffix(SUFFIX)]
             with in_group(zone):
                 ev = Event.objects.create(kind="messe", title=title, place="Cathédrale Saints-Pierre-et-Paul",
-                                          created_by=o["president"], chef=o["formateur"], cascade=True,
+                                          created_by=o["president"], chef=o["president"], cascade=True,
                                           starts_at=timezone.make_aware(datetime.combine(when, time(9))))
                 send_down(zone, f"Événement de {zone.name}", f"{ev.title} · {when:%d/%m} à 09:00",
                           {"type": "event", "id": ev.pk}, kind="duty")
-                set_requests(ev, [{"group": k.pk, "requested": 3, "note": "En tenue de cérémonie"} for k in zone.children.all()],
-                             by=o["formateur"])
-            # The first parish of each zone names its people; the second hasn't yet.
-            first = sorted(zone.children.all(), key=lambda g: g.name)[0]
+                active = [k for k in zone.children.all() if k.name.removesuffix(SUFFIX) in officers]
+                set_requests(ev, [{"group": k.pk, "requested": 3, "note": "En tenue de cérémonie"} for k in active],
+                             by=o["president"])
+            # The first parish of each zone names its people; the others haven't yet.
+            first = sorted(active, key=lambda g: g.name)[0]
             c = EventContingent.objects.get(event=ev, group=first)
             with in_group(first):
                 answer(c, [m.pk for m in members[first.name.removesuffix(SUFFIX)][:3]],
@@ -255,7 +273,8 @@ class Command(BaseCommand):
 
         with in_group(zb):
             dues = network_dues.ask(zb, title="Quote-part T4 2026", amount=15000, due_on=today + timedelta(days=30),
-                                    by=officers["Zone Bonamoussadi"]["tresorier"])
+                                    groups=[g.pk for g in zb.children.all() if g.name.removesuffix(SUFFIX) in officers],
+                                    by=officers[ZONE]["tresorier"])
         paid = next(x for x in dues if x.group == groups["GS Bonamoussadi"])
         with in_group(paid.group):
             network_dues.pay(paid, by=officers["GS Bonamoussadi"]["tresorier"])

@@ -72,14 +72,15 @@ def save_network(*, by, request=None, network=None, name, levels):
     name = (name or "").strip()[:120]
     if not name:
         raise NetworkRule("name_required", "Le nom du réseau est obligatoire.")
-    labels = [(levels[i] if i < len(levels) else "").strip()[:40] for i in range(4)]
+    labels = [(levels[i] if i < len(levels) else "").strip()[:40] or "" for i in range(len(Network.LEVELS))]
     if not labels[0] or not labels[1]:
         raise NetworkRule("levels_required", "Nommez au moins les deux premiers niveaux (ex. Paroisse, Zone).")
     created = network is None
     network = network or Network(created_by=by)
-    before = {"nom": network.name, "niveaux": [network.level1, network.level2, network.level3, network.level4]}
+    before = {"nom": network.name, "niveaux": network.labels}
     network.name = name
-    network.level1, network.level2, network.level3, network.level4 = labels
+    for i, label in enumerate(labels, start=1):
+        setattr(network, f"level{i}", label)
     used = [n for n in Network.LEVELS if not labels[n - 1]]
     if not created and network.groups.filter(level__in=used).exists():
         raise NetworkRule("level_in_use", "Un groupe est à ce niveau : gardez-lui un nom.")
@@ -174,17 +175,21 @@ def find_invitation(code, group, kind=GroupInvitation.Kind.ATTACH):
         if link_between(u, group) is not None:
             raise NetworkRule("already_twinned", f"Votre groupe est déjà jumelé avec « {u.name} ».", 409)
         return inv
+    _check_attach(group, u)
+    return inv
+
+
+def _check_attach(group, u):
     if u.pk == group.pk:
         raise NetworkRule("self", "Un groupe ne peut pas se rattacher à lui-même.")
     if group.parent_id is not None:
-        raise NetworkRule("already", f"Votre groupe est déjà rattaché à « {group.parent.name} ». Détachez-le d’abord.", 409)
+        raise NetworkRule("already", f"« {group.name} » est déjà rattaché à « {group.parent.name} ». Détachez-le d’abord.", 409)
     if group.network_id and group.network_id != u.network_id:
         raise NetworkRule("other_network", "Ce groupe invite dans un autre réseau que le vôtre.")
     if group.level >= u.level:
-        raise NetworkRule("level", f"« {u.name} » doit être d’un niveau supérieur au vôtre.")
+        raise NetworkRule("level", f"« {u.name} » doit être d’un niveau supérieur à « {group.name} ».")
     if u.pk in {d.pk for d in group.descendants()}:
         raise NetworkRule("loop", "Ce groupe est déjà rattaché au vôtre.")
-    return inv
 
 
 @transaction.atomic
@@ -232,7 +237,9 @@ def summary(group, request=None, *, manage=False):
     from .sharing import settings_of, totals
 
     def item(g):
-        return {**group_identity(g, request), "level": g.level, "level_name": g.level_name}
+        # "waiting": set up by the platform team, no président yet (« à compléter »).
+        return {**group_identity(g, request), "level": g.level, "level_name": g.level_name,
+                "waiting": not has_president(g)}
 
     net = group.network
     data = {
@@ -386,3 +393,114 @@ def end_twin(group, other, *, by, reason, request=None, platform=False):
     _record(other, "Jumelage terminé", by=by, request=request, detail=detail)
     for g in (group, other):
         _tell(g, "Jumelage terminé", f"« {group.name} » et « {other.name} » ne sont plus jumelés. Motif : {reason}")
+
+
+# --- Setting up a network from the back-office (build 46) ------------------------------------
+
+def has_president(group):
+    """Someone holds the group's name/logo/attachment right (group.profile)."""
+    from apps.accounts.models import RoleAssignment
+
+    with in_group(group):
+        return RoleAssignment.objects.active().filter(
+            role__group=group, role__permissions__resource="group.profile", role__permissions__action="change").exists()
+
+
+def level_model(network, level):
+    from .models import NetworkLevelModel
+
+    m = NetworkLevelModel.objects.filter(network=network, level=level).select_related("group").first()
+    return m.group if m and m.group.is_active else None
+
+
+def set_level_model(network, level, group, *, by, request=None):
+    from .models import NetworkLevelModel
+
+    if group.network_id != network.pk or group.level != int(level):
+        raise NetworkRule("bad_model", "Le modèle doit être un groupe de ce réseau, à ce niveau.")
+    NetworkLevelModel.objects.update_or_create(network=network, level=level, defaults={"group": group})
+    audit.record("Modèle de rôles choisi", actor=by, obj=network, request=request, platform=True,
+                 detail={"niveau": network.level_name(level), "groupe": group.name})
+
+
+@transaction.atomic
+def attach_direct(group, parent, *, by, request=None):
+    """The platform team places a group it set up, which has no président
+    yet, under `parent` — no code needed: nobody there to ask. A group with a
+    président joins with a code, as before."""
+    group = Group.objects.select_for_update().get(pk=group.pk)
+    if has_president(group):
+        raise NetworkRule("has_president", f"« {group.name} » a un président : envoyez-lui un code d’invitation.")
+    if parent.network_id is None:
+        raise NetworkRule("parent_outside", f"« {parent.name} » n’est dans aucun réseau.")
+    _check_attach(group, parent)
+    group.parent, group.network, group.attached_at = parent, parent.network, timezone.now()
+    group.save(update_fields=["parent", "network", "attached_at"])
+    detail = {"groupe": group.name, "rattache_a": parent.name, "par": "équipe Huddle"}
+    _record(group, "Groupe rattaché", by=by, request=request, detail=detail, platform=True)
+    _record(parent, "Groupe rattaché", by=by, request=request, detail=detail)
+    _tell(parent, "Nouveau groupe rattaché",
+          f"« {group.name} » a été rattaché à « {parent.name} » par l’équipe Huddle ({group.level_name}).")
+    return group
+
+
+@transaction.atomic
+def create_in_network(*, name, network, level, parent=None, preset=None, place="", by, request=None):
+    """A new group, set up by the platform team, straight in its place: its
+    roles come from the level's model group, else from `preset`
+    (group_admin.ROLE_PRESETS); the first group of a level becomes its model."""
+    from .group_admin import ROLE_PRESETS, create_group, default_preset
+
+    level = int(level or 1)
+    if level not in Network.LEVELS or not network.level_name(level):
+        raise NetworkRule("bad_level", "Ce niveau n’existe pas dans ce réseau.")
+    name = (name or "").strip()[:120]
+    if not name:
+        raise NetworkRule("name_required", "Le nom du groupe est obligatoire.")
+    if Group.objects.filter(name__iexact=name, is_active=True).exists():
+        raise NetworkRule("name_taken", f"Un groupe s’appelle déjà « {name} ».")
+    if parent is not None and parent.level <= level:
+        raise NetworkRule("level", f"« {parent.name} » doit être d’un niveau supérieur.")
+    model = level_model(network, level)
+    if model is not None:
+        g = create_group(name=name, place=place, by=by, request=request, template=model)
+    else:
+        key = preset if preset in ROLE_PRESETS else default_preset(level)
+        g = create_group(name=name, place=place, by=by, request=request, roles=ROLE_PRESETS[key][1])
+    g = place_group(g, network=network, level=level, by=by, request=request)
+    if model is None:
+        set_level_model(network, level, g, by=by, request=request)
+    if parent is not None:
+        g = attach_direct(g, parent, by=by, request=request)
+    return g
+
+
+def import_groups(network, text, *, by, request=None):
+    """One group per line: « Nom ; niveau ; rattaché à » (niveau: its number
+    or its name; « rattaché à »: a group of the network, possibly created on
+    an earlier line). All or nothing; the error names the line."""
+    rows = [ln for ln in (text or "").replace("\r", "").split("\n") if ln.strip() and not ln.strip().startswith("#")]
+    if not rows:
+        raise NetworkRule("empty_import", "Collez au moins une ligne : Nom ; niveau ; rattaché à.")
+    if len(rows) > 300:
+        raise NetworkRule("too_many", "300 lignes au plus par import.")
+    names = {n.lower(): i for i, n in enumerate(network.labels, start=1) if n}
+    created = []
+    with transaction.atomic():
+        for no, line in enumerate(rows, start=1):
+            parts = [p.strip() for p in line.split(";")]
+            name, lvl, parent_name = (parts + ["", "", ""])[:3]
+            level = int(lvl) if lvl.isdigit() else names.get(lvl.lower())
+            if not name or not level:
+                raise NetworkRule("bad_line", f"Ligne {no} : « {line.strip()} » — attendu « Nom ; niveau ; rattaché à ».")
+            parent = None
+            if parent_name:
+                parent = Group.objects.filter(name__iexact=parent_name, network=network, is_active=True).first()
+                if parent is None:
+                    raise NetworkRule("bad_parent", f"Ligne {no} : « {parent_name} » n’est pas un groupe de ce réseau.")
+            try:
+                created.append(create_in_network(name=name, network=network, level=level, parent=parent, by=by,
+                                                 request=request))
+            except NetworkRule as e:
+                raise NetworkRule(e.code, f"Ligne {no} : {e.message}") from None
+    return created

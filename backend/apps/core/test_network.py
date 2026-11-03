@@ -531,12 +531,85 @@ def test_demo_network_builds_and_goes_away(tmp_path):
 
     out = tmp_path / "demo.txt"
     call_command("seed_network_demo", out=str(out), stdout=StringIO())
-    zone = Group.objects.get(name="Zone Bonamoussadi (démo)")
-    assert {g.name for g in zone.children.all()} == {"GS Bonamoussadi (démo)", "GS Kotto (démo)"}
-    assert zone.parent.name == "Diocèse de Douala (démo)" and GroupLink.objects.filter(is_active=True).count() == 1
-    assert NetworkDue.objects.filter(umbrella=zone).count() == 2
+    from apps.accounts.models import Role
+    from apps.core.network import has_president
+
+    zone = Group.objects.get(name="Zone Wouri 9 (démo)")
+    kids = {g.name: has_president(g) for g in zone.children.all()}
+    assert len(kids) == 7 and kids["GS Yapoma (démo)"] and not kids["GS Paroisse 7 (démo)"]
+    assert zone.parent.name == "Archidiocèse de Douala (démo)" and GroupLink.objects.filter(is_active=True).count() == 1
+    assert NetworkDue.objects.filter(umbrella=zone).count() == 3  # the three active parishes
+    assert Role.all_groups.get(group=zone.parent, slug="conseiller").name == "Aumônier diocésain"
+    assert Role.all_groups.get(group=zone, slug="president").name == "Coordinateur de zone"
+    assert zone.network.level_name(4) == "Province ecclésiastique"
     text = out.read_text()
     assert "PIN de tous les comptes" in text and "+237600000100" in text
     call_command("seed_network_demo", delete=True, stdout=StringIO())
     assert not Group.objects.filter(name__endswith=" (démo)").exists()
     assert not User.objects.filter(phone="+237600000100").exists()
+
+
+# --- Build 46: six levels, roles per level, direct placement, « à compléter » ----------------
+
+def test_six_levels_and_presets_per_level():
+    from apps.accounts.models import Role
+    from apps.core.network import create_in_network, level_model
+
+    net = save_network(by=None, name="Église (test)", levels=["Paroisse", "Zone", "Diocèse", "Province", "National", ""])
+    assert net.level_name(5) == "National" and net.level_name(6) == ""
+    d = create_in_network(name="Archidiocèse de Douala", network=net, level=3, by=None)
+    z = create_in_network(name="Zone Wouri 9", network=net, level=2, parent=d, by=None)
+    roles = lambda g: dict(Role.all_groups.filter(group=g).values_list("slug", "name"))  # noqa: E731
+    assert roles(d)["conseiller"] == "Aumônier diocésain" and "censeur-general" not in roles(d)
+    assert roles(z)["president"] == "Coordinateur de zone" and "formateur" not in roles(z)
+    # The first group of a level is its model; edits to it reach the next ones.
+    assert level_model(net, 2) == z
+    Role.all_groups.filter(group=z, slug="secretaire-general").update(name="Secrétaire de zone")
+    z2 = create_in_network(name="Zone Wouri 10", network=net, level=2, parent=d, by=None)
+    assert roles(z2)["secretaire-general"] == "Secrétaire de zone"
+    assert z2.parent == d and z2.network == net
+
+
+def test_import_a_list_all_or_nothing(boss):  # noqa: F811
+    from apps.core.network import import_groups
+
+    net = save_network(by=None, name="MGS (import)", levels=["Paroisse", "Zone paroissiale", "Diocèse"])
+    text = "Archidiocèse de Douala ; Diocèse ;\nZone Wouri 9 ; 2 ; Archidiocèse de Douala\n" + "\n".join(
+        f"GS Paroisse {i} ; Paroisse ; Zone Wouri 9" for i in range(1, 8))
+    made = import_groups(net, text, by=None)
+    zone = Group.objects.get(name="Zone Wouri 9")
+    assert len(made) == 9 and zone.children.count() == 7 and zone.parent.name == "Archidiocèse de Douala"
+    with pytest.raises(NetworkRule) as e:
+        import_groups(net, "Zone X ; 2 ; Archidiocèse de Douala\nGS Y ; 1 ; Zone Inconnue", by=None)
+    assert e.value.code == "bad_parent" and "Ligne 2" in e.value.message
+    assert not Group.objects.filter(name="Zone X").exists()  # nothing kept
+    page = boss.post("/bo/reseaux/", {"action": "import", "network": net.pk, "lines": "GS Paroisse 8 ; 1 ; Zone Wouri 9"},
+                     follow=True).content.decode()
+    assert "1 groupe créé" in page and "À compléter" in page
+
+
+def test_direct_placement_only_without_a_president(mgs):
+    net, parish, zone, pres_p, pres_z, _ = mgs
+    from apps.core.network import attach_direct, create_in_network
+
+    with pytest.raises(NetworkRule) as e:
+        attach_direct(parish, zone, by=None)  # Yapoma has a président: it joins with a code
+    assert e.value.code == "has_president"
+    empty = create_in_network(name="GS Paroisse 2", network=net, level=1, by=None)
+    attach_direct(empty, zone, by=None)
+    data = app_client(pres_z, zone).get("/api/network/").json()
+    child = next(c for c in data["children"] if c["name"] == "GS Paroisse 2")
+    assert child["waiting"] is True
+    assert Notification.all_groups.filter(user=pres_z, group=zone, title="Nouveau groupe rattaché").exists()
+
+
+def test_backoffice_creates_a_group_in_place(boss, mgs):  # noqa: F811
+    net, parish, zone, *_ = mgs
+    page = boss.post("/bo/reseaux/", {"action": "create", "network": net.pk, "name": "GS Paroisse 3", "level": 1,
+                                      "parent": zone.pk}, follow=True).content.decode()
+    g = Group.objects.get(name="GS Paroisse 3")
+    assert g.parent == zone and "à compléter" in page.lower()
+    page = boss.post("/bo/reseaux/", {"action": "network", "id": net.pk, "name": net.name, "level1": "Paroisse",
+                                      "level2": "Zone paroissiale", "level3": "Diocèse", "level4": "Province ecclésiastique",
+                                      "level5": "National"}, follow=True).content.decode()
+    assert "Province ecclésiastique" in page

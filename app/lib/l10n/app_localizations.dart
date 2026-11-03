@@ -6163,6 +6163,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Restant à recevoir des groupes rattachés'**
   String get reportNetAskedOpen;
+
+  /// No description provided for @groupNetWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'À compléter (pas encore de président)'**
+  String get groupNetWaiting;
 }
 
 class _AppLocalizationsDelegate

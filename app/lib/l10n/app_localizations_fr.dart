@@ -3764,4 +3764,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportNetAskedOpen => 'Restant à recevoir des groupes rattachés';
+
+  @override
+  String get groupNetWaiting => 'À compléter (pas encore de président)';
 }

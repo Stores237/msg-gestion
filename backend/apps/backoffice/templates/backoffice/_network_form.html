@@ -4,6 +4,9 @@
   <label class="fld"><span class="fld-l">Niveau 1 (groupe de base)<em> *</em></span><span class="fld-box"><input name="level1" required maxlength="40" value="{{ n.level1|default:'' }}" placeholder="Ex. Paroisse"></span></label>
   <label class="fld"><span class="fld-l">Niveau 2<em> *</em></span><span class="fld-box"><input name="level2" required maxlength="40" value="{{ n.level2|default:'' }}" placeholder="Ex. Zone paroissiale"></span></label>
   <label class="fld"><span class="fld-l">Niveau 3</span><span class="fld-box"><input name="level3" maxlength="40" value="{{ n.level3|default:'' }}" placeholder="Ex. Diocèse"></span></label>
-  <label class="fld"><span class="fld-l">Niveau 4</span><span class="fld-box"><input name="level4" maxlength="40" value="{{ n.level4|default:'' }}" placeholder="Ex. National"></span></label>
+  <label class="fld"><span class="fld-l">Niveau 4</span><span class="fld-box"><input name="level4" maxlength="40" value="{{ n.level4|default:'' }}" placeholder="Ex. Province ecclésiastique"></span></label>
+  <label class="fld"><span class="fld-l">Niveau 5</span><span class="fld-box"><input name="level5" maxlength="40" value="{{ n.level5|default:'' }}" placeholder="Ex. National"></span></label>
+  <label class="fld"><span class="fld-l">Niveau 6</span><span class="fld-box"><input name="level6" maxlength="40" value="{{ n.level6|default:'' }}" placeholder="Facultatif"></span></label>
+  <small class="muted">Nommez les niveaux dont vous aurez besoin ; un niveau sans groupe peut rester prévu pour plus tard.</small>
   <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-primary">Enregistrer</button></div>
 </form>

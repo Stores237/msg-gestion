@@ -444,6 +444,7 @@ class _NetworkScreenState extends State<NetworkScreen> {
                                       g,
                                       'network-child-${g.group.id}',
                                       extra: [
+                                        if (g.waiting) l.groupNetWaiting,
                                         if (g.below > 0)
                                           l.groupNetGroupsBelow(g.below),
                                         g.shares.isEmpty

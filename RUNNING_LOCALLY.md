@@ -71,10 +71,12 @@ cd backend
 .venv/bin/python manage.py seed_network_demo --delete                   # remove it again
 ```
 
-It creates "MGS Cameroun (démo)": Diocèse de Douala › Zone Bonamoussadi (GS Bonamoussadi, GS
-Kotto) and Zone Akwa (GS Akwa, GS Bonapriso), plus Chorale Sainte-Cécile twinned with GS Kotto.
-Each group has a président, trésorier, commissaire aux comptes, formateur and four members
-(phones +237 600 000 100 to 163, one shared PIN written to `--out`). It also sets sharing, a
+It creates "MGS Cameroun (démo)" (levels up to Province ecclésiastique and National, groups up to
+the diocese): Archidiocèse de Douala › Zone Wouri 9 (GS Yapoma, GS Bonamoussadi, GS Kotto, and
+GS Paroisse 4–7 « à compléter ») and Zone Akwa (GS Akwa, GS Bonapriso), plus Chorale
+Sainte-Cécile twinned with GS Kotto. The diocese has an aumônier diocésain and its bureau, the
+zones a coordinateur de zone and theirs, each parish its full bureau; every active group has
+four members too (phones from +237 600 000 100, one shared PIN written to `--out`). It also sets sharing, a
 diocesan announcement sent down, two zone events asking each parish for 3 people (one parish has
 answered), and a zone contribution of 15 000 (one parish has paid). Only groups whose name ends
 in "(démo)" are touched.

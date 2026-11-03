@@ -17,22 +17,52 @@ def template_group():
     return Group.objects.order_by("pk").first()
 
 
+# Role sets for the upper levels of a network (owner, 2026-11-03: "go ahead
+# with your examples"). Each keeps a parish role's slug — so its rights and
+# the fixed rules (separation of duties, planning, reports) carry over — under
+# the level's own name. Names and rights are then edited in the back-office.
+ROLE_PRESETS = {
+    "local": ("Bureau complet (comme le premier groupe)", None),
+    "zone": ("Bureau de zone (coordination)", [
+        ("president", "Coordinateur de zone"), ("vice-president", "Coordinateur adjoint"),
+        ("secretaire-general", "Secrétaire"), ("tresorier", "Trésorier"),
+        ("commissaire-aux-comptes", "Commissaire aux comptes"), ("membre", "Membre")]),
+    "diocese": ("Bureau diocésain (avec aumônier)", [
+        ("conseiller", "Aumônier diocésain"), ("president", "Président diocésain"),
+        ("vice-president", "Vice-président diocésain"), ("secretaire-general", "Secrétaire"),
+        ("tresorier", "Trésorier"), ("commissaire-aux-comptes", "Commissaire aux comptes"), ("membre", "Membre")]),
+    "simple": ("Bureau simple (président, secrétaire, finances)", [
+        ("president", "Président"), ("vice-president", "Vice-président"), ("secretaire-general", "Secrétaire"),
+        ("tresorier", "Trésorier"), ("commissaire-aux-comptes", "Commissaire aux comptes"), ("membre", "Membre")]),
+}
+
+
+def default_preset(level):
+    return {1: "local", 2: "zone", 3: "diocese"}.get(level, "simple")
+
+
 @transaction.atomic
-def create_group(*, name, place="", motto="", welcome_message="", by=None, request=None):
+def create_group(*, name, place="", motto="", welcome_message="", by=None, request=None, template=None, roles=None):
+    """`template`: the group whose roles, activity types and dress codes the
+    new one copies (default: the first group). `roles`: [(slug, name)] to
+    copy only those roles, renamed (ROLE_PRESETS)."""
     from apps.accounts.models import Role, RolePermission
 
     base = slugify(name)[:44] or "groupe"
     slug, n = base, 2
     while Group.objects.filter(slug=slug).exists():
         slug, n = f"{base}-{n}", n + 1
-    template = template_group()
+    template = template or template_group()
+    renamed = dict(roles) if roles else None
     group = Group.objects.create(name=name.strip(), slug=slug)
     Settings.all_groups.create(group=group, parish=place.strip(), motto=motto.strip(), welcome_message=welcome_message.strip())
     roles = 0
     if template is not None:
         for role in Role.all_groups.filter(group=template, is_archived=False):
+            if renamed is not None and role.slug not in renamed:
+                continue
             perms = list(role.permissions.values_list("resource", "action"))
-            copy = Role.all_groups.create(group=group, slug=role.slug, name=role.name, kind=role.kind,
+            copy = Role.all_groups.create(group=group, slug=role.slug, name=renamed[role.slug] if renamed else role.name, kind=role.kind,
                                           mandate_months=role.mandate_months, sort_order=role.sort_order,
                                           daily=role.daily)
             RolePermission.objects.bulk_create([RolePermission(role=copy, resource=r, action=a) for r, a in perms])
