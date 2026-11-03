@@ -78,7 +78,9 @@ class MeSerializer(serializers.Serializer):
                 # Finances asks the finance code first (owner, 2026-10-30).
                 "finance_code_required": st.finance_code_required,
                 # Shown on every amount; the app's language until the member picks one (2026-11-02).
-                "currency": st.currency, "language": st.language}
+                "currency": st.currency, "language": st.language,
+                # Groups attached below (build 41): posts can be sent down to them.
+                "below": st.group.children.filter(is_active=True).count()}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:

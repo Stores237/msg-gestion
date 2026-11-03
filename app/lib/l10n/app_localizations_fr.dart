@@ -3473,4 +3473,41 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get groupNetReportIn => 'Rapport';
+
+  @override
+  String groupNetFrom(String name) {
+    return 'De la part de $name';
+  }
+
+  @override
+  String groupNetEventFromAbove(String name) {
+    return 'Événement de $name, transmis à votre groupe. Il se modifie et l’appel se fait dans $name.';
+  }
+
+  @override
+  String get groupNetSendDown => 'Aussi pour les groupes rattachés';
+
+  @override
+  String groupNetSendDownHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Les $count groupes rattachés (et ceux en dessous) la reçoivent aussi, avec une notification.',
+      one: 'Le groupe rattaché la reçoit aussi, avec une notification.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupNetSendDownEventHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Il apparaît aussi dans le calendrier des $count groupes rattachés et de ceux en dessous.',
+      one: 'Il apparaît aussi dans le calendrier du groupe rattaché.',
+    );
+    return '$_temp0';
+  }
 }

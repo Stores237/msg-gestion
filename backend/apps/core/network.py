@@ -241,3 +241,55 @@ def summary(group, request=None, *, manage=False):
     if manage and can_invite(group):
         data["invitations"] = [{"code": i.pretty, "expires_at": i.expires_at.isoformat()} for i in pending_invitations(group)]
     return data
+
+
+# --- What flows down (build 41) ------------------------------------------------------------
+
+def upper_ids(group_id):
+    """The active groups above `group_id` (their cascaded posts reach it)."""
+    g = Group.objects.filter(pk=group_id).select_related("parent").first()
+    return [a.pk for a in g.ancestors() if a.is_active] if g else []
+
+
+def visible(model, group_id, **extra):
+    """`model` rows of this group plus those its upper groups sent down."""
+    from django.db.models import Q
+
+    if group_id is None:  # no group chosen (one group on the platform): as before
+        return model.objects.all()
+    cond = Q(group_id=group_id)
+    up = upper_ids(group_id)
+    if up:
+        cond |= Q(group_id__in=up, cascade=True, **extra)
+    return model.all_groups.filter(cond)
+
+
+def origin(obj, group_id, request=None):
+    """The sending group, when a row comes from above; else None."""
+    from .identity import group_identity
+
+    if obj.group_id == group_id:
+        return None
+    cache = getattr(request, "_origins", None) if request is not None else None
+    if cache is None:
+        cache = {}
+        if request is not None:
+            request._origins = cache
+    if obj.group_id not in cache:
+        g = obj.group
+        cache[obj.group_id] = {**group_identity(g, request), "level_name": g.level_name}
+    return cache[obj.group_id]
+
+
+def send_down(group, title, body, target, *, kind="announcement"):
+    """Notify the members of every group below `group`, each in its group."""
+    from apps.accounts.models import User
+
+    from .notify import notify
+
+    n = 0
+    for g in group.descendants():
+        with in_group(g):
+            people = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
+            n += notify(people, kind, title, body, target)
+    return n

@@ -207,3 +207,64 @@ def test_backoffice_shows_what_each_group_shares(boss, mgs):  # noqa: F811
 
     save_settings(parish, {"calendar": "summary"}, by=pres_p)
     assert "Calendrier : résumé" in boss.get("/bo/reseaux/").content.decode()
+
+
+# --- Build 41: what flows down -------------------------------------------------------------
+
+def test_a_zone_announcement_reaches_the_parishes(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from apps.announcements.models import Announcement
+
+    zapi = app_client(pres_z, zone)
+    r = zapi.post("/api/announcements/", {"title": "Rencontre de zone", "body": "Samedi à 15 h", "cascade": True}, format="json")
+    assert r.status_code == 201, r.content
+    pk = r.json()["id"]
+    assert Notification.all_groups.filter(user=member, group=parish, title=f"Annonce de {zone.name}").exists()
+
+    mapi = app_client(member, parish)
+    feed = mapi.get("/api/announcements/").json()
+    item = next(a for a in feed["results"] if a["id"] == pk)
+    assert item["from_group"]["name"] == zone.name and item["can_edit"] is False and item["reads"] is None
+    assert feed["unread"] >= 1
+    assert mapi.get(f"/api/announcements/{pk}/").status_code == 200
+    assert mapi.post(f"/api/announcements/{pk}/read/").status_code == 204
+    # The parish can't change it.
+    assert app_client(pres_p, parish).patch(f"/api/announcements/{pk}/", {"title": "x"}, format="json").status_code == 404
+    # The zone's own view counts the parish's members in the total.
+    own = zapi.get(f"/api/announcements/{pk}/").json()
+    assert own["from_group"] is None and own["reads"]["read"] == 2 and own["reads"]["total"] >= 3
+    # Not cascaded: stays in the zone.
+    quiet = zapi.post("/api/announcements/", {"title": "Bureau seulement"}, format="json").json()["id"]
+    assert quiet not in [a["id"] for a in mapi.get("/api/announcements/").json()["results"]]
+    assert Announcement.all_groups.get(pk=pk).group == zone
+
+
+def test_cascade_needs_groups_below(mgs):
+    _, parish, zone, pres_p, *_ = mgs
+    r = app_client(pres_p, parish).post("/api/announcements/", {"title": "Hello", "cascade": True}, format="json")
+    assert r.status_code == 400 and "cascade" in r.json()
+
+
+def test_a_zone_event_shows_in_the_parish_calendar(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from apps.core.groups import in_group
+    from apps.events.models import ActivityType
+
+    with in_group(zone):
+        kind = ActivityType.objects.first().slug
+    when = (timezone.now() + timedelta(days=3)).replace(microsecond=0).isoformat()
+    zapi = app_client(pres_z, zone)
+    r = zapi.post("/api/events/", {"kind": kind, "title": "Messe de zone", "starts_at": when, "place": "Cathédrale",
+                                    "cascade": True, "chef": pres_z.pk}, format="json")
+    assert r.status_code == 201, r.content
+    pk = r.json()["id"]
+    assert Notification.all_groups.filter(user=member, group=parish, title=f"Événement de {zone.name}").exists()
+    mapi = app_client(member, parish)
+    ev = next(e for e in mapi.get("/api/events/").json() if e["id"] == pk)
+    assert ev["from_group"]["name"] == zone.name and ev["can_edit"] is False and ev["kind_name"]
+    detail = app_client(pres_p, parish).get(f"/api/events/{pk}/").json()
+    assert detail["from_group"]["name"] == zone.name and "attendance_counts" not in detail
+    assert app_client(pres_p, parish).patch(f"/api/events/{pk}/", {"title": "x"}, format="json").status_code == 404
+    # Detached: it disappears.
+    detach(parish, by=pres_p, reason="Test")
+    assert pk not in [e["id"] for e in mapi.get("/api/events/").json()]

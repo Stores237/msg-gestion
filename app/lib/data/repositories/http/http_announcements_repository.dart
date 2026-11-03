@@ -38,6 +38,7 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
     int? eventId,
     bool pinned = false,
     List<int> tagged = const [],
+    bool cascade = false,
   }) async => Announcement.fromJson(
     await _api.post(
           '/announcements/',
@@ -48,6 +49,7 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
             'event': eventId,
             'pinned': pinned,
             'tagged': tagged,
+            if (cascade) 'cascade': true,
           },
         )
         as Map<String, dynamic>,

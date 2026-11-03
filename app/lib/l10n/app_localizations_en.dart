@@ -3426,4 +3426,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupNetReportIn => 'Report';
+
+  @override
+  String groupNetFrom(String name) {
+    return 'From $name';
+  }
+
+  @override
+  String groupNetEventFromAbove(String name) {
+    return 'An event of $name, passed on to your group. It is changed, and the roll call taken, in $name.';
+  }
+
+  @override
+  String get groupNetSendDown => 'Also for the attached groups';
+
+  @override
+  String groupNetSendDownHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $count attached groups (and those below) get it too, with a notification.',
+      one: 'The attached group gets it too, with a notification.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String groupNetSendDownEventHint(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'It also shows in the calendars of the $count attached groups and those below.',
+      one: 'It also shows in the attached group’s calendar.',
+    );
+    return '$_temp0';
+  }
 }

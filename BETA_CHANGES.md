@@ -1443,3 +1443,24 @@ Owner (2026-11-03): groups "share information base on what they allow to share".
 - How to verify: attach a parish to a zone (build 39), then as the parish président Réseau → Ce
   que nous partageons → Membres: Détail, Finances: Résumé → Enregistrer. As the zone's
   président, Réseau → the parish → names and roles, and the balance.
+
+## 63. Build 41: networks, phase 3 — announcements and events sent down
+
+Owner (2026-11-03): the groups of a network "communicate with each other"; an umbrella informs.
+
+- **Announcements**: a group with groups attached below gets "Aussi pour les groupes rattachés"
+  in the composer (announcements for everyone; not convocations nor tagged ones). The members of
+  every group below (all levels) get it in their Annonces, marked "De la part de Zone Nord ·
+  Zone paroissiale" with the zone's logo, and a notification "Annonce de Zone Nord". They read it
+  and it counts as read; they can't edit or delete it. The author's read counter includes them.
+- **Events**: the event form gets the same switch. The event shows in the calendars (and
+  Accueil) of every group below, marked with its origin; notification "Événement de Zone Nord".
+  There it is read-only: no "Prévenir une absence", no roll call, no report (those stay in the
+  zone). Detaching a group removes the zone's posts from its lists.
+- Names of activity types and dress codes come from the sending group.
+- Server: `Announcement.cascade`, `Event.cascade` (migrations announcements 0006, events 0009),
+  `apps/core/network.py` `visible`, `origin`, `send_down`; list, detail and mark-read include
+  what comes from above; `from_group` in both payloads; `/api/me/` group gains `below`.
+- Not yet: reminders the evening before for events sent down; joint planning (next).
+- How to verify: zone président → Annonces → Nouvelle → "Aussi pour les groupes rattachés" →
+  Publier; a parish member sees it with "De la part de …". Same with an event in Calendrier.

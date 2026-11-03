@@ -42,7 +42,11 @@ class GroupInfo {
     String? initials,
     this.levelName = '',
     this.parent,
+    this.below = 0,
   }) : initials = initials ?? '';
+
+  /// How many groups are attached directly below (build 41).
+  final int below;
 
   /// Its level in a network ("Paroisse") and the group it is attached to
   /// (owner, 2026-11-03), shown in the group sheet.
@@ -97,6 +101,7 @@ class GroupInfo {
     initials: j['initials'] as String?,
     levelName: (j['level_name'] as String?) ?? '',
     parent: j['parent'] as String?,
+    below: (j['below'] as int?) ?? 0,
   );
 }
 

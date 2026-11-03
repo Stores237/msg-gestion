@@ -2143,5 +2143,38 @@
       }
     }
   },
-  "groupNetReportIn": "Rapport"
+  "groupNetReportIn": "Rapport",
+  "groupNetFrom": "De la part de {name}",
+  "@groupNetFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetEventFromAbove": "Événement de {name}, transmis à votre groupe. Il se modifie et l’appel se fait dans {name}.",
+  "@groupNetEventFromAbove": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetSendDown": "Aussi pour les groupes rattachés",
+  "groupNetSendDownHint": "{count, plural, =1{Le groupe rattaché la reçoit aussi, avec une notification.} other{Les {count} groupes rattachés (et ceux en dessous) la reçoivent aussi, avec une notification.}}",
+  "@groupNetSendDownHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNetSendDownEventHint": "{count, plural, =1{Il apparaît aussi dans le calendrier du groupe rattaché.} other{Il apparaît aussi dans le calendrier des {count} groupes rattachés et de ceux en dessous.}}",
+  "@groupNetSendDownEventHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

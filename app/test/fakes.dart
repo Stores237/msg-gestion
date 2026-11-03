@@ -652,6 +652,8 @@ class FakeEventsRepository implements EventsRepository {
       myDuty: e.myDuty,
       placeDetail: e.placeDetail,
       dressDetail: e.dressDetail,
+      fromGroup: e.fromGroup,
+      cascade: e.cascade,
     );
   }
 
@@ -799,8 +801,9 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
     int? eventId,
     bool pinned = false,
     List<int> tagged = const [],
+    bool cascade = false,
   }) async {
-    sent.add('$kind:$title:${eventId ?? '-'}');
+    sent.add('$kind:$title:${eventId ?? '-'}${cascade ? ':down' : ''}');
     lastTagged = tagged;
     final a = Announcement(
       id: 100 + sent.length,

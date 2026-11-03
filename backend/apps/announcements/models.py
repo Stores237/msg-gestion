@@ -19,6 +19,9 @@ class Announcement(models.Model):
     body = models.TextField(blank=True)
     event = models.ForeignKey("events.Event", on_delete=models.SET_NULL, null=True, blank=True, related_name="convocations")
     pinned = models.BooleanField(default=False)
+    # Also for every group attached below this one (owner, 2026-11-03: the
+    # zone informs its parishes). They read it, marked with this group's name.
+    cascade = models.BooleanField("aussi pour les groupes rattachés", default=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     # The author's role when they posted (owner, 2026-10-26: shown on it).
     author_role = models.CharField(max_length=100, blank=True)

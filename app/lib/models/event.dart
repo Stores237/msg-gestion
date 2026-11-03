@@ -1,3 +1,5 @@
+import 'me.dart';
+
 /// Kind and dress keys are the group's own (back-office → Paramètres); the
 /// server also sends their names (kindName, dressName).
 /// Attendance keys: present, absent, excuse ('' = not marked).
@@ -33,7 +35,15 @@ class CalendarEvent {
     this.myDuty,
     this.placeDetail = '',
     this.dressDetail = '',
+    this.cascade = false,
+    this.fromGroup,
   });
+
+  /// Also in the calendars of the groups attached below (build 41).
+  final bool cascade;
+
+  /// Sent down by a group above; read-only here, no roll call.
+  final GroupInfo? fromGroup;
 
   /// Second line under the place ("Quartier, ville").
   final String placeDetail;
@@ -132,6 +142,10 @@ class CalendarEvent {
     attendanceCounts: (j['attendance_counts'] as Map<String, dynamic>?)?.map(
       (k, v) => MapEntry(k, v as int),
     ),
+    cascade: j['cascade'] == true,
+    fromGroup: j['from_group'] == null
+        ? null
+        : GroupInfo.fromJson(j['from_group'] as Map<String, dynamic>),
   );
 
   Map<String, dynamic> toJson() => {
@@ -146,6 +160,7 @@ class CalendarEvent {
     'kind_other': kindOther,
     'scope': scope,
     'chef': chefId,
+    'cascade': cascade,
   };
 }
 

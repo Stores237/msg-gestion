@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/repositories/profile_repository.dart';
+import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/event.dart';
@@ -39,6 +40,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
   Set<String> _scoped = AppSettings.defaultScopedTypes;
   Set<String> _noChef = AppSettings.defaultTypesWithoutChef;
   String _dress = 'interieure';
+
+  /// Also in the calendars of the groups attached below (build 41).
+  bool _cascade = false;
+  int get _below => currentUser.value?.group?.below ?? 0;
   late DateTime _day;
   TimeOfDay _start = const TimeOfDay(hour: 15, minute: 0);
   TimeOfDay? _end;
@@ -58,6 +63,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
       _place.text = e.place;
       _placeDetail.text = e.placeDetail;
       _notes.text = e.notes;
+      _cascade = e.cascade;
       _kindOther.text = e.kindOther;
       _scope = e.scope;
       if (e.chefId != null) _chef = (e.chefId!, e.chefName ?? '');
@@ -130,6 +136,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
         kindOther: _kind == 'autre' ? _kindOther.text.trim() : '',
         scope: _hasScope ? _scope : '',
         chefId: _needsChef ? _chef?.$1 : null,
+        cascade: _cascade && _below > 0,
       );
       final repo = RepositoryLocator.instance.events;
       if (widget.existing == null) {
@@ -408,6 +415,17 @@ class _EventFormScreenState extends State<EventFormScreen> {
                       maxLines: 4,
                       decoration: deco(),
                     ),
+                    if (_below > 0) ...[
+                      const SizedBox(height: 12),
+                      SwitchListTile(
+                        key: const Key('e-cascade'),
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l.groupNetSendDown),
+                        subtitle: Text(l.groupNetSendDownEventHint(_below)),
+                        value: _cascade,
+                        onChanged: (v) => setState(() => _cascade = v),
+                      ),
+                    ],
                   ],
                 ),
               ),

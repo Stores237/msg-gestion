@@ -125,13 +125,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   final d = Dates(context);
                   final overnight =
                       e.endsAt != null && e.endsAt!.day != e.startsAt.day;
-                  final canRoll = widget.me.can(
-                    'calendar.attendance',
-                    'change',
-                  );
+                  // Sent down by a group above (build 41): read only here.
+                  final foreign = e.fromGroup != null;
+                  final canRoll =
+                      !foreign &&
+                      widget.me.can('calendar.attendance', 'change');
                   return ListView(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     children: [
+                      if (e.fromGroup case final g?) ...[
+                        FromGroupMark(group: g, key: const Key('event-origin')),
+                        const SizedBox(height: 8),
+                      ],
                       EventTypeLine(event: e),
                       const SizedBox(height: 4),
                       Text(
@@ -221,105 +226,119 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                         ),
                       ],
-                      if (e.reportStatus.isNotEmpty) ...[
+                      if (e.reportStatus.isNotEmpty && !foreign) ...[
                         const SizedBox(height: 20),
                         ReportSection(event: e, onDone: _refresh),
                       ],
-                      const SizedBox(height: 20),
-                      SectionLabel(l.myPresence),
-                      const SizedBox(height: 8),
-                      GroupCard(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      presenceLabel(l, e.myAttendance ?? ''),
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w700,
+                      if (foreign) ...[
+                        const SizedBox(height: 20),
+                        Text(
+                          l.groupNetEventFromAbove(e.fromGroup!.name),
+                          key: const Key('event-from-above-note'),
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.5,
+                            color: c.textSecondary,
+                          ),
+                        ),
+                      ],
+                      if (!foreign) ...[
+                        const SizedBox(height: 20),
+                        SectionLabel(l.myPresence),
+                        const SizedBox(height: 8),
+                        GroupCard(
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        presenceLabel(l, e.myAttendance ?? ''),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  if (e.myAttendance != null)
-                                    Badge2(
-                                      presenceLabel(l, e.myAttendance!),
-                                      tone: switch (e.myAttendance) {
-                                        'present' => Tone.green,
-                                        'absent' => Tone.red,
-                                        _ => Tone.amber,
-                                      },
+                                    if (e.myAttendance != null)
+                                      Badge2(
+                                        presenceLabel(l, e.myAttendance!),
+                                        tone: switch (e.myAttendance) {
+                                          'present' => Tone.green,
+                                          'absent' => Tone.red,
+                                          _ => Tone.amber,
+                                        },
+                                      ),
+                                  ],
+                                ),
+                                // On a lineup: their post, or not on duty.
+                                if (e.hasLineup) ...[
+                                  const SizedBox(height: 8),
+                                  if (e.myDuty == null)
+                                    Text(
+                                      l.notOnDuty,
+                                      key: const Key('not-on-duty'),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: c.textSecondary,
+                                      ),
+                                    )
+                                  else
+                                    Wrap(
+                                      key: const Key('my-duty'),
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      children: [
+                                        if (e.myDuty!.chef)
+                                          Badge2(
+                                            l.chefDeGroupe,
+                                            tone: Tone.green,
+                                          ),
+                                        if (e.myDuty!.post.isNotEmpty)
+                                          Badge2(
+                                            l.myPost(dutyLabel(l, e.myDuty!)),
+                                          ),
+                                      ],
                                     ),
                                 ],
-                              ),
-                              // On a lineup: their post, or not on duty.
-                              if (e.hasLineup) ...[
-                                const SizedBox(height: 8),
-                                if (e.myDuty == null)
+                                if (e.myAttendance == null &&
+                                    (!e.hasLineup || e.myDuty != null)) ...[
+                                  const SizedBox(height: 2),
                                   Text(
-                                    l.notOnDuty,
-                                    key: const Key('not-on-duty'),
+                                    l.presenceNotMarkedSub,
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: c.textSecondary,
                                     ),
-                                  )
-                                else
-                                  Wrap(
-                                    key: const Key('my-duty'),
-                                    spacing: 6,
-                                    runSpacing: 4,
-                                    children: [
-                                      if (e.myDuty!.chef)
-                                        Badge2(
-                                          l.chefDeGroupe,
-                                          tone: Tone.green,
-                                        ),
-                                      if (e.myDuty!.post.isNotEmpty)
-                                        Badge2(
-                                          l.myPost(dutyLabel(l, e.myDuty!)),
-                                        ),
-                                    ],
                                   ),
-                              ],
-                              if (e.myAttendance == null &&
-                                  (!e.hasLineup || e.myDuty != null)) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  l.presenceNotMarkedSub,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: c.textSecondary,
-                                  ),
-                                ),
-                              ],
-                              if (e.myAttendance == null &&
-                                  !e.ended &&
-                                  (!e.hasLineup || e.myDuty != null) &&
-                                  e.startsAt.isAfter(
-                                    DateTime.now().subtract(
-                                      const Duration(hours: 1),
+                                ],
+                                if (e.myAttendance == null &&
+                                    !e.ended &&
+                                    (!e.hasLineup || e.myDuty != null) &&
+                                    e.startsAt.isAfter(
+                                      DateTime.now().subtract(
+                                        const Duration(hours: 1),
+                                      ),
+                                    )) ...[
+                                  const SizedBox(height: 12),
+                                  OutlinedButton(
+                                    key: const Key('warn-absence'),
+                                    onPressed: () => _excuse(e),
+                                    style: OutlinedButton.styleFrom(
+                                      minimumSize: const Size.fromHeight(48),
+                                      shape: const StadiumBorder(),
                                     ),
-                                  )) ...[
-                                const SizedBox(height: 12),
-                                OutlinedButton(
-                                  key: const Key('warn-absence'),
-                                  onPressed: () => _excuse(e),
-                                  style: OutlinedButton.styleFrom(
-                                    minimumSize: const Size.fromHeight(48),
-                                    shape: const StadiumBorder(),
+                                    child: Text(l.warnAbsence),
                                   ),
-                                  child: Text(l.warnAbsence),
-                                ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       SectionLabel(l.reminders),
                       const SizedBox(height: 8),

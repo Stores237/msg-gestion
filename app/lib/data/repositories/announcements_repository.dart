@@ -11,6 +11,7 @@ abstract class AnnouncementsRepository {
     int? eventId,
     bool pinned = false,
     List<int> tagged = const [],
+    bool cascade = false,
   });
 
   /// The author (or someone who manages announcements) edits or deletes it.

@@ -14,7 +14,10 @@
   give each its président; send each parish président their zone's code. Install build 39.
 - [ ] **Owner — build 40 (2026-11-03, network sharing):** deploy (migration core 0018); each
   attached group's président sets Réseau → Ce que nous partageons. Install build 40.
-- [ ] **Engineering — networks, next phases (2026-11-03):** umbrella announcements and events reaching the groups below + joint planning,
+- [ ] **Owner — build 41 (2026-11-03, sent down):** deploy (migrations announcements 0006,
+  events 0009); install build 41.
+- [ ] **Engineering — networks, next phases (2026-11-03):** evening-before reminders for events
+  sent down; joint planning,
   links between groups (neighbours under one parent; "jumelage" elsewhere), dues between levels.
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render

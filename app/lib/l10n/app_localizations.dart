@@ -5719,6 +5719,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Rapport'**
   String get groupNetReportIn;
+
+  /// No description provided for @groupNetFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'De la part de {name}'**
+  String groupNetFrom(String name);
+
+  /// No description provided for @groupNetEventFromAbove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événement de {name}, transmis à votre groupe. Il se modifie et l’appel se fait dans {name}.'**
+  String groupNetEventFromAbove(String name);
+
+  /// No description provided for @groupNetSendDown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aussi pour les groupes rattachés'**
+  String get groupNetSendDown;
+
+  /// No description provided for @groupNetSendDownHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Le groupe rattaché la reçoit aussi, avec une notification.} other{Les {count} groupes rattachés (et ceux en dessous) la reçoivent aussi, avec une notification.}}'**
+  String groupNetSendDownHint(int count);
+
+  /// No description provided for @groupNetSendDownEventHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Il apparaît aussi dans le calendrier du groupe rattaché.} other{Il apparaît aussi dans le calendrier des {count} groupes rattachés et de ceux en dessous.}}'**
+  String groupNetSendDownEventHint(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../data/group_controller.dart';
+import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/announcement.dart';
@@ -41,6 +42,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
   int _kind = 0; // 0 annonce, 1 convocation
   CalendarEvent? _event;
   bool _pinned = false;
+
+  /// Also for the groups attached below (build 41).
+  bool _cascade = false;
+  int get _below => currentUser.value?.group?.below ?? 0;
   bool _busy = false;
   bool _eventMissing = false;
   final List<PickedFile> _files = [];
@@ -255,6 +260,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
               eventId: eventId,
               pinned: _pinned,
               tagged: [for (final r in _tagged) r.id],
+              cascade: _cascade && _kind == 0 && _tagged.isEmpty,
             );
       for (final f in [
         ..._files,
@@ -476,6 +482,19 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           chevron: true,
                           onTap: _pickTagged,
                         ),
+                        if (!_editing &&
+                            _below > 0 &&
+                            _kind == 0 &&
+                            _tagged.isEmpty)
+                          ListRow(
+                            title: Text(l.groupNetSendDown),
+                            subtitle: Text(l.groupNetSendDownHint(_below)),
+                            trailing: Switch(
+                              key: const Key('a-cascade'),
+                              value: _cascade,
+                              onChanged: (v) => setState(() => _cascade = v),
+                            ),
+                          ),
                         if (!_editing)
                           ListRow(
                             title: Text(l.pinOnTop),

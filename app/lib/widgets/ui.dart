@@ -5,11 +5,13 @@ import '../data/file_store.dart';
 import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
+import '../models/me.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'attachments.dart';
 import 'dates.dart';
 import 'errors.dart';
+import 'group_logo.dart';
 import 'labels.dart';
 import 'photo_frame.dart';
 import 'store_image.dart';
@@ -901,6 +903,13 @@ class EventCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (e.fromGroup case final g?) ...[
+                        FromGroupMark(
+                          group: g,
+                          key: Key('event-from-group-${e.id}'),
+                        ),
+                        const SizedBox(height: 6),
+                      ],
                       EventTypeLine(event: e),
                       const SizedBox(height: 2),
                       Text(
@@ -1010,6 +1019,10 @@ class AnnouncementCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (a.fromGroup case final g?) ...[
+                  FromGroupMark(group: g, key: Key('from-group-${a.id}')),
+                  const SizedBox(height: 8),
+                ],
                 Row(
                   children: [
                     // Wraps instead of overflowing on narrow phones / large text.
@@ -1373,6 +1386,41 @@ class OwnerActions extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// "De la part de Zone Nord": an announcement or event sent down by a group
+/// above (build 41), with that group's logo.
+class FromGroupMark extends StatelessWidget {
+  const FromGroupMark({super.key, required this.group});
+  final GroupInfo group;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    return Row(
+      children: [
+        GroupLogo(group: group, size: 20),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            AppLocalizations.of(context).groupNetFrom(
+              [
+                group.name,
+                group.levelName,
+              ].where((s) => s.isNotEmpty).join(' · '),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: c.textSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

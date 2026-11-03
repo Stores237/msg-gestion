@@ -1,3 +1,5 @@
+import 'me.dart';
+
 class AttachmentInfo {
   const AttachmentInfo({
     required this.id,
@@ -69,7 +71,15 @@ class Announcement {
     this.attachments = const [],
     this.tagged = const [],
     this.forMe = false,
+    this.cascade = false,
+    this.fromGroup,
   });
+
+  /// Also sent to the groups attached below (build 41).
+  final bool cascade;
+
+  /// Sent down by a group above this one; read-only here.
+  final GroupInfo? fromGroup;
 
   final int id;
 
@@ -125,6 +135,8 @@ class Announcement {
     attachments: attachments,
     tagged: tagged,
     forMe: forMe,
+    cascade: cascade,
+    fromGroup: fromGroup,
   );
 
   factory Announcement.fromJson(Map<String, dynamic> j) {
@@ -160,6 +172,10 @@ class Announcement {
           ),
       ],
       forMe: (j['for_me'] as bool?) ?? false,
+      cascade: j['cascade'] == true,
+      fromGroup: j['from_group'] == null
+          ? null
+          : GroupInfo.fromJson(j['from_group'] as Map<String, dynamic>),
     );
   }
 }

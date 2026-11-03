@@ -111,6 +111,9 @@ class Event(models.Model):
     # The slug of one of the group's DressCode, or empty.
     dress = models.CharField(max_length=12, blank=True)
     notes = models.TextField(blank=True)
+    # Shown in the calendars of the groups attached below (owner, 2026-11-03),
+    # read-only there.
+    cascade = models.BooleanField("aussi pour les groupes rattachés", default=False)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     # The author's role when they created it (owner, 2026-10-26: shown on it).
     created_by_role = models.CharField(max_length=100, blank=True)

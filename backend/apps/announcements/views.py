@@ -35,8 +35,16 @@ def _notify_new(item, users):
     return notify(users, kind, title, item.title, target)
 
 
+def _visible(request):
+    """This group's announcements and those sent down from above (build 41)."""
+    from apps.core.groups import current_group_id
+    from apps.core.network import visible
+
+    return visible(Announcement, current_group_id(), kind=Announcement.Kind.ANNOUNCEMENT)
+
+
 def _context(request, items):
-    read_ids = set(Read.objects.filter(member=request.user, announcement__in=items).values_list("announcement_id", flat=True))
+    read_ids = set(Read.all_groups.filter(member=request.user, announcement__in=items).values_list("announcement_id", flat=True))
     return {"read_ids": read_ids, "viewer": request.user, "audience": _audience().count(), "request": request}
 
 
@@ -51,7 +59,7 @@ class AnnouncementListView(APIView):
         # Explicit order_by: Django drops Meta.ordering from GROUP BY queries,
         # and annotate(Count) makes this one.
         qs = (
-            Announcement.objects.select_related("author", "event")
+            _visible(request).select_related("author", "event", "group")
             .prefetch_related("attachments", "tagged")
             .annotate(read_count=Count("reads"))
             .order_by("-pinned", "-created_at")
@@ -66,7 +74,7 @@ class AnnouncementListView(APIView):
         elif f == "for_me":
             qs = qs.filter(tagged=request.user)
         items = list(qs[:100])
-        unread = Announcement.objects.exclude(reads__member=request.user).count()
+        unread = _visible(request).exclude(reads__member=request.user).count()
         return Response({"unread": unread, "results": AnnouncementSerializer(items, many=True, context=_context(request, items)).data})
 
     @extend_schema(request=AnnouncementSerializer, responses=AnnouncementSerializer)
@@ -77,6 +85,12 @@ class AnnouncementListView(APIView):
         Read.objects.create(announcement=item, member=request.user)  # the author has read it
         tagged = item.tagged.all()
         n = _notify_new(item, (tagged if tagged else _audience()).exclude(pk=request.user.pk))
+        if item.cascade:
+            from apps.core.models import Settings
+            from apps.core.network import send_down
+
+            g = Settings.get().group
+            n += send_down(g, f"Annonce de {g.name}", item.title, {"type": "announcement", "id": item.pk})
         audit.record("Convocation envoyée" if item.kind == Announcement.Kind.CONVOCATION else "Annonce publiée",
                      actor=request.user, obj=item, request=request,
                      detail={"notifiés": n, **({"mentionnés": len(tagged)} if tagged else {})})
@@ -90,7 +104,7 @@ class AnnouncementDetailView(APIView):
     permission_classes = [require("announcements.posts", "view")]
 
     def get(self, request, pk):
-        item = get_object_or_404(Announcement.objects.select_related("author", "event").prefetch_related("tagged"), pk=pk)
+        item = get_object_or_404(_visible(request).select_related("author", "event", "group").prefetch_related("tagged"), pk=pk)
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
 
     @extend_schema(request=AnnouncementSerializer, responses=AnnouncementSerializer)
@@ -126,8 +140,8 @@ class MarkReadView(APIView):
     permission_classes = [require("announcements.posts", "view")]
 
     def post(self, request, pk):
-        item = get_object_or_404(Announcement, pk=pk)
-        Read.objects.get_or_create(announcement=item, member=request.user)
+        item = get_object_or_404(_visible(request), pk=pk)
+        Read.all_groups.get_or_create(announcement=item, member=request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

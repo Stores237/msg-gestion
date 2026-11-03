@@ -25,13 +25,14 @@ class EventSerializer(serializers.ModelSerializer):
     report_read_by = serializers.SerializerMethodField()
     has_lineup = serializers.SerializerMethodField()
     my_duty = serializers.SerializerMethodField()
+    from_group = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "place_detail", "dress", "dress_name", "dress_detail",
                   "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete", "ended",
                   "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
-                  "has_lineup", "my_duty"]
+                  "has_lineup", "my_duty", "cascade", "from_group"]
         read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete", "ended"]
 
     def __init__(self, *args, **kwargs):
@@ -63,21 +64,34 @@ class EventSerializer(serializers.ModelSerializer):
 
     def get_can_report(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and reports.can_submit(v, event)
+        return bool(v) and not self._foreign(event) and reports.can_submit(v, event)
 
     def get_can_read_report(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and reports.status(event) in ("submitted", "late") and reports.can_read(v, event)
+        return bool(v) and not self._foreign(event) and reports.status(event) in ("submitted", "late") and reports.can_read(v, event)
 
     # Whoever added it edits and deletes it (owner, 2026-10-26); people with
     # the calendar's change / delete rights can for any event.
+    def _foreign(self, event) -> bool:
+        from apps.core.groups import current_group_id
+
+        gid = current_group_id()
+        return gid is not None and event.group_id is not None and event.group_id != gid
+
+    def get_from_group(self, event) -> dict | None:
+        """The group above that sent it down (build 41), read-only here."""
+        from apps.core.groups import current_group_id
+        from apps.core.network import origin
+
+        return origin(event, current_group_id(), self.context.get("request")) if self._foreign(event) else None
+
     def get_can_edit(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "change"))
+        return bool(v) and not self._foreign(event) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "change"))
 
     def get_can_delete(self, event) -> bool:
         v = self.context.get("viewer")
-        return bool(v) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "delete"))
+        return bool(v) and not self._foreign(event) and not event.has_ended() and (event.created_by_id == v.pk or v.can("calendar.events", "delete"))
 
     def get_ended(self, event) -> bool:
         return event.has_ended()
@@ -97,15 +111,37 @@ class EventSerializer(serializers.ModelSerializer):
             cache[key] = load()
         return cache[key]
 
+    def _in_origin(self, event, key, load):
+        """Names from the event's own group (an event sent down from above
+        uses that group's activity types and dress codes)."""
+        if not self._foreign(event):
+            return self._names(key, load)
+        from apps.core.groups import in_group
+
+        cache = self.context.setdefault("_names", {})
+        k = (key, event.group_id)
+        if k not in cache:
+            with in_group(event.group_id):
+                cache[k] = load()
+        return cache[k]
+
     def get_kind_name(self, event) -> str:
-        return self._names("kinds", kind_names).get(event.kind, event.kind)
+        return self._in_origin(event, "kinds", kind_names).get(event.kind, event.kind)
 
     def get_dress_detail(self, event) -> str:
         """What the dress means in this group (Paramètres → Tenues)."""
-        return self._names("dress_details", dress_descriptions).get(event.dress, "") if event.dress else ""
+        return self._in_origin(event, "dress_details", dress_descriptions).get(event.dress, "") if event.dress else ""
 
     def get_dress_name(self, event) -> str:
-        return self._names("dresses", dress_names).get(event.dress, event.dress) if event.dress else ""
+        return self._in_origin(event, "dresses", dress_names).get(event.dress, event.dress) if event.dress else ""
+
+    def validate_cascade(self, value):
+        if value:
+            from apps.core.models import Settings
+
+            if not Settings.get().group.children.filter(is_active=True).exists():
+                raise serializers.ValidationError("Aucun groupe n’est rattaché au vôtre.", code="no_groups_below")
+        return value
 
     def validate_kind(self, value):
         # The group's own list (back-office → Paramètres).

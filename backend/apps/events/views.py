@@ -34,6 +34,14 @@ def _context(user, events):
     return {"mine": _mine(user, events), "viewer": user, "lineups": with_lineup, "duties": duties}
 
 
+def _visible():
+    """This group's events and those sent down from above (build 41)."""
+    from apps.core.groups import current_group_id
+    from apps.core.network import visible
+
+    return visible(Event, current_group_id())
+
+
 def _day_start(d):
     return timezone.make_aware(datetime.combine(d, time.min))
 
@@ -51,7 +59,7 @@ class EventListView(APIView):
         end = parse_date(request.query_params.get("to", "")) or start + timedelta(days=60)
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
-        events = list(Event.objects.select_related(*EVENT_RELATED).filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
+        events = list(_visible().select_related(*EVENT_RELATED, "group").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
         return Response(EventSerializer(events, many=True, context=_context(request.user, events)).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
@@ -62,6 +70,13 @@ class EventListView(APIView):
         audit.record("Événement créé", actor=request.user, obj=event, request=request,
                      detail={"chef": event.chef.short_name} if event.chef else None)
         reports.tell_chef(event)
+        if event.cascade:
+            from apps.core.models import Settings
+            from apps.core.network import send_down
+
+            g = Settings.get().group
+            when = timezone.localtime(event.starts_at).strftime("%d/%m à %H:%M")
+            send_down(g, f"Événement de {g.name}", f"{event.title} · {when}", {"type": "event", "id": event.pk}, kind="duty")
         return Response(EventSerializer(event, context={"viewer": request.user}).data, status=status.HTTP_201_CREATED)
 
 
@@ -73,9 +88,9 @@ class EventDetailView(APIView):
 
     @extend_schema(responses=EventSerializer)
     def get(self, request, pk):
-        event = get_object_or_404(Event.objects.select_related(*EVENT_RELATED), pk=pk)
+        event = get_object_or_404(_visible().select_related(*EVENT_RELATED, "group"), pk=pk)
         body = dict(EventSerializer(event, context=_context(request.user, [event])).data)
-        if request.user.can("calendar.attendance", "view"):
+        if request.user.can("calendar.attendance", "view") and body.get("from_group") is None:
             counts = {s: 0 for s in Attendance.Status.values}
             for st in event.attendance.values_list("status", flat=True):
                 counts[st] += 1

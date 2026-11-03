@@ -1060,5 +1060,10 @@
   "groupNetEvents90": "Events with a roll call (3 months)",
   "groupNetPresenceRate": "Attendance rate",
   "groupNetAttendance": "{present} present · {absent} absent · {excused} excused",
-  "groupNetReportIn": "Report"
+  "groupNetReportIn": "Report",
+  "groupNetFrom": "From {name}",
+  "groupNetEventFromAbove": "An event of {name}, passed on to your group. It is changed, and the roll call taken, in {name}.",
+  "groupNetSendDown": "Also for the attached groups",
+  "groupNetSendDownHint": "{count, plural, =1{The attached group gets it too, with a notification.} other{The {count} attached groups (and those below) get it too, with a notification.}}",
+  "groupNetSendDownEventHint": "{count, plural, =1{It also shows in the attached group’s calendar.} other{It also shows in the calendars of the {count} attached groups and those below.}}"
 }
