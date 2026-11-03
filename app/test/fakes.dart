@@ -654,6 +654,38 @@ class FakeEventsRepository implements EventsRepository {
       dressDetail: e.dressDetail,
       fromGroup: e.fromGroup,
       cascade: e.cascade,
+      contingent: e.contingent,
+    );
+  }
+
+  // Joint planning (build 42).
+  ContingentBoard board = const ContingentBoard();
+  MyContingent? mine;
+  final asked = <String>[];
+  final answered = <List<int>>[];
+
+  @override
+  Future<ContingentBoard> contingents(int eventId) async => board;
+
+  @override
+  Future<ContingentBoard> askContingents(
+    int eventId,
+    List<({int group, int requested, String note})> requests,
+  ) async {
+    asked.addAll([for (final r in requests) '${r.group}:${r.requested}']);
+    return board;
+  }
+
+  @override
+  Future<MyContingent> myContingent(int eventId) async => mine!;
+
+  @override
+  Future<MyContingent> answerContingent(int eventId, List<int> members) async {
+    answered.add(members);
+    return mine = MyContingent(
+      requested: mine!.requested,
+      members: [for (final m in members) (id: m, name: 'Membre $m')],
+      canAnswer: true,
     );
   }
 

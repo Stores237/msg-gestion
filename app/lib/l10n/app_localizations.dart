@@ -5749,6 +5749,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count, plural, =1{Il apparaît aussi dans le calendrier du groupe rattaché.} other{Il apparaît aussi dans le calendrier des {count} groupes rattachés et de ceux en dessous.}}'**
   String groupNetSendDownEventHint(int count);
+
+  /// No description provided for @contingentsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnes demandées aux groupes'**
+  String get contingentsTitle;
+
+  /// No description provided for @contingentsAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez combien de personnes chaque groupe rattaché doit envoyer. Son responsable du planning choisit qui ; vous voyez les noms ici.'**
+  String get contingentsAbout;
+
+  /// No description provided for @contingentsNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande pour l’instant'**
+  String get contingentsNone;
+
+  /// No description provided for @contingentLess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne de moins'**
+  String get contingentLess;
+
+  /// No description provided for @contingentMore.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une personne de plus'**
+  String get contingentMore;
+
+  /// No description provided for @contingentSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer les demandes'**
+  String get contingentSend;
+
+  /// No description provided for @contingentAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes envoyées. Les responsables du planning des groupes sont prévenus.'**
+  String get contingentAsked;
+
+  /// No description provided for @contingentWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente des noms'**
+  String get contingentWaiting;
+
+  /// No description provided for @contingentNamed.
+  ///
+  /// In fr, this message translates to:
+  /// **'{named}/{requested} : {names}'**
+  String contingentNamed(int named, int requested, String names);
+
+  /// No description provided for @contingentTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personnes demandées'**
+  String get contingentTitle;
+
+  /// No description provided for @contingentAsk.
+  ///
+  /// In fr, this message translates to:
+  /// **'{from} demande {count, plural, =1{1 personne} other{{count} personnes}}'**
+  String contingentAsk(String from, int count);
+
+  /// No description provided for @contingentNamedLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'{named} désignée(s) sur {requested}'**
+  String contingentNamedLabel(int named, int requested);
+
+  /// No description provided for @contingentNobody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Personne n’est encore désigné.'**
+  String get contingentNobody;
+
+  /// No description provided for @contingentChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désigner les personnes'**
+  String get contingentChoose;
+
+  /// No description provided for @contingentChooseHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seulement des membres actifs de votre groupe. Ils reçoivent une notification ; le groupe qui demande voit leurs noms.'**
+  String get contingentChooseHint;
+
+  /// No description provided for @contingentSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Désignation enregistrée.'**
+  String get contingentSaved;
+
+  /// No description provided for @contingentYou.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous êtes désigné(e)'**
+  String get contingentYou;
 }
 
 class _AppLocalizationsDelegate

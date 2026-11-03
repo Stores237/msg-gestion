@@ -37,7 +37,12 @@ class CalendarEvent {
     this.dressDetail = '',
     this.cascade = false,
     this.fromGroup,
+    this.contingent,
   });
+
+  /// Joint planning (build 42): from above, what this group is asked and
+  /// whether the viewer is named; on an event this group sent down, totals.
+  final ContingentSummary? contingent;
 
   /// Also in the calendars of the groups attached below (build 41).
   final bool cascade;
@@ -146,6 +151,9 @@ class CalendarEvent {
     fromGroup: j['from_group'] == null
         ? null
         : GroupInfo.fromJson(j['from_group'] as Map<String, dynamic>),
+    contingent: j['contingent'] == null
+        ? null
+        : ContingentSummary.fromJson(j['contingent'] as Map<String, dynamic>),
   );
 
   Map<String, dynamic> toJson() => {
@@ -243,5 +251,96 @@ class AttendanceRow {
     duty: j['duty'] == null
         ? null
         : Duty.fromJson(j['duty'] as Map<String, dynamic>),
+  );
+}
+
+/// How many people are asked and named (build 42).
+class ContingentSummary {
+  const ContingentSummary({
+    required this.requested,
+    required this.designated,
+    this.me = false,
+  });
+  final int requested;
+  final int designated;
+  final bool me;
+
+  factory ContingentSummary.fromJson(Map<String, dynamic> j) =>
+      ContingentSummary(
+        requested: j['requested'] as int,
+        designated: j['designated'] as int,
+        me: j['me'] == true,
+      );
+}
+
+typedef NamedPerson = ({int id, String name});
+
+List<NamedPerson> _people(Object? rows) => [
+  for (final p in (rows as List?) ?? const [])
+    (id: p['id'] as int, name: p['name'] as String),
+];
+
+/// One group below, on the asking side.
+class ContingentRow {
+  const ContingentRow({
+    required this.group,
+    this.requested = 0,
+    this.note = '',
+    this.members = const [],
+    this.answeredAt,
+  });
+  final GroupInfo group;
+  final int requested;
+  final String note;
+  final List<NamedPerson> members;
+  final DateTime? answeredAt;
+}
+
+class ContingentBoard {
+  const ContingentBoard({
+    this.groups = const [],
+    this.canPlan = false,
+    this.sentDown = false,
+  });
+  final List<ContingentRow> groups;
+  final bool canPlan;
+  final bool sentDown;
+
+  factory ContingentBoard.fromJson(Map<String, dynamic> j) => ContingentBoard(
+    canPlan: j['can_plan'] == true,
+    sentDown: j['sent_down'] == true,
+    groups: [
+      for (final r in (j['groups'] as List?) ?? const [])
+        ContingentRow(
+          group: GroupInfo.fromJson(r['group'] as Map<String, dynamic>),
+          requested: r['requested'] as int,
+          note: (r['note'] as String?) ?? '',
+          members: _people(r['members']),
+          answeredAt: r['answered_at'] == null
+              ? null
+              : DateTime.parse(r['answered_at'] as String).toLocal(),
+        ),
+    ],
+  );
+}
+
+/// The asked side: what the group above wants from this group.
+class MyContingent {
+  const MyContingent({
+    required this.requested,
+    this.note = '',
+    this.members = const [],
+    this.canAnswer = false,
+  });
+  final int requested;
+  final String note;
+  final List<NamedPerson> members;
+  final bool canAnswer;
+
+  factory MyContingent.fromJson(Map<String, dynamic> j) => MyContingent(
+    requested: j['requested'] as int,
+    note: (j['note'] as String?) ?? '',
+    members: _people(j['members']),
+    canAnswer: j['can_answer'] == true,
   );
 }

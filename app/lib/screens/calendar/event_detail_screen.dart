@@ -13,6 +13,7 @@ import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/ui.dart';
 import 'attendance_screen.dart';
+import 'contingent_screens.dart';
 import 'event_form_screen.dart';
 import 'report_screens.dart';
 
@@ -335,6 +336,77 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   ),
                                 ],
                               ],
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (foreign && e.contingent != null) ...[
+                        const SizedBox(height: 20),
+                        GroupCard(
+                          children: [
+                            ListRow(
+                              key: const Key('my-contingent'),
+                              lead: const Icon(Icons.groups_outlined),
+                              title: Text(
+                                l.contingentAsk(
+                                  e.fromGroup!.name,
+                                  e.contingent!.requested,
+                                ),
+                              ),
+                              subtitle: Text(
+                                l.contingentNamedLabel(
+                                  e.contingent!.designated,
+                                  e.contingent!.requested,
+                                ),
+                              ),
+                              trailing: e.contingent!.me
+                                  ? Badge2(
+                                      l.contingentYou,
+                                      key: const Key('contingent-me'),
+                                      tone: Tone.green,
+                                    )
+                                  : null,
+                              chevron: true,
+                              onTap: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        MyContingentScreen(event: e),
+                                  ),
+                                );
+                                _refresh();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (!foreign &&
+                          e.cascade &&
+                          (widget.me.group?.below ?? 0) > 0) ...[
+                        const SizedBox(height: 20),
+                        GroupCard(
+                          children: [
+                            ListRow(
+                              key: const Key('open-contingents'),
+                              lead: const Icon(Icons.groups_outlined),
+                              title: Text(l.contingentsTitle),
+                              subtitle: Text(
+                                e.contingent == null
+                                    ? l.contingentsNone
+                                    : l.contingentNamedLabel(
+                                        e.contingent!.designated,
+                                        e.contingent!.requested,
+                                      ),
+                              ),
+                              chevron: true,
+                              onTap: () async {
+                                await Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => ContingentsScreen(event: e),
+                                  ),
+                                );
+                                _refresh();
+                              },
                             ),
                           ],
                         ),

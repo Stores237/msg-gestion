@@ -27,6 +27,16 @@ abstract class EventsRepository {
   Future<void> excuse(int eventId, {String reason = ''});
   Future<AttendanceSheet> attendance(int eventId);
 
+  /// Joint planning (build 42): the asking group's board, and its requests
+  /// (group id → number, note); the asked group's side and its answer.
+  Future<ContingentBoard> contingents(int eventId);
+  Future<ContingentBoard> askContingents(
+    int eventId,
+    List<({int group, int requested, String note})> requests,
+  );
+  Future<MyContingent> myContingent(int eventId);
+  Future<MyContingent> answerContingent(int eventId, List<int> members);
+
   /// marks: member id → present | absent | excuse | '' (clear).
   Future<AttendanceSheet> saveAttendance(int eventId, Map<int, String> marks);
 

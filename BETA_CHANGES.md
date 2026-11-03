@@ -1464,3 +1464,24 @@ Owner (2026-11-03): the groups of a network "communicate with each other"; an um
 - Not yet: reminders the evening before for events sent down; joint planning (next).
 - How to verify: zone président → Annonces → Nouvelle → "Aussi pour les groupes rattachés" →
   Publier; a parish member sees it with "De la part de …". Same with an event in Calendrier.
+
+## 64. Build 42: networks, phase 4 — joint planning
+
+Owner (2026-11-03): joint duty across the parishes of a zone, without the zone running them.
+
+- On an event a group sent down, that group's planning officers (`calendar.planning` change) get
+  **Personnes demandées aux groupes**: for each group attached directly below, − / + the number
+  of people wanted, then "Envoyer les demandes". Each group's planning officers are notified
+  ("Zone Nord demande 6 personnes", with the date and the note). 0 cancels a request.
+- In the parish, the event (from above) shows "Zone Nord demande 6 personnes · 2 désignée(s) sur
+  6". Its planning officer opens it → **Désigner les personnes** (the usual member picker, with
+  roles; active members of this group only). The people named are notified ("Vous êtes
+  désigné(e)") and see "Vous êtes désigné(e)" on the event; people removed are told; the zone's
+  planners get "GS Yapoma a désigné 6/6".
+- The zone sees, per group, the names or "En attente des noms". It never picks a parish's
+  members itself. Nothing changes once the event is over.
+- Server: `events.EventContingent` (migration events 0010), `apps/events/contingents.py`;
+  `/api/events/<id>/contingents/` (GET, PUT `requests`), `/api/events/<id>/contingent/` (GET, PUT
+  `members`); the event payload gains `contingent`.
+- How to verify: zone → an event sent down → Personnes demandées aux groupes → + on a parish →
+  Envoyer. Parish planning officer → the event → Désigner → pick two → the zone sees the names.

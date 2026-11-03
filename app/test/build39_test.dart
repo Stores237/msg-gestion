@@ -313,4 +313,96 @@ void main() {
     expect(find.byKey(const Key('roll-call')), findsNothing);
     expect(find.byKey(const Key('warn-absence')), findsNothing);
   });
+
+  // Build 42: joint planning.
+  testWidgets('the zone asks each parish for people', (tester) async {
+    final f = await setUpApp(tester);
+    f.events.events = [
+      CalendarEvent(
+        id: 8,
+        kind: 'messe',
+        title: 'Pèlerinage',
+        startsAt: DateTime.now().add(const Duration(days: 5)),
+        place: '',
+        dress: '',
+        notes: '',
+        cascade: true,
+      ),
+    ];
+    f.events.board = const ContingentBoard(
+      canPlan: true,
+      sentDown: true,
+      groups: [ContingentRow(group: GroupInfo(id: 3, name: 'GS Yapoma'))],
+    );
+    await tester.pumpWidget(
+      MsgApp(
+        home: EventDetailScreen(
+          eventId: 8,
+          me: fakeMe(
+            groups: const [
+              {'id': 7, 'name': 'Zone Nord', 'below': 1},
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('open-contingents')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('open-contingents')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('more-3')));
+    await tester.tap(find.byKey(const Key('more-3')));
+    await tester.pump();
+    expect(find.text('2'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('contingents-save')));
+    await tester.pumpAndSettle();
+    expect(f.events.asked, ['3:2']);
+  });
+
+  testWidgets('the parish names its people; the named member sees it', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.events.events = [
+      CalendarEvent(
+        id: 9,
+        kind: 'messe',
+        title: 'Pèlerinage',
+        startsAt: DateTime.now().add(const Duration(days: 5)),
+        place: '',
+        dress: '',
+        notes: '',
+        cascade: true,
+        fromGroup: const GroupInfo(id: 7, name: 'Zone Nord'),
+        contingent: const ContingentSummary(
+          requested: 2,
+          designated: 1,
+          me: true,
+        ),
+      ),
+    ];
+    f.events.mine = const MyContingent(requested: 2, canAnswer: true);
+    await tester.pumpWidget(
+      MsgApp(home: EventDetailScreen(eventId: 9, me: fakeMe())),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('contingent-me')), findsOneWidget);
+    expect(find.text('Zone Nord demande 2 personnes'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('my-contingent')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('contingent-name')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('pick-many-2')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('members-done')));
+    await tester.pumpAndSettle();
+    expect(f.events.answered, [
+      [2],
+    ]);
+    expect(find.byKey(const Key('named-2')), findsOneWidget);
+  });
 }

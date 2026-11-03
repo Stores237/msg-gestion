@@ -270,3 +270,84 @@ class ExcuseView(APIView):
             defaults={"status": Attendance.Status.EXCUSED, "reason": s.validated_data["reason"], "marked_by": request.user},
         )
         return Response({"my_attendance": Attendance.Status.EXCUSED})
+
+
+def _people(qs):
+    return [{"id": u.pk, "name": u.short_name} for u in sorted(qs, key=lambda u: (u.last_name, u.first_name))]
+
+
+class ContingentsView(APIView):
+    """The asking side (owner, 2026-11-03): GET how many people each group
+    below is asked for and whom it named; PUT {"requests": [{"group",
+    "requested", "note"}]} (calendar.planning change)."""
+
+    permission_classes = [require("calendar.events", "view")]
+
+    def _body(self, request, event):
+        from apps.core.identity import group_identity
+
+        from .contingents import contingents_of
+
+        rows = []
+        for r in contingents_of(event):
+            c = r["contingent"]
+            rows.append({"group": group_identity(r["group"], request), "requested": c.requested if c else 0,
+                         "note": c.note if c else "", "members": _people(c.members.all()) if c else [],
+                         "answered_at": c.answered_at.isoformat() if c and c.answered_at else None})
+        return {"groups": rows, "can_plan": request.user.can("calendar.planning", "change") and not event.has_ended(),
+                "sent_down": event.cascade}
+
+    def get(self, request, pk):
+        event = get_object_or_404(Event, pk=pk)
+        return Response(self._body(request, event))
+
+    def put(self, request, pk):
+        from .contingents import ContingentRule, set_requests
+
+        event = get_object_or_404(Event, pk=pk)
+        if not request.user.can("calendar.planning", "change"):
+            return Response({"detail": "Réservé à ceux qui font le planning.", "code": "forbidden"}, status=403)
+        try:
+            set_requests(event, request.data.get("requests"), by=request.user, request=request)
+        except ContingentRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response(self._body(request, event))
+
+
+class MyContingentView(APIView):
+    """The asked side: GET what the group above asks of this group for its
+    event; PUT {"members": [ids]} (calendar.planning change here)."""
+
+    permission_classes = [require("calendar.events", "view")]
+
+    def _contingent(self, pk):
+        from apps.core.groups import current_group_id
+
+        from .models import EventContingent
+
+        event = get_object_or_404(_visible(), pk=pk)
+        return get_object_or_404(EventContingent.objects.select_related("event", "event__group", "group"),
+                                 event=event, group_id=current_group_id())
+
+    def _body(self, request, c):
+        return {"requested": c.requested, "note": c.note, "members": _people(c.members.all()),
+                "answered_at": c.answered_at.isoformat() if c.answered_at else None,
+                "can_answer": request.user.can("calendar.planning", "change") and not c.event.has_ended()}
+
+    def get(self, request, pk):
+        return Response(self._body(request, self._contingent(pk)))
+
+    def put(self, request, pk):
+        from .contingents import ContingentRule, answer
+
+        c = self._contingent(pk)
+        if not request.user.can("calendar.planning", "change"):
+            return Response({"detail": "Réservé à ceux qui font le planning.", "code": "forbidden"}, status=403)
+        ids = request.data.get("members")
+        if not isinstance(ids, list):
+            return Response({"detail": "Liste de membres attendue.", "code": "bad_request"}, status=400)
+        try:
+            answer(c, ids, by=request.user, request=request)
+        except ContingentRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response(self._body(request, c))

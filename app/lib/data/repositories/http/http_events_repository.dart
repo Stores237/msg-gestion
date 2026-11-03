@@ -111,4 +111,42 @@ class HttpEventsRepository implements EventsRepository {
           );
     return EventReport.fromJson(data as Map<String, dynamic>);
   }
+
+  @override
+  Future<ContingentBoard> contingents(int eventId) async =>
+      ContingentBoard.fromJson(
+        await _api.get('/events/$eventId/contingents/') as Map<String, dynamic>,
+      );
+
+  @override
+  Future<ContingentBoard> askContingents(
+    int eventId,
+    List<({int group, int requested, String note})> requests,
+  ) async => ContingentBoard.fromJson(
+    await _api.put(
+          '/events/$eventId/contingents/',
+          body: {
+            'requests': [
+              for (final r in requests)
+                {'group': r.group, 'requested': r.requested, 'note': r.note},
+            ],
+          },
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<MyContingent> myContingent(int eventId) async => MyContingent.fromJson(
+    await _api.get('/events/$eventId/contingent/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<MyContingent> answerContingent(int eventId, List<int> members) async =>
+      MyContingent.fromJson(
+        await _api.put(
+              '/events/$eventId/contingent/',
+              body: {'members': members},
+            )
+            as Map<String, dynamic>,
+      );
 }

@@ -3463,4 +3463,70 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get contingentsTitle => 'People asked of the groups';
+
+  @override
+  String get contingentsAbout =>
+      'Say how many people each attached group should send. Its planning officer chooses who; you see the names here.';
+
+  @override
+  String get contingentsNone => 'No request yet';
+
+  @override
+  String get contingentLess => 'One person fewer';
+
+  @override
+  String get contingentMore => 'One more person';
+
+  @override
+  String get contingentSend => 'Send the requests';
+
+  @override
+  String get contingentAsked =>
+      'Requests sent. The groups’ planning officers are told.';
+
+  @override
+  String get contingentWaiting => 'Waiting for names';
+
+  @override
+  String contingentNamed(int named, int requested, String names) {
+    return '$named/$requested: $names';
+  }
+
+  @override
+  String get contingentTitle => 'People asked';
+
+  @override
+  String contingentAsk(String from, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: '1 person',
+    );
+    return '$from asks for $_temp0';
+  }
+
+  @override
+  String contingentNamedLabel(int named, int requested) {
+    return '$named named out of $requested';
+  }
+
+  @override
+  String get contingentNobody => 'Nobody is named yet.';
+
+  @override
+  String get contingentChoose => 'Name the people';
+
+  @override
+  String get contingentChooseHint =>
+      'Only active members of your group. They get a notification; the asking group sees their names.';
+
+  @override
+  String get contingentSaved => 'Saved.';
+
+  @override
+  String get contingentYou => 'You are named';
 }

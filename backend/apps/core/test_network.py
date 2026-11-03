@@ -268,3 +268,65 @@ def test_a_zone_event_shows_in_the_parish_calendar(mgs):
     # Detached: it disappears.
     detach(parish, by=pres_p, reason="Test")
     assert pk not in [e["id"] for e in mapi.get("/api/events/").json()]
+
+
+# --- Build 42: joint planning ---------------------------------------------------------------
+
+def _zone_event(zone, pres_z, cascade=True):
+    from apps.core.groups import in_group
+    from apps.events.models import ActivityType
+
+    with in_group(zone):
+        kind = ActivityType.objects.first().slug
+    when = (timezone.now() + timedelta(days=5)).replace(microsecond=0).isoformat()
+    r = app_client(pres_z, zone).post("/api/events/", {"kind": kind, "title": "Pèlerinage de zone", "starts_at": when,
+                                                      "cascade": cascade, "chef": pres_z.pk}, format="json")
+    assert r.status_code == 201, r.content
+    return r.json()["id"]
+
+
+def test_the_zone_asks_the_parish_names(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    pk = _zone_event(zone, pres_z)
+    zapi = app_client(pres_z, zone)
+    body = zapi.get(f"/api/events/{pk}/contingents/").json()
+    assert body["groups"][0]["group"]["name"] == parish.name and body["groups"][0]["requested"] == 0
+    r = zapi.put(f"/api/events/{pk}/contingents/", {"requests": [{"group": parish.pk, "requested": 2, "note": "En tenue"}]},
+                 format="json")
+    assert r.status_code == 200 and r.json()["groups"][0]["requested"] == 2
+    assert Notification.all_groups.filter(user=pres_p, group=parish, title__startswith=f"{zone.name} demande 2").exists()
+
+    papi = app_client(pres_p, parish)
+    mine = papi.get(f"/api/events/{pk}/contingent/").json()
+    assert mine["requested"] == 2 and mine["note"] == "En tenue" and mine["can_answer"] is True
+    r = papi.put(f"/api/events/{pk}/contingent/", {"members": [member.pk, pres_p.pk]}, format="json")
+    assert r.status_code == 200 and len(r.json()["members"]) == 2
+    assert Notification.all_groups.filter(user=member, group=parish, title="Vous êtes désigné(e)").exists()
+    assert Notification.all_groups.filter(user=pres_z, group=zone, title=f"{parish.name} a désigné 2/2").exists()
+    # The member sees it on the event; the zone sees the names.
+    ev = next(e for e in app_client(member, parish).get("/api/events/").json() if e["id"] == pk)
+    assert ev["contingent"] == {"requested": 2, "designated": 2, "me": True}
+    names = zapi.get(f"/api/events/{pk}/contingents/").json()["groups"][0]["members"]
+    assert len(names) == 2
+    assert zapi.get(f"/api/events/{pk}/").json()["contingent"]["designated"] == 2
+
+
+def test_contingent_rules(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    zapi = app_client(pres_z, zone)
+    quiet = _zone_event(zone, pres_z, cascade=False)
+    r = zapi.put(f"/api/events/{quiet}/contingents/", {"requests": [{"group": parish.pk, "requested": 1}]}, format="json")
+    assert r.json()["code"] == "not_sent_down"
+    pk = _zone_event(zone, pres_z)
+    assert zapi.put(f"/api/events/{pk}/contingents/", {"requests": [{"group": zone.pk, "requested": 1}]},
+                    format="json").json()["code"] == "not_below"
+    # A plain member can't ask nor name.
+    assert app_client(member, parish).put(f"/api/events/{pk}/contingent/", {"members": []}, format="json").status_code == 404
+    zapi.put(f"/api/events/{pk}/contingents/", {"requests": [{"group": parish.pk, "requested": 1}]}, format="json")
+    assert app_client(member, parish).put(f"/api/events/{pk}/contingent/", {"members": []}, format="json").status_code == 403
+    # Only the parish's own active members.
+    r = app_client(pres_p, parish).put(f"/api/events/{pk}/contingent/", {"members": [999999]}, format="json")
+    assert r.json()["code"] == "not_member"
+    # 0 cancels.
+    zapi.put(f"/api/events/{pk}/contingents/", {"requests": [{"group": parish.pk, "requested": 0}]}, format="json")
+    assert app_client(pres_p, parish).get(f"/api/events/{pk}/contingent/").status_code == 404

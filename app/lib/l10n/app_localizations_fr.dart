@@ -3510,4 +3510,70 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get contingentsTitle => 'Personnes demandées aux groupes';
+
+  @override
+  String get contingentsAbout =>
+      'Indiquez combien de personnes chaque groupe rattaché doit envoyer. Son responsable du planning choisit qui ; vous voyez les noms ici.';
+
+  @override
+  String get contingentsNone => 'Aucune demande pour l’instant';
+
+  @override
+  String get contingentLess => 'Une personne de moins';
+
+  @override
+  String get contingentMore => 'Une personne de plus';
+
+  @override
+  String get contingentSend => 'Envoyer les demandes';
+
+  @override
+  String get contingentAsked =>
+      'Demandes envoyées. Les responsables du planning des groupes sont prévenus.';
+
+  @override
+  String get contingentWaiting => 'En attente des noms';
+
+  @override
+  String contingentNamed(int named, int requested, String names) {
+    return '$named/$requested : $names';
+  }
+
+  @override
+  String get contingentTitle => 'Personnes demandées';
+
+  @override
+  String contingentAsk(String from, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count personnes',
+      one: '1 personne',
+    );
+    return '$from demande $_temp0';
+  }
+
+  @override
+  String contingentNamedLabel(int named, int requested) {
+    return '$named désignée(s) sur $requested';
+  }
+
+  @override
+  String get contingentNobody => 'Personne n’est encore désigné.';
+
+  @override
+  String get contingentChoose => 'Désigner les personnes';
+
+  @override
+  String get contingentChooseHint =>
+      'Seulement des membres actifs de votre groupe. Ils reçoivent une notification ; le groupe qui demande voit leurs noms.';
+
+  @override
+  String get contingentSaved => 'Désignation enregistrée.';
+
+  @override
+  String get contingentYou => 'Vous êtes désigné(e)';
 }

@@ -216,3 +216,26 @@ def dress_names():
 
 def dress_descriptions():
     return dict(DressCode.objects.exclude(description="").values_list("slug", "description"))
+
+
+class EventContingent(models.Model):
+    """Joint planning (owner, 2026-11-03): an event a group sends down asks
+    each group attached below it for a number of people; that group's
+    planning officer names who goes. The upper group asks, the lower one
+    decides who (an umbrella only informs)."""
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="contingents")
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, related_name="+")
+    requested = models.PositiveSmallIntegerField()
+    note = models.CharField(max_length=200, blank=True)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="contingents")
+    asked_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    asked_at = models.DateTimeField(auto_now_add=True)
+    answered_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    answered_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["event", "group"], name="one_contingent_per_group")]
+
+    def __str__(self):
+        return f"{self.event} · {self.group}: {self.requested}"

@@ -1065,5 +1065,22 @@
   "groupNetEventFromAbove": "An event of {name}, passed on to your group. It is changed, and the roll call taken, in {name}.",
   "groupNetSendDown": "Also for the attached groups",
   "groupNetSendDownHint": "{count, plural, =1{The attached group gets it too, with a notification.} other{The {count} attached groups (and those below) get it too, with a notification.}}",
-  "groupNetSendDownEventHint": "{count, plural, =1{It also shows in the attached group’s calendar.} other{It also shows in the calendars of the {count} attached groups and those below.}}"
+  "groupNetSendDownEventHint": "{count, plural, =1{It also shows in the attached group’s calendar.} other{It also shows in the calendars of the {count} attached groups and those below.}}",
+  "contingentsTitle": "People asked of the groups",
+  "contingentsAbout": "Say how many people each attached group should send. Its planning officer chooses who; you see the names here.",
+  "contingentsNone": "No request yet",
+  "contingentLess": "One person fewer",
+  "contingentMore": "One more person",
+  "contingentSend": "Send the requests",
+  "contingentAsked": "Requests sent. The groups’ planning officers are told.",
+  "contingentWaiting": "Waiting for names",
+  "contingentNamed": "{named}/{requested}: {names}",
+  "contingentTitle": "People asked",
+  "contingentAsk": "{from} asks for {count, plural, =1{1 person} other{{count} people}}",
+  "contingentNamedLabel": "{named} named out of {requested}",
+  "contingentNobody": "Nobody is named yet.",
+  "contingentChoose": "Name the people",
+  "contingentChooseHint": "Only active members of your group. They get a notification; the asking group sees their names.",
+  "contingentSaved": "Saved.",
+  "contingentYou": "You are named"
 }

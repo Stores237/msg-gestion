@@ -26,13 +26,14 @@ class EventSerializer(serializers.ModelSerializer):
     has_lineup = serializers.SerializerMethodField()
     my_duty = serializers.SerializerMethodField()
     from_group = serializers.SerializerMethodField()
+    contingent = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "place_detail", "dress", "dress_name", "dress_detail",
                   "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete", "ended",
                   "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
-                  "has_lineup", "my_duty", "cascade", "from_group"]
+                  "has_lineup", "my_duty", "cascade", "from_group", "contingent"]
         read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete", "ended"]
 
     def __init__(self, *args, **kwargs):
@@ -84,6 +85,28 @@ class EventSerializer(serializers.ModelSerializer):
         from apps.core.network import origin
 
         return origin(event, current_group_id(), self.context.get("request")) if self._foreign(event) else None
+
+    def get_contingent(self, event) -> dict | None:
+        """Joint planning (build 42). From above: what this group is asked
+        and whether the viewer is named. Sent down by this group: totals."""
+        from apps.core.groups import current_group_id
+
+        from .models import EventContingent
+
+        if not event.cascade:
+            return None
+        v = self.context.get("viewer")
+        if self._foreign(event):
+            c = EventContingent.objects.filter(event=event, group_id=current_group_id()).prefetch_related("members").first()
+            if c is None:
+                return None
+            ids = {u.pk for u in c.members.all()}
+            return {"requested": c.requested, "designated": len(ids), "me": bool(v) and v.pk in ids}
+        rows = list(EventContingent.objects.filter(event=event).prefetch_related("members"))
+        if not rows:
+            return None
+        return {"requested": sum(c.requested for c in rows), "designated": sum(len(c.members.all()) for c in rows),
+                "groups": len(rows), "me": False}
 
     def get_can_edit(self, event) -> bool:
         v = self.context.get("viewer")
