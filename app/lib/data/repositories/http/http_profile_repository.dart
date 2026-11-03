@@ -164,6 +164,23 @@ class HttpProfileRepository implements ProfileRepository {
   );
 
   @override
+  Future<SharingSettings> sharing() async => SharingSettings.fromJson(
+    await _api.get('/network/sharing/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<SharingSettings> saveSharing(Map<String, String> values) async =>
+      SharingSettings.fromJson(
+        await _api.put('/network/sharing/', body: values)
+            as Map<String, dynamic>,
+      );
+
+  @override
+  Future<SharedGroup> sharedGroup(int id) async => SharedGroup.fromJson(
+    await _api.get('/network/groups/$id/') as Map<String, dynamic>,
+  );
+
+  @override
   Future<void> setReminders({bool? eve, bool? twoHours}) => _api.patch(
     '/me/preferences/',
     body: {'remind_eve': ?eve, 'remind_2h': ?twoHours},

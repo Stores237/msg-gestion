@@ -9,6 +9,7 @@ import '../widgets/dates.dart';
 import '../widgets/errors.dart';
 import '../widgets/group_logo.dart';
 import '../widgets/ui.dart';
+import 'network_sharing_screens.dart';
 
 /// Réseau (owner, 2026-11-03): groups linked in levels, like the MGS's
 /// parish groups, zones paroissiales and dioceses. Everyone sees where the
@@ -213,13 +214,20 @@ class _NetworkScreenState extends State<NetworkScreen> {
     final l = AppLocalizations.of(context);
     final c = context.msg;
     final info = _info;
-    Widget groupRow(NetworkGroup g, String key, {String? extra}) => ListRow(
+    Widget groupRow(
+      NetworkGroup g,
+      String key, {
+      String? extra,
+      VoidCallback? onTap,
+    }) => ListRow(
       key: Key(key),
       lead: GroupLogo(group: g.group, size: 36),
       title: Text(g.group.name),
       subtitle: Text(
         [g.levelName, ?extra].where((s) => s.isNotEmpty).join(' · '),
       ),
+      chevron: onTap != null,
+      onTap: onTap,
     );
     return Scaffold(
       body: SafeArea(
@@ -309,10 +317,66 @@ class _NetworkScreenState extends State<NetworkScreen> {
                                 ),
                               ),
                           ],
+                          if (info.sharing case final sh?) ...[
+                            const SizedBox(height: 24),
+                            SectionLabel(l.groupNetSharingTitle),
+                            const SizedBox(height: 8),
+                            GroupCard(
+                              children: [
+                                ListRow(
+                                  key: const Key('network-sharing'),
+                                  lead: const Icon(Icons.visibility_outlined),
+                                  title: Text(
+                                    sh.values.every((v) => v == 'none')
+                                        ? l.groupNetSharesNone
+                                        : l.groupNetSharesList(
+                                            [
+                                              for (final k
+                                                  in SharingSettings.kinds)
+                                                if ((sh[k] ?? 'none') != 'none')
+                                                  '${sharingKindLabel(l, k).toLowerCase()} (${sharingLevelLabel(l, sh[k]!).toLowerCase()})',
+                                            ].join(', '),
+                                          ),
+                                  ),
+                                  subtitle: Text(
+                                    l.groupNetSharingWith(
+                                      info.parents.first.group.name,
+                                    ),
+                                  ),
+                                  chevron: true,
+                                  onTap: () async {
+                                    final saved = await Navigator.of(context)
+                                        .push<bool>(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const SharingScreen(),
+                                          ),
+                                        );
+                                    if (saved == true) _load();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                           if (info.children.isNotEmpty || info.canInvite) ...[
                             const SizedBox(height: 24),
                             SectionLabel(l.groupNetBelow(info.children.length)),
                             const SizedBox(height: 8),
+                            if (info.totals case final t?) ...[
+                              Text(
+                                l.groupNetTotals(
+                                  t.members,
+                                  t.sharingMembers,
+                                  t.groups,
+                                ),
+                                key: const Key('network-totals'),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: c.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
                             if (info.children.isEmpty)
                               Text(
                                 l.groupNetNoChildren,
@@ -325,9 +389,29 @@ class _NetworkScreenState extends State<NetworkScreen> {
                                     groupRow(
                                       g,
                                       'network-child-${g.group.id}',
-                                      extra: g.below > 0
-                                          ? l.groupNetGroupsBelow(g.below)
-                                          : null,
+                                      extra: [
+                                        if (g.below > 0)
+                                          l.groupNetGroupsBelow(g.below),
+                                        g.shares.isEmpty
+                                            ? l.groupNetSharesNone
+                                            : l.groupNetSharesList(
+                                                g.shares
+                                                    .map(
+                                                      (k) => sharingKindLabel(
+                                                        l,
+                                                        k,
+                                                      ).toLowerCase(),
+                                                    )
+                                                    .join(', '),
+                                              ),
+                                      ].join(' · '),
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => SharedGroupScreen(
+                                            groupId: g.group.id,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                 ],
                               ),

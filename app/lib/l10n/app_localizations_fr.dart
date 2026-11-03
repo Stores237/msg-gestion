@@ -3340,8 +3340,137 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get groupNetAbout =>
-      'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux. Ce que chaque groupe partage avec son réseau se réglera bientôt ici.';
+      'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux et ne voit que ce que chaque groupe choisit de partager.';
 
   @override
   String get copy => 'Copier';
+
+  @override
+  String get groupNetSharingTitle => 'Ce que nous partageons';
+
+  @override
+  String groupNetSharingWith(String name) {
+    return 'Avec $name et les groupes au-dessus';
+  }
+
+  @override
+  String get groupNetSharingAbout =>
+      'Choisissez ce que les groupes au-dessus du vôtre peuvent voir. Là-haut, chaque partie n’est lue que par ceux dont le rôle la couvre (le trésorier pour les finances…). Rien n’est partagé tant que vous ne l’avez pas choisi.';
+
+  @override
+  String get groupNetSharingSaved =>
+      'Partage enregistré. Les groupes au-dessus sont prévenus.';
+
+  @override
+  String get groupNetNeverShared =>
+      'Jamais partagés : numéros de téléphone, codes, contacts des mineurs, pièces jointes, relevés personnels.';
+
+  @override
+  String get groupNetKindMembers => 'Membres';
+
+  @override
+  String get groupNetKindFinances => 'Finances';
+
+  @override
+  String get groupNetKindCalendar => 'Calendrier';
+
+  @override
+  String get groupNetKindAnnouncements => 'Annonces';
+
+  @override
+  String get groupNetKindReports => 'Présences et rapports';
+
+  @override
+  String get groupNetLevelNone => 'Rien';
+
+  @override
+  String get groupNetLevelSummary => 'Résumé';
+
+  @override
+  String get groupNetLevelDetail => 'Détail';
+
+  @override
+  String get groupNetHintMembers =>
+      'Résumé : le nombre de membres. Détail : + les noms et les rôles.';
+
+  @override
+  String get groupNetHintFinances =>
+      'Résumé : le solde et les totaux de l’année. Détail : + les 30 dernières opérations validées.';
+
+  @override
+  String get groupNetHintCalendar =>
+      'Résumé : le nombre d’événements à 30 jours. Détail : + leurs dates et lieux.';
+
+  @override
+  String get groupNetHintAnnouncements =>
+      'Détail : vos 10 dernières annonces (pas les convocations).';
+
+  @override
+  String get groupNetHintReports =>
+      'Résumé : le taux de présence sur 3 mois. Détail : + les présences par événement.';
+
+  @override
+  String get groupNetSharesNone => 'Ne partage rien';
+
+  @override
+  String groupNetSharesList(String kinds) {
+    return 'Partage : $kinds';
+  }
+
+  @override
+  String groupNetTotals(int members, int sharing, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sharing,
+      locale: localeName,
+      other:
+          '$members membres, d’après $sharing groupes sur $groups qui partagent leurs membres',
+      one:
+          '$members membres, d’après 1 groupe sur $groups qui partage ses membres',
+      zero: 'Aucun des $groups groupes ne partage encore ses membres',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetSharesNothing => 'Ce groupe ne partage rien';
+
+  @override
+  String get groupNetSharesNothingBody =>
+      'Son président choisit ce qu’il partage, dans Réseau → Ce que nous partageons.';
+
+  @override
+  String get groupNetNotYourRole =>
+      'Partagé, mais votre rôle dans ce groupe ne couvre pas cette partie.';
+
+  @override
+  String get groupNetMembersActive => 'Membres';
+
+  @override
+  String get groupNetBalance => 'Solde validé';
+
+  @override
+  String get groupNetYearIn => 'Entrées de l’année';
+
+  @override
+  String get groupNetYearOut => 'Sorties de l’année';
+
+  @override
+  String get groupNetUpcoming => 'Événements à 30 jours';
+
+  @override
+  String get groupNetNoneYet => 'Rien pour l’instant.';
+
+  @override
+  String get groupNetEvents90 => 'Événements avec appel (3 mois)';
+
+  @override
+  String get groupNetPresenceRate => 'Taux de présence';
+
+  @override
+  String groupNetAttendance(int present, int absent, int excused) {
+    return '$present présents · $absent absents · $excused excusés';
+  }
+
+  @override
+  String get groupNetReportIn => 'Rapport';
 }

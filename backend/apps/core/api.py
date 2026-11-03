@@ -426,3 +426,46 @@ class NetworkLeaveView(_NetworkBase):
             return self._refuse(request, group, "Détachement refusé", e)
         group.refresh_from_db()
         return Response(summary(group, request, manage=True))
+
+
+class NetworkSharingView(_NetworkBase):
+    """GET what the group shares with the groups above it; PUT
+    {"members": "summary", …} (the président)."""
+
+    def get(self, request):
+        from .sharing import KINDS, settings_of
+
+        group, manage = self._ctx(request)
+        return Response({"values": settings_of(group), "can_manage": manage,
+                         "options": {k: ["none", *levels] for k, (levels, _) in KINDS.items()}})
+
+    def put(self, request):
+        from .sharing import KINDS, SharingRule, save_settings
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            values = save_settings(group, request.data if isinstance(request.data, dict) else {}, by=request.user,
+                                   request=request)
+        except SharingRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response({"values": values, "can_manage": True,
+                         "options": {k: ["none", *levels] for k, (levels, _) in KINDS.items()}})
+
+
+class NetworkGroupView(_NetworkBase):
+    """GET a group below the current one: what it shares, as far as the
+    viewer's role in the current group lets them read it."""
+
+    def get(self, request, pk):
+        from .identity import group_identity
+        from .sharing import shared_view
+
+        group, _ = self._ctx(request)
+        target = next((g for g in group.descendants() if g.pk == pk), None)
+        if target is None:
+            return Response({"detail": "Ce groupe n’est pas rattaché au vôtre.", "code": "not_below"}, status=404)
+        return Response({**group_identity(target, request), "level_name": target.level_name,
+                         "parent": target.parent.name if target.parent_id else None,
+                         "shared": shared_view(target, request.user)})

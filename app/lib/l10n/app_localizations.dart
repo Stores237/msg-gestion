@@ -5507,7 +5507,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupNetAbout.
   ///
   /// In fr, this message translates to:
-  /// **'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux. Ce que chaque groupe partage avec son réseau se réglera bientôt ici.'**
+  /// **'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux et ne voit que ce que chaque groupe choisit de partager.'**
   String get groupNetAbout;
 
   /// No description provided for @copy.
@@ -5515,6 +5515,210 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Copier'**
   String get copy;
+
+  /// No description provided for @groupNetSharingTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que nous partageons'**
+  String get groupNetSharingTitle;
+
+  /// No description provided for @groupNetSharingWith.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec {name} et les groupes au-dessus'**
+  String groupNetSharingWith(String name);
+
+  /// No description provided for @groupNetSharingAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez ce que les groupes au-dessus du vôtre peuvent voir. Là-haut, chaque partie n’est lue que par ceux dont le rôle la couvre (le trésorier pour les finances…). Rien n’est partagé tant que vous ne l’avez pas choisi.'**
+  String get groupNetSharingAbout;
+
+  /// No description provided for @groupNetSharingSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage enregistré. Les groupes au-dessus sont prévenus.'**
+  String get groupNetSharingSaved;
+
+  /// No description provided for @groupNetNeverShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jamais partagés : numéros de téléphone, codes, contacts des mineurs, pièces jointes, relevés personnels.'**
+  String get groupNetNeverShared;
+
+  /// No description provided for @groupNetKindMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get groupNetKindMembers;
+
+  /// No description provided for @groupNetKindFinances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Finances'**
+  String get groupNetKindFinances;
+
+  /// No description provided for @groupNetKindCalendar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calendrier'**
+  String get groupNetKindCalendar;
+
+  /// No description provided for @groupNetKindAnnouncements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annonces'**
+  String get groupNetKindAnnouncements;
+
+  /// No description provided for @groupNetKindReports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Présences et rapports'**
+  String get groupNetKindReports;
+
+  /// No description provided for @groupNetLevelNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien'**
+  String get groupNetLevelNone;
+
+  /// No description provided for @groupNetLevelSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé'**
+  String get groupNetLevelSummary;
+
+  /// No description provided for @groupNetLevelDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail'**
+  String get groupNetLevelDetail;
+
+  /// No description provided for @groupNetHintMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé : le nombre de membres. Détail : + les noms et les rôles.'**
+  String get groupNetHintMembers;
+
+  /// No description provided for @groupNetHintFinances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé : le solde et les totaux de l’année. Détail : + les 30 dernières opérations validées.'**
+  String get groupNetHintFinances;
+
+  /// No description provided for @groupNetHintCalendar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé : le nombre d’événements à 30 jours. Détail : + leurs dates et lieux.'**
+  String get groupNetHintCalendar;
+
+  /// No description provided for @groupNetHintAnnouncements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail : vos 10 dernières annonces (pas les convocations).'**
+  String get groupNetHintAnnouncements;
+
+  /// No description provided for @groupNetHintReports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résumé : le taux de présence sur 3 mois. Détail : + les présences par événement.'**
+  String get groupNetHintReports;
+
+  /// No description provided for @groupNetSharesNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne partage rien'**
+  String get groupNetSharesNone;
+
+  /// No description provided for @groupNetSharesList.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partage : {kinds}'**
+  String groupNetSharesList(String kinds);
+
+  /// No description provided for @groupNetTotals.
+  ///
+  /// In fr, this message translates to:
+  /// **'{sharing, plural, =0{Aucun des {groups} groupes ne partage encore ses membres} =1{{members} membres, d’après 1 groupe sur {groups} qui partage ses membres} other{{members} membres, d’après {sharing} groupes sur {groups} qui partagent leurs membres}}'**
+  String groupNetTotals(int members, int sharing, int groups);
+
+  /// No description provided for @groupNetSharesNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce groupe ne partage rien'**
+  String get groupNetSharesNothing;
+
+  /// No description provided for @groupNetSharesNothingBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Son président choisit ce qu’il partage, dans Réseau → Ce que nous partageons.'**
+  String get groupNetSharesNothingBody;
+
+  /// No description provided for @groupNetNotYourRole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partagé, mais votre rôle dans ce groupe ne couvre pas cette partie.'**
+  String get groupNetNotYourRole;
+
+  /// No description provided for @groupNetMembersActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Membres'**
+  String get groupNetMembersActive;
+
+  /// No description provided for @groupNetBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde validé'**
+  String get groupNetBalance;
+
+  /// No description provided for @groupNetYearIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrées de l’année'**
+  String get groupNetYearIn;
+
+  /// No description provided for @groupNetYearOut.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sorties de l’année'**
+  String get groupNetYearOut;
+
+  /// No description provided for @groupNetUpcoming.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événements à 30 jours'**
+  String get groupNetUpcoming;
+
+  /// No description provided for @groupNetNoneYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien pour l’instant.'**
+  String get groupNetNoneYet;
+
+  /// No description provided for @groupNetEvents90.
+  ///
+  /// In fr, this message translates to:
+  /// **'Événements avec appel (3 mois)'**
+  String get groupNetEvents90;
+
+  /// No description provided for @groupNetPresenceRate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taux de présence'**
+  String get groupNetPresenceRate;
+
+  /// No description provided for @groupNetAttendance.
+  ///
+  /// In fr, this message translates to:
+  /// **'{present} présents · {absent} absents · {excused} excusés'**
+  String groupNetAttendance(int present, int absent, int excused);
+
+  /// No description provided for @groupNetReportIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rapport'**
+  String get groupNetReportIn;
 }
 
 class _AppLocalizationsDelegate

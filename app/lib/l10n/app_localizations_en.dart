@@ -3294,8 +3294,136 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupNetAbout =>
-      'A higher group informs the groups attached to it; it doesn’t decide for them. What each group shares with its network will be set here soon.';
+      'A higher group informs the groups attached to it; it doesn’t decide for them and only sees what each group chooses to share.';
 
   @override
   String get copy => 'Copy';
+
+  @override
+  String get groupNetSharingTitle => 'What we share';
+
+  @override
+  String groupNetSharingWith(String name) {
+    return 'With $name and the groups above';
+  }
+
+  @override
+  String get groupNetSharingAbout =>
+      'Choose what the groups above yours can see. Up there, each part is read only by those whose role covers it (the treasurer for finances…). Nothing is shared until you choose.';
+
+  @override
+  String get groupNetSharingSaved =>
+      'Sharing saved. The groups above are told.';
+
+  @override
+  String get groupNetNeverShared =>
+      'Never shared: phone numbers, codes, minors’ contacts, attachments, personal statements.';
+
+  @override
+  String get groupNetKindMembers => 'Members';
+
+  @override
+  String get groupNetKindFinances => 'Finances';
+
+  @override
+  String get groupNetKindCalendar => 'Calendar';
+
+  @override
+  String get groupNetKindAnnouncements => 'Announcements';
+
+  @override
+  String get groupNetKindReports => 'Attendance and reports';
+
+  @override
+  String get groupNetLevelNone => 'Nothing';
+
+  @override
+  String get groupNetLevelSummary => 'Summary';
+
+  @override
+  String get groupNetLevelDetail => 'Detail';
+
+  @override
+  String get groupNetHintMembers =>
+      'Summary: how many members. Detail: + names and roles.';
+
+  @override
+  String get groupNetHintFinances =>
+      'Summary: the balance and the year’s totals. Detail: + the last 30 validated operations.';
+
+  @override
+  String get groupNetHintCalendar =>
+      'Summary: how many events in the next 30 days. Detail: + their dates and places.';
+
+  @override
+  String get groupNetHintAnnouncements =>
+      'Detail: your last 10 announcements (not call-ups).';
+
+  @override
+  String get groupNetHintReports =>
+      'Summary: the attendance rate over 3 months. Detail: + attendance per event.';
+
+  @override
+  String get groupNetSharesNone => 'Shares nothing';
+
+  @override
+  String groupNetSharesList(String kinds) {
+    return 'Shares: $kinds';
+  }
+
+  @override
+  String groupNetTotals(int members, int sharing, int groups) {
+    String _temp0 = intl.Intl.pluralLogic(
+      sharing,
+      locale: localeName,
+      other:
+          '$members members, from $sharing groups out of $groups sharing their members',
+      one: '$members members, from 1 group out of $groups sharing its members',
+      zero: 'None of the $groups groups shares its members yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetSharesNothing => 'This group shares nothing';
+
+  @override
+  String get groupNetSharesNothingBody =>
+      'Its president chooses what it shares, in Network → What we share.';
+
+  @override
+  String get groupNetNotYourRole =>
+      'Shared, but your role in this group doesn’t cover this part.';
+
+  @override
+  String get groupNetMembersActive => 'Members';
+
+  @override
+  String get groupNetBalance => 'Validated balance';
+
+  @override
+  String get groupNetYearIn => 'Income this year';
+
+  @override
+  String get groupNetYearOut => 'Spending this year';
+
+  @override
+  String get groupNetUpcoming => 'Events in the next 30 days';
+
+  @override
+  String get groupNetNoneYet => 'Nothing yet.';
+
+  @override
+  String get groupNetEvents90 => 'Events with a roll call (3 months)';
+
+  @override
+  String get groupNetPresenceRate => 'Attendance rate';
+
+  @override
+  String groupNetAttendance(int present, int absent, int excused) {
+    return '$present present · $absent absent · $excused excused';
+  }
+
+  @override
+  String get groupNetReportIn => 'Report';
 }

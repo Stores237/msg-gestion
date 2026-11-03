@@ -134,4 +134,89 @@ void main() {
     expect(find.byKey(const Key('network-leave')), findsNothing);
     expect(find.byKey(const Key('network-invite')), findsNothing);
   });
+
+  // Build 40: what each group shares.
+  testWidgets('the président chooses what the zone may see', (tester) async {
+    final f = await setUpApp(tester);
+    f.profile.networkInfo = const NetworkInfo(
+      networkName: 'MGS Cameroun',
+      levelName: 'Paroisse',
+      parents: [FakeProfileRepository.zone],
+      canManage: true,
+      sharing: {'members': 'none', 'finances': 'none'},
+    );
+    await tester.pumpWidget(const MsgApp(home: NetworkScreen()));
+    await tester.pumpAndSettle();
+    expect(find.text('Ne partage rien'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('network-sharing')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('share-members-detail')));
+    await tester.tap(find.byKey(const Key('share-finances-summary')));
+    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('sharing-save')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('sharing-save')));
+    await tester.pumpAndSettle();
+    expect(f.profile.savedSharing.single['members'], 'detail');
+    expect(f.profile.savedSharing.single['finances'], 'summary');
+    expect(f.profile.savedSharing.single['calendar'], 'none');
+  });
+
+  testWidgets('the zone opens a parish: what it shares, as its role allows', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.profile.networkInfo = const NetworkInfo(
+      networkName: 'MGS Cameroun',
+      levelName: 'Zone paroissiale',
+      totals: (groups: 2, sharingMembers: 1, members: 42),
+      children: [
+        NetworkGroup(
+          group: GroupInfo(id: 3, name: 'GS Yapoma', initials: 'GSY'),
+          levelName: 'Paroisse',
+          shares: ['members', 'finances'],
+        ),
+      ],
+    );
+    f.profile.shared = const SharedGroup(
+      group: GroupInfo(id: 3, name: 'GS Yapoma', initials: 'GSY'),
+      levelName: 'Paroisse',
+      parent: 'Zone Nord',
+      shared: {
+        'members': SharedKind(
+          level: 'detail',
+          data: {
+            'total': 42,
+            'people': [
+              {
+                'name': 'Ewane Brice',
+                'roles': ['Président'],
+              },
+            ],
+          },
+        ),
+        'finances': SharedKind(level: 'summary', hidden: true),
+      },
+    );
+    await tester.pumpWidget(const MsgApp(home: NetworkScreen()));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('42 membres, d’après 1 groupe sur 2 qui partage ses membres'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Partage : membres, finances'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('network-child-3')));
+    await tester.pumpAndSettle();
+    expect(find.text('Ewane Brice'), findsOneWidget);
+    expect(find.text('Président'), findsOneWidget);
+    expect(
+      find.text(
+        'Partagé, mais votre rôle dans ce groupe ne couvre pas cette partie.',
+      ),
+      findsOneWidget,
+    );
+  });
 }

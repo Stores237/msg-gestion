@@ -287,9 +287,12 @@ def networks(request):
     for inv in GroupInvitation.objects.filter(status=GroupInvitation.Status.PENDING).select_related("created_by"):
         if not inv.expires_at or inv.expires_at > timezone.now():
             pending.setdefault(inv.umbrella_id, []).append(inv)
+    from apps.core.sharing import LABELS, LEVEL_LABELS, settings_of
+
     for n in nets:
         for g in n.rows:
             g.invites = pending.get(g.pk, [])
+            g.share_text = ", ".join(f"{LABELS[k]} : {LEVEL_LABELS[v].lower()}" for k, v in settings_of(g).items() if v != "none")
     return render(request, "backoffice/networks.html", {
         "nav": "networks", "networks": nets,
         "outside": Group.objects.filter(network__isnull=True, is_active=True).order_by("name"),

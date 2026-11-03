@@ -149,3 +149,61 @@ def test_backoffice_networks_page(boss, mgs):  # noqa: F811
     assert "n’est plus rattaché" in page and Group.objects.get(pk=parish.pk).parent is None
     page = boss.post("/bo/reseaux/", {"action": "network", "name": "", "level1": "a", "level2": "b"}, follow=True).content.decode()
     assert "Le nom du réseau est obligatoire." in page
+
+
+# --- Build 40: what each group shares upward -----------------------------------------------
+
+def _attached(mgs):
+    net, parish, zone, pres_p, pres_z, member = mgs
+    accept_invitation(create_invitation(zone, by=pres_z).code, parish, by=pres_p)
+    return parish, zone, pres_p, pres_z, member
+
+
+def test_nothing_is_shared_until_the_president_chooses(mgs):
+    parish, zone, pres_p, pres_z, _ = _attached(mgs)
+    zapi = app_client(pres_z, zone)
+    seen = zapi.get(f"/api/network/groups/{parish.pk}/").json()
+    assert seen["name"] == parish.name and seen["shared"] == {}
+    papi = app_client(pres_p, parish)
+    assert papi.get("/api/network/sharing/").json()["values"]["finances"] == "none"
+    r = papi.put("/api/network/sharing/", {"members": "detail", "finances": "summary", "announcements": "detail"}, format="json")
+    assert r.status_code == 200 and r.json()["values"]["members"] == "detail"
+    assert papi.put("/api/network/sharing/", {"announcements": "summary"}, format="json").json()["code"] == "bad_level"
+    assert AuditLog.objects.filter(action="Partage avec le réseau modifié", group=parish).exists()
+    assert Notification.all_groups.filter(user=pres_z, group=zone, title="Partage d’un groupe rattaché").exists()
+
+    shared = zapi.get(f"/api/network/groups/{parish.pk}/").json()["shared"]
+    assert set(shared) == {"members", "finances", "announcements"}
+    people = shared["members"]["data"]["people"]
+    assert people and all(set(p) == {"name", "roles"} for p in people)  # never a phone
+    assert "balance" in shared["finances"]["data"] and "entries" not in shared["finances"]["data"]
+    z = zapi.get("/api/network/").json()
+    assert z["totals"]["sharing_members"] == 1 and z["totals"]["members"] >= 2
+    assert set(z["children"][0]["shares"]) == {"members", "finances", "announcements"}
+
+
+def test_each_kind_needs_the_matching_role_above(mgs):
+    parish, zone, pres_p, pres_z, _ = _attached(mgs)
+    from apps.core.sharing import save_settings
+
+    save_settings(parish, {"finances": "detail", "members": "summary"}, by=pres_p)
+    plain = UserFactory.build()  # a plain member of the zone
+    plain.save()
+    give(plain, zone, "membre")
+    shared = app_client(plain, zone).get(f"/api/network/groups/{parish.pk}/").json()["shared"]
+    assert shared["finances"] == {"level": "detail", "hidden": True}
+
+
+def test_only_groups_below_can_be_looked_at(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    # The parish can't look at its zone, nor a member at their own group this way.
+    assert app_client(pres_p, parish).get(f"/api/network/groups/{zone.pk}/").status_code == 404
+    assert app_client(member, parish).put("/api/network/sharing/", {"members": "detail"}, format="json").status_code == 403
+
+
+def test_backoffice_shows_what_each_group_shares(boss, mgs):  # noqa: F811
+    parish, zone, pres_p, *_ = _attached(mgs)
+    from apps.core.sharing import save_settings
+
+    save_settings(parish, {"calendar": "summary"}, by=pres_p)
+    assert "Calendrier : résumé" in boss.get("/bo/reseaux/").content.decode()

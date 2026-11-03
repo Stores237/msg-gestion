@@ -163,9 +163,13 @@ class NetworkGroup {
     required this.group,
     this.levelName = '',
     this.below = 0,
+    this.shares = const [],
   });
   final GroupInfo group;
   final String levelName;
+
+  /// The kinds it shares with the groups above (children list only).
+  final List<String> shares;
 
   /// Groups under it, at any depth (children list only).
   final int below;
@@ -174,6 +178,7 @@ class NetworkGroup {
     group: GroupInfo.fromJson(j),
     levelName: (j['level_name'] as String?) ?? '',
     below: (j['children'] as int?) ?? 0,
+    shares: [for (final k in (j['shares'] as List?) ?? const []) k as String],
   );
 }
 
@@ -190,7 +195,15 @@ class NetworkInfo {
     this.canManage = false,
     this.canInvite = false,
     this.invitations = const [],
+    this.totals,
+    this.sharing,
   });
+
+  /// Below an umbrella: (groups, groups sharing their members, members).
+  final ({int groups, int sharingMembers, int members})? totals;
+
+  /// What this group shares upward (attached groups only).
+  final Map<String, String>? sharing;
   final String? networkName;
   final List<String> levels;
   final String levelName;
@@ -222,8 +235,89 @@ class NetworkInfo {
         for (final i in (j['invitations'] as List?) ?? const [])
           Invitation.fromJson(i as Map<String, dynamic>),
       ],
+      totals: switch (j['totals']) {
+        final Map<String, dynamic> t => (
+          groups: t['groups'] as int,
+          sharingMembers: t['sharing_members'] as int,
+          members: t['members'] as int,
+        ),
+        _ => null,
+      },
+      sharing: (j['sharing'] as Map<String, dynamic>?)?.map(
+        (k, v) => MapEntry(k, v as String),
+      ),
     );
   }
+}
+
+/// What a group shares upward (owner, 2026-11-03): per kind "none",
+/// "summary" or "detail"; [options] lists the levels each kind offers.
+class SharingSettings {
+  const SharingSettings({
+    required this.values,
+    required this.options,
+    this.canManage = false,
+  });
+  final Map<String, String> values;
+  final Map<String, List<String>> options;
+  final bool canManage;
+
+  static const kinds = [
+    'members',
+    'finances',
+    'calendar',
+    'announcements',
+    'reports',
+  ];
+
+  factory SharingSettings.fromJson(Map<String, dynamic> j) => SharingSettings(
+    values: (j['values'] as Map<String, dynamic>).map(
+      (k, v) => MapEntry(k, v as String),
+    ),
+    options: (j['options'] as Map<String, dynamic>).map(
+      (k, v) => MapEntry(k, [for (final o in v as List) o as String]),
+    ),
+    canManage: j['can_manage'] == true,
+  );
+}
+
+/// One kind a group below shares: its level and the data, or [hidden]
+/// when the viewer's role up here doesn't cover it.
+class SharedKind {
+  const SharedKind({required this.level, this.hidden = false, this.data});
+  final String level;
+  final bool hidden;
+  final Map<String, dynamic>? data;
+}
+
+/// A group below, as far as it shares and the viewer may read.
+class SharedGroup {
+  const SharedGroup({
+    required this.group,
+    this.levelName = '',
+    this.parent,
+    this.shared = const {},
+  });
+  final GroupInfo group;
+  final String levelName;
+  final String? parent;
+  final Map<String, SharedKind> shared;
+
+  factory SharedGroup.fromJson(Map<String, dynamic> j) => SharedGroup(
+    group: GroupInfo.fromJson(j),
+    levelName: (j['level_name'] as String?) ?? '',
+    parent: j['parent'] as String?,
+    shared: ((j['shared'] as Map<String, dynamic>?) ?? const {}).map(
+      (k, v) => MapEntry(
+        k,
+        SharedKind(
+          level: v['level'] as String,
+          hidden: v['hidden'] == true,
+          data: v['data'] as Map<String, dynamic>?,
+        ),
+      ),
+    ),
+  );
 }
 
 /// An umbrella group's single-use code ("ABCD-EFGH").
@@ -298,4 +392,7 @@ abstract class ProfileRepository {
   Future<NetworkInfo> leaveNetwork(String reason);
   Future<Invitation> createInvitation();
   Future<void> revokeInvitation(String code);
+  Future<SharingSettings> sharing();
+  Future<SharingSettings> saveSharing(Map<String, String> values);
+  Future<SharedGroup> sharedGroup(int id);
 }

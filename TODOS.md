@@ -12,8 +12,9 @@
   0017, accounts 0026), then back-office → Réseaux de groupes: create the MGS network and its
   levels, place each group, create the zones/dioceses as groups (Groupes → Nouveau groupe) and
   give each its président; send each parish président their zone's code. Install build 39.
-- [ ] **Engineering — networks, next phases (2026-11-03):** sharing settings per group (Rien /
-  Résumé / Détail), umbrella announcements and events reaching the groups below + joint planning,
+- [ ] **Owner — build 40 (2026-11-03, network sharing):** deploy (migration core 0018); each
+  attached group's président sets Réseau → Ce que nous partageons. Install build 40.
+- [ ] **Engineering — networks, next phases (2026-11-03):** umbrella announcements and events reaching the groups below + joint planning,
   links between groups (neighbours under one parent; "jumelage" elsewhere), dues between levels.
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render

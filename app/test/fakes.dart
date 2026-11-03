@@ -336,6 +336,43 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Future<void> revokeInvitation(String code) async => revoked.add(code);
 
+  // Build 40: sharing.
+  SharingSettings sharingSettings = const SharingSettings(
+    values: {
+      'members': 'none',
+      'finances': 'none',
+      'calendar': 'none',
+      'announcements': 'none',
+      'reports': 'none',
+    },
+    options: {
+      'members': ['none', 'summary', 'detail'],
+      'finances': ['none', 'summary', 'detail'],
+      'calendar': ['none', 'summary', 'detail'],
+      'announcements': ['none', 'detail'],
+      'reports': ['none', 'summary', 'detail'],
+    },
+    canManage: true,
+  );
+  final savedSharing = <Map<String, String>>[];
+  SharedGroup? shared;
+
+  @override
+  Future<SharingSettings> sharing() async => sharingSettings;
+
+  @override
+  Future<SharingSettings> saveSharing(Map<String, String> values) async {
+    savedSharing.add(values);
+    return sharingSettings = SharingSettings(
+      values: {...sharingSettings.values, ...values},
+      options: sharingSettings.options,
+      canManage: true,
+    );
+  }
+
+  @override
+  Future<SharedGroup> sharedGroup(int id) async => shared!;
+
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
 

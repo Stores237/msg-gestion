@@ -101,6 +101,34 @@ class Group(models.Model):
         return out
 
 
+class GroupShare(models.Model):
+    """What a group shows the groups of its network (owner, 2026-11-03:
+    "share information base on what they allow to share"). One row per
+    audience and kind; no row = nothing shared. Audience "up" = the groups
+    above it; neighbours and twinned groups come with links."""
+
+    class Audience(models.TextChoices):
+        UP = "up", "Groupes au-dessus"
+
+    class Level(models.TextChoices):
+        NONE = "none", "Rien"
+        SUMMARY = "summary", "Résumé"
+        DETAIL = "detail", "Détail"
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="shares")
+    audience = models.CharField(max_length=12, choices=Audience.choices, default=Audience.UP)
+    kind = models.CharField(max_length=16)
+    level = models.CharField(max_length=8, choices=Level.choices, default=Level.NONE)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["group", "audience", "kind"], name="one_share_per_kind")]
+
+    def __str__(self):
+        return f"{self.group} · {self.audience} · {self.kind}: {self.level}"
+
+
 class GroupInvitation(models.Model):
     """An umbrella group invites a group of a lower level to join it
     (owner, 2026-11-03: "joind each group with invitation link"). The code

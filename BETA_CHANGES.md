@@ -1414,3 +1414,32 @@ enough.
   1 and a new "Zone" group at level 2 → Code d’invitation. In the app, as the MGS président:
   Accueil → group name → Réseau → Rejoindre avec un code → the zone shows under "Rattaché à";
   the zone's président gets a notification. "Se détacher" with a reason undoes it.
+
+## 62. Build 40: networks, phase 2 — what each group shares
+
+Owner (2026-11-03): groups "share information base on what they allow to share".
+
+- **App → Réseau → Ce que nous partageons** (attached groups): kind by kind, what the groups
+  above may see — Membres, Finances, Calendrier (Rien · Résumé · Détail), Annonces (Rien ·
+  Détail), Présences et rapports (Rien · Résumé · Détail). Nothing is shared until the président
+  chooses; members see the choice, read-only. Summary / detail:
+  - Membres: how many (by status) / + names and roles.
+  - Finances: validated balance, the year's income and spending / + the last 30 validated lines.
+  - Calendrier: events in the next 30 days (count) / + dates and places.
+  - Annonces: the last 10 announcements (not convocations).
+  - Présences: attendance rate over 3 months / + present-absent-excused per event, report in.
+  Never shared: phone numbers, PINs, minors' contacts, attachments, personal statements.
+- **Upper group**: Réseau lists each attached group with what it shares and a total ("42
+  membres, d’après 1 groupe sur 2 qui partage ses membres"); tapping a group opens what it
+  shares. Each part is read only by those whose role in the upper group covers it (finances →
+  `finances.cashbook` view, members → `members.profile` view, calendar → `calendar.events`,
+  announcements → `announcements.posts`, reports → `calendar.reports`); otherwise "Partagé, mais
+  votre rôle… ne couvre pas cette partie". Only groups below can be opened.
+- Each change is journaled in the group and its parent's présidents are told what is now shared.
+  Back-office → Réseaux de groupes shows a "Partage vers le haut" column.
+- Server: `core.GroupShare` (migration core 0018), `apps/core/sharing.py`;
+  `/api/network/sharing/` (GET, PUT), `/api/network/groups/<id>/`; `/api/network/` gains
+  `totals`, `sharing` and each child's `shares`.
+- How to verify: attach a parish to a zone (build 39), then as the parish président Réseau → Ce
+  que nous partageons → Membres: Détail, Finances: Résumé → Enregistrer. As the zone's
+  président, Réseau → the parish → names and roles, and the balance.

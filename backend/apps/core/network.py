@@ -218,6 +218,7 @@ def detach(group, *, by, reason, request=None, platform=False):
 
 def summary(group, request=None, *, manage=False):
     from .identity import group_identity
+    from .sharing import settings_of, totals
 
     def item(g):
         return {**group_identity(g, request), "level": g.level, "level_name": g.level_name}
@@ -227,10 +228,16 @@ def summary(group, request=None, *, manage=False):
         "network": {"name": net.name, "levels": [n for n in (net.level1, net.level2, net.level3, net.level4) if n]} if net else None,
         "level": group.level, "level_name": group.level_name,
         "parents": [item(g) for g in group.ancestors()],
-        "children": [{**item(c), "children": len(c.descendants())} for c in group.children.filter(is_active=True).order_by("name")],
+        "children": [{**item(c), "children": len(c.descendants()),
+                      "shares": [k for k, v in settings_of(c).items() if v != "none"]}
+                     for c in group.children.filter(is_active=True).order_by("name")],
         "can_manage": manage, "can_invite": manage and can_invite(group),
         "invitations": [],
     }
+    below = group.descendants()
+    if below:
+        data["totals"] = totals(below)
+    data["sharing"] = settings_of(group) if group.parent_id else None
     if manage and can_invite(group):
         data["invitations"] = [{"code": i.pretty, "expires_at": i.expires_at.isoformat()} for i in pending_invitations(group)]
     return data
