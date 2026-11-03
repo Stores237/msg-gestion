@@ -2,7 +2,7 @@
 {% block title %}Réseaux de groupes{% endblock %}
 {% block crumb %}<div class="crumb">Plateforme Huddle · {{ networks|length }} réseau{{ networks|length|pluralize:"x" }}</div>{% endblock %}
 {% block heading %}Réseaux de groupes{% endblock %}
-{% block acts %}{% if 'backoffice.groups:change' in p %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-net-new').showModal()">{% icon 'plus' %}Nouveau réseau</button>{% endif %}{% endblock %}
+{% block acts %}<a class="btn btn-secondary" href="{% url 'backoffice:network_dues' %}">{% icon 'wallet' %}Quotes-parts</a>{% if 'backoffice.groups:change' in p %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-net-new').showModal()">{% icon 'plus' %}Nouveau réseau</button>{% endif %}{% endblock %}
 {% block body %}
 <div class="notice">{% icon 'info' %}<span>Un réseau relie des groupes par niveaux, comme les groupes de paroisse, les zones paroissiales et les diocèses. Placez chaque groupe à son niveau ici. Pour le rattacher, créez un <b>code d’invitation</b> pour le groupe de niveau supérieur : le président du groupe invité le saisit dans l’application (Accueil → nom du groupe → Réseau). Un groupe supérieur <b>informe</b> les groupes rattachés ; il ne décide pas pour eux et ne voit que ce que chaque groupe choisit de partager (réglé par son président dans l’application).</span></div>
 

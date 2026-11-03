@@ -1465,8 +1465,10 @@ class FakeFinancesRepository implements FinancesRepository {
     pending: pending,
     validatedBy: reportValidated ? 'Moi' : null,
     validatedAt: reportValidated ? DateTime(2026, 10, 20) : null,
+    network: reportNetwork,
   );
 
+  QuarterNetwork? reportNetwork;
   int reportPending = 3;
 
   @override

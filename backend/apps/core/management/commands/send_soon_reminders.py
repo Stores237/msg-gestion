@@ -32,14 +32,27 @@ class Command(BaseCommand):
         # The group's delay (Settings.remind_before_hours, 2 h by default),
         # within the half-hour either side this job runs.
         ahead = timedelta(hours=Settings.get().remind_before_hours)
-        events = Event.objects.filter(starts_at__gte=now + ahead - timedelta(minutes=30), starts_at__lt=now + ahead + timedelta(minutes=30))
+        from apps.core.groups import current_group_id
+        from apps.core.network import visible
+        from apps.events.contingents import named_here
+
+        gid = current_group_id()
+        # Also the events sent down from above (build 45).
+        events = visible(Event, gid).filter(starts_at__gte=now + ahead - timedelta(minutes=30),
+                                            starts_at__lt=now + ahead + timedelta(minutes=30)).select_related("group")
         members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_2h=True))
         sent = 0
         for e in events:
             if Notification.objects.filter(kind="reminder", target__type="event", target__id=e.pk, target__when="2h").exists():
                 continue
             when = timezone.localtime(e.starts_at)
-            sent += notify(members, "reminder", f"Rappel : {e.title} à {when:%H:%M}", e.place, {"type": "event", "id": e.pk, "when": "2h"})
+            target = {"type": "event", "id": e.pk, "when": "2h"}
+            named = named_here(e, gid) if e.group_id != gid else []
+            if named:
+                sent += notify(named, "reminder", f"Rappel : vous êtes attendu(e) à {when:%H:%M}",
+                               " · ".join(x for x in [e.title, e.group.name, e.place] if x), target)
+            ids = {u.pk for u in named}
+            sent += notify([m for m in members if m.pk not in ids], "reminder", f"Rappel : {e.title} à {when:%H:%M}", e.place, target)
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")
         from apps.events import reports
 

@@ -60,3 +60,26 @@ flutter run --dart-define=API_BASE_URL=https://msg-staging.onrender.com/api
 ```
 
 The base URL is fixed at build time; there is no runtime switch.
+
+## Demo network
+
+To try networks of groups end to end (builds 39–45), build a made-up network:
+
+```bash
+cd backend
+.venv/bin/python manage.py seed_network_demo --out demo-network.txt   # keep this file out of git (it has the PIN)
+.venv/bin/python manage.py seed_network_demo --delete                   # remove it again
+```
+
+It creates "MGS Cameroun (démo)": Diocèse de Douala › Zone Bonamoussadi (GS Bonamoussadi, GS
+Kotto) and Zone Akwa (GS Akwa, GS Bonapriso), plus Chorale Sainte-Cécile twinned with GS Kotto.
+Each group has a président, trésorier, commissaire aux comptes, formateur and four members
+(phones +237 600 000 100 to 163, one shared PIN written to `--out`). It also sets sharing, a
+diocesan announcement sent down, two zone events asking each parish for 3 people (one parish has
+answered), and a zone contribution of 15 000 (one parish has paid). Only groups whose name ends
+in "(démo)" are touched.
+
+On staging (after deploying build 45): Render → msg-staging → Shell →
+`python manage.py seed_network_demo --out /tmp/demo.txt && cat /tmp/demo.txt`. Sign in to the app
+with any of the listed numbers and the PIN; someone in several groups picks the group after
+signing in. `--delete` removes everything again.

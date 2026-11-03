@@ -1536,3 +1536,27 @@ diocese?").
 - How to verify: zone trésorier → Finances → Quotes-parts du réseau → Demander une quote-part →
   25 000 → the parish trésorier is notified → Régler → each cash book has a pending line; the
   zone validates its line → the contribution shows "Reçue" on both sides.
+
+## 67. Build 45: networks — reminders, report, back-office contributions
+
+Owner (2026-11-03): the three items left after build 44.
+
+- **Reminders**: the evening-before and "2 heures avant" jobs now include the events sent down
+  from above, for the members of each group below (with their usual settings). The people named
+  for such an event get their own reminder whatever their setting: "Rappel : vous êtes attendu(e)
+  demain 09:00 · Pèlerinage · Zone Nord". Running a job twice still sends nothing more.
+- **Quarterly report** (app and PDF): a "Quotes-parts du réseau" section with the contributions
+  paid to the group above and received from the groups below during the quarter (by their
+  cash-book date), and what is still to pay / to receive. Groups outside any network don't see it.
+  The PDF also names the "Quotes-parts du réseau" and "Autre" categories.
+- **Back-office → Réseaux de groupes → Quotes-parts** (`backoffice.groups` view): every
+  contribution, filtered by network and status, with totals (demandé, reçu, payé à confirmer, à
+  payer). Read only.
+- **Demo network** to try it all: `python manage.py seed_network_demo --out demo.txt` builds
+  "MGS Cameroun (démo)" (a diocese, two zones, four parishes, a twinned choir, 64 made-up
+  people with one PIN, sharing, a diocesan announcement, zone events asking for people, a
+  contribution); `--delete` removes it. See RUNNING_LOCALLY.md "Demo network".
+- No migration.
+- How to verify: a zone event sent down for tomorrow with a named parish member → after the
+  evening job the member has "Rappel : vous êtes attendu(e)…". Finances → Rapport shows the
+  contributions of the quarter. Back-office → Réseaux de groupes → Quotes-parts.

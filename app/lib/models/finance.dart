@@ -309,7 +309,12 @@ class QuarterReport {
     required this.pending,
     this.validatedBy,
     this.validatedAt,
+    this.network,
   });
+
+  /// Contributions between levels in the quarter (build 45); null outside
+  /// any network.
+  final QuarterNetwork? network;
 
   final int year;
   final int quarter;
@@ -341,5 +346,39 @@ class QuarterReport {
     validatedAt: j['validated_at'] == null
         ? null
         : DateTime.parse(j['validated_at'] as String).toLocal(),
+    network: j['network'] == null
+        ? null
+        : QuarterNetwork.fromJson(j['network'] as Map<String, dynamic>),
+  );
+}
+
+typedef NetworkLine = ({String title, String group, int amount});
+
+class QuarterNetwork {
+  const QuarterNetwork({
+    this.paid = const [],
+    this.received = const [],
+    this.owedOpen = 0,
+    this.askedOpen = 0,
+  });
+  final List<NetworkLine> paid;
+  final List<NetworkLine> received;
+  final int owedOpen;
+  final int askedOpen;
+
+  static List<NetworkLine> _lines(Object? rows) => [
+    for (final r in (rows as List?) ?? const [])
+      (
+        title: r['title'] as String,
+        group: r['group'] as String,
+        amount: r['amount'] as int,
+      ),
+  ];
+
+  factory QuarterNetwork.fromJson(Map<String, dynamic> j) => QuarterNetwork(
+    paid: _lines(j['paid']),
+    received: _lines(j['received']),
+    owedOpen: (j['owed_open'] as int?) ?? 0,
+    askedOpen: (j['asked_open'] as int?) ?? 0,
   );
 }

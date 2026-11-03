@@ -2339,5 +2339,24 @@
   "netDueLate": "En retard",
   "netDueSent": "Payée, à confirmer",
   "netDueReceived": "Reçue",
-  "netDueCancelledBadge": "Annulée"
+  "netDueCancelledBadge": "Annulée",
+  "reportNetPaid": "Versée à {group}",
+  "@reportNetPaid": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reportNetReceived": "Reçue de {group}",
+  "@reportNetReceived": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reportNetNone": "Aucune quote-part réglée sur le trimestre",
+  "reportNetOwedOpen": "Restant à verser au groupe au-dessus",
+  "reportNetAskedOpen": "Restant à recevoir des groupes rattachés"
 }

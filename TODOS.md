@@ -22,9 +22,8 @@
   install build 43.
 - [ ] **Owner — build 44 (2026-11-03, contributions):** deploy (migration finances 0007); install
   build 44. Networks phases 1–6 are all in (39–44): try them together on staging.
-- [ ] **Engineering — networks, later (2026-11-03):** evening-before reminders for events sent
-  down (and for the people named); contributions shown in the quarterly report; a back-office
-  view of contributions across a network.
+- [ ] **Owner — build 45 (2026-11-03):** deploy (no migration) and install build 45. To try the
+  networks end to end, run the demo network (see RUNNING_LOCALLY.md "Demo network").
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render
   (migrations core 0016, accounts 0025, finances 0006; also builds 35–36's if not yet deployed),

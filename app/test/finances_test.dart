@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:huddle/models/finance.dart';
+
 import 'fakes.dart';
 import 'helpers.dart';
 
@@ -174,5 +176,24 @@ void main() {
     expect(find.text('Décès · famille Nkotto'), findsOneWidget);
     expect(find.text('Amende · Retard à l’assise'), findsOneWidget);
     expect(find.text('À PAYER'), findsNWidgets(2));
+  });
+
+  testWidgets('report: contributions between levels (build 45)', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.finances.reportNetwork = const QuarterNetwork(
+      paid: [(title: 'Quote-part T3', group: 'Zone Nord', amount: 10000)],
+      owedOpen: 5000,
+    );
+    await openFinances(tester, _auditor);
+    await tester.tap(find.text('Rapport'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('report-network')),
+      200,
+    );
+    expect(find.text('Versée à Zone Nord'), findsOneWidget);
+    expect(find.text('Restant à verser au groupe au-dessus'), findsOneWidget);
   });
 }

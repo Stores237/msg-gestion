@@ -320,6 +320,39 @@ def report(year, quarter):
         "pending": in_q.exclude(status=Entry.Status.VALIDATED).count(),
         "validated_by": done.validated_by.short_name if done else None,
         "validated_at": done.validated_at if done else None,
+        "network": network_report(start, end),
+    }
+
+
+def network_report(start, end):
+    """Contributions between levels in the quarter (build 45): paid to the
+    group above, received from the groups below (by the date of their
+    cash-book line), and what is still open. None outside any network."""
+    from apps.core.groups import current_group_id
+
+    from .models import NetworkDue
+
+    gid = current_group_id()
+    if gid is None:
+        from apps.core.models import Settings
+
+        gid = Settings.get().group_id
+    owed = NetworkDue.objects.filter(group_id=gid, cancelled=False).select_related("umbrella", "paid_entry", "received_entry")
+    asked = NetworkDue.objects.filter(umbrella_id=gid, cancelled=False).select_related("group", "received_entry")
+    if not owed.exists() and not asked.exists():
+        return None
+
+    def line(d, other):
+        return {"title": d.title, "group": other.name, "amount": d.amount, "status": d.status,
+                "date": d.received_entry.date.isoformat() if d.received_entry else None}
+
+    paid = [line(d, d.umbrella) for d in owed if d.paid_entry and start <= d.paid_entry.date < end]
+    received = [line(d, d.group) for d in asked if d.received_entry and start <= d.received_entry.date < end]
+    return {
+        "paid": paid, "paid_total": sum(x["amount"] for x in paid),
+        "received": received, "received_total": sum(x["amount"] for x in received),
+        "owed_open": sum(d.amount for d in owed if d.received_entry_id is None),
+        "asked_open": sum(d.amount for d in asked if d.received_entry_id is None),
     }
 
 

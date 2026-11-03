@@ -18,7 +18,8 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, Tabl
 from apps.core.models import Settings
 
 GREEN = colors.HexColor("#2E7D46")
-CATS = {"inscription": "Inscriptions", "amende": "Amendes", "aide_don": "Aides et dons", "solidarite": "Contributions de solidarité", "depense": "Dépenses"}
+CATS = {"inscription": "Inscriptions", "amende": "Amendes", "aide_don": "Aides et dons", "solidarite": "Contributions de solidarité", "depense": "Dépenses",
+        "reseau": "Quotes-parts du réseau", "autre": "Autre"}
 
 
 def money(n):
@@ -71,6 +72,16 @@ def report_pdf(r):
         out = [_table(rows, [110 * mm, 50 * mm], (1,)), Spacer(1, 6 * mm), _table(cats, [110 * mm, 50 * mm], (1,))]
         status = (f"Validé par {r['validated_by']} le {timezone.localtime(r['validated_at']):%d/%m/%Y}" if r["validated_by"]
                   else f"Non validé · {r['pending']} opération(s) à vérifier")
+        if r.get("network"):
+            n = r["network"]
+            net = [["Quotes-parts du réseau", "Groupe", "Montant"]]
+            net += [[f"Versée · {x['title']}", x["group"], money(x["amount"])] for x in n["paid"]]
+            net += [[f"Reçue · {x['title']}", x["group"], money(x["amount"])] for x in n["received"]]
+            if len(net) == 1:
+                net.append(["Aucune sur le trimestre", "", ""])
+            net += [["Restant à verser au groupe au-dessus", "", money(n["owed_open"])],
+                    ["Restant à recevoir des groupes rattachés", "", money(n["asked_open"])]]
+            out += [Spacer(1, 6 * mm), _table(net, [80 * mm, 50 * mm, 30 * mm], (2,))]
         return out + [Spacer(1, 6 * mm), Paragraph(status, styles["Normal"])]
 
     return _doc(f"Rapport T{r['quarter']} {r['year']}", build)

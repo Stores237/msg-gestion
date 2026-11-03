@@ -1129,5 +1129,10 @@
   "netDueLate": "Late",
   "netDueSent": "Paid, to confirm",
   "netDueReceived": "Received",
-  "netDueCancelledBadge": "Cancelled"
+  "netDueCancelledBadge": "Cancelled",
+  "reportNetPaid": "Paid to {group}",
+  "reportNetReceived": "Received from {group}",
+  "reportNetNone": "No contribution settled this quarter",
+  "reportNetOwedOpen": "Still to pay to the group above",
+  "reportNetAskedOpen": "Still to receive from attached groups"
 }

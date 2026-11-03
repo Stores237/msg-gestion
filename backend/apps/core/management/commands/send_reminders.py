@@ -29,17 +29,35 @@ class Command(BaseCommand):
         self.monthly_dues()
         tomorrow = timezone.localdate() + timedelta(days=1)
         lo = timezone.make_aware(datetime.combine(tomorrow, time.min))
-        events = Event.objects.filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1))
+        from apps.core.groups import current_group_id
+        from apps.core.network import visible
+        from apps.events.contingents import named_here
+
+        gid = current_group_id()
+        # This group's events and those sent down from above (build 45).
+        events = visible(Event, gid).filter(starts_at__gte=lo, starts_at__lt=lo + timedelta(days=1)).select_related("group")
         members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
         today_start = timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
         sent = 0
-        dresses = dress_names()
+        dresses = {gid: dress_names()}
         for e in events:
             if Notification.objects.filter(kind="reminder", target__type="event", target__id=e.pk, created_at__gte=today_start).exists():
                 continue
+            if e.group_id not in dresses:
+                with in_group(e.group_id):
+                    dresses[e.group_id] = dress_names()
             when = timezone.localtime(e.starts_at)
-            body = " · ".join(x for x in [dresses.get(e.dress, "") if e.dress else "", e.place] if x)
-            sent += notify(members, "reminder", f"Rappel : {e.title} demain {when:%H:%M}", body, {"type": "event", "id": e.pk})
+            dress = dresses[e.group_id].get(e.dress, "") if e.dress else ""
+            body = " · ".join(x for x in [dress, e.place] if x)
+            target = {"type": "event", "id": e.pk}
+            # The people named for it are reminded whatever their setting.
+            named = named_here(e, gid) if e.group_id != gid else []
+            if named:
+                sent += notify(named, "reminder", f"Rappel : vous êtes attendu(e) demain {when:%H:%M}",
+                               " · ".join(x for x in [e.title, e.group.name, body] if x), target)
+            ids = {u.pk for u in named}
+            sent += notify([m for m in members if m.pk not in ids], "reminder", f"Rappel : {e.title} demain {when:%H:%M}",
+                           " · ".join(x for x in [body, e.group.name if e.group_id != gid else ""] if x), target)
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")
 
     def monthly_dues(self):

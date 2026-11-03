@@ -461,3 +461,82 @@ def test_contribution_rules(mgs):
     r = app_client(pt, parish).post("/api/finances/entries/", {"direction": "in", "amount": 5, "category": "reseau",
                                                                "label": "x", "date": "2026-11-01"}, format="json")
     assert r.status_code == 400 and r.json()["code"] == "network_auto"
+
+
+# --- Build 45: reminders, report, back-office contributions -------------------------------
+
+def test_reminders_reach_the_groups_below_and_the_named(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from django.core.management import call_command
+
+    from apps.core.groups import in_group
+    from apps.events.models import ActivityType, Event, EventContingent
+
+    with in_group(zone):
+        kind = ActivityType.objects.first().slug
+        tomorrow = timezone.localtime() + timedelta(days=1)
+        ev = Event.objects.create(kind=kind, title="Pèlerinage", starts_at=tomorrow.replace(hour=9, minute=0),
+                                  place="Cathédrale", cascade=True)
+    c = EventContingent.objects.create(event=ev, group=parish, requested=1)
+    c.members.set([member])
+    member.remind_eve = False  # named people are reminded whatever their setting
+    member.save(update_fields=["remind_eve"])
+    call_command("send_reminders", stdout=__import__("io").StringIO())
+    assert Notification.all_groups.filter(user=member, group=parish, title__startswith="Rappel : vous êtes attendu(e)").exists()
+    assert Notification.all_groups.filter(user=pres_p, group=parish, title__startswith="Rappel : Pèlerinage").exists()
+    # Run twice: nothing more.
+    n = Notification.all_groups.filter(kind="reminder").count()
+    call_command("send_reminders", stdout=__import__("io").StringIO())
+    assert Notification.all_groups.filter(kind="reminder").count() == n
+
+
+def test_quarter_report_and_backoffice_show_contributions(boss, mgs):  # noqa: F811
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from apps.core.groups import in_group
+    from apps.finances import network_dues as nd
+    from apps.finances.models import Entry
+
+    pt = UserFactory.build()
+    pt.save()
+    give(pt, parish, "tresorier")
+    give(pt, parish, "president")
+    with in_group(zone):
+        due = nd.ask(zone, title="Quote-part T4", amount=10000, by=pres_z)[0]
+    with in_group(parish):
+        nd.pay(due, by=pt)
+    due.refresh_from_db()
+    Entry.all_groups.filter(pk=due.received_entry_id).update(status="validated")
+    today = timezone.localdate()
+    q = (today.month - 1) // 3 + 1
+    with in_group(zone):
+        from apps.finances.services import report
+        r = report(today.year, q)
+    assert r["network"]["received_total"] == 10000 and r["network"]["received"][0]["group"] == parish.name
+    with in_group(parish):
+        r = report(today.year, q)
+    assert r["network"]["paid_total"] == 10000 and r["network"]["owed_open"] == 0
+    page = boss.get("/bo/reseaux/quotes-parts/").content.decode()
+    assert "Quote-part T4" in page and parish.name in page and "Reçue" in page
+    assert "Quote-part T4" not in boss.get("/bo/reseaux/quotes-parts/?statut=open").content.decode()
+
+
+def test_demo_network_builds_and_goes_away(tmp_path):
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    from apps.accounts.models import User
+    from apps.core.models import Group, GroupLink
+    from apps.finances.models import NetworkDue
+
+    out = tmp_path / "demo.txt"
+    call_command("seed_network_demo", out=str(out), stdout=StringIO())
+    zone = Group.objects.get(name="Zone Bonamoussadi (démo)")
+    assert {g.name for g in zone.children.all()} == {"GS Bonamoussadi (démo)", "GS Kotto (démo)"}
+    assert zone.parent.name == "Diocèse de Douala (démo)" and GroupLink.objects.filter(is_active=True).count() == 1
+    assert NetworkDue.objects.filter(umbrella=zone).count() == 2
+    text = out.read_text()
+    assert "PIN de tous les comptes" in text and "+237600000100" in text
+    call_command("seed_network_demo", delete=True, stdout=StringIO())
+    assert not Group.objects.filter(name__endswith=" (démo)").exists()
+    assert not User.objects.filter(phone="+237600000100").exists()

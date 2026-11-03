@@ -1,0 +1,25 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Quotes-parts du réseau{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:networks' %}">Réseaux de groupes</a> · quotes-parts</div>{% endblock %}
+{% block heading %}Quotes-parts du réseau{% endblock %}
+{% block body %}
+<div class="notice">{% icon 'info' %}<span>Les contributions qu’un groupe demande aux groupes rattachés. Lecture seule : l’équipe des finances de chaque groupe demande, règle et valide dans l’application (Finances → Quotes-parts du réseau). « Reçue » = la ligne a été validée dans le livre de caisse du groupe qui demande.</span></div>
+<form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:16px">
+  <label class="fld" style="min-width:200px"><span class="fld-l">Réseau</span><span class="fld-box"><select name="reseau" onchange="this.form.submit()"><option value="">Tous</option>{% for n in networks %}<option value="{{ n.pk }}"{% if n.pk|stringformat:"s" == net_id %} selected{% endif %}>{{ n.name }}</option>{% endfor %}</select></span></label>
+  <label class="fld" style="min-width:180px"><span class="fld-l">Statut</span><span class="fld-box"><select name="statut" onchange="this.form.submit()"><option value="">Tous</option>{% for v, label in statuses %}<option value="{{ v }}"{% if v == status %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></span></label>
+</form>
+<div class="bo-cols" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+  <section class="panel" style="padding:16px"><small class="muted">Demandé</small><div class="tnum" style="font-size:22px;font-weight:800">{{ totals.asked|fcfa }}</div></section>
+  <section class="panel" style="padding:16px"><small class="muted">Reçu</small><div class="tnum" style="font-size:22px;font-weight:800">{{ totals.received|fcfa }}</div></section>
+  <section class="panel" style="padding:16px"><small class="muted">Payé, à confirmer</small><div class="tnum" style="font-size:22px;font-weight:800">{{ totals.sent|fcfa }}</div></section>
+  <section class="panel" style="padding:16px"><small class="muted">À payer</small><div class="tnum" style="font-size:22px;font-weight:800">{{ totals.open|fcfa }}</div></section>
+</div>
+<section class="panel" style="margin-top:16px"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Demandée par</th><th>À</th><th>Intitulé</th><th class="amt">Montant</th><th>Échéance</th><th>Statut</th></tr></thead><tbody>
+  {% for d in rows %}<tr id="due-{{ d.pk }}"><td><span style="display:inline-flex;align-items:center;gap:6px">{% group_logo d.umbrella 20 %}{{ d.umbrella.name }}</span>{% if d.umbrella.network %}<br><small class="muted">{{ d.umbrella.network.name }}</small>{% endif %}</td>
+    <td><span style="display:inline-flex;align-items:center;gap:6px">{% group_logo d.group 20 %}{{ d.group.name }}</span></td>
+    <td>{{ d.title }}{% if d.cancel_reason %}<br><small class="muted">{{ d.cancel_reason }}</small>{% endif %}</td>
+    <td class="amt tnum">{{ d.amount|fcfa }}</td><td>{{ d.due_on|date:"d/m/Y"|default:"—" }}</td>
+    <td>{% if d.status == "received" %}<span class="status ok"><i></i>Reçue</span>{% elif d.status == "sent" %}<span class="status warn"><i></i>Payée, à confirmer</span>{% elif d.status == "cancelled" %}<span class="status off"><i></i>Annulée</span>{% else %}<span class="status err"><i></i>À payer</span>{% endif %}{% if d.paid_at %}<br><small class="muted">réglée le {{ d.paid_at|date:"d/m/Y" }}{% if d.paid_by %} par {{ d.paid_by.short_name }}{% endif %}</small>{% endif %}</td></tr>
+  {% empty %}<tr class="empty-row"><td colspan="6">Aucune quote-part.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

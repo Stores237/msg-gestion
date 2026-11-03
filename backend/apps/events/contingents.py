@@ -23,6 +23,12 @@ class ContingentRule(Exception):
         self.code, self.message, self.status = code, message, status
 
 
+def named_here(event, group_id):
+    """The members of `group_id` named for an event sent down from above."""
+    c = EventContingent.objects.filter(event=event, group_id=group_id).prefetch_related("members").first()
+    return list(c.members.filter(is_active=True)) if c else []
+
+
 def planners(group):
     from apps.accounts.models import RoleAssignment, User
 

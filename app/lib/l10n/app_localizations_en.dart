@@ -3698,4 +3698,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get netDueCancelledBadge => 'Cancelled';
+
+  @override
+  String reportNetPaid(String group) {
+    return 'Paid to $group';
+  }
+
+  @override
+  String reportNetReceived(String group) {
+    return 'Received from $group';
+  }
+
+  @override
+  String get reportNetNone => 'No contribution settled this quarter';
+
+  @override
+  String get reportNetOwedOpen => 'Still to pay to the group above';
+
+  @override
+  String get reportNetAskedOpen => 'Still to receive from attached groups';
 }

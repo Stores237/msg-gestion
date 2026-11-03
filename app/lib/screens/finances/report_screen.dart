@@ -169,6 +169,41 @@ class _ReportViewState extends State<ReportView> {
                   ),
               ],
             ),
+            // Contributions between levels (build 45).
+            if (r.network case final n?) ...[
+              const SizedBox(height: 20),
+              SectionLabel(l.netDuesTitle),
+              const SizedBox(height: 8),
+              GroupCard(
+                key: const Key('report-network'),
+                children: [
+                  for (final x in n.paid)
+                    ListRow(
+                      title: Text(x.title),
+                      subtitle: Text(l.reportNetPaid(x.group)),
+                      trailing: Amount(-x.amount, weight: FontWeight.w600),
+                    ),
+                  for (final x in n.received)
+                    ListRow(
+                      title: Text(x.title),
+                      subtitle: Text(l.reportNetReceived(x.group)),
+                      trailing: Amount(x.amount, weight: FontWeight.w600),
+                    ),
+                  if (n.paid.isEmpty && n.received.isEmpty)
+                    ListRow(title: Text(l.reportNetNone)),
+                  if (n.owedOpen > 0)
+                    ListRow(
+                      title: Text(l.reportNetOwedOpen),
+                      trailing: Amount(n.owedOpen, weight: FontWeight.w600),
+                    ),
+                  if (n.askedOpen > 0)
+                    ListRow(
+                      title: Text(l.reportNetAskedOpen),
+                      trailing: Amount(n.askedOpen, weight: FontWeight.w600),
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: 20),
             if (r.validatedBy != null)
               Notice(

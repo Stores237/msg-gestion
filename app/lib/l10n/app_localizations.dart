@@ -6133,6 +6133,36 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Annulée'**
   String get netDueCancelledBadge;
+
+  /// No description provided for @reportNetPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Versée à {group}'**
+  String reportNetPaid(String group);
+
+  /// No description provided for @reportNetReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçue de {group}'**
+  String reportNetReceived(String group);
+
+  /// No description provided for @reportNetNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune quote-part réglée sur le trimestre'**
+  String get reportNetNone;
+
+  /// No description provided for @reportNetOwedOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restant à verser au groupe au-dessus'**
+  String get reportNetOwedOpen;
+
+  /// No description provided for @reportNetAskedOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Restant à recevoir des groupes rattachés'**
+  String get reportNetAskedOpen;
 }
 
 class _AppLocalizationsDelegate

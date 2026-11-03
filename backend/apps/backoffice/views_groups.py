@@ -305,3 +305,31 @@ def networks(request):
         "days": net.INVITATION_DAYS,
         "links": GroupLink.objects.filter(is_active=True).select_related("a", "b").order_by("-created_at"),
     })
+
+
+@backoffice_view("backoffice.groups", "view")
+def network_dues(request):
+    """Réseaux → Quotes-parts (build 45): the contributions groups asked of
+    the groups below them, network by network, with their status. Read
+    only: each group's finance team asks, pays and validates in the app."""
+    from apps.core.models import Network
+    from apps.finances.models import NetworkDue
+
+    status = request.GET.get("statut", "")
+    net_id = request.GET.get("reseau", "")
+    dues = NetworkDue.objects.select_related("umbrella", "umbrella__network", "group", "received_entry", "paid_by")
+    if net_id:
+        dues = dues.filter(umbrella__network_id=net_id)
+    rows = list(dues.order_by("-created_at")[:500])
+    if status:
+        rows = [d for d in rows if d.status == status]
+    totals = {"asked": 0, "received": 0, "sent": 0, "open": 0}
+    for d in rows:
+        if d.status == NetworkDue.Status.CANCELLED:
+            continue
+        totals["asked"] += d.amount
+        totals[{"received": "received", "sent": "sent"}.get(d.status, "open")] += d.amount
+    return render(request, "backoffice/network_dues.html", {
+        "nav": "networks", "rows": rows, "totals": totals, "networks": Network.objects.all(),
+        "statuses": NetworkDue.Status.choices, "status": status, "net_id": net_id,
+    })
