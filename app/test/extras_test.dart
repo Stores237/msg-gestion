@@ -93,7 +93,7 @@ void main() {
     // Told what it is before anything downloads (owner, 2026-11-02).
     expect(find.byKey(const Key('download-ask')), findsOneWidget);
     expect(
-      find.textContaining('Livre de caisse : toutes les opérations'),
+      find.textContaining('Livre de caisse : les opérations'),
       findsOneWidget,
     );
     expect(f.finances.exports, isEmpty);

@@ -8,6 +8,7 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render
   (migrations core 0016, accounts 0025, finances 0006; also builds 35–36's if not yet deployed),
   then fill back-office → Paramètres → Cotisations et caisse, Règles des membres, Calendrier and

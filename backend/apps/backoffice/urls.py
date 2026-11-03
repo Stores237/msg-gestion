@@ -41,6 +41,7 @@ urlpatterns = [
     path("finances/", views_finances.statement, name="finances"),
     path("finances/bilan.pdf", views_finances.statement_pdf_view, name="statement_pdf"),
     path("finances/bilan.csv", views_finances.statement_csv, name="statement_csv"),
+    path("finances/livre-de-caisse.pdf", views_finances.cashbook_pdf_view, name="cashbook_pdf"),
     path("finances/membres/<int:pk>/", views_finances.member_statement, name="member_statement"),
     path("finances/depenses/", views_finances.expenses, name="expenses"),
     path("finances/depenses/<int:pk>/", views_finances.expense, name="expense"),

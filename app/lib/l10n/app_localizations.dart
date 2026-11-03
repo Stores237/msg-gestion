@@ -5093,13 +5093,13 @@ abstract class AppLocalizations {
   /// No description provided for @aboutStatementPdf.
   ///
   /// In fr, this message translates to:
-  /// **'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.'**
+  /// **'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, sur la période choisie.'**
   String get aboutStatementPdf;
 
   /// No description provided for @aboutCashbookPdf.
   ///
   /// In fr, this message translates to:
-  /// **'Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.'**
+  /// **'Livre de caisse : les opérations (entrées et sorties) de la période, avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant ; avec une période, le solde au début et à la fin.'**
   String get aboutCashbookPdf;
 
   /// No description provided for @aboutReportPdf.
@@ -5263,6 +5263,54 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{hours, plural, =1{1 heure avant} other{{hours} heures avant}}'**
   String remindBefore(int hours);
+
+  /// No description provided for @periodLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Période'**
+  String get periodLabel;
+
+  /// No description provided for @periodAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get periodAll;
+
+  /// No description provided for @periodThisMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce mois'**
+  String get periodThisMonth;
+
+  /// No description provided for @periodLastMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois dernier'**
+  String get periodLastMonth;
+
+  /// No description provided for @periodThisYear.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette année'**
+  String get periodThisYear;
+
+  /// No description provided for @periodCustom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir…'**
+  String get periodCustom;
+
+  /// No description provided for @periodWhole.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout l’historique, jusqu’à aujourd’hui.'**
+  String get periodWhole;
+
+  /// No description provided for @periodRange.
+  ///
+  /// In fr, this message translates to:
+  /// **'Du {from} au {to}.'**
+  String periodRange(String from, String to);
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/balance_privacy.dart';
+import '../../data/repositories/finances_repository.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/finance.dart';
@@ -42,12 +43,12 @@ class _FinancesScreenState extends State<FinancesScreen> {
     String source,
     String name,
     String about,
-    Future<String> Function() link,
+    Future<String> Function(ExportPeriod?) link,
   ) => openDocument(
     context,
     source: source,
     name: name,
-    link: link,
+    periodLink: link,
     about: about,
   );
 
@@ -126,7 +127,9 @@ class _FinancesScreenState extends State<FinancesScreen> {
                     'fin-statement',
                     l.pdfStatementName(fileDate()),
                     l.aboutStatementPdf,
-                    RepositoryLocator.instance.finances.statementPdf,
+                    (p) => RepositoryLocator.instance.finances.statementPdf(
+                      period: p,
+                    ),
                   ),
                 ),
               if (_tab == 0 && widget.me.can('finances.cashbook', 'export'))
@@ -138,7 +141,9 @@ class _FinancesScreenState extends State<FinancesScreen> {
                     'fin-cashbook',
                     l.pdfCashbookName(fileDate()),
                     l.aboutCashbookPdf,
-                    RepositoryLocator.instance.finances.cashbookPdf,
+                    (p) => RepositoryLocator.instance.finances.cashbookPdf(
+                      period: p,
+                    ),
                   ),
                 ),
             ],

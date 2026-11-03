@@ -233,3 +233,60 @@ def test_repeated_absences_alert_once():
         api.put(f"/api/events/{e.pk}/attendance/", {"marks": [{"member": member.pk, "status": "absent"}]}, format="json")
     assert Notification.objects.filter(user=member, title="Absences").count() == 1
     assert Notification.objects.filter(user=censeur, title="Absences répétées").count() == 1
+
+
+# --- Export period (owner, 2026-11-03) -------------------------------------------------
+
+
+def _money_history():
+    from apps.finances.models import Due, Entry
+
+    member = UserFactory()
+    give_role(member, "membre")
+    admin = UserFactory()
+    old = Due.objects.create(member=member, kind="amende", label="Retard", amount=500)
+    Due.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=60))
+    Due.objects.create(member=member, kind="amende", label="Absence", amount=1000)
+    Entry.objects.create(direction="in", amount=500, category="amende", label="Retard", member=member, status="validated",
+                         date=date.today() - timedelta(days=50), created_by=admin)
+    Entry.objects.create(direction="in", amount=300, category="amende", label="Absence", member=member, status="validated",
+                         date=date.today(), created_by=admin)
+    return member
+
+
+def test_statements_and_cash_book_follow_the_period():
+    member = _money_history()
+    api, _ = client_for("tresorier")
+    start = (date.today() - timedelta(days=7)).isoformat()
+    whole = {r["member"]: r for r in api.get("/api/finances/statement/").json()["rows"]}[member.pk]
+    assert (whole["owed"], whole["paid"]) == (1500, 800)
+    body = api.get(f"/api/finances/statement/?from={start}").json()
+    row = {r["member"]: r for r in body["rows"]}[member.pk]
+    assert (row["owed"], row["paid"]) == (1000, 300) and body["period"].startswith("depuis le")
+    one = api.get(f"/api/finances/statement/{member.pk}/?from={start}&to={date.today().isoformat()}").json()
+    assert [d["label"] for d in one["dues"]] == ["Absence"] and len(one["entries"]) == 1
+    assert api.get("/api/finances/statement/?from=2026-13-01").json()["code"] == "bad_period"
+    assert api.get(f"/api/finances/statement/?from={date.today()}&to=2020-01-01").json()["code"] == "bad_period"
+
+    from apps.finances import services
+
+    lines, opening, closing = services.cashbook(services.Period(date.today() - timedelta(days=7), date.today()))
+    assert [e.label for e in lines] == ["Absence"] and (opening, closing) == (500, 800)
+    assert api.get(f"/api/finances/entries/pdf/?from={start}").status_code == 200
+    assert AuditLog.objects.filter(action="Export PDF du livre de caisse", detail__periode__startswith="depuis").exists()
+
+
+def test_backoffice_period_filters_the_page_and_the_exports(boss):  # noqa: F811
+    member = _money_history()
+    start = (date.today() - timedelta(days=7)).isoformat()
+    page = boss.get(f"/bo/finances/?from={start}").content.decode()
+    assert "Chiffres et exports depuis le" in page
+    assert f"bilan.pdf?from={start}" in page and f"livre-de-caisse.pdf?from={start}" in page
+    r = boss.get(f"/bo/finances/livre-de-caisse.pdf?from={start}")
+    assert r.status_code == 200 and r["Content-Type"] == "application/pdf"
+    assert start.replace("-", "") in r["Content-Disposition"]
+    csv = boss.get(f"/bo/finances/bilan.csv?from={start}").content.decode()
+    assert "Période : depuis le" in csv
+    page = boss.get(f"/bo/finances/membres/{member.pk}/?from={start}").content.decode()
+    assert "Absence" in page and "Retard" not in page
+    assert "Période invalide" in boss.get("/bo/finances/?from=hier", follow=True).content.decode()

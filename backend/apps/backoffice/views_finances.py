@@ -5,6 +5,7 @@ trésorier, président) download the same statements from the app."""
 import csv
 import io
 
+from django.contrib import messages
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -28,10 +29,32 @@ def _members(request):
     return q, qs
 
 
+def _period(request):
+    """The period chosen in the page (GET from/to), its quick choices and the
+    query string the export links carry. Wrong dates: the whole history, said."""
+    from datetime import date, timedelta
+
+    try:
+        period = services.parse_period(request.GET)
+    except services.FinanceRule as e:
+        messages.error(request, str(e))
+        period = services.Period()
+    today = timezone.localdate()
+    first = today.replace(day=1)
+    last_end = first - timedelta(days=1)
+    quick = [("Tout", "", ""),
+             ("Ce mois", f"{first:%Y-%m-%d}", f"{today:%Y-%m-%d}"),
+             ("Mois dernier", f"{last_end.replace(day=1):%Y-%m-%d}", f"{last_end:%Y-%m-%d}"),
+             ("Cette année", f"{date(today.year, 1, 1):%Y-%m-%d}", f"{today:%Y-%m-%d}")]
+    pq = "&".join(f"{k}={d:%Y-%m-%d}" for k, d in (("from", period.start), ("to", period.end)) if d)
+    return period, {"period": period, "quick": quick, "pq": f"?{pq}" if pq else ""}
+
+
 @backoffice_view("finances.cashbook", "view")
 def statement(request):
     q, qs = _members(request)
-    rows = services.statement_rows(qs)
+    period, ctx = _period(request)
+    rows = services.statement_rows(qs, period)
     only = request.GET.get("reste", "")
     if only == "1":
         rows = [r for r in rows if r["remaining"]]
@@ -40,15 +63,17 @@ def statement(request):
         "nav": "finances", "rows": rows, "totals": services.statement_totals(rows), "q": q, "only": only,
         "balance": services.balance(validated), "pending": Entry.objects.filter(status=Entry.Status.PENDING).count(),
         "can_export": request.user.can("finances.cashbook", "export"),
+        "keep": [(k, v) for k, v in (("q", q), ("reste", only)) if v], **ctx,
     })
 
 
 @backoffice_view("finances.cashbook", "view")
 def member_statement(request, pk):
     member = get_object_or_404(User.objects.members(), pk=pk)
+    period, ctx = _period(request)
     return render(request, "backoffice/finance_member.html", {
-        "nav": "finances", "member": member, "st": services.member_statement(member),
-        "can_export": request.user.can("finances.cashbook", "export"),
+        "nav": "finances", "member": member, "st": services.member_statement(member, period),
+        "can_export": request.user.can("finances.cashbook", "export"), "keep": [], **ctx,
     })
 
 
@@ -58,16 +83,38 @@ def _file(body, name, content_type):
     return resp
 
 
+def _name(base, period):
+    return f"{base}-{period.slug or timezone.localdate().strftime('%Y-%m-%d')}"
+
+
+def _detail(period, **kw):
+    return {**kw, **({"periode": period.label} if period else {})}
+
+
 @backoffice_view("finances.cashbook", "export")
 def statement_pdf_view(request):
-    rows = services.statement_rows()
-    audit.record("Export PDF du bilan général", actor=request.user, request=request, detail={"membres": len(rows)})
-    return _file(statement_pdf(rows, services.statement_totals(rows)), f"bilan-general-{timezone.localdate():%Y-%m-%d}.pdf", "application/pdf")
+    period, _ = _period(request)
+    rows = services.statement_rows(period=period)
+    audit.record("Export PDF du bilan général", actor=request.user, request=request, detail=_detail(period, membres=len(rows)))
+    return _file(statement_pdf(rows, services.statement_totals(rows), period.label), _name("bilan-general", period) + ".pdf",
+                 "application/pdf")
+
+
+@backoffice_view("finances.cashbook", "export")
+def cashbook_pdf_view(request):
+    from apps.finances.pdf import cashbook_pdf
+
+    period, _ = _period(request)
+    lines, opening, closing = services.cashbook(period)
+    audit.record("Export PDF du livre de caisse", actor=request.user, request=request, detail=_detail(period, lignes=len(lines)))
+    pdf = cashbook_pdf(lines, period.label, opening if period else None, closing if period else None)
+    return _file(pdf, _name("livre-de-caisse", period) + ".pdf", "application/pdf")
 
 
 @backoffice_view("finances.cashbook", "export")
 def statement_csv(request):
-    rows = services.statement_rows()
+    period, _ = _period(request)
+    rows = services.statement_rows(period=period)
     buf = io.StringIO()
     w = csv.writer(buf, delimiter=";")
     c = Settings.get().currency
@@ -77,16 +124,20 @@ def statement_csv(request):
         w.writerow([r["full_name"], r["phone"], status.get(r["status"], r["status"]), r["owed"], r["paid"], r["pending"], r["remaining"]])
     t = services.statement_totals(rows)
     w.writerow(["Total", "", "", t["owed"], t["paid"], t["pending"], t["remaining"]])
-    audit.record("Export CSV du bilan général", actor=request.user, request=request, detail={"membres": len(rows)})
-    return _file("﻿" + buf.getvalue(), f"bilan-general-{timezone.localdate():%Y-%m-%d}.csv", "text/csv; charset=utf-8")
+    if period:
+        w.writerow([f"Période : {period.label}"])
+    audit.record("Export CSV du bilan général", actor=request.user, request=request, detail=_detail(period, membres=len(rows)))
+    return _file("﻿" + buf.getvalue(), _name("bilan-general", period) + ".csv", "text/csv; charset=utf-8")
 
 
 @backoffice_view("finances.cashbook", "export")
 def member_statement_pdf_view(request, pk):
     member = get_object_or_404(User.objects.members(), pk=pk)
-    audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
+    period, _ = _period(request)
+    audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request, detail=_detail(period) or None)
     slug = f"{member.last_name}-{member.first_name}".lower().replace(" ", "-")
-    return _file(member_statement_pdf(services.member_statement(member)), f"bilan-{slug}-{timezone.localdate():%Y-%m-%d}.pdf", "application/pdf")
+    return _file(member_statement_pdf(services.member_statement(member, period)), _name(f"bilan-{slug}", period) + ".pdf",
+                 "application/pdf")
 
 
 # --- Expense requests (owner, 2026-10-30): the super admin sees them all,

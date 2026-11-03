@@ -115,8 +115,10 @@ class _ProfileBody extends StatelessWidget {
     name: AppLocalizations.of(
       context,
     ).pdfMemberStatementName(m.summary.fullName, fileDate()),
-    link: () =>
-        RepositoryLocator.instance.finances.memberStatementPdf(m.summary.id),
+    periodLink: (p) => RepositoryLocator.instance.finances.memberStatementPdf(
+      m.summary.id,
+      period: p,
+    ),
     about: AppLocalizations.of(
       context,
     ).aboutMemberStatementPdf(m.summary.fullName),

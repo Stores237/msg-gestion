@@ -438,9 +438,15 @@ class CashbookPdfView(APIView):
     def get(self, request):
         from .pdf import cashbook_pdf, publish
 
-        entries = list(Entry.objects.select_related("member", "created_by", "validated_by")[:1000])
-        audit.record("Export PDF du livre de caisse", actor=request.user, request=request, detail={"lignes": len(entries)})
-        return _pdf_response(request, publish(cashbook_pdf(entries), "livre-de-caisse"))
+        try:
+            period = services.parse_period(request.query_params)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        entries, opening, closing = services.cashbook(period)
+        audit.record("Export PDF du livre de caisse", actor=request.user, request=request,
+                     detail={"lignes": len(entries), **({"periode": period.label} if period else {})})
+        pdf = cashbook_pdf(entries, period.label, opening if period else None, closing if period else None)
+        return _pdf_response(request, publish(pdf, "livre-de-caisse"))
 
 
 # --- Members' balance statement ("bilan") ---------------------------------------------
@@ -453,8 +459,12 @@ class StatementView(APIView):
 
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request):
-        rows = services.statement_rows()
-        return Response({"rows": rows, "totals": services.statement_totals(rows)})
+        try:
+            period = services.parse_period(request.query_params)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        rows = services.statement_rows(period=period)
+        return Response({"rows": rows, "totals": services.statement_totals(rows), "period": period.label})
 
 
 class MemberStatementView(APIView):
@@ -462,7 +472,11 @@ class MemberStatementView(APIView):
 
     @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request, pk):
-        return Response(services.member_statement(get_object_or_404(User.objects.members(), pk=pk)))
+        try:
+            period = services.parse_period(request.query_params)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        return Response(services.member_statement(get_object_or_404(User.objects.members(), pk=pk), period))
 
 
 class StatementPdfView(APIView):
@@ -471,9 +485,14 @@ class StatementPdfView(APIView):
     def get(self, request):
         from .pdf import publish, statement_pdf
 
-        rows = services.statement_rows()
-        audit.record("Export PDF du bilan général", actor=request.user, request=request, detail={"membres": len(rows)})
-        return _pdf_response(request, publish(statement_pdf(rows, services.statement_totals(rows)), "bilan-general"))
+        try:
+            period = services.parse_period(request.query_params)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        rows = services.statement_rows(period=period)
+        audit.record("Export PDF du bilan général", actor=request.user, request=request,
+                     detail={"membres": len(rows), **({"periode": period.label} if period else {})})
+        return _pdf_response(request, publish(statement_pdf(rows, services.statement_totals(rows), period.label), "bilan-general"))
 
 
 class MemberStatementPdfView(APIView):
@@ -482,6 +501,11 @@ class MemberStatementPdfView(APIView):
     def get(self, request, pk):
         from .pdf import member_statement_pdf, publish
 
+        try:
+            period = services.parse_period(request.query_params)
+        except services.FinanceRule as e:
+            return _rule_error(e)
         member = get_object_or_404(User.objects.members(), pk=pk)
-        audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request)
-        return _pdf_response(request, publish(member_statement_pdf(services.member_statement(member)), "bilan-membre"))
+        audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request,
+                     detail={"periode": period.label} if period else None)
+        return _pdf_response(request, publish(member_statement_pdf(services.member_statement(member, period)), "bilan-membre"))

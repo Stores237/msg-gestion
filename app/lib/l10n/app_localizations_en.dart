@@ -3029,11 +3029,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutStatementPdf =>
-      'Members\' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, as of today.';
+      'Members\' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, over the chosen period.';
 
   @override
   String get aboutCashbookPdf =>
-      'Cash book: every operation (money in and out) with its date, description, the member concerned, who entered and validated it, and its amount.';
+      'Cash book: the period\'s operations (money in and out) with their date, description, the member concerned, who entered and validated them, and their amount; with a period, the balance at its start and end.';
 
   @override
   String aboutReportPdf(int quarter, int year) {
@@ -3129,5 +3129,31 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 hour before',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get periodLabel => 'Period';
+
+  @override
+  String get periodAll => 'All';
+
+  @override
+  String get periodThisMonth => 'This month';
+
+  @override
+  String get periodLastMonth => 'Last month';
+
+  @override
+  String get periodThisYear => 'This year';
+
+  @override
+  String get periodCustom => 'Choose…';
+
+  @override
+  String get periodWhole => 'The whole history, up to today.';
+
+  @override
+  String periodRange(String from, String to) {
+    return 'From $from to $to.';
   }
 }

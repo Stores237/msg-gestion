@@ -336,20 +336,71 @@ def validate_report(year, quarter, *, by, request=None):
 # --- Members' balance statement ("bilan") -----------------------------------------------
 
 
-def statement_rows(members=None):
+class Period:
+    """A chosen period for an export (owner, 2026-11-03): from and/or to,
+    both included; neither = everything."""
+
+    def __init__(self, start=None, end=None):
+        self.start, self.end = start, end
+
+    def __bool__(self):
+        return bool(self.start or self.end)
+
+    @property
+    def label(self):
+        if self.start and self.end:
+            return f"du {self.start:%d/%m/%Y} au {self.end:%d/%m/%Y}"
+        if self.start:
+            return f"depuis le {self.start:%d/%m/%Y}"
+        if self.end:
+            return f"jusqu’au {self.end:%d/%m/%Y}"
+        return ""
+
+    @property
+    def slug(self):
+        return "-".join(f"{d:%Y%m%d}" for d in (self.start, self.end) if d)
+
+    def dates(self, qs, field):
+        """qs filtered on a date (or `x__date`) field."""
+        if self.start:
+            qs = qs.filter(**{f"{field}__gte": self.start})
+        if self.end:
+            qs = qs.filter(**{f"{field}__lte": self.end})
+        return qs
+
+
+def parse_period(params):
+    """?from=YYYY-MM-DD&to=YYYY-MM-DD → Period; FinanceRule when wrong."""
+    from django.utils.dateparse import parse_date
+
+    raw = {k: (params.get(k) or "").strip() for k in ("from", "to")}
+    try:
+        start, end = (parse_date(raw[k]) if raw[k] else None for k in ("from", "to"))
+    except ValueError:
+        start = end = False
+    if start is False or (raw["from"] and start is None) or (raw["to"] and end is None):
+        raise FinanceRule("bad_period", "Période invalide : dates au format AAAA-MM-JJ.")
+    if start and end and end < start:
+        raise FinanceRule("bad_period", "Période invalide : la fin est avant le début.")
+    return Period(start, end)
+
+
+def statement_rows(members=None, period=None):
     """Bilan général: per member, what they owe (fines, shares, registration),
     what they paid (validated, and still waiting for validation) and what is
-    left to pay. Members with nothing at all are listed too, at zero."""
+    left to pay. Members with nothing at all are listed too, at zero. With a
+    period: the debts created and the payments dated within it."""
+    period = period or Period()
     if members is None:
         members = User.objects.members().exclude(gstatus=User.Status.ARCHIVED)
     members = list(members.order_by("last_name", "first_name"))
     ids = [m.pk for m in members]
-    dues = Due.objects.filter(member_id__in=ids, cancelled=False).annotate(p=Sum("entries__amount"))
+    dues = period.dates(Due.objects.filter(member_id__in=ids, cancelled=False), "created_at__date").annotate(p=Sum("entries__amount"))
     owed, left = {}, {}
     for d in dues:
         owed[d.member_id] = owed.get(d.member_id, 0) + d.amount
         left[d.member_id] = left.get(d.member_id, 0) + max(d.amount - (d.p or 0), 0)
-    paid_in = Entry.objects.filter(member_id__in=ids, direction=Entry.Direction.IN)
+    paid_in = period.dates(Entry.objects.filter(member_id__in=ids, direction=Entry.Direction.IN), "date")
     validated = dict(paid_in.filter(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
     pending = dict(paid_in.exclude(status=Entry.Status.VALIDATED).values("member").annotate(t=Sum("amount")).values_list("member", "t"))
     return [{
@@ -362,12 +413,14 @@ def statement_totals(rows):
     return {k: sum(r[k] for r in rows) for k in ("owed", "paid", "pending", "remaining")}
 
 
-def member_statement(member):
+def member_statement(member, period=None):
     """Bilan of one member: the totals, each debt, and every cash-book line
-    in their name."""
-    row = statement_rows(User.objects.members().filter(pk=member.pk))[0]
+    in their name (within the period, when one is given)."""
+    period = period or Period()
+    row = statement_rows(User.objects.members().filter(pk=member.pk), period)[0]
     dues = []
-    for d in Due.objects.filter(member=member, cancelled=False).annotate(p=Sum("entries__amount")).order_by("created_at"):
+    for d in period.dates(Due.objects.filter(member=member, cancelled=False), "created_at__date").annotate(
+            p=Sum("entries__amount")).order_by("created_at"):
         paid = d.p or 0
         dues.append({"id": d.pk, "kind": d.kind, "kind_label": d.get_kind_display(), "label": d.label, "amount": d.amount,
                      "paid": paid, "remaining": max(d.amount - paid, 0), "created_at": d.created_at})
@@ -375,5 +428,18 @@ def member_statement(member):
         "id": e.pk, "date": e.date, "direction": e.direction, "amount": e.amount, "category": e.category,
         "category_label": e.get_category_display(), "label": e.label, "status": e.status,
         "created_by": e.created_by.short_name, "validated_by": e.validated_by.short_name if e.validated_by else None,
-    } for e in Entry.objects.filter(member=member).select_related("created_by", "validated_by").order_by("date", "created_at")]
-    return {**row, "dues": dues, "entries": entries}
+    } for e in period.dates(Entry.objects.filter(member=member), "date").select_related("created_by", "validated_by").order_by("date", "created_at")]
+    return {**row, "dues": dues, "entries": entries, "period": period.label}
+
+
+def cashbook(period=None):
+    """The cash-book lines for an export, with the validated balance before
+    and at the end of the period."""
+
+    period = period or Period()
+    lines = list(period.dates(Entry.objects.all(), "date").select_related("member", "created_by", "validated_by")
+                 .order_by("date", "created_at")[:2000])
+    validated = Entry.objects.filter(status=Entry.Status.VALIDATED)
+    opening = balance(validated.filter(date__lt=period.start)) if period.start else 0
+    closing = balance(validated.filter(date__lte=period.end)) if period.end else balance(validated)
+    return lines, opening, closing

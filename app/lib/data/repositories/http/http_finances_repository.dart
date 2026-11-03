@@ -197,20 +197,26 @@ class HttpFinancesRepository implements FinancesRepository {
           as String;
 
   @override
-  Future<String> cashbookPdf() async =>
-      ((await _api.get('/finances/entries/pdf/'))
+  Future<String> cashbookPdf({ExportPeriod? period}) async =>
+      ((await _api.get('/finances/entries/pdf/', query: period?.query))
               as Map<String, dynamic>)['url']
           as String;
 
   @override
-  Future<String> statementPdf() async =>
-      ((await _api.get('/finances/statement/pdf/'))
+  Future<String> statementPdf({ExportPeriod? period}) async =>
+      ((await _api.get('/finances/statement/pdf/', query: period?.query))
               as Map<String, dynamic>)['url']
           as String;
 
   @override
-  Future<String> memberStatementPdf(int memberId) async =>
-      ((await _api.get('/finances/statement/$memberId/pdf/'))
+  Future<String> memberStatementPdf(
+    int memberId, {
+    ExportPeriod? period,
+  }) async =>
+      ((await _api.get(
+                '/finances/statement/$memberId/pdf/',
+                query: period?.query,
+              ))
               as Map<String, dynamic>)['url']
           as String;
 

@@ -1258,20 +1258,27 @@ class FakeFinancesRepository implements FinancesRepository {
   }
 
   @override
-  Future<String> cashbookPdf() async {
-    exports.add('cashbook');
+  Future<String> cashbookPdf({ExportPeriod? period}) async {
+    exports.add(period == null ? 'cashbook' : 'cashbook:${period.slug}');
     return 'https://example.test/c.pdf';
   }
 
   @override
-  Future<String> statementPdf() async {
-    exports.add('statement');
+  Future<String> statementPdf({ExportPeriod? period}) async {
+    exports.add(period == null ? 'statement' : 'statement:${period.slug}');
     return 'https://example.test/s.pdf';
   }
 
   @override
-  Future<String> memberStatementPdf(int memberId) async {
-    exports.add('statement:$memberId');
+  Future<String> memberStatementPdf(
+    int memberId, {
+    ExportPeriod? period,
+  }) async {
+    exports.add(
+      period == null
+          ? 'statement:$memberId'
+          : 'statement:$memberId:${period.slug}',
+    );
     return 'https://example.test/m.pdf';
   }
 }

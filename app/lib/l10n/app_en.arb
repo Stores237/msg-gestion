@@ -922,8 +922,8 @@
   "downloadAskTitle": "Download this document?",
   "downloadAskWhere": "PDF · saved in Downloads/Huddle and readable later without a connection.",
   "download": "Download",
-  "aboutStatementPdf": "Members' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, as of today.",
-  "aboutCashbookPdf": "Cash book: every operation (money in and out) with its date, description, the member concerned, who entered and validated it, and its amount.",
+  "aboutStatementPdf": "Members' general statement: for each member, what they owe, what they paid (validated), what awaits validation and what is left to pay, over the chosen period.",
+  "aboutCashbookPdf": "Cash book: the period's operations (money in and out) with their date, description, the member concerned, who entered and validated them, and their amount; with a period, the balance at its start and end.",
   "aboutReportPdf": "Financial report for quarter {quarter} {year}: opening balance, money in and out, closing balance and income by category.",
   "@aboutReportPdf": {
     "placeholders": {
@@ -972,6 +972,24 @@
     "placeholders": {
       "hours": {
         "type": "int"
+      }
+    }
+  },
+  "periodLabel": "Period",
+  "periodAll": "All",
+  "periodThisMonth": "This month",
+  "periodLastMonth": "Last month",
+  "periodThisYear": "This year",
+  "periodCustom": "Choose…",
+  "periodWhole": "The whole history, up to today.",
+  "periodRange": "From {from} to {to}.",
+  "@periodRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
       }
     }
   }

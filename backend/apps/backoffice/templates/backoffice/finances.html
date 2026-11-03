@@ -2,8 +2,9 @@
 {% block title %}Bilan financier{% endblock %}
 {% block crumb %}<div class="crumb">Finances · {{ rows|length }} membre{{ rows|length|pluralize }}</div>{% endblock %}
 {% block heading %}Bilan financier des membres{% endblock %}
-{% block acts %}<a class="btn btn-outline" href="{% url 'backoffice:expenses' %}">{% icon 'receipt' %}Demandes de dépense</a>{% if can_export %}<a class="btn btn-outline" href="{% url 'backoffice:statement_csv' %}">{% icon 'file-spreadsheet' %}CSV</a><a class="btn btn-primary" href="{% url 'backoffice:statement_pdf' %}">{% icon 'file-down' %}Bilan général (PDF)</a>{% endif %}{% endblock %}
+{% block acts %}<a class="btn btn-outline" href="{% url 'backoffice:expenses' %}">{% icon 'receipt' %}Demandes de dépense</a>{% if can_export %}<a class="btn btn-outline" href="{% url 'backoffice:cashbook_pdf' %}{{ pq }}" title="Toutes les opérations{% if period %} {{ period.label }}{% endif %}, avec le solde au début et à la fin">{% icon 'book-open' %}Livre de caisse (PDF)</a><a class="btn btn-outline" href="{% url 'backoffice:statement_csv' %}{{ pq }}">{% icon 'file-spreadsheet' %}CSV</a><a class="btn btn-primary" href="{% url 'backoffice:statement_pdf' %}{{ pq }}">{% icon 'file-down' %}Bilan général (PDF)</a>{% endif %}{% endblock %}
 {% block body %}
+<section class="panel" style="margin-bottom:24px">{% include "backoffice/_period.html" %}</section>
 <div class="kpis money">
   <div class="kpi"><span>Solde de la caisse</span><b class="tnum">{{ balance|fcfa }}</b><small>opérations validées{% if pending %} · {{ pending }} à valider{% endif %}</small></div>
   <div class="kpi"><span>Total dû</span><b class="tnum">{{ totals.owed|fcfa }}</b><small>amendes, contributions, inscriptions</small></div>
@@ -16,11 +17,11 @@
     <a class="fsel{% if not only %} on{% endif %}" href="?q={{ q|urlencode }}">Tous les membres</a><a class="fsel{% if only == '1' %} on{% endif %}" href="?q={{ q|urlencode }}&reste=1">Avec un reste à payer</a>
   </form>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Membre</th><th class="amt">Dû</th><th class="amt">Versé (validé)</th><th class="amt">À valider</th><th class="amt">Reste à payer</th><th></th></tr></thead><tbody>
-    {% for r in rows %}<tr><td><a class="who" href="{% url 'backoffice:member_statement' r.member %}" style="color:inherit"><span><b>{{ r.full_name }}</b><small style="white-space:nowrap">{{ r.phone|phone }}</small></span></a></td>
+    {% for r in rows %}<tr><td><a class="who" href="{% url 'backoffice:member_statement' r.member %}{{ pq }}" style="color:inherit"><span><b>{{ r.full_name }}</b><small style="white-space:nowrap">{{ r.phone|phone }}</small></span></a></td>
       <td class="tnum amt">{{ r.owed|fcfa }}</td><td class="tnum amt">{{ r.paid|fcfa }}</td>
       <td class="tnum muted amt">{% if r.pending %}{{ r.pending|fcfa }}{% else %}—{% endif %}</td>
       <td class="tnum amt">{% if r.remaining %}<b>{{ r.remaining|fcfa }}</b>{% elif r.owed %}<span class="status ok"><i></i>Soldé</span>{% else %}<span class="muted">—</span>{% endif %}</td>
-      <td class="amt"><span class="row-acts"><a class="btn btn-secondary btn-sm" href="{% url 'backoffice:member_statement' r.member %}">Détail</a>{% if can_export %}<a class="iconbtn" href="{% url 'backoffice:member_statement_pdf' r.member %}" aria-label="Bilan PDF de {{ r.full_name }}" title="Bilan PDF">{% icon 'file-down' 20 %}</a>{% endif %}</span></td></tr>
+      <td class="amt"><span class="row-acts"><a class="btn btn-secondary btn-sm" href="{% url 'backoffice:member_statement' r.member %}{{ pq }}">Détail</a>{% if can_export %}<a class="iconbtn" href="{% url 'backoffice:member_statement_pdf' r.member %}{{ pq }}" aria-label="Bilan PDF de {{ r.full_name }}" title="Bilan PDF">{% icon 'file-down' 20 %}</a>{% endif %}</span></td></tr>
     {% empty %}<tr class="empty-row"><td colspan="6">Aucun membre ne correspond.</td></tr>{% endfor %}
   </tbody>
   {% if rows %}<tfoot><tr><td><b>Total</b></td><td class="tnum amt"><b>{{ totals.owed|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.paid|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.pending|fcfa }}</b></td><td class="tnum amt"><b>{{ totals.remaining|fcfa }}</b></td><td></td></tr></tfoot>{% endif %}

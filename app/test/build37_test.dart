@@ -217,4 +217,39 @@ void main() {
     expect(find.text('À L’ESSAI'), findsOneWidget);
     expect(find.text('INACTIF'), findsOneWidget);
   });
+
+  testWidgets('a finance PDF for a chosen period', (tester) async {
+    final f = await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        tabs: const ['accueil', 'finances'],
+        permissions: const {
+          'finances.cashbook': ['view', 'export'],
+        },
+      ),
+    );
+    await tester.tap(find.byKey(const Key('tab-finances')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('export-cashbook')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Tout l’historique, jusqu’à aujourd’hui.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('period-month')));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Text>(find.byKey(const Key('period-text'))).data,
+      startsWith('Du '),
+    );
+    await tester.tap(find.byKey(const Key('confirm-download')));
+    await tester.pumpAndSettle();
+    final now = DateTime.now();
+    String day(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    expect(f.finances.exports, [
+      'cashbook:${day(DateTime(now.year, now.month))}_${day(now)}',
+    ]);
+  });
 }

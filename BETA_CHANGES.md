@@ -1357,3 +1357,27 @@ was still `cm.msgyapoma.msg_gestion`.
   récupération" → code + new PIN signs in. Open a past event → no Modifier; Appel still works.
   Finances → eye → balance hidden on Finances and Accueil. Finances → PDF → the dialog explains it.
 
+## 60. Build 38: a period for the finance exports
+
+Owner (2026-11-03), after build 37's download window: add a period choice, in the app and the
+back-office.
+
+- **App**: the download window of the bilan général, the livre de caisse and a member's relevé
+  now has "Période": Tout, Ce mois, Mois dernier, Cette année, Choisir… (a date range); the line
+  under it says which days. The quarterly report keeps its quarter. A PDF for a period is its own
+  file (the period is in its name) and its own offline copy.
+- **Back-office**: Finances and a member's page get a "Période" bar (same quick choices, or two
+  dates + Appliquer). The figures on the page, the member links and every export (Bilan général
+  PDF, CSV, member PDF and the new **Livre de caisse (PDF)**) follow it; file names carry the
+  dates.
+- What a period means: debts created and payments dated within it; the cash book lists the
+  operations dated within it, with the validated balance at its start and end. The PDF says
+  "Période : du … au …". Wrong dates: `bad_period` (app) or a message and the whole history
+  (back-office). Each export's journal entry records the period.
+- Server: `?from=YYYY-MM-DD&to=YYYY-MM-DD` on `/api/finances/statement/` (+ `/pdf/`),
+  `/api/finances/statement/<id>/` (+ `/pdf/`), `/api/finances/entries/pdf/`;
+  `/bo/finances/livre-de-caisse.pdf`. No migration.
+- How to verify: app → Finances → PDF icon → "Ce mois" → Télécharger → the PDF says "Période :
+  du 01/… au …". Back-office → Finances → "Mois dernier" → the totals change → Livre de caisse
+  (PDF) shows the balance at the start and end of last month.
+

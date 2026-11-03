@@ -3075,11 +3075,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get aboutStatementPdf =>
-      'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.';
+      'Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, sur la période choisie.';
 
   @override
   String get aboutCashbookPdf =>
-      'Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.';
+      'Livre de caisse : les opérations (entrées et sorties) de la période, avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant ; avec une période, le solde au début et à la fin.';
 
   @override
   String aboutReportPdf(int quarter, int year) {
@@ -3175,5 +3175,31 @@ class AppLocalizationsFr extends AppLocalizations {
       one: '1 heure avant',
     );
     return '$_temp0';
+  }
+
+  @override
+  String get periodLabel => 'Période';
+
+  @override
+  String get periodAll => 'Tout';
+
+  @override
+  String get periodThisMonth => 'Ce mois';
+
+  @override
+  String get periodLastMonth => 'Mois dernier';
+
+  @override
+  String get periodThisYear => 'Cette année';
+
+  @override
+  String get periodCustom => 'Choisir…';
+
+  @override
+  String get periodWhole => 'Tout l’historique, jusqu’à aujourd’hui.';
+
+  @override
+  String periodRange(String from, String to) {
+    return 'Du $from au $to.';
   }
 }

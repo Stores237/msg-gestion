@@ -25,7 +25,7 @@ def money(n):
     return f"{n:,}".replace(",", " ") + " FCFA"
 
 
-def _doc(title, story_builder):
+def _doc(title, story_builder, period=""):
     buf = io.BytesIO()
     st = Settings.get()
     styles = getSampleStyleSheet()
@@ -35,6 +35,7 @@ def _doc(title, story_builder):
         Paragraph(st.parish, styles["Normal"]),
         Spacer(1, 8 * mm),
         Paragraph(f"<b>{title}</b>", styles["Title"]),
+        *([Paragraph(f"Période : {period}", styles["Normal"]), Spacer(1, 2 * mm)] if period else []),
         Spacer(1, 4 * mm),
     ]
     story += story_builder(styles)
@@ -75,22 +76,28 @@ def report_pdf(r):
     return _doc(f"Rapport T{r['quarter']} {r['year']}", build)
 
 
-def cashbook_pdf(entries):
+def cashbook_pdf(entries, period="", opening=None, closing=None):
     def build(styles):
+        out = []
+        if opening is not None:
+            out += [_table([["Solde validé", "Montant"], ["Au début de la période", money(opening)],
+                            ["À la fin de la période", money(closing)]], [110 * mm, 50 * mm], (1,)), Spacer(1, 6 * mm)]
         rows = [["Date", "Libellé", "Membre", "Saisi / validé", "Montant"]]
         for e in entries:
             who = e.created_by.short_name + (f" / {e.validated_by.short_name}" if e.validated_by else " / à valider")
             rows.append([f"{e.date:%d/%m/%Y}", Paragraph(f"{CATS.get(e.category, e.category)} · {e.label}", styles["BodyText"]),
                          e.member.short_name if e.member else "", who, ("+ " if e.direction == "in" else "− ") + money(e.amount)])
-        return [_table(rows, [22 * mm, 62 * mm, 30 * mm, 34 * mm, 28 * mm], (4,))]
+        if len(rows) == 1:
+            return out + [Paragraph("Aucune opération sur la période.", styles["Normal"])]
+        return out + [_table(rows, [22 * mm, 62 * mm, 30 * mm, 34 * mm, 28 * mm], (4,))]
 
-    return _doc("Livre de caisse", build)
+    return _doc("Livre de caisse", build, period)
 
 
 STATUS = {"validated": "validé", "pending": "à valider", "to_confirm": "à finaliser"}
 
 
-def statement_pdf(rows, totals):
+def statement_pdf(rows, totals, period=""):
     """Bilan général: one line per member."""
     def build(styles):
         table = [["Membre", "Dû", "Versé (validé)", "À valider", "Reste à payer"]]
@@ -103,7 +110,7 @@ def statement_pdf(rows, totals):
         return [Paragraph(f"{len(rows)} membres · « Versé » ne compte que les paiements validés par le commissaire aux comptes.",
                           styles["Normal"]), Spacer(1, 4 * mm), t]
 
-    return _doc("Bilan financier des membres", build)
+    return _doc("Bilan financier des membres", build, period)
 
 
 def member_statement_pdf(st):
@@ -120,7 +127,7 @@ def member_statement_pdf(st):
                              money(d["remaining"]) if d["remaining"] else "soldé"])
             out.append(_table(dues, [36 * mm, 56 * mm, 26 * mm, 26 * mm, 26 * mm], (2, 3, 4)))
         else:
-            out.append(Paragraph("Aucune dette.", styles["Normal"]))
+            out.append(Paragraph("Aucune dette sur la période." if st.get("period") else "Aucune dette.", styles["Normal"]))
         out += [Spacer(1, 6 * mm), Paragraph("<b>Opérations à son nom</b>", styles["Heading3"])]
         if st["entries"]:
             lines = [["Date", "Libellé", "Saisi / validé", "Montant"]]
@@ -133,7 +140,7 @@ def member_statement_pdf(st):
             out.append(Paragraph("Aucune opération.", styles["Normal"]))
         return out
 
-    return _doc("Bilan financier individuel", build)
+    return _doc("Bilan financier individuel", build, st.get("period", ""))
 
 
 def publish(pdf_bytes, prefix):

@@ -1892,8 +1892,8 @@
   "downloadAskTitle": "Télécharger ce document ?",
   "downloadAskWhere": "PDF · enregistré dans Téléchargements/Huddle et lisible ensuite sans connexion.",
   "download": "Télécharger",
-  "aboutStatementPdf": "Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, à la date d’aujourd’hui.",
-  "aboutCashbookPdf": "Livre de caisse : toutes les opérations (entrées et sorties) avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant.",
+  "aboutStatementPdf": "Bilan général des membres : pour chacun, ce qu’il doit, ce qu’il a versé (validé), ce qui attend une validation et ce qui reste à payer, sur la période choisie.",
+  "aboutCashbookPdf": "Livre de caisse : les opérations (entrées et sorties) de la période, avec leur date, leur libellé, le membre concerné, qui les a saisies et validées, et leur montant ; avec une période, le solde au début et à la fin.",
   "aboutReportPdf": "Rapport financier du trimestre {quarter} {year} : solde d’ouverture, entrées et sorties, solde de clôture et entrées par catégorie.",
   "@aboutReportPdf": {
     "placeholders": {
@@ -1942,6 +1942,24 @@
     "placeholders": {
       "hours": {
         "type": "int"
+      }
+    }
+  },
+  "periodLabel": "Période",
+  "periodAll": "Tout",
+  "periodThisMonth": "Ce mois",
+  "periodLastMonth": "Mois dernier",
+  "periodThisYear": "Cette année",
+  "periodCustom": "Choisir…",
+  "periodWhole": "Tout l’historique, jusqu’à aujourd’hui.",
+  "periodRange": "Du {from} au {to}.",
+  "@periodRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
       }
     }
   }

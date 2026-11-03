@@ -1,6 +1,26 @@
 import '../../models/expense.dart';
 import '../../models/finance.dart';
 
+/// The period chosen for a finance export (owner, 2026-11-03), both days
+/// included; null ends = open.
+class ExportPeriod {
+  const ExportPeriod({this.from, this.to});
+  final DateTime? from;
+  final DateTime? to;
+
+  static String _day(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// ?from=…&to=… for the API.
+  Map<String, String> get query => {
+    if (from != null) 'from': _day(from!),
+    if (to != null) 'to': _day(to!),
+  };
+
+  /// "2026-10-01_2026-10-31": in file names and offline keys.
+  String get slug => [from, to].map((d) => d == null ? '' : _day(d)).join('_');
+}
+
 abstract class FinancesRepository {
   Future<FinanceSummary> summary();
   Future<List<FinanceEntry>> entries();
@@ -42,11 +62,11 @@ abstract class FinancesRepository {
 
   /// Signed download links for the PDF exports.
   Future<String> reportPdf(int year, int quarter);
-  Future<String> cashbookPdf();
+  Future<String> cashbookPdf({ExportPeriod? period});
 
   /// Bilan: every member's dues and payments, or one member's.
-  Future<String> statementPdf();
-  Future<String> memberStatementPdf(int memberId);
+  Future<String> statementPdf({ExportPeriod? period});
+  Future<String> memberStatementPdf(int memberId, {ExportPeriod? period});
 
   // --- Expense requests (owner, 2026-10-30) ---
   Future<List<ExpenseDomain>> expenseDomains();
