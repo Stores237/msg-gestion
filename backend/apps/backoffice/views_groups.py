@@ -1,6 +1,7 @@
 """The platform's groups (back-office → Groupes): list, create, edit,
 delete (two super admins), switch."""
 
+from django.conf import settings
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -330,6 +331,7 @@ def networks(request):
         "all_groups": Group.objects.filter(is_active=True).select_related("network").order_by("name"),
         "days": net.INVITATION_DAYS,
         "presets": [(k, v[0]) for k, v in ROLE_PRESETS.items()],
+        "demo_tools": settings.DEMO_TOOLS and request.user.is_super_admin,
         "links": GroupLink.objects.filter(is_active=True).select_related("a", "b").order_by("-created_at"),
     })
 
@@ -359,4 +361,41 @@ def network_dues(request):
     return render(request, "backoffice/network_dues.html", {
         "nav": "networks", "rows": rows, "totals": totals, "networks": Network.objects.all(),
         "statuses": NetworkDue.Status.choices, "status": status, "net_id": net_id,
+    })
+
+
+@backoffice_view("backoffice.groups", "view")
+def network_demo(request):
+    """Réseaux → Réseau de démonstration (build 47): the seed_network_demo
+    command as two buttons, for a super admin, on staging only (owner: the
+    Render shell isn't on his plan). The shared PIN shows once, on the page
+    that created it; it is never stored in clear."""
+    from django.http import Http404
+
+    from apps.core.management.commands import seed_network_demo as demo
+
+    if not settings.DEMO_TOOLS or not request.user.is_super_admin:
+        raise Http404
+    created = None
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "create":
+            if demo.exists():
+                messages.error(request, "Le réseau de démonstration existe déjà. Supprimez-le d’abord pour repartir de zéro.")
+            else:
+                pin, listing = demo.create_demo()
+                audit.record("Réseau de démonstration créé", actor=request.user, request=request, platform=True,
+                             detail={"groupes": len(listing)})
+                created = {"pin": pin, "listing": listing}
+        elif action == "delete":
+            if request.POST.get("confirm") != "SUPPRIMER":
+                messages.error(request, "Tapez SUPPRIMER pour confirmer.")
+            else:
+                n, _rows = demo.delete_demo()
+                audit.record("Réseau de démonstration supprimé", actor=request.user, request=request, platform=True,
+                             sensitive=True, detail={"groupes": n})
+                messages.success(request, f"Réseau de démonstration supprimé ({n} groupes et leurs membres).")
+                return redirect("backoffice:network_demo")
+    return render(request, "backoffice/network_demo.html", {
+        "nav": "networks", "exists": demo.exists(), "created": created, "network": demo.NETWORK,
     })

@@ -81,7 +81,8 @@ diocesan announcement sent down, two zone events asking each parish for 3 people
 answered), and a zone contribution of 15 000 (one parish has paid). Only groups whose name ends
 in "(démo)" are touched.
 
-On staging (after deploying build 45): Render → msg-staging → Shell →
-`python manage.py seed_network_demo --out /tmp/demo.txt && cat /tmp/demo.txt`. Sign in to the app
+On staging (no Shell on the free plan): back-office → Réseaux de groupes → **Démonstration**
+(super admin, staging only: `DEMO_TOOLS=true`, or the staging task token set) → "Créer le réseau de
+démonstration"; the page lists the accounts and shows the PIN once. Sign in to the app
 with any of the listed numbers and the PIN; someone in several groups picks the group after
 signing in. `--delete` removes everything again.

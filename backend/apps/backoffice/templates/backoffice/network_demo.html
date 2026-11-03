@@ -1,0 +1,30 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Réseau de démonstration{% endblock %}
+{% block crumb %}<div class="crumb"><a href="{% url 'backoffice:networks' %}">Réseaux de groupes</a> · démonstration (serveur de test)</div>{% endblock %}
+{% block heading %}Réseau de démonstration{% endblock %}
+{% block body %}
+<div class="notice warn">{% icon 'flask-conical' %}<span>Serveur de test seulement. Crée « {{ network }} » : Archidiocèse de Douala › Zone Wouri 9 (GS Yapoma, GS Bonamoussadi, GS Kotto et 4 paroisses « à compléter ») et Zone Akwa (2 paroisses), plus une chorale jumelée. Des membres fictifs (numéros +237 600 000 1xx) partagent un même code PIN. Rien d’autre n’est touché : seuls les groupes dont le nom finit par « (démo) ».</span></div>
+
+{% if created %}
+<section class="panel" style="margin-top:24px" id="demo-created"><div class="panel-h"><h2>Créé · notez le PIN maintenant</h2></div><div class="panel-b">
+  <p style="font-size:18px">PIN de tous les comptes de démonstration : <b class="tnum" id="demo-pin" style="font-size:24px;letter-spacing:2px">{{ created.pin }}</b></p>
+  <p class="muted" style="font-size:13px">Il n’est affiché qu’ici, une seule fois. Perdu ? Supprimez le réseau de démonstration et recréez-le.</p>
+  {% for group, rows in created.listing %}
+    <h3 style="margin-top:16px;font-size:15px">{{ group }}</h3>
+    <div class="tbl-wrap"><table class="tbl"><tbody>{% for role, name, phone in rows %}<tr><td style="width:40%">{{ role }}</td><td>{{ name }}</td><td class="tnum">{{ phone|phone }}</td></tr>{% endfor %}</tbody></table></div>
+  {% endfor %}
+  <p style="margin-top:16px">Dans l’application (build 46 ou plus), connectez-vous avec un de ces numéros et le PIN, puis Accueil → nom du groupe → Réseau.</p>
+</div></section>
+{% endif %}
+
+<section class="panel" style="margin-top:24px"><div class="panel-b" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+  {% if exists %}
+    <span>Le réseau de démonstration existe.</span>
+    <form method="post" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">{% csrf_token %}<input type="hidden" name="action" value="delete">
+      <label class="fld"><span class="fld-l">Tapez SUPPRIMER pour confirmer</span><span class="fld-box"><input name="confirm" autocomplete="off" required></span></label>
+      <button class="btn btn-danger">{% icon 'trash-2' 16 %}Supprimer le réseau de démonstration</button></form>
+  {% else %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="create"><button class="btn btn-primary" id="demo-create">{% icon 'plus' 16 %}Créer le réseau de démonstration</button></form>
+  {% endif %}
+</div></section>
+{% endblock %}

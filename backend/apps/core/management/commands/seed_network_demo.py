@@ -73,10 +73,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         if opts["delete"]:
-            return self.delete()
-        from apps.core.models import Group
-
-        if Group.objects.filter(name=demo(GROUPS[0][0])).exists():
+            n_groups, n_rows = self.delete()
+            self.stdout.write(f"Removed {n_groups} demo groups and their people ({n_rows} rows).")
+            return
+        if exists():
             raise CommandError("The demo network already exists. Run with --delete first to start again.")
         pin = self.pick_pin()
         with transaction.atomic():
@@ -305,4 +305,25 @@ class Command(BaseCommand):
             users = User.objects.filter(phone__in=phones)
             keep = set(Membership.all_groups.filter(user__in=users).values_list("user_id", flat=True))
             n = users.exclude(pk__in=keep).delete()[0]
-        self.stdout.write(f"Removed {len(groups)} demo groups and their people ({n} rows).")
+        return len(groups), n
+
+
+# --- For the back-office (build 47: staging has no shell on the owner's plan) ----------------
+
+def exists():
+    from apps.core.models import Group
+
+    return Group.objects.filter(name=demo(GROUPS[0][0])).exists()
+
+
+def create_demo():
+    """Build the demo network; returns (pin, [(group, [(role, name, phone)])])."""
+    cmd = Command()
+    pin = cmd.pick_pin()
+    with transaction.atomic():
+        return pin, cmd.build(pin)
+
+
+def delete_demo():
+    """Remove it; returns (groups, rows) deleted."""
+    return Command().delete()

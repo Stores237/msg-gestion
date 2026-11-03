@@ -17,6 +17,7 @@ urlpatterns = [
     path("groupes/<int:pk>/supprimer/", views_groups.group_delete, name="group_delete"),
     path("reseaux/", views_groups.networks, name="networks"),
     path("reseaux/quotes-parts/", views_groups.network_dues, name="network_dues"),
+    path("reseaux/demonstration/", views_groups.network_demo, name="network_demo"),
     path("plateforme/", views_groups.platform, name="platform"),
     path("aide/questions/", views_groups.faq, name="faq"),
     path("equipe/", views_staff.staff, name="staff"),

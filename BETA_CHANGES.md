@@ -1597,3 +1597,17 @@ Suisse, which is a good starting point.
   "National" → Importer une liste with the archdiocese, Zone Wouri 9 and its parishes → the tree
   shows them, « À compléter »; the zone's roles are "Coordinateur de zone"…; give GS Yapoma's
   président the zone's code → it joins.
+
+## 69. Build 47: the demo network from the back-office (staging)
+
+Owner (2026-11-03): "I can't use the Render shell due to my plan."
+
+- Back-office → Réseaux de groupes → **Démonstration** (super admins, staging only): "Créer le
+  réseau de démonstration" runs what `seed_network_demo` does and shows, once, the shared PIN and
+  every demo account (group, role, name, phone). "Supprimer le réseau de démonstration" (type
+  SUPPRIMER) removes it. Both are journaled. A second "Créer" is refused while it exists.
+- Staging only: on when `DEMO_TOOLS=true` (now in render.yaml for staging) or the staging task
+  token is set; production sets neither, so the page doesn't exist there (404).
+- How to verify: deploy staging → back-office as super admin → Réseaux de groupes → Démonstration
+  → Créer → note the PIN → sign in to the app with a listed number, e.g. the Zone Wouri 9
+  coordinateur → Accueil → group name → Réseau.

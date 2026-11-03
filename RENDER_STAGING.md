@@ -40,6 +40,7 @@ Supabase project or a Redis instance with production (`RENDER_PRODUCTION.md`).
 | `SENTRY_DSN` | Sentry project (optional, recommended: see §4) |
 | `DJANGO_ADMIN_EMAILS` | Comma-separated; unhandled errors are mailed here (needs email set up) |
 | `TASK_TRIGGER_TOKEN` | A long random string; only if a scheduled job exists (§3) |
+| `DEMO_TOOLS` | `true`: back-office → Réseaux de groupes → Démonstration (build 47). Never on production |
 | `DJANGO_SUPERUSER_PHONE` / `DJANGO_SUPERUSER_PASSWORD` | The Django-admin account, created on container start by `ensure_superuser` |
 | `CLIENT_IP_HEADER` | Leave unset. Production settings read the client address from `HTTP_CF_CONNECTING_IP` (Render serves through Cloudflare). After a deploy, back-office → Intégrations → "Adresse du visiteur" must show your own public address; if it shows a warning, see SECURITY.md "Client address" |
 

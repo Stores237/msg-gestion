@@ -263,6 +263,10 @@ BACKOFFICE_TRUST_DEVICE_DAYS = 30
 # the endpoint answers 404 for everything. Production uses Render Cron Job
 # services instead and never sets this (playbook §4).
 TASK_TRIGGER_TOKEN = env("TASK_TRIGGER_TOKEN", default=None)
+# Back-office "Réseau de démonstration" (build 47): staging only. On by
+# default where the staging task token is set (production never sets it);
+# DEMO_TOOLS=false turns it off anyway.
+DEMO_TOOLS = env.bool("DEMO_TOOLS", default=bool(TASK_TRIGGER_TOKEN))
 
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@msg-yapoma.cm")
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")

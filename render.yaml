@@ -73,6 +73,10 @@ services:
       # Staging-only scheduler stand-in (cron-job.org → /internal/tasks/).
       - key: TASK_TRIGGER_TOKEN
         sync: false
+      # Back-office → Réseaux de groupes → Démonstration (build 47; no Shell
+      # on the free plan). Never set on production.
+      - key: DEMO_TOOLS
+        value: "true"
       # Free tier has no Shell tab: ensure_superuser creates the Django
       # admin account on container start from these.
       - key: DJANGO_SUPERUSER_PHONE

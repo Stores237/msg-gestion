@@ -613,3 +613,39 @@ def test_backoffice_creates_a_group_in_place(boss, mgs):  # noqa: F811
                                       "level2": "Zone paroissiale", "level3": "Diocèse", "level4": "Province ecclésiastique",
                                       "level5": "National"}, follow=True).content.decode()
     assert "Province ecclésiastique" in page
+
+
+# --- Build 47: the demo network from the back-office (staging only) ---------------------------
+
+def test_backoffice_demo_page_only_on_staging(boss, settings):  # noqa: F811
+    settings.DEMO_TOOLS = False
+    assert boss.get("/bo/reseaux/demonstration/").status_code == 404
+    assert "Démonstration" not in boss.get("/bo/reseaux/").content.decode()
+    settings.DEMO_TOOLS = True
+    assert "Démonstration" in boss.get("/bo/reseaux/").content.decode()
+    page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}).content.decode()
+    assert 'id="demo-pin"' in page and "Zone Wouri 9 (démo)" in page and "Aumônier diocésain" in page
+    assert Group.objects.filter(name="Archidiocèse de Douala (démo)").exists()
+    assert AuditLog.objects.filter(action="Réseau de démonstration créé").exists()
+    # Twice: refused, the PIN isn't shown again.
+    page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}, follow=True).content.decode()
+    assert "existe déjà" in page and 'id="demo-pin"' not in page
+    page = boss.post("/bo/reseaux/demonstration/", {"action": "delete", "confirm": "non"}, follow=True).content.decode()
+    assert "Tapez SUPPRIMER" in page and Group.objects.filter(name__endswith=" (démo)").exists()
+    boss.post("/bo/reseaux/demonstration/", {"action": "delete", "confirm": "SUPPRIMER"})
+    assert not Group.objects.filter(name__endswith=" (démo)").exists()
+
+
+def test_demo_page_is_for_super_admins_only(settings):
+    from django.test import Client
+
+    from apps.accounts.factories import give_role
+
+    settings.DEMO_TOOLS = True
+    u = UserFactory()
+    give_role(u, "membre")
+    c = Client()
+    c.force_login(u)
+    assert c.get("/bo/reseaux/demonstration/").status_code in (302, 403, 404)
+    assert c.post("/bo/reseaux/demonstration/", {"action": "create"}).status_code in (302, 403, 404)
+    assert not Group.objects.filter(name__endswith=" (démo)").exists()
