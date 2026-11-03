@@ -1511,3 +1511,28 @@ proposal for links outside the tree; proposed and built: neighbours + twinning.
   a choir: choir → Jumeler → code; parish → Accepter un jumelage → the choir appears under
   Groupes jumelés; the choir sets Ce que nous partageons → Avec les groupes jumelés → Annonces:
   Détail → the parish opens it and reads its announcements.
+
+## 66. Build 44: networks, phase 6 — contributions between levels
+
+Owner (2026-11-03): money between the levels of a network (yes to "do parish groups pay the zone or
+diocese?").
+
+- **Finances → Quotes-parts du réseau** (groups with a group above or groups below):
+  - **Demandé aux groupes rattachés**: the finance team (`finances.cashbook` create) → "Demander
+    une quote-part": title, amount per group, optional deadline → one contribution per group
+    attached directly below; their finance teams are notified. An open one can be cancelled with
+    a reason (the group is told).
+  - **À payer au groupe au-dessus**: each contribution with its status (À payer, En retard,
+    Payée à confirmer, Reçue, Annulée). "Régler" asks to confirm, then records a money-out line
+    in this group's cash book and a money-in line in the asking group's ("Quote-part 2027 · GS
+    Yapoma"), both pending and approved by each finance team as usual (the approvers of both are
+    notified). It becomes "Reçue" when the group above validates its line.
+- New cash-book category "Quotes-parts du réseau", used only by this flow (by hand: refused,
+  `network_auto`).
+- The group above never touches a lower group's money: it asks, the lower group pays.
+- Server: `finances.NetworkDue` + category `reseau` (migration finances 0007),
+  `apps/finances/network_dues.py`; `/api/finances/network-dues/` (GET, POST),
+  `/api/finances/network-dues/<id>/pay/`, `…/cancel/`.
+- How to verify: zone trésorier → Finances → Quotes-parts du réseau → Demander une quote-part →
+  25 000 → the parish trésorier is notified → Régler → each cash book has a pending line; the
+  zone validates its line → the contribution shows "Reçue" on both sides.

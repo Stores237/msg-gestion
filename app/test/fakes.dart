@@ -979,6 +979,49 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
 }
 
 class FakeFinancesRepository implements FinancesRepository {
+  // Contributions between levels (build 44).
+  NetworkDues dues = const NetworkDues();
+  final duesLog = <String>[];
+
+  @override
+  Future<NetworkDues> networkDues() async => dues;
+
+  @override
+  Future<NetworkDues> askNetworkDue({
+    required String title,
+    required int amount,
+    DateTime? dueOn,
+  }) async {
+    duesLog.add('ask:$title:$amount');
+    return dues;
+  }
+
+  @override
+  Future<NetworkDues> payNetworkDue(int id) async {
+    duesLog.add('pay:$id');
+    return dues = NetworkDues(
+      canPay: dues.canPay,
+      owed: [
+        for (final d in dues.owed)
+          d.id == id
+              ? NetworkDueItem(
+                  id: d.id,
+                  title: d.title,
+                  amount: d.amount,
+                  group: d.group,
+                  status: 'sent',
+                )
+              : d,
+      ],
+    );
+  }
+
+  @override
+  Future<NetworkDues> cancelNetworkDue(int id, String reason) async {
+    duesLog.add('cancel:$id:$reason');
+    return dues;
+  }
+
   final created = <NewEntry>[];
   final validated = <int>[];
   Map<int, int>? paid;

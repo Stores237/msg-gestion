@@ -103,6 +103,7 @@ String financeCategoryLabel(AppLocalizations l, String c) => switch (c) {
   'solidarite' => l.catSolidarity,
   'depense' => l.catExpense,
   'autre' => l.catOther,
+  'reseau' => l.catNetwork,
   _ => c,
 };
 

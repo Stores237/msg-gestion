@@ -47,6 +47,9 @@ EDITABLE = ("direction", "amount", "category", "label", "member", "date")
 def check_line(direction, category, label, member):
     """Owner, 2026-10-30: every money-in line names a member; "Autre" is for
     money in and needs a description."""
+    if category == Entry.Category.NETWORK:
+        # Recorded only through Finances → Réseau (build 44), never by hand.
+        raise FinanceRule("network_auto", "Les quotes-parts du réseau se règlent dans Finances → Réseau.")
     if direction == Entry.Direction.IN and member is None:
         raise FinanceRule("member_required", "Choisissez le membre concerné.")
     if category == Entry.Category.OTHER:

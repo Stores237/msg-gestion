@@ -509,3 +509,76 @@ class MemberStatementPdfView(APIView):
         audit.record("Export PDF du bilan individuel", actor=request.user, obj=member, request=request,
                      detail={"periode": period.label} if period else None)
         return _pdf_response(request, publish(member_statement_pdf(services.member_statement(member, period)), "bilan-membre"))
+
+
+class NetworkDuesView(APIView):
+    """Finances → Réseau (build 44). GET what this group owes the group
+    above and what it asked of the groups below; POST {title, amount,
+    due_on?, groups?} asks the groups below (finances.cashbook create)."""
+
+    permission_classes = [require("finances.cashbook", "view")]
+
+    def get(self, request):
+        from apps.core.models import Settings
+
+        from .models import NetworkDue
+        from .network_dues import row
+
+        group = Settings.get().group
+        owed = NetworkDue.objects.filter(group=group).select_related("umbrella", "group", "received_entry")
+        asked = NetworkDue.objects.filter(umbrella=group).select_related("umbrella", "group", "received_entry")
+        can = request.user.can("finances.cashbook", "create")
+        return Response({"owed": [row(d, request, side="owed") for d in owed],
+                         "asked": [row(d, request, side="asked") for d in asked],
+                         "can_pay": can, "can_ask": can and group.children.filter(is_active=True).exists()})
+
+    def post(self, request):
+        from django.utils.dateparse import parse_date
+
+        from apps.core.models import Settings
+
+        from .network_dues import ask
+
+        if not request.user.can("finances.cashbook", "create"):
+            return Response({"detail": "Réservé à l’équipe des finances.", "code": "forbidden"}, status=403)
+        raw = request.data.get("due_on")
+        due_on = parse_date(raw) if raw else None
+        if raw and due_on is None:
+            return Response({"detail": "Date invalide.", "code": "bad_date"}, status=400)
+        try:
+            ask(Settings.get().group, title=request.data.get("title"), amount=request.data.get("amount"), due_on=due_on,
+                groups=request.data.get("groups"), by=request.user, request=request)
+        except services.FinanceRule as e:
+            return _rule_error(e)
+        return self.get(request)
+
+
+class NetworkDueActionView(APIView):
+    """POST pay (the group that owes it, {date?}) or cancel (the group that
+    asked it, {reason})."""
+
+    permission_classes = [require("finances.cashbook", "create")]
+
+    def post(self, request, pk, action):
+        from django.utils.dateparse import parse_date
+
+        from apps.core.models import Settings
+
+        from .models import NetworkDue
+        from .network_dues import cancel, pay
+
+        group = Settings.get().group
+        due = NetworkDue.objects.select_related("umbrella", "group").filter(pk=pk).first()
+        try:
+            if due is not None and action == "pay" and due.group_id == group.pk:
+                on = parse_date(request.data.get("date") or "") if request.data.get("date") else None
+                pay(due, by=request.user, on=on, request=request)
+            elif due is not None and action == "cancel" and due.umbrella_id == group.pk:
+                cancel(due, by=request.user, reason=request.data.get("reason"), request=request)
+            else:
+                return Response({"detail": "Quote-part introuvable.", "code": "not_found"}, status=404)
+        except services.FinanceRule as e:
+            audit.record("Quote-part refusée", actor=request.user, obj=group, request=request, refused=True,
+                         detail={"action": action, "raison": str(e)})
+            return _rule_error(e)
+        return NetworkDuesView().get(request)

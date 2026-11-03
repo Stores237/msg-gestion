@@ -17,6 +17,7 @@ import 'expenses/expenses_screen.dart';
 import 'account_screen.dart';
 import 'help_screens.dart';
 import 'members/member_profile_screen.dart';
+import 'finances/network_dues_screen.dart';
 import 'network_screen.dart';
 import 'shell_screen.dart';
 import '../models/me.dart';
@@ -86,6 +87,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       page = const FaqScreen();
     } else if (type == 'network') {
       page = const NetworkScreen();
+    } else if (type == 'network_dues') {
+      page = const NetworkDuesScreen();
     } else if (_tabFor[type] case final tab?) {
       // Cash book, my dues, the planning: their tab (owner, 2026-11-02:
       // these opened nothing).

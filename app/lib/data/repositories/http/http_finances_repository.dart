@@ -312,4 +312,45 @@ class HttpFinancesRepository implements FinancesRepository {
               ))
         as Map<String, dynamic>,
   );
+
+  String _day(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  @override
+  Future<NetworkDues> networkDues() async => NetworkDues.fromJson(
+    await _api.get('/finances/network-dues/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<NetworkDues> askNetworkDue({
+    required String title,
+    required int amount,
+    DateTime? dueOn,
+  }) async => NetworkDues.fromJson(
+    await _api.post(
+          '/finances/network-dues/',
+          body: {
+            'title': title,
+            'amount': amount,
+            if (dueOn != null) 'due_on': _day(dueOn),
+          },
+        )
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<NetworkDues> payNetworkDue(int id) async => NetworkDues.fromJson(
+    await _api.post('/finances/network-dues/$id/pay/', body: const {})
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<NetworkDues> cancelNetworkDue(int id, String reason) async =>
+      NetworkDues.fromJson(
+        await _api.post(
+              '/finances/network-dues/$id/cancel/',
+              body: {'reason': reason},
+            )
+            as Map<String, dynamic>,
+      );
 }

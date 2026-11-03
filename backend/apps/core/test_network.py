@@ -394,3 +394,70 @@ def test_backoffice_ends_a_twinning(boss, mgs):  # noqa: F811
     assert "Jumelages · 1" in boss.get("/bo/reseaux/").content.decode()
     page = boss.post("/bo/reseaux/", {"action": "end_twin", "id": link.pk, "reason": "Doublon"}, follow=True).content.decode()
     assert "terminé" in page and not GroupLink.objects.get(pk=link.pk).is_active
+
+
+# --- Build 44: contributions between levels ---------------------------------------------
+
+def test_the_zone_asks_a_contribution_and_the_parish_pays_it(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from apps.core.groups import in_group
+    from apps.finances.models import Entry, NetworkDue
+
+    zt, pt = UserFactory.build(), UserFactory.build()
+    zt.save()
+    pt.save()
+    give(zt, zone, "tresorier")
+    give(pt, parish, "tresorier")
+    zapi, papi = app_client(zt, zone), app_client(pt, parish)
+    r = zapi.post("/api/finances/network-dues/", {"title": "Quote-part 2027", "amount": 25000, "due_on": "2027-01-31"},
+                  format="json")
+    assert r.status_code == 200, r.content
+    asked = r.json()["asked"]
+    assert len(asked) == 1 and asked[0]["group"]["name"] == parish.name and asked[0]["status"] == "open"
+    assert Notification.all_groups.filter(user=pt, group=parish, title=f"Quote-part demandée par {zone.name}").exists()
+
+    owed = papi.get("/api/finances/network-dues/").json()
+    assert owed["can_pay"] and owed["owed"][0]["group"]["name"] == zone.name and owed["owed"][0]["amount"] == 25000
+    due_id = owed["owed"][0]["id"]
+    # The zone can't pay it, the parish can't cancel it.
+    assert zapi.post(f"/api/finances/network-dues/{due_id}/pay/", {}, format="json").status_code == 404
+    assert papi.post(f"/api/finances/network-dues/{due_id}/cancel/", {"reason": "non"}, format="json").status_code == 404
+    data = papi.post(f"/api/finances/network-dues/{due_id}/pay/", {}, format="json").json()
+    assert data["owed"][0]["status"] == "sent"
+    with in_group(parish):
+        out = Entry.objects.get(category="reseau")
+        assert out.direction == "out" and out.status == "pending" and out.amount == 25000
+    with in_group(zone):
+        inn = Entry.objects.get(category="reseau")
+        assert inn.direction == "in" and zone.name not in inn.label and parish.name in inn.label
+    assert papi.post(f"/api/finances/network-dues/{due_id}/pay/", {}, format="json").json()["code"] == "due_paid"
+    # Received once the zone validates its line.
+    inn.status = Entry.Status.VALIDATED
+    inn.save(update_fields=["status"])
+    assert NetworkDue.objects.get(pk=due_id).status == "received"
+    assert zapi.get("/api/finances/network-dues/").json()["asked"][0]["status"] == "received"
+
+
+def test_contribution_rules(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    zt = UserFactory.build()
+    zt.save()
+    give(zt, zone, "tresorier")
+    zapi = app_client(zt, zone)
+    assert zapi.post("/api/finances/network-dues/", {"title": "Q", "amount": 100}, format="json").json()["code"] == "title_required"
+    assert zapi.post("/api/finances/network-dues/", {"title": "Quote", "amount": 0}, format="json").json()["code"] == "bad_amount"
+    assert app_client(member, parish).post("/api/finances/network-dues/", {"title": "Quote", "amount": 5},
+                                           format="json").status_code == 403
+    pt = UserFactory.build()
+    pt.save()
+    give(pt, parish, "tresorier")
+    assert app_client(pt, parish).post("/api/finances/network-dues/", {"title": "Quote", "amount": 5},
+                                       format="json").json()["code"] == "no_groups_below"
+    due = zapi.post("/api/finances/network-dues/", {"title": "Quote", "amount": 5}, format="json").json()["asked"][0]["id"]
+    assert zapi.post(f"/api/finances/network-dues/{due}/cancel/", {"reason": ""}, format="json").json()["code"] == "reason_required"
+    assert zapi.post(f"/api/finances/network-dues/{due}/cancel/", {"reason": "Erreur"}, format="json").json()["asked"][0]["status"] == "cancelled"
+    assert app_client(pt, parish).post(f"/api/finances/network-dues/{due}/pay/", {}, format="json").json()["code"] == "due_cancelled"
+    # The category can't be used by hand.
+    r = app_client(pt, parish).post("/api/finances/entries/", {"direction": "in", "amount": 5, "category": "reseau",
+                                                               "label": "x", "date": "2026-11-01"}, format="json")
+    assert r.status_code == 400 and r.json()["code"] == "network_auto"

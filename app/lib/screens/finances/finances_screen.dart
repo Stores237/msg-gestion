@@ -17,6 +17,7 @@ import '../expenses/expenses_screen.dart';
 import 'collection_screen.dart';
 import 'entry_form_screen.dart';
 import 'finance_gate.dart';
+import 'network_dues_screen.dart';
 import 'report_screen.dart';
 
 /// Finances tab (design: "Finances · livre de caisse"): balance, then the
@@ -176,6 +177,28 @@ class _FinancesScreenState extends State<FinancesScreen> {
       if (widget.me.can('finances.expenses', 'view')) ...[
         const SizedBox(height: 12),
         ExpensesEntryRow(key: ValueKey(('exp', _reload)), me: widget.me),
+      ],
+      // Contributions between levels of a network (build 44).
+      if (widget.me.group?.parent != null ||
+          (widget.me.group?.below ?? 0) > 0) ...[
+        const SizedBox(height: 12),
+        GroupCard(
+          children: [
+            ListRow(
+              key: const Key('open-network-dues'),
+              lead: const IconChip(Icons.hub_outlined, tone: Tone.neutral),
+              title: Text(AppLocalizations.of(context).netDuesTitle),
+              subtitle: Text(AppLocalizations.of(context).netDuesRowHint),
+              chevron: true,
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NetworkDuesScreen()),
+                );
+                if (mounted) _refresh();
+              },
+            ),
+          ],
+        ),
       ],
       const SizedBox(height: 16),
       Seg2(

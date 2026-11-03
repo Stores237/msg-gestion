@@ -9,6 +9,8 @@ import 'package:huddle/models/event.dart';
 import 'package:huddle/screens/announcements/announcement_detail_screen.dart';
 import 'package:huddle/screens/announcements/compose_screen.dart';
 import 'package:huddle/screens/calendar/event_detail_screen.dart';
+import 'package:huddle/data/repositories/finances_repository.dart';
+import 'package:huddle/screens/finances/network_dues_screen.dart';
 import 'package:huddle/screens/network_screen.dart';
 
 import 'fakes.dart';
@@ -480,5 +482,72 @@ void main() {
       find.text('Avec les groupes voisins (même groupe au-dessus)'),
       findsWidgets,
     );
+  });
+
+  // Build 44: contributions between levels.
+  testWidgets('the parish pays the zone\'s contribution', (tester) async {
+    final f = await setUpApp(tester);
+    f.finances.dues = const NetworkDues(
+      canPay: true,
+      owed: [
+        NetworkDueItem(
+          id: 3,
+          title: 'Quote-part 2027',
+          amount: 25000,
+          group: GroupInfo(id: 7, name: 'Zone Nord'),
+        ),
+      ],
+    );
+    await tester.pumpWidget(const MsgApp(home: NetworkDuesScreen()));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('owed-3')), findsOneWidget);
+    expect(find.text('À PAYER'), findsOneWidget); // the open badge
+    await tester.tap(find.byKey(const Key('pay-3')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('due-pay-confirm')));
+    await tester.pumpAndSettle();
+    expect(f.finances.duesLog, ['pay:3']);
+    expect(find.byKey(const Key('pay-3')), findsNothing);
+  });
+
+  testWidgets('the zone asks its groups for a contribution', (tester) async {
+    final f = await setUpApp(tester);
+    f.finances.dues = const NetworkDues(canPay: true, canAsk: true);
+    await tester.pumpWidget(const MsgApp(home: NetworkDuesScreen()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('ask-due')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('due-send')));
+    await tester.pump();
+    expect(find.text('Écrivez un intitulé et un montant.'), findsOneWidget);
+    await tester.enterText(
+      find.byKey(const Key('due-title')),
+      'Quote-part 2027',
+    );
+    await tester.enterText(find.byKey(const Key('due-amount')), '25 000');
+    await tester.tap(find.byKey(const Key('due-send')));
+    await tester.pumpAndSettle();
+    expect(f.finances.duesLog, ['ask:Quote-part 2027:25000']);
+  });
+
+  testWidgets('Finances shows the network row for an attached group', (
+    tester,
+  ) async {
+    await setUpApp(tester);
+    await pumpShell(
+      tester,
+      fakeMe(
+        tabs: const ['accueil', 'finances'],
+        permissions: const {
+          'finances.cashbook': ['view'],
+        },
+        groups: const [
+          {'id': 1, 'name': 'GS Yapoma', 'parent': 'Zone Nord'},
+        ],
+      ),
+    );
+    await tester.tap(find.byKey(const Key('tab-finances')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('open-network-dues')), findsOneWidget);
   });
 }

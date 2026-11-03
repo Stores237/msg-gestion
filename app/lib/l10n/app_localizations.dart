@@ -5959,6 +5959,180 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Jumelage avec {name} terminé.'**
   String groupNetTwinEnded(String name);
+
+  /// No description provided for @catNetwork.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quotes-parts du réseau'**
+  String get catNetwork;
+
+  /// No description provided for @netDuesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quotes-parts du réseau'**
+  String get netDuesTitle;
+
+  /// No description provided for @netDuesRowHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que vous devez au groupe au-dessus, ce que vous demandez aux groupes rattachés'**
+  String get netDuesRowHint;
+
+  /// No description provided for @netDuesAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Régler une quote-part ajoute une sortie dans votre livre de caisse et une entrée dans celui du groupe qui la demande ; chacune est approuvée comme d’habitude. Elle est « reçue » quand le groupe au-dessus a validé son entrée.'**
+  String get netDuesAbout;
+
+  /// No description provided for @netDuesOwed.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer au groupe au-dessus'**
+  String get netDuesOwed;
+
+  /// No description provided for @netDuesNothingOwed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien à payer.'**
+  String get netDuesNothingOwed;
+
+  /// No description provided for @netDuesAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé aux groupes rattachés'**
+  String get netDuesAsked;
+
+  /// No description provided for @netDuesNothingAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune quote-part demandée.'**
+  String get netDuesNothingAsked;
+
+  /// No description provided for @netDueNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander une quote-part'**
+  String get netDueNew;
+
+  /// No description provided for @netDueNewHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandée à chaque groupe rattaché directement au vôtre ; leur équipe des finances est prévenue.'**
+  String get netDueNewHint;
+
+  /// No description provided for @netDueTitleLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Intitulé (ex. Quote-part 2027)'**
+  String get netDueTitleLabel;
+
+  /// No description provided for @netDueAmountLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant par groupe'**
+  String get netDueAmountLabel;
+
+  /// No description provided for @netDueNoDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans date limite (toucher pour en choisir une)'**
+  String get netDueNoDate;
+
+  /// No description provided for @netDueBefore.
+  ///
+  /// In fr, this message translates to:
+  /// **'avant le {date}'**
+  String netDueBefore(String date);
+
+  /// No description provided for @netDueFormError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écrivez un intitulé et un montant.'**
+  String get netDueFormError;
+
+  /// No description provided for @netDueSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander'**
+  String get netDueSend;
+
+  /// No description provided for @netDueAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quote-part demandée. Les équipes des finances des groupes sont prévenues.'**
+  String get netDueAsked;
+
+  /// No description provided for @netDuePay.
+  ///
+  /// In fr, this message translates to:
+  /// **'Régler'**
+  String get netDuePay;
+
+  /// No description provided for @netDuePayTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Régler {amount} ?'**
+  String netDuePayTitle(String amount);
+
+  /// No description provided for @netDuePayBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {title} » pour {group}. Une sortie est ajoutée à votre livre de caisse (à approuver) et une entrée à celui de {group}.'**
+  String netDuePayBody(String group, String title);
+
+  /// No description provided for @netDuePaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quote-part réglée. Elle attend l’approbation des deux livres de caisse.'**
+  String get netDuePaid;
+
+  /// No description provided for @netDueCancel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler'**
+  String get netDueCancel;
+
+  /// No description provided for @netDueCancelTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la quote-part de {group} ?'**
+  String netDueCancelTitle(String group);
+
+  /// No description provided for @netDueCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quote-part annulée ; le groupe est prévenu.'**
+  String get netDueCancelled;
+
+  /// No description provided for @netDueOpen.
+  ///
+  /// In fr, this message translates to:
+  /// **'À payer'**
+  String get netDueOpen;
+
+  /// No description provided for @netDueLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'En retard'**
+  String get netDueLate;
+
+  /// No description provided for @netDueSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payée, à confirmer'**
+  String get netDueSent;
+
+  /// No description provided for @netDueReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçue'**
+  String get netDueReceived;
+
+  /// No description provided for @netDueCancelledBadge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get netDueCancelledBadge;
 }
 
 class _AppLocalizationsDelegate

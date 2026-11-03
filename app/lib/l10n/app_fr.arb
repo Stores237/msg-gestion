@@ -2279,5 +2279,65 @@
         "type": "String"
       }
     }
-  }
+  },
+  "catNetwork": "Quotes-parts du réseau",
+  "netDuesTitle": "Quotes-parts du réseau",
+  "netDuesRowHint": "Ce que vous devez au groupe au-dessus, ce que vous demandez aux groupes rattachés",
+  "netDuesAbout": "Régler une quote-part ajoute une sortie dans votre livre de caisse et une entrée dans celui du groupe qui la demande ; chacune est approuvée comme d’habitude. Elle est « reçue » quand le groupe au-dessus a validé son entrée.",
+  "netDuesOwed": "À payer au groupe au-dessus",
+  "netDuesNothingOwed": "Rien à payer.",
+  "netDuesAsked": "Demandé aux groupes rattachés",
+  "netDuesNothingAsked": "Aucune quote-part demandée.",
+  "netDueNew": "Demander une quote-part",
+  "netDueNewHint": "Demandée à chaque groupe rattaché directement au vôtre ; leur équipe des finances est prévenue.",
+  "netDueTitleLabel": "Intitulé (ex. Quote-part 2027)",
+  "netDueAmountLabel": "Montant par groupe",
+  "netDueNoDate": "Sans date limite (toucher pour en choisir une)",
+  "netDueBefore": "avant le {date}",
+  "@netDueBefore": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "netDueFormError": "Écrivez un intitulé et un montant.",
+  "netDueSend": "Demander",
+  "netDueAsked": "Quote-part demandée. Les équipes des finances des groupes sont prévenues.",
+  "netDuePay": "Régler",
+  "netDuePayTitle": "Régler {amount} ?",
+  "@netDuePayTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "netDuePayBody": "« {title} » pour {group}. Une sortie est ajoutée à votre livre de caisse (à approuver) et une entrée à celui de {group}.",
+  "@netDuePayBody": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "netDuePaid": "Quote-part réglée. Elle attend l’approbation des deux livres de caisse.",
+  "netDueCancel": "Annuler",
+  "netDueCancelTitle": "Annuler la quote-part de {group} ?",
+  "@netDueCancelTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "netDueCancelled": "Quote-part annulée ; le groupe est prévenu.",
+  "netDueOpen": "À payer",
+  "netDueLate": "En retard",
+  "netDueSent": "Payée, à confirmer",
+  "netDueReceived": "Reçue",
+  "netDueCancelledBadge": "Annulée"
 }

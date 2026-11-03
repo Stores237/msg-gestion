@@ -3645,4 +3645,104 @@ class AppLocalizationsFr extends AppLocalizations {
   String groupNetTwinEnded(String name) {
     return 'Jumelage avec $name terminé.';
   }
+
+  @override
+  String get catNetwork => 'Quotes-parts du réseau';
+
+  @override
+  String get netDuesTitle => 'Quotes-parts du réseau';
+
+  @override
+  String get netDuesRowHint =>
+      'Ce que vous devez au groupe au-dessus, ce que vous demandez aux groupes rattachés';
+
+  @override
+  String get netDuesAbout =>
+      'Régler une quote-part ajoute une sortie dans votre livre de caisse et une entrée dans celui du groupe qui la demande ; chacune est approuvée comme d’habitude. Elle est « reçue » quand le groupe au-dessus a validé son entrée.';
+
+  @override
+  String get netDuesOwed => 'À payer au groupe au-dessus';
+
+  @override
+  String get netDuesNothingOwed => 'Rien à payer.';
+
+  @override
+  String get netDuesAsked => 'Demandé aux groupes rattachés';
+
+  @override
+  String get netDuesNothingAsked => 'Aucune quote-part demandée.';
+
+  @override
+  String get netDueNew => 'Demander une quote-part';
+
+  @override
+  String get netDueNewHint =>
+      'Demandée à chaque groupe rattaché directement au vôtre ; leur équipe des finances est prévenue.';
+
+  @override
+  String get netDueTitleLabel => 'Intitulé (ex. Quote-part 2027)';
+
+  @override
+  String get netDueAmountLabel => 'Montant par groupe';
+
+  @override
+  String get netDueNoDate => 'Sans date limite (toucher pour en choisir une)';
+
+  @override
+  String netDueBefore(String date) {
+    return 'avant le $date';
+  }
+
+  @override
+  String get netDueFormError => 'Écrivez un intitulé et un montant.';
+
+  @override
+  String get netDueSend => 'Demander';
+
+  @override
+  String get netDueAsked =>
+      'Quote-part demandée. Les équipes des finances des groupes sont prévenues.';
+
+  @override
+  String get netDuePay => 'Régler';
+
+  @override
+  String netDuePayTitle(String amount) {
+    return 'Régler $amount ?';
+  }
+
+  @override
+  String netDuePayBody(String group, String title) {
+    return '« $title » pour $group. Une sortie est ajoutée à votre livre de caisse (à approuver) et une entrée à celui de $group.';
+  }
+
+  @override
+  String get netDuePaid =>
+      'Quote-part réglée. Elle attend l’approbation des deux livres de caisse.';
+
+  @override
+  String get netDueCancel => 'Annuler';
+
+  @override
+  String netDueCancelTitle(String group) {
+    return 'Annuler la quote-part de $group ?';
+  }
+
+  @override
+  String get netDueCancelled => 'Quote-part annulée ; le groupe est prévenu.';
+
+  @override
+  String get netDueOpen => 'À payer';
+
+  @override
+  String get netDueLate => 'En retard';
+
+  @override
+  String get netDueSent => 'Payée, à confirmer';
+
+  @override
+  String get netDueReceived => 'Reçue';
+
+  @override
+  String get netDueCancelledBadge => 'Annulée';
 }

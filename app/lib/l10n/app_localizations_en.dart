@@ -3598,4 +3598,104 @@ class AppLocalizationsEn extends AppLocalizations {
   String groupNetTwinEnded(String name) {
     return 'Twinning with $name ended.';
   }
+
+  @override
+  String get catNetwork => 'Network contributions';
+
+  @override
+  String get netDuesTitle => 'Network contributions';
+
+  @override
+  String get netDuesRowHint =>
+      'What you owe the group above, what you ask of the attached groups';
+
+  @override
+  String get netDuesAbout =>
+      'Paying a contribution adds money out to your cash book and money in to the asking group’s; each is approved as usual. It is “received” once the group above has validated its line.';
+
+  @override
+  String get netDuesOwed => 'To pay to the group above';
+
+  @override
+  String get netDuesNothingOwed => 'Nothing to pay.';
+
+  @override
+  String get netDuesAsked => 'Asked of the attached groups';
+
+  @override
+  String get netDuesNothingAsked => 'No contribution asked.';
+
+  @override
+  String get netDueNew => 'Ask for a contribution';
+
+  @override
+  String get netDueNewHint =>
+      'Asked of each group attached directly to yours; their finance team is told.';
+
+  @override
+  String get netDueTitleLabel => 'Title (e.g. 2027 contribution)';
+
+  @override
+  String get netDueAmountLabel => 'Amount per group';
+
+  @override
+  String get netDueNoDate => 'No deadline (tap to choose one)';
+
+  @override
+  String netDueBefore(String date) {
+    return 'before $date';
+  }
+
+  @override
+  String get netDueFormError => 'Write a title and an amount.';
+
+  @override
+  String get netDueSend => 'Ask';
+
+  @override
+  String get netDueAsked =>
+      'Contribution asked. The groups’ finance teams are told.';
+
+  @override
+  String get netDuePay => 'Pay';
+
+  @override
+  String netDuePayTitle(String amount) {
+    return 'Pay $amount?';
+  }
+
+  @override
+  String netDuePayBody(String group, String title) {
+    return '“$title” for $group. Money out is added to your cash book (to approve) and money in to $group’s.';
+  }
+
+  @override
+  String get netDuePaid =>
+      'Contribution paid. It awaits approval in both cash books.';
+
+  @override
+  String get netDueCancel => 'Cancel';
+
+  @override
+  String netDueCancelTitle(String group) {
+    return 'Cancel $group’s contribution?';
+  }
+
+  @override
+  String get netDueCancelled => 'Contribution cancelled; the group is told.';
+
+  @override
+  String get netDueOpen => 'To pay';
+
+  @override
+  String get netDueLate => 'Late';
+
+  @override
+  String get netDueSent => 'Paid, to confirm';
+
+  @override
+  String get netDueReceived => 'Received';
+
+  @override
+  String get netDueCancelledBadge => 'Cancelled';
 }

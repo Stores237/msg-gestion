@@ -97,6 +97,9 @@ class Entry(models.Model):
         SOLIDARITY = "solidarite", "Contributions de solidarité"
         OTHER = "autre", "Autre"
         EXPENSE = "depense", "Dépenses"
+        # Contributions between the groups of a network (build 44): paid to
+        # the group above, received from the groups below.
+        NETWORK = "reseau", "Quotes-parts du réseau"
 
     class Status(models.TextChoices):
         PENDING = "pending", "À valider"
@@ -254,3 +257,48 @@ class ExpenseMessage(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+
+
+class NetworkDue(models.Model):
+    """A contribution a group asks of a group attached below it (owner,
+    2026-11-03: money between levels). Paying it records a money-out line in
+    the payer's cash book and a money-in line in the asker's; each is
+    approved there as usual. Paid once the asker's line is validated."""
+
+    class Status(models.TextChoices):
+        OPEN = "open", "À payer"
+        SENT = "sent", "Payée, à confirmer"
+        RECEIVED = "received", "Reçue"
+        CANCELLED = "cancelled", "Annulée"
+
+    umbrella = models.ForeignKey("core.Group", on_delete=models.CASCADE, related_name="+")
+    group = models.ForeignKey("core.Group", on_delete=models.CASCADE, related_name="+")
+    title = models.CharField(max_length=120)
+    amount = models.PositiveIntegerField()
+    due_on = models.DateField(null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_entry = models.ForeignKey(Entry, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    received_entry = models.ForeignKey(Entry, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    paid_at = models.DateTimeField(null=True, blank=True)
+    cancelled = models.BooleanField(default=False)
+    cancel_reason = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.CheckConstraint(condition=Q(amount__gt=0), name="network_due_amount_positive")]
+
+    def __str__(self):
+        return f"{self.title} · {self.group} → {self.umbrella}"
+
+    @property
+    def status(self):
+        if self.cancelled:
+            return self.Status.CANCELLED
+        if self.received_entry_id is None:
+            return self.Status.OPEN
+        if self.received_entry and self.received_entry.status == Entry.Status.VALIDATED:
+            return self.Status.RECEIVED
+        return self.Status.SENT
+
