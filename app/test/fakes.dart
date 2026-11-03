@@ -276,7 +276,10 @@ class FakeProfileRepository implements ProfileRepository {
   Future<NetworkInfo> network() async => networkInfo;
 
   @override
-  Future<InvitationPreview> previewInvitation(String code) async {
+  Future<InvitationPreview> previewInvitation(
+    String code, {
+    bool twin = false,
+  }) async {
     if (code.replaceAll('-', '').toUpperCase() != 'ABCDEFGH') {
       throw ApiException(
         404,
@@ -314,8 +317,33 @@ class FakeProfileRepository implements ProfileRepository {
     return networkInfo = _with(parents: const []);
   }
 
+  final twinsJoined = <String>[];
+  final twinsEnded = <String>[];
+
   @override
-  Future<Invitation> createInvitation() async {
+  Future<NetworkInfo> joinTwin(String code) async {
+    twinsJoined.add(code);
+    return networkInfo = NetworkInfo(
+      networkName: networkInfo.networkName,
+      levelName: networkInfo.levelName,
+      canManage: networkInfo.canManage,
+      twins: const [zone],
+      sharingTwins: const {'members': 'none'},
+    );
+  }
+
+  @override
+  Future<NetworkInfo> endTwin(int groupId, String reason) async {
+    twinsEnded.add('$groupId:$reason');
+    return networkInfo = NetworkInfo(
+      networkName: networkInfo.networkName,
+      levelName: networkInfo.levelName,
+      canManage: networkInfo.canManage,
+    );
+  }
+
+  @override
+  Future<Invitation> createInvitation({bool twin = false}) async {
     final inv = Invitation(
       code: 'WXYZ-2345',
       expiresAt: DateTime.now().add(const Duration(days: 14)),
@@ -357,11 +385,20 @@ class FakeProfileRepository implements ProfileRepository {
   final savedSharing = <Map<String, String>>[];
   SharedGroup? shared;
 
-  @override
-  Future<SharingSettings> sharing() async => sharingSettings;
+  String? lastAudience;
 
   @override
-  Future<SharingSettings> saveSharing(Map<String, String> values) async {
+  Future<SharingSettings> sharing({String audience = 'up'}) async {
+    lastAudience = audience;
+    return sharingSettings;
+  }
+
+  @override
+  Future<SharingSettings> saveSharing(
+    Map<String, String> values, {
+    String audience = 'up',
+  }) async {
+    lastAudience = audience;
     savedSharing.add(values);
     return sharingSettings = SharingSettings(
       values: {...sharingSettings.values, ...values},

@@ -5851,6 +5851,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Vous êtes désigné(e)'**
   String get contingentYou;
+
+  /// No description provided for @groupNetSharingNeighbours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec les groupes voisins (même groupe au-dessus)'**
+  String get groupNetSharingNeighbours;
+
+  /// No description provided for @groupNetSharingTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avec les groupes jumelés'**
+  String get groupNetSharingTwins;
+
+  /// No description provided for @groupNetNeighbours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes voisins'**
+  String get groupNetNeighbours;
+
+  /// No description provided for @groupNetTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes jumelés'**
+  String get groupNetTwins;
+
+  /// No description provided for @groupNetNoTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun jumelage. Deux groupes de n’importe quel réseau peuvent se jumeler pour partager ce qu’ils choisissent.'**
+  String get groupNetNoTwins;
+
+  /// No description provided for @groupNetTwinInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jumeler'**
+  String get groupNetTwinInvite;
+
+  /// No description provided for @groupNetTwinAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter un jumelage'**
+  String get groupNetTwinAccept;
+
+  /// No description provided for @groupNetTwinJoinHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le code de jumelage reçu de l’autre groupe.'**
+  String get groupNetTwinJoinHint;
+
+  /// No description provided for @groupNetTwinAskTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jumeler votre groupe avec {name} ?'**
+  String groupNetTwinAskTitle(String name);
+
+  /// No description provided for @groupNetTwinAskBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque groupe choisit ce qu’il partage avec ses groupes jumelés (rien au départ). Chacun peut mettre fin au jumelage.'**
+  String get groupNetTwinAskBody;
+
+  /// No description provided for @groupNetTwin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jumeler'**
+  String get groupNetTwin;
+
+  /// No description provided for @groupNetTwinned.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe est jumelé avec {name}.'**
+  String groupNetTwinned(String name);
+
+  /// No description provided for @groupNetTwinCodeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code de jumelage'**
+  String get groupNetTwinCodeTitle;
+
+  /// No description provided for @groupNetTwinCodeHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez ce code au président de l’autre groupe : il le saisit dans Réseau → Accepter un jumelage. Valable jusqu’au {date}, une seule fois.'**
+  String groupNetTwinCodeHint(String date);
+
+  /// No description provided for @groupNetTwinEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre fin au jumelage'**
+  String get groupNetTwinEnd;
+
+  /// No description provided for @groupNetTwinEndTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mettre fin au jumelage avec {name}'**
+  String groupNetTwinEndTitle(String name);
+
+  /// No description provided for @groupNetTwinEndBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les présidents des deux groupes seront prévenus ; plus rien n’est partagé entre vous.'**
+  String get groupNetTwinEndBody;
+
+  /// No description provided for @groupNetTwinEnded.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jumelage avec {name} terminé.'**
+  String groupNetTwinEnded(String name);
 }
 
 class _AppLocalizationsDelegate

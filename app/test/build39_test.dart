@@ -405,4 +405,80 @@ void main() {
     ]);
     expect(find.byKey(const Key('named-2')), findsOneWidget);
   });
+
+  // Build 43: neighbours and twinning.
+  testWidgets('the président twins with another group, then ends it', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.profile.networkInfo = const NetworkInfo(levelName: '', canManage: true);
+    await tester.pumpWidget(const MsgApp(home: NetworkScreen()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('twin-join')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('twin-join')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('join-code')), 'abcd-efgh');
+    await tester.tap(find.byKey(const Key('join-check')));
+    await tester.pumpAndSettle();
+    expect(find.text('Jumeler votre groupe avec Zone Nord ?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('join-confirm')));
+    await tester.pumpAndSettle();
+    expect(f.profile.twinsJoined, ['abcdefgh']);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('end-twin-7')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('end-twin-7')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('leave-reason')), 'Fin');
+    await tester.tap(find.byKey(const Key('leave-confirm')));
+    await tester.pumpAndSettle();
+    expect(f.profile.twinsEnded, ['7:Fin']);
+  });
+
+  testWidgets('neighbours are listed and get their own sharing', (
+    tester,
+  ) async {
+    final f = await setUpApp(tester);
+    f.profile.networkInfo = const NetworkInfo(
+      networkName: 'MGS Cameroun',
+      levelName: 'Paroisse',
+      parents: [FakeProfileRepository.zone],
+      canManage: true,
+      sharing: {'members': 'none'},
+      sharingNeighbours: {'members': 'summary'},
+      neighbours: [
+        NetworkGroup(
+          group: GroupInfo(id: 4, name: 'GS Bonamoussadi'),
+          levelName: 'Paroisse',
+          shares: ['calendar'],
+        ),
+      ],
+    );
+    await tester.pumpWidget(const MsgApp(home: NetworkScreen()));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('neighbour-4')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.textContaining('Partage : calendrier'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('sharing-neighbours')),
+      -200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('sharing-neighbours')));
+    await tester.pumpAndSettle();
+    expect(f.profile.lastAudience, 'neighbours');
+    expect(
+      find.text('Avec les groupes voisins (même groupe au-dessus)'),
+      findsWidgets,
+    );
+  });
 }

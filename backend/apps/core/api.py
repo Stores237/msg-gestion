@@ -338,6 +338,13 @@ class NetworkInvitationView(_NetworkBase):
 
     throttle_scope = "network_code"
 
+    def _kind(self, request):
+        """?kind=twin (or "kind" in the body): a twinning code (build 43)."""
+        from .models import GroupInvitation
+
+        raw = request.query_params.get("kind") or (request.data.get("kind") if isinstance(request.data, dict) else None)
+        return GroupInvitation.Kind.TWIN if raw == "twin" else GroupInvitation.Kind.ATTACH
+
     def get_throttles(self):
         from .throttling import ClientIPScopedRateThrottle
 
@@ -351,12 +358,13 @@ class NetworkInvitationView(_NetworkBase):
         if not manage:
             return self._forbidden()
         try:
-            inv = find_invitation(request.query_params.get("code"), group)
+            inv = find_invitation(request.query_params.get("code"), group, kind=self._kind(request))
         except NetworkRule as e:
             return self._refuse(request, group, "Code de rattachement refusé", e)
         u = inv.umbrella
         return Response({**group_identity(u, request), "level": u.level, "level_name": u.level_name,
-                         "network": u.network.name, "parents": [g.name for g in u.ancestors()]})
+                         "network": u.network.name if u.network_id else "", "parents": [g.name for g in u.ancestors()],
+                         "kind": inv.kind})
 
     def post(self, request):
         from .network import NetworkRule, create_invitation
@@ -365,7 +373,7 @@ class NetworkInvitationView(_NetworkBase):
         if not manage:
             return self._forbidden()
         try:
-            inv = create_invitation(group, by=request.user, request=request)
+            inv = create_invitation(group, by=request.user, request=request, kind=self._kind(request))
         except NetworkRule as e:
             return self._refuse(request, group, "Invitation de rattachement refusée", e)
         return Response({"code": inv.pretty, "expires_at": inv.expires_at.isoformat()}, status=201)
@@ -432,11 +440,18 @@ class NetworkSharingView(_NetworkBase):
     """GET what the group shares with the groups above it; PUT
     {"members": "summary", …} (the président)."""
 
+    @staticmethod
+    def _audience(request):
+        from .models import GroupShare
+
+        a = request.query_params.get("audience") or "up"
+        return a if a in GroupShare.Audience.values else "up"
+
     def get(self, request):
         from .sharing import KINDS, settings_of
 
         group, manage = self._ctx(request)
-        return Response({"values": settings_of(group), "can_manage": manage,
+        return Response({"values": settings_of(group, self._audience(request)), "can_manage": manage,
                          "options": {k: ["none", *levels] for k, (levels, _) in KINDS.items()}})
 
     def put(self, request):
@@ -447,7 +462,7 @@ class NetworkSharingView(_NetworkBase):
             return self._forbidden()
         try:
             values = save_settings(group, request.data if isinstance(request.data, dict) else {}, by=request.user,
-                                   request=request)
+                                   request=request, audience=self._audience(request))
         except SharingRule as e:
             return Response({"detail": e.message, "code": e.code}, status=e.status)
         return Response({"values": values, "can_manage": True,
@@ -460,12 +475,58 @@ class NetworkGroupView(_NetworkBase):
 
     def get(self, request, pk):
         from .identity import group_identity
+        from .models import Group
+        from .network import relation
         from .sharing import shared_view
 
         group, _ = self._ctx(request)
-        target = next((g for g in group.descendants() if g.pk == pk), None)
-        if target is None:
-            return Response({"detail": "Ce groupe n’est pas rattaché au vôtre.", "code": "not_below"}, status=404)
+        target = Group.objects.filter(pk=pk, is_active=True).select_related("parent", "network").first()
+        rel = relation(group, target) if target is not None else None
+        if rel is None:
+            return Response({"detail": "Ce groupe n’est pas lié au vôtre.", "code": "not_linked"}, status=404)
         return Response({**group_identity(target, request), "level_name": target.level_name,
-                         "parent": target.parent.name if target.parent_id else None,
-                         "shared": shared_view(target, request.user)})
+                         "parent": target.parent.name if target.parent_id else None, "relation": rel,
+                         "shared": shared_view(target, request.user, audience=rel)})
+
+
+class NetworkTwinJoinView(_NetworkBase):
+    """POST {code} — the président accepts another group's twinning code."""
+
+    throttle_scope = "network_code"
+
+    def get_throttles(self):
+        from .throttling import ClientIPScopedRateThrottle
+
+        return [ClientIPScopedRateThrottle()]
+
+    def post(self, request):
+        from .network import NetworkRule, accept_twin, summary
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            accept_twin(request.data.get("code"), group, by=request.user, request=request)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Jumelage refusé", e)
+        return Response(summary(group, request, manage=True))
+
+
+class NetworkTwinEndView(_NetworkBase):
+    """POST {reason} — the président ends the twinning with group <pk>."""
+
+    def post(self, request, pk):
+        from .models import Group
+        from .network import NetworkRule, end_twin, summary
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        other = Group.objects.filter(pk=pk).first()
+        if other is None:
+            return Response({"detail": "Groupe introuvable.", "code": "not_found"}, status=404)
+        try:
+            end_twin(group, other, by=request.user, reason=request.data.get("reason"), request=request)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Fin de jumelage refusée", e)
+        return Response(summary(group, request, manage=True))

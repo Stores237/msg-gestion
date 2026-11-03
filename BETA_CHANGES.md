@@ -1485,3 +1485,29 @@ Owner (2026-11-03): joint duty across the parishes of a zone, without the zone r
   `members`); the event payload gains `contingent`.
 - How to verify: zone → an event sent down → Personnes demandées aux groupes → + on a parish →
   Envoyer. Parish planning officer → the event → Désigner → pick two → the zone sees the names.
+
+## 65. Build 43: networks, phase 5 — neighbours and twinning
+
+Owner (2026-11-03): groups "communicate with each other", sharing "what they allow". Asked for a
+proposal for links outside the tree; proposed and built: neighbours + twinning.
+
+- **Neighbours**: groups attached to the same group above (the parishes of one zone) see each
+  other in Réseau → Groupes voisins, with what each shares; tapping one opens it.
+- **Twinning** ("jumelage"), any two groups, any network or none: one président → Réseau →
+  **Jumeler** (an 8-character code, 14 days, single use); the other → **Accepter un jumelage** →
+  sees who → "Jumeler". Both présidents are told. Either side ends it (× on the row, with a
+  reason); the back-office lists twinnings (Réseaux de groupes → Jumelages) and can end one.
+- **Sharing is set per audience**: Réseau → Ce que nous partageons now has one row each for the
+  groups above, the neighbours and the twinned groups (only those that exist), each with the same
+  Rien / Résumé / Détail choices; nothing is shared until chosen. The readers' roles still apply.
+  A change notifies the groups concerned.
+- An attach code can't be used to twin and the reverse ("wrong_kind").
+- Server: `core.GroupLink`, `GroupInvitation.kind`, audiences `neighbours` / `twins` (migration
+  core 0019); `/api/network/invitations/?kind=twin`, `/api/network/twins/join/`,
+  `/api/network/twins/<id>/end/`, `/api/network/sharing/?audience=…`; `/api/network/groups/<id>/`
+  works for groups below, neighbours and twins (`relation`); `/api/network/` gains `neighbours`,
+  `twins`, `sharing_neighbours`, `sharing_twins`, `twin_invitations`.
+- How to verify: two parishes in one zone each see the other under Groupes voisins. A parish and
+  a choir: choir → Jumeler → code; parish → Accepter un jumelage → the choir appears under
+  Groupes jumelés; the choir sets Ce que nous partageons → Avec les groupes jumelés → Annonces:
+  Détail → the parish opens it and reads its announcements.

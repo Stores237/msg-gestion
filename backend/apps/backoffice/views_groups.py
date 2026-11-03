@@ -245,7 +245,7 @@ def networks(request):
     """Réseaux (owner, 2026-11-03): networks of groups in levels (paroisse →
     zone → diocèse…), umbrella groups' invitation codes, detaching."""
     from apps.core import network as net
-    from apps.core.models import GroupInvitation, Network
+    from apps.core.models import GroupInvitation, GroupLink, Network
 
     if request.method == "POST":
         if not request.user.can("backoffice.groups", "change"):
@@ -271,6 +271,10 @@ def networks(request):
                 inv = get_object_or_404(GroupInvitation, pk=P.get("id"))
                 net.revoke_invitation(inv, by=request.user, request=request, platform=True)
                 messages.success(request, "Invitation annulée : le code ne marche plus.")
+            elif action == "end_twin":
+                link = get_object_or_404(GroupLink, pk=P.get("id"), is_active=True)
+                net.end_twin(link.a, link.b, by=request.user, reason=P.get("reason"), request=request, platform=True)
+                messages.success(request, f"Jumelage « {link.a.name} » ↔ « {link.b.name} » terminé. Les deux présidents sont prévenus.")
             elif action == "detach" and group is not None:
                 parent = net.detach(group, by=request.user, reason=P.get("reason"), request=request, platform=True)
                 messages.success(request, f"« {group.name} » n’est plus rattaché à « {parent.name} ». Les deux présidents sont prévenus.")
@@ -284,7 +288,8 @@ def networks(request):
         n.rows = _tree(n)
         n.levels = [(i, n.level_name(i)) for i in Network.LEVELS if n.level_name(i)]
     pending = {}
-    for inv in GroupInvitation.objects.filter(status=GroupInvitation.Status.PENDING).select_related("created_by"):
+    for inv in GroupInvitation.objects.filter(status=GroupInvitation.Status.PENDING,
+                                              kind=GroupInvitation.Kind.ATTACH).select_related("created_by"):
         if not inv.expires_at or inv.expires_at > timezone.now():
             pending.setdefault(inv.umbrella_id, []).append(inv)
     from apps.core.sharing import LABELS, LEVEL_LABELS, settings_of
@@ -298,4 +303,5 @@ def networks(request):
         "outside": Group.objects.filter(network__isnull=True, is_active=True).order_by("name"),
         "all_groups": Group.objects.filter(is_active=True).select_related("network").order_by("name"),
         "days": net.INVITATION_DAYS,
+        "links": GroupLink.objects.filter(is_active=True).select_related("a", "b").order_by("-created_at"),
     })

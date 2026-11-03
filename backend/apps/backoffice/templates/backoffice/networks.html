@@ -36,6 +36,21 @@
 <section class="panel" style="margin-top:24px"><div class="panel-b"><span class="muted">Aucun réseau. Créez-en un avec « Nouveau réseau », par exemple « Mouvement Garde Suisse · Cameroun », avec ses niveaux : Paroisse, Zone paroissiale, Diocèse, National.</span></div></section>
 {% endfor %}
 
+{% if links %}
+<section class="panel" style="margin-top:24px" id="twins"><div class="panel-h"><h2>Jumelages · {{ links|length }}</h2></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupes</th><th>Depuis</th><th></th></tr></thead><tbody>
+    {% for lk in links %}<tr><td><span style="display:inline-flex;align-items:center;gap:6px">{% group_logo lk.a 20 %}<b>{{ lk.a.name }}</b> ↔ {% group_logo lk.b 20 %}<b>{{ lk.b.name }}</b></span></td><td>{{ lk.created_at|date:"d/m/Y" }}</td>
+      <td class="amt">{% if 'backoffice.groups:change' in p %}<button class="btn btn-ghost btn-sm" type="button" style="color:var(--red-500)" onclick="document.getElementById('dlg-twin-{{ lk.pk }}').showModal()">{% icon 'unlink' 16 %}Mettre fin</button>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+  <div class="tbl-f"><span>Deux groupes de n’importe quel réseau se jumellent eux-mêmes dans l’application (Réseau → Jumeler avec un groupe) ; chacun choisit ce qu’il partage avec ses groupes jumelés.</span></div>
+</section>
+{% if 'backoffice.groups:change' in p %}{% for lk in links %}
+<dialog id="dlg-twin-{{ lk.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="end_twin"><input type="hidden" name="id" value="{{ lk.pk }}">
+  <h3>Mettre fin au jumelage · {{ lk.a.name }} ↔ {{ lk.b.name }}</h3>
+  <label class="fld"><span class="fld-l">Motif<em> *</em></span><span class="fld-box multi"><textarea name="reason" rows="3" required minlength="3" maxlength="300"></textarea></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-danger">Mettre fin</button></div>
+</form></dialog>{% endfor %}{% endif %}
+{% endif %}
 {% if 'backoffice.groups:change' in p %}
 <section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Placer un groupe</h2></div><div class="panel-b">
   <form method="post" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">{% csrf_token %}<input type="hidden" name="action" value="place">

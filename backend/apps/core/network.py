@@ -25,7 +25,7 @@ from django.utils import timezone
 
 from . import audit
 from .groups import in_group
-from .models import Group, GroupInvitation, Network
+from .models import Group, GroupInvitation, GroupLink, Network
 
 INVITATION_DAYS = 14
 ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # no 0/O, 1/I/L
@@ -111,7 +111,8 @@ def place_group(group, *, network, level, by, request=None):
     group.network, group.level = network, level
     group.save(update_fields=["network", "level"])
     if network is None or level == 1:
-        GroupInvitation.objects.filter(umbrella=group, status=GroupInvitation.Status.PENDING).update(
+        GroupInvitation.objects.filter(umbrella=group, kind=GroupInvitation.Kind.ATTACH,
+                                       status=GroupInvitation.Status.PENDING).update(
             status=GroupInvitation.Status.REVOKED)
     audit.record("Groupe placé dans un réseau", actor=by, obj=group, request=request, platform=True, sensitive=True,
                  detail={"avant": before, "apres": {"reseau": str(network or "—"), "niveau": level}})
@@ -124,16 +125,16 @@ def can_invite(group):
     return group.network_id is not None and group.level > 1 and group.is_active
 
 
-def create_invitation(umbrella, *, by, request=None, platform=False):
-    if not can_invite(umbrella):
+def create_invitation(umbrella, *, by, request=None, platform=False, kind=GroupInvitation.Kind.ATTACH):
+    if kind == GroupInvitation.Kind.ATTACH and not can_invite(umbrella):
         raise NetworkRule("not_umbrella", "Seul un groupe de niveau supérieur dans un réseau peut inviter.")
     for _ in range(10):
         code = "".join(secrets.choice(ALPHABET) for _ in range(8))
         if not GroupInvitation.objects.filter(code=code).exists():
             break
-    inv = GroupInvitation.objects.create(umbrella=umbrella, code=code, created_by=by,
+    inv = GroupInvitation.objects.create(umbrella=umbrella, code=code, created_by=by, kind=kind,
                                          expires_at=timezone.now() + timedelta(days=INVITATION_DAYS))
-    _record(umbrella, "Invitation de rattachement créée", by=by, request=request, platform=platform,
+    _record(umbrella, "Code de jumelage créé" if kind == GroupInvitation.Kind.TWIN else "Invitation de rattachement créée", by=by, request=request, platform=platform,
             detail={"expire": inv.expires_at.date().isoformat()})
     return inv
 
@@ -146,12 +147,12 @@ def revoke_invitation(inv, *, by, request=None, platform=False):
     _record(inv.umbrella, "Invitation de rattachement annulée", by=by, request=request, platform=platform, detail={})
 
 
-def pending_invitations(umbrella):
-    return GroupInvitation.objects.filter(umbrella=umbrella, status=GroupInvitation.Status.PENDING,
+def pending_invitations(umbrella, kind=GroupInvitation.Kind.ATTACH):
+    return GroupInvitation.objects.filter(umbrella=umbrella, kind=kind, status=GroupInvitation.Status.PENDING,
                                           expires_at__gt=timezone.now())
 
 
-def find_invitation(code, group):
+def find_invitation(code, group, kind=GroupInvitation.Kind.ATTACH):
     """The invitation behind `code`, checked for `group` (the one that
     would join). Raises NetworkRule with what's wrong."""
     code = clean_code(code)
@@ -162,7 +163,17 @@ def find_invitation(code, group):
         raise NetworkRule("used", "Ce code a déjà servi. Demandez-en un nouveau.")
     if inv.expires_at <= timezone.now():
         raise NetworkRule("expired", "Ce code a expiré. Demandez-en un nouveau.")
+    if inv.kind != kind:
+        raise NetworkRule("wrong_kind", "C’est un code de jumelage : utilisez « Accepter un jumelage »."
+                          if inv.kind == GroupInvitation.Kind.TWIN else
+                          "C’est un code de rattachement : utilisez « Rejoindre avec un code ».")
     u = inv.umbrella
+    if kind == GroupInvitation.Kind.TWIN:
+        if u.pk == group.pk:
+            raise NetworkRule("self", "Un groupe ne peut pas se jumeler avec lui-même.")
+        if link_between(u, group) is not None:
+            raise NetworkRule("already_twinned", f"Votre groupe est déjà jumelé avec « {u.name} ».", 409)
+        return inv
     if u.pk == group.pk:
         raise NetworkRule("self", "Un groupe ne peut pas se rattacher à lui-même.")
     if group.parent_id is not None:
@@ -238,6 +249,13 @@ def summary(group, request=None, *, manage=False):
     if below:
         data["totals"] = totals(below)
     data["sharing"] = settings_of(group) if group.parent_id else None
+    near, linked = neighbours(group), twins(group)
+    data["neighbours"] = [{**item(g), "shares": [k for k, v in settings_of(g, "neighbours").items() if v != "none"]} for g in near]
+    data["twins"] = [{**item(g), "shares": [k for k, v in settings_of(g, "twins").items() if v != "none"]} for g in linked]
+    data["sharing_neighbours"] = settings_of(group, "neighbours") if near else None
+    data["sharing_twins"] = settings_of(group, "twins") if linked else None
+    data["twin_invitations"] = ([{"code": i.pretty, "expires_at": i.expires_at.isoformat()}
+                                 for i in pending_invitations(group, GroupInvitation.Kind.TWIN)] if manage else [])
     if manage and can_invite(group):
         data["invitations"] = [{"code": i.pretty, "expires_at": i.expires_at.isoformat()} for i in pending_invitations(group)]
     return data
@@ -293,3 +311,78 @@ def send_down(group, title, body, target, *, kind="announcement"):
             people = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
             n += notify(people, kind, title, body, target)
     return n
+
+
+# --- Links between groups (build 43) ---------------------------------------------------------
+
+def neighbours(group):
+    """The other active groups attached to the same parent."""
+    if group.parent_id is None:
+        return []
+    return list(Group.objects.filter(parent_id=group.parent_id, is_active=True).exclude(pk=group.pk).order_by("name"))
+
+
+def _pair(g1, g2):
+    return (g1, g2) if g1.pk < g2.pk else (g2, g1)
+
+
+def link_between(g1, g2):
+    a, b = _pair(g1, g2)
+    return GroupLink.objects.filter(a=a, b=b, is_active=True).first()
+
+
+def twins(group):
+    from django.db.models import Q
+
+    links = GroupLink.objects.filter(Q(a=group) | Q(b=group), is_active=True).select_related("a", "b")
+    return sorted((lk.other(group) for lk in links if lk.other(group).is_active), key=lambda g: g.name)
+
+
+def relation(viewer_group, target):
+    """How `target` relates to the viewer's group, for sharing: "up" (it is
+    below), "neighbours", "twins", or None."""
+    if target.pk in {d.pk for d in viewer_group.descendants()}:
+        return "up"
+    if viewer_group.parent_id and target.parent_id == viewer_group.parent_id and target.pk != viewer_group.pk:
+        return "neighbours"
+    if link_between(viewer_group, target) is not None:
+        return "twins"
+    return None
+
+
+@transaction.atomic
+def accept_twin(code, group, *, by, request=None):
+    inv = find_invitation(code, group, kind=GroupInvitation.Kind.TWIN)
+    inv = GroupInvitation.objects.select_for_update().get(pk=inv.pk)
+    if inv.status != GroupInvitation.Status.PENDING:
+        raise NetworkRule("used", "Ce code a déjà servi. Demandez-en un nouveau.")
+    other = inv.umbrella
+    a, b = _pair(group, other)
+    link, _ = GroupLink.objects.get_or_create(a=a, b=b, defaults={"created_by": by})
+    link.is_active, link.ended_at, link.ended_by, link.ended_reason, link.created_by = True, None, None, "", by
+    link.save()
+    inv.status, inv.used_by_group, inv.used_by, inv.used_at = GroupInvitation.Status.USED, group, by, timezone.now()
+    inv.save(update_fields=["status", "used_by_group", "used_by", "used_at"])
+    detail = {"groupes": [group.name, other.name]}
+    _record(group, "Groupes jumelés", by=by, request=request, detail=detail)
+    _record(other, "Groupes jumelés", by=by, request=request, detail=detail)
+    _tell(other, "Nouveau jumelage", f"« {group.name} » et « {other.name} » sont jumelés.")
+    _tell(group, "Nouveau jumelage", f"« {group.name} » et « {other.name} » sont jumelés.")
+    return other
+
+
+@transaction.atomic
+def end_twin(group, other, *, by, reason, request=None, platform=False):
+    reason = (reason or "").strip()[:300]
+    if len(reason) < 3:
+        raise NetworkRule("detach_reason", "Indiquez le motif.")
+    link = link_between(group, other)
+    if link is None:
+        raise NetworkRule("not_twinned", "Ces groupes ne sont pas jumelés.", 404)
+    link.is_active, link.ended_at, link.ended_by, link.ended_reason = False, timezone.now(), by, reason
+    link.save(update_fields=["is_active", "ended_at", "ended_by", "ended_reason"])
+    detail = {"groupes": [group.name, other.name], "motif": reason}
+    _record(group, "Jumelage terminé", by=by, request=request, detail=detail, platform=platform)
+    _record(other, "Jumelage terminé", by=by, request=request, detail=detail)
+    for g in (group, other):
+        _tell(g, "Jumelage terminé", f"« {group.name} » et « {other.name} » ne sont plus jumelés. Motif : {reason}")

@@ -330,3 +330,67 @@ def test_contingent_rules(mgs):
     # 0 cancels.
     zapi.put(f"/api/events/{pk}/contingents/", {"requests": [{"group": parish.pk, "requested": 0}]}, format="json")
     assert app_client(pres_p, parish).get(f"/api/events/{pk}/contingent/").status_code == 404
+
+
+# --- Build 43: neighbours and twinning ------------------------------------------------------
+
+def test_neighbours_see_what_each_shares_with_neighbours(mgs):
+    parish, zone, pres_p, pres_z, member = _attached(mgs)
+    from apps.core.sharing import save_settings
+
+    other = create_group(name="GS Bonamoussadi")
+    pres_o = UserFactory.build()
+    pres_o.save()
+    give(pres_o, other, "president")
+    other = place_group(other, network=mgs[0], level=1, by=None)
+    accept_invitation(create_invitation(zone, by=None).code, other, by=pres_o)
+    papi = app_client(pres_p, parish)
+    data = papi.get("/api/network/").json()
+    assert [g["name"] for g in data["neighbours"]] == [other.name] and data["sharing_neighbours"]["members"] == "none"
+    # Nothing until the neighbour shares; "up" settings don't count for neighbours.
+    save_settings(other, {"members": "summary"}, by=pres_o)
+    assert papi.get(f"/api/network/groups/{other.pk}/").json()["shared"] == {}
+    r = app_client(pres_o, other).put("/api/network/sharing/?audience=neighbours", {"members": "summary"}, format="json")
+    assert r.status_code == 200 and r.json()["values"]["members"] == "summary"
+    seen = papi.get(f"/api/network/groups/{other.pk}/").json()
+    assert seen["relation"] == "neighbours" and seen["shared"]["members"]["data"]["total"] >= 1
+    assert Notification.all_groups.filter(user=pres_p, group=parish, title="Partage d’un groupe voisin").exists()
+
+
+def test_two_groups_anywhere_twin_with_a_code(mgs):
+    _, parish, zone, pres_p, pres_z, _ = mgs
+    choir = create_group(name="Chorale Sainte-Cécile")  # in no network
+    pres_c = UserFactory.build()
+    pres_c.save()
+    give(pres_c, choir, "president")
+    capi, papi = app_client(pres_c, choir), app_client(pres_p, parish)
+    code = capi.post("/api/network/invitations/?kind=twin").json()["code"]
+    assert capi.get("/api/network/").json()["twin_invitations"][0]["code"] == code
+    # Not an attach code.
+    assert papi.post("/api/network/join/", {"code": code}, format="json").json()["code"] == "wrong_kind"
+    assert papi.get(f"/api/network/invitations/?code={code}&kind=twin").json()["name"] == choir.name
+    data = papi.post("/api/network/twins/join/", {"code": code}, format="json").json()
+    assert [g["name"] for g in data["twins"]] == [choir.name]
+    assert Notification.all_groups.filter(user=pres_c, group=choir, title="Nouveau jumelage").exists()
+    capi.put("/api/network/sharing/?audience=twins", {"announcements": "detail"}, format="json")
+    seen = papi.get(f"/api/network/groups/{choir.pk}/").json()
+    assert seen["relation"] == "twins" and "announcements" in seen["shared"]
+    # A second code between the same groups is refused; ending needs a reason.
+    code2 = capi.post("/api/network/invitations/", {"kind": "twin"}, format="json").json()["code"]
+    assert papi.post("/api/network/twins/join/", {"code": code2}, format="json").json()["code"] == "already_twinned"
+    assert papi.post(f"/api/network/twins/{choir.pk}/end/", {"reason": ""}, format="json").json()["code"] == "detach_reason"
+    data = papi.post(f"/api/network/twins/{choir.pk}/end/", {"reason": "Fin du projet"}, format="json").json()
+    assert data["twins"] == []
+    assert papi.get(f"/api/network/groups/{choir.pk}/").status_code == 404
+
+
+def test_backoffice_ends_a_twinning(boss, mgs):  # noqa: F811
+    _, parish, zone, pres_p, pres_z, _ = mgs
+    from apps.core.models import GroupInvitation, GroupLink
+    from apps.core.network import accept_twin
+
+    accept_twin(create_invitation(zone, by=None, kind=GroupInvitation.Kind.TWIN).code, parish, by=pres_p)
+    link = GroupLink.objects.get(is_active=True)
+    assert "Jumelages · 1" in boss.get("/bo/reseaux/").content.decode()
+    page = boss.post("/bo/reseaux/", {"action": "end_twin", "id": link.pk, "reason": "Doublon"}, follow=True).content.decode()
+    assert "terminé" in page and not GroupLink.objects.get(pk=link.pk).is_active

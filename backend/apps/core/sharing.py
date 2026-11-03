@@ -60,13 +60,19 @@ def save_settings(group, values, *, by, request=None, audience=GroupShare.Audien
     if changed:
         with in_group(group):
             audit.record("Partage avec le réseau modifié", actor=by, obj=group, request=request, detail=changed)
-        if group.parent_id and group.parent.is_active:
-            from .network import _tell
+        from .network import _tell, neighbours, twins
 
-            now = settings_of(group, audience)
-            shown = ", ".join(f"{LABELS[k].lower()} ({LEVEL_LABELS[v].lower()})" for k, v in now.items() if v != NONE)
-            _tell(group.parent, "Partage d’un groupe rattaché",
-                  f"« {group.name} » partage maintenant : {shown}." if shown else f"« {group.name} » ne partage plus rien.")
+        now = settings_of(group, audience)
+        shown = ", ".join(f"{LABELS[k].lower()} ({LEVEL_LABELS[v].lower()})" for k, v in now.items() if v != NONE)
+        body = f"« {group.name} » partage maintenant : {shown}." if shown else f"« {group.name} » ne partage plus rien."
+        if audience == GroupShare.Audience.UP:
+            told, title = ([group.parent] if group.parent_id and group.parent.is_active else []), "Partage d’un groupe rattaché"
+        elif audience == GroupShare.Audience.NEIGHBOURS:
+            told, title = neighbours(group), "Partage d’un groupe voisin"
+        else:
+            told, title = twins(group), "Partage d’un groupe jumelé"
+        for g in told:
+            _tell(g, title, body)
     return settings_of(group, audience)
 
 

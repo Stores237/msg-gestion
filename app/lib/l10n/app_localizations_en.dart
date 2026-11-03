@@ -3529,4 +3529,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contingentYou => 'You are named';
+
+  @override
+  String get groupNetSharingNeighbours =>
+      'With neighbouring groups (same group above)';
+
+  @override
+  String get groupNetSharingTwins => 'With twinned groups';
+
+  @override
+  String get groupNetNeighbours => 'Neighbouring groups';
+
+  @override
+  String get groupNetTwins => 'Twinned groups';
+
+  @override
+  String get groupNetNoTwins =>
+      'No twinning. Two groups of any network can twin to share what they choose.';
+
+  @override
+  String get groupNetTwinInvite => 'Twin';
+
+  @override
+  String get groupNetTwinAccept => 'Accept a twinning';
+
+  @override
+  String get groupNetTwinJoinHint =>
+      'Type the twinning code you received from the other group.';
+
+  @override
+  String groupNetTwinAskTitle(String name) {
+    return 'Twin your group with $name?';
+  }
+
+  @override
+  String get groupNetTwinAskBody =>
+      'Each group chooses what it shares with its twinned groups (nothing at first). Either can end the twinning.';
+
+  @override
+  String get groupNetTwin => 'Twin';
+
+  @override
+  String groupNetTwinned(String name) {
+    return 'Your group is twinned with $name.';
+  }
+
+  @override
+  String get groupNetTwinCodeTitle => 'Twinning code';
+
+  @override
+  String groupNetTwinCodeHint(String date) {
+    return 'Send this code to the other group’s president: they type it in Network → Accept a twinning. Valid until $date, single use.';
+  }
+
+  @override
+  String get groupNetTwinEnd => 'End the twinning';
+
+  @override
+  String groupNetTwinEndTitle(String name) {
+    return 'End the twinning with $name';
+  }
+
+  @override
+  String get groupNetTwinEndBody =>
+      'Both groups’ presidents will be told; nothing is shared between you any more.';
+
+  @override
+  String groupNetTwinEnded(String name) {
+    return 'Twinning with $name ended.';
+  }
 }

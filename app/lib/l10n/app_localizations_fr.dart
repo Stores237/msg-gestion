@@ -3576,4 +3576,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get contingentYou => 'Vous êtes désigné(e)';
+
+  @override
+  String get groupNetSharingNeighbours =>
+      'Avec les groupes voisins (même groupe au-dessus)';
+
+  @override
+  String get groupNetSharingTwins => 'Avec les groupes jumelés';
+
+  @override
+  String get groupNetNeighbours => 'Groupes voisins';
+
+  @override
+  String get groupNetTwins => 'Groupes jumelés';
+
+  @override
+  String get groupNetNoTwins =>
+      'Aucun jumelage. Deux groupes de n’importe quel réseau peuvent se jumeler pour partager ce qu’ils choisissent.';
+
+  @override
+  String get groupNetTwinInvite => 'Jumeler';
+
+  @override
+  String get groupNetTwinAccept => 'Accepter un jumelage';
+
+  @override
+  String get groupNetTwinJoinHint =>
+      'Saisissez le code de jumelage reçu de l’autre groupe.';
+
+  @override
+  String groupNetTwinAskTitle(String name) {
+    return 'Jumeler votre groupe avec $name ?';
+  }
+
+  @override
+  String get groupNetTwinAskBody =>
+      'Chaque groupe choisit ce qu’il partage avec ses groupes jumelés (rien au départ). Chacun peut mettre fin au jumelage.';
+
+  @override
+  String get groupNetTwin => 'Jumeler';
+
+  @override
+  String groupNetTwinned(String name) {
+    return 'Votre groupe est jumelé avec $name.';
+  }
+
+  @override
+  String get groupNetTwinCodeTitle => 'Code de jumelage';
+
+  @override
+  String groupNetTwinCodeHint(String date) {
+    return 'Envoyez ce code au président de l’autre groupe : il le saisit dans Réseau → Accepter un jumelage. Valable jusqu’au $date, une seule fois.';
+  }
+
+  @override
+  String get groupNetTwinEnd => 'Mettre fin au jumelage';
+
+  @override
+  String groupNetTwinEndTitle(String name) {
+    return 'Mettre fin au jumelage avec $name';
+  }
+
+  @override
+  String get groupNetTwinEndBody =>
+      'Les présidents des deux groupes seront prévenus ; plus rien n’est partagé entre vous.';
+
+  @override
+  String groupNetTwinEnded(String name) {
+    return 'Jumelage avec $name terminé.';
+  }
 }

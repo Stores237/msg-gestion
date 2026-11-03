@@ -135,11 +135,16 @@ class HttpProfileRepository implements ProfileRepository {
       NetworkInfo.fromJson(await _api.get('/network/') as Map<String, dynamic>);
 
   @override
-  Future<InvitationPreview> previewInvitation(String code) async =>
-      InvitationPreview.fromJson(
-        await _api.get('/network/invitations/', query: {'code': code})
-            as Map<String, dynamic>,
-      );
+  Future<InvitationPreview> previewInvitation(
+    String code, {
+    bool twin = false,
+  }) async => InvitationPreview.fromJson(
+    await _api.get(
+          '/network/invitations/',
+          query: {'code': code, if (twin) 'kind': 'twin'},
+        )
+        as Map<String, dynamic>,
+  );
 
   @override
   Future<NetworkInfo> joinNetwork(String code) async => NetworkInfo.fromJson(
@@ -154,9 +159,30 @@ class HttpProfileRepository implements ProfileRepository {
   );
 
   @override
-  Future<Invitation> createInvitation() async => Invitation.fromJson(
-    await _api.post('/network/invitations/') as Map<String, dynamic>,
+  Future<Invitation> createInvitation({bool twin = false}) async =>
+      Invitation.fromJson(
+        await _api.post(
+              '/network/invitations/',
+              body: {if (twin) 'kind': 'twin'},
+            )
+            as Map<String, dynamic>,
+      );
+
+  @override
+  Future<NetworkInfo> joinTwin(String code) async => NetworkInfo.fromJson(
+    await _api.post('/network/twins/join/', body: {'code': code})
+        as Map<String, dynamic>,
   );
+
+  @override
+  Future<NetworkInfo> endTwin(int groupId, String reason) async =>
+      NetworkInfo.fromJson(
+        await _api.post(
+              '/network/twins/$groupId/end/',
+              body: {'reason': reason},
+            )
+            as Map<String, dynamic>,
+      );
 
   @override
   Future<void> revokeInvitation(String code) => _api.delete(
@@ -164,16 +190,20 @@ class HttpProfileRepository implements ProfileRepository {
   );
 
   @override
-  Future<SharingSettings> sharing() async => SharingSettings.fromJson(
-    await _api.get('/network/sharing/') as Map<String, dynamic>,
-  );
-
-  @override
-  Future<SharingSettings> saveSharing(Map<String, String> values) async =>
+  Future<SharingSettings> sharing({String audience = 'up'}) async =>
       SharingSettings.fromJson(
-        await _api.put('/network/sharing/', body: values)
+        await _api.get('/network/sharing/', query: {'audience': audience})
             as Map<String, dynamic>,
       );
+
+  @override
+  Future<SharingSettings> saveSharing(
+    Map<String, String> values, {
+    String audience = 'up',
+  }) async => SharingSettings.fromJson(
+    await _api.put('/network/sharing/?audience=$audience', body: values)
+        as Map<String, dynamic>,
+  );
 
   @override
   Future<SharedGroup> sharedGroup(int id) async => SharedGroup.fromJson(

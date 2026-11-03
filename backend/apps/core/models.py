@@ -101,6 +101,31 @@ class Group(models.Model):
         return out
 
 
+class GroupLink(models.Model):
+    """Two groups twinned (owner, 2026-11-03: groups "communicate with each
+    other"), in any network or none: one président issues a code, the
+    other accepts it. Either side ends it, with a reason. Stored with the
+    lower id first."""
+
+    a = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    b = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    ended_reason = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["a", "b"], name="one_link_per_pair")]
+
+    def __str__(self):
+        return f"{self.a} ↔ {self.b}"
+
+    def other(self, group):
+        return self.b if self.a_id == group.pk else self.a
+
+
 class GroupShare(models.Model):
     """What a group shows the groups of its network (owner, 2026-11-03:
     "share information base on what they allow to share"). One row per
@@ -109,6 +134,8 @@ class GroupShare(models.Model):
 
     class Audience(models.TextChoices):
         UP = "up", "Groupes au-dessus"
+        NEIGHBOURS = "neighbours", "Groupes voisins"
+        TWINS = "twins", "Groupes jumelés"
 
     class Level(models.TextChoices):
         NONE = "none", "Rien"
@@ -139,7 +166,14 @@ class GroupInvitation(models.Model):
         USED = "used", "Utilisée"
         REVOKED = "revoked", "Annulée"
 
+    class Kind(models.TextChoices):
+        ATTACH = "attach", "Rattachement"
+        TWIN = "twin", "Jumelage"
+
+    # For a twinning code (build 43), `umbrella` is simply the group that
+    # issued it, at any level, in any network.
     umbrella = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="invitations")
+    kind = models.CharField(max_length=8, choices=Kind.choices, default=Kind.ATTACH)
     code = models.CharField(max_length=8, unique=True)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")

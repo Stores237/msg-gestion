@@ -2226,5 +2226,58 @@
   "contingentChoose": "Désigner les personnes",
   "contingentChooseHint": "Seulement des membres actifs de votre groupe. Ils reçoivent une notification ; le groupe qui demande voit leurs noms.",
   "contingentSaved": "Désignation enregistrée.",
-  "contingentYou": "Vous êtes désigné(e)"
+  "contingentYou": "Vous êtes désigné(e)",
+  "groupNetSharingNeighbours": "Avec les groupes voisins (même groupe au-dessus)",
+  "groupNetSharingTwins": "Avec les groupes jumelés",
+  "groupNetNeighbours": "Groupes voisins",
+  "groupNetTwins": "Groupes jumelés",
+  "groupNetNoTwins": "Aucun jumelage. Deux groupes de n’importe quel réseau peuvent se jumeler pour partager ce qu’ils choisissent.",
+  "groupNetTwinInvite": "Jumeler",
+  "groupNetTwinAccept": "Accepter un jumelage",
+  "groupNetTwinJoinHint": "Saisissez le code de jumelage reçu de l’autre groupe.",
+  "groupNetTwinAskTitle": "Jumeler votre groupe avec {name} ?",
+  "@groupNetTwinAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetTwinAskBody": "Chaque groupe choisit ce qu’il partage avec ses groupes jumelés (rien au départ). Chacun peut mettre fin au jumelage.",
+  "groupNetTwin": "Jumeler",
+  "groupNetTwinned": "Votre groupe est jumelé avec {name}.",
+  "@groupNetTwinned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetTwinCodeTitle": "Code de jumelage",
+  "groupNetTwinCodeHint": "Envoyez ce code au président de l’autre groupe : il le saisit dans Réseau → Accepter un jumelage. Valable jusqu’au {date}, une seule fois.",
+  "@groupNetTwinCodeHint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetTwinEnd": "Mettre fin au jumelage",
+  "groupNetTwinEndTitle": "Mettre fin au jumelage avec {name}",
+  "@groupNetTwinEndTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetTwinEndBody": "Les présidents des deux groupes seront prévenus ; plus rien n’est partagé entre vous.",
+  "groupNetTwinEnded": "Jumelage avec {name} terminé.",
+  "@groupNetTwinEnded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

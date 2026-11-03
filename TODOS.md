@@ -18,9 +18,10 @@
   events 0009); install build 41.
 - [ ] **Owner — build 42 (2026-11-03, joint planning):** deploy (migration events 0010); install
   build 42.
+- [ ] **Owner — build 43 (2026-11-03, neighbours and twinning):** deploy (migration core 0019);
+  install build 43.
 - [ ] **Engineering — networks, next phases (2026-11-03):** evening-before reminders for events
-  sent down (and for the people named);
-  links between groups (neighbours under one parent; "jumelage" elsewhere), dues between levels.
+  sent down (and for the people named); dues between levels.
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render
   (migrations core 0016, accounts 0025, finances 0006; also builds 35–36's if not yet deployed),

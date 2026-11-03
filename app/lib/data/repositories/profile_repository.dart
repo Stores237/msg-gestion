@@ -197,7 +197,22 @@ class NetworkInfo {
     this.invitations = const [],
     this.totals,
     this.sharing,
+    this.neighbours = const [],
+    this.twins = const [],
+    this.sharingNeighbours,
+    this.sharingTwins,
+    this.twinInvitations = const [],
   });
+
+  /// Groups under the same parent, and twinned groups (build 43), each
+  /// with what it shares with this group.
+  final List<NetworkGroup> neighbours;
+  final List<NetworkGroup> twins;
+
+  /// What this group shares with its neighbours / twins (null: none).
+  final Map<String, String>? sharingNeighbours;
+  final Map<String, String>? sharingTwins;
+  final List<Invitation> twinInvitations;
 
   /// Below an umbrella: (groups, groups sharing their members, members).
   final ({int groups, int sharingMembers, int members})? totals;
@@ -243,12 +258,27 @@ class NetworkInfo {
         ),
         _ => null,
       },
-      sharing: (j['sharing'] as Map<String, dynamic>?)?.map(
-        (k, v) => MapEntry(k, v as String),
-      ),
+      sharing: _levels(j['sharing']),
+      neighbours: [
+        for (final g in (j['neighbours'] as List?) ?? const [])
+          NetworkGroup.fromJson(g as Map<String, dynamic>),
+      ],
+      twins: [
+        for (final g in (j['twins'] as List?) ?? const [])
+          NetworkGroup.fromJson(g as Map<String, dynamic>),
+      ],
+      sharingNeighbours: _levels(j['sharing_neighbours']),
+      sharingTwins: _levels(j['sharing_twins']),
+      twinInvitations: [
+        for (final i in (j['twin_invitations'] as List?) ?? const [])
+          Invitation.fromJson(i as Map<String, dynamic>),
+      ],
     );
   }
 }
+
+Map<String, String>? _levels(Object? m) =>
+    (m as Map<String, dynamic>?)?.map((k, v) => MapEntry(k, v as String));
 
 /// What a group shares upward (owner, 2026-11-03): per kind "none",
 /// "summary" or "detail"; [options] lists the levels each kind offers.
@@ -387,12 +417,21 @@ abstract class ProfileRepository {
 
   /// The group's network (owner, 2026-11-03).
   Future<NetworkInfo> network();
-  Future<InvitationPreview> previewInvitation(String code);
+  Future<InvitationPreview> previewInvitation(String code, {bool twin = false});
   Future<NetworkInfo> joinNetwork(String code);
   Future<NetworkInfo> leaveNetwork(String reason);
-  Future<Invitation> createInvitation();
+
+  /// [twin]: a twinning code (build 43) instead of an attach one.
+  Future<Invitation> createInvitation({bool twin = false});
+  Future<NetworkInfo> joinTwin(String code);
+  Future<NetworkInfo> endTwin(int groupId, String reason);
   Future<void> revokeInvitation(String code);
-  Future<SharingSettings> sharing();
-  Future<SharingSettings> saveSharing(Map<String, String> values);
+
+  /// [audience]: up | neighbours | twins.
+  Future<SharingSettings> sharing({String audience = 'up'});
+  Future<SharingSettings> saveSharing(
+    Map<String, String> values, {
+    String audience = 'up',
+  });
   Future<SharedGroup> sharedGroup(int id);
 }

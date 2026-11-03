@@ -64,11 +64,11 @@ class _NetworkScreenState extends State<NetworkScreen> {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
 
-  Future<void> _join() async {
+  Future<void> _join({bool twin = false}) async {
     final l = AppLocalizations.of(context);
     final preview = await showDialog<(String, InvitationPreview)>(
       context: context,
-      builder: (_) => const _JoinDialog(),
+      builder: (_) => _JoinDialog(twin: twin),
     );
     if (preview == null || !mounted) return;
     final (code, from) = preview;
@@ -76,7 +76,11 @@ class _NetworkScreenState extends State<NetworkScreen> {
       context: context,
       builder: (context) => AlertDialog(
         key: const Key('join-ask'),
-        title: Text(l.groupNetJoinAskTitle(from.group.name)),
+        title: Text(
+          twin
+              ? l.groupNetTwinAskTitle(from.group.name)
+              : l.groupNetJoinAskTitle(from.group.name),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +111,7 @@ class _NetworkScreenState extends State<NetworkScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text(l.groupNetJoinAskBody),
+            Text(twin ? l.groupNetTwinAskBody : l.groupNetJoinAskBody),
           ],
         ),
         actions: [
@@ -118,17 +122,23 @@ class _NetworkScreenState extends State<NetworkScreen> {
           FilledButton(
             key: const Key('join-confirm'),
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l.groupNetJoin),
+            child: Text(twin ? l.groupNetTwin : l.groupNetJoin),
           ),
         ],
       ),
     );
     if (ok != true || !mounted) return;
     await _run(() async {
-      final info = await _repo.joinNetwork(code);
+      final info = twin
+          ? await _repo.joinTwin(code)
+          : await _repo.joinNetwork(code);
       if (!mounted) return;
       setState(() => _info = info);
-      _snack(l.groupNetJoined(from.group.name));
+      _snack(
+        twin
+            ? l.groupNetTwinned(from.group.name)
+            : l.groupNetJoined(from.group.name),
+      );
     });
   }
 
@@ -147,22 +157,37 @@ class _NetworkScreenState extends State<NetworkScreen> {
     });
   }
 
-  Future<void> _invite() async {
-    Invitation? inv;
+  Future<void> _endTwin(NetworkGroup other) async {
+    final l = AppLocalizations.of(context);
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (_) => _LeaveDialog(parent: other.group.name, twin: true),
+    );
+    if (reason == null || !mounted) return;
     await _run(() async {
-      inv = await _repo.createInvitation();
-      await _load();
+      final info = await _repo.endTwin(other.group.id, reason);
+      if (!mounted) return;
+      setState(() => _info = info);
+      _snack(l.groupNetTwinEnded(other.group.name));
     });
-    if (inv != null && mounted) await _showCode(inv!);
   }
 
-  Future<void> _showCode(Invitation inv) {
+  Future<void> _invite({bool twin = false}) async {
+    Invitation? inv;
+    await _run(() async {
+      inv = await _repo.createInvitation(twin: twin);
+      await _load();
+    });
+    if (inv != null && mounted) await _showCode(inv!, twin: twin);
+  }
+
+  Future<void> _showCode(Invitation inv, {bool twin = false}) {
     final l = AppLocalizations.of(context);
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         key: const Key('invite-dialog'),
-        title: Text(l.groupNetInviteTitle),
+        title: Text(twin ? l.groupNetTwinCodeTitle : l.groupNetInviteTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -177,7 +202,11 @@ class _NetworkScreenState extends State<NetworkScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            Text(l.groupNetInviteHint(Dates(context).fullDate(inv.expiresAt))),
+            Text(
+              (twin ? l.groupNetTwinCodeHint : l.groupNetInviteHint)(
+                Dates(context).fullDate(inv.expiresAt),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -228,6 +257,41 @@ class _NetworkScreenState extends State<NetworkScreen> {
       ),
       chevron: onTap != null,
       onTap: onTap,
+    );
+    String sharesText(List<String> kinds) => kinds.isEmpty
+        ? l.groupNetSharesNone
+        : l.groupNetSharesList(
+            kinds.map((k) => sharingKindLabel(l, k).toLowerCase()).join(', '),
+          );
+    void open(NetworkGroup g) => Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => SharedGroupScreen(groupId: g.group.id)),
+    );
+    Widget sharingRow(
+      Map<String, String> sh,
+      String audience,
+      String sub,
+    ) => ListRow(
+      key: Key(audience == 'up' ? 'network-sharing' : 'sharing-$audience'),
+      lead: const Icon(Icons.visibility_outlined),
+      title: Text(
+        sh.values.every((v) => v == 'none')
+            ? l.groupNetSharesNone
+            : l.groupNetSharesList(
+                [
+                  for (final k in SharingSettings.kinds)
+                    if ((sh[k] ?? 'none') != 'none')
+                      '${sharingKindLabel(l, k).toLowerCase()} (${sharingLevelLabel(l, sh[k]!).toLowerCase()})',
+                ].join(', '),
+              ),
+      ),
+      subtitle: Text(sub),
+      chevron: true,
+      onTap: () async {
+        final saved = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(builder: (_) => SharingScreen(audience: audience)),
+        );
+        if (saved == true) _load();
+      },
     );
     return Scaffold(
       body: SafeArea(
@@ -317,44 +381,34 @@ class _NetworkScreenState extends State<NetworkScreen> {
                                 ),
                               ),
                           ],
-                          if (info.sharing case final sh?) ...[
+                          if (info.sharing != null ||
+                              info.sharingNeighbours != null ||
+                              info.sharingTwins != null) ...[
                             const SizedBox(height: 24),
                             SectionLabel(l.groupNetSharingTitle),
                             const SizedBox(height: 8),
                             GroupCard(
                               children: [
-                                ListRow(
-                                  key: const Key('network-sharing'),
-                                  lead: const Icon(Icons.visibility_outlined),
-                                  title: Text(
-                                    sh.values.every((v) => v == 'none')
-                                        ? l.groupNetSharesNone
-                                        : l.groupNetSharesList(
-                                            [
-                                              for (final k
-                                                  in SharingSettings.kinds)
-                                                if ((sh[k] ?? 'none') != 'none')
-                                                  '${sharingKindLabel(l, k).toLowerCase()} (${sharingLevelLabel(l, sh[k]!).toLowerCase()})',
-                                            ].join(', '),
-                                          ),
-                                  ),
-                                  subtitle: Text(
+                                if (info.sharing case final sh?)
+                                  sharingRow(
+                                    sh,
+                                    'up',
                                     l.groupNetSharingWith(
                                       info.parents.first.group.name,
                                     ),
                                   ),
-                                  chevron: true,
-                                  onTap: () async {
-                                    final saved = await Navigator.of(context)
-                                        .push<bool>(
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const SharingScreen(),
-                                          ),
-                                        );
-                                    if (saved == true) _load();
-                                  },
-                                ),
+                                if (info.sharingNeighbours case final sh?)
+                                  sharingRow(
+                                    sh,
+                                    'neighbours',
+                                    l.groupNetSharingNeighbours,
+                                  ),
+                                if (info.sharingTwins case final sh?)
+                                  sharingRow(
+                                    sh,
+                                    'twins',
+                                    l.groupNetSharingTwins,
+                                  ),
                               ],
                             ),
                           ],
@@ -471,6 +525,117 @@ class _NetworkScreenState extends State<NetworkScreen> {
                               ),
                             ],
                           ],
+                          if (info.neighbours.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            SectionLabel(l.groupNetNeighbours),
+                            const SizedBox(height: 8),
+                            GroupCard(
+                              children: [
+                                for (final g in info.neighbours)
+                                  groupRow(
+                                    g,
+                                    'neighbour-${g.group.id}',
+                                    extra: sharesText(g.shares),
+                                    onTap: () => open(g),
+                                  ),
+                              ],
+                            ),
+                          ],
+                          if (info.twins.isNotEmpty || info.canManage) ...[
+                            const SizedBox(height: 24),
+                            SectionLabel(l.groupNetTwins),
+                            const SizedBox(height: 8),
+                            if (info.twins.isEmpty)
+                              Text(
+                                l.groupNetNoTwins,
+                                style: TextStyle(color: c.textSecondary),
+                              )
+                            else
+                              GroupCard(
+                                children: [
+                                  for (final g in info.twins)
+                                    ListRow(
+                                      key: Key('twin-${g.group.id}'),
+                                      lead: GroupLogo(group: g.group, size: 36),
+                                      title: Text(g.group.name),
+                                      subtitle: Text(sharesText(g.shares)),
+                                      onTap: () => open(g),
+                                      trailing: info.canManage
+                                          ? IconButton(
+                                              key: Key(
+                                                'end-twin-${g.group.id}',
+                                              ),
+                                              tooltip: l.groupNetTwinEnd,
+                                              onPressed: _busy
+                                                  ? null
+                                                  : () => _endTwin(g),
+                                              icon: Icon(
+                                                Icons.link_off,
+                                                color: c.alert,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                ],
+                              ),
+                            if (info.canManage) ...[
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      key: const Key('twin-invite'),
+                                      onPressed: _busy
+                                          ? null
+                                          : () => _invite(twin: true),
+                                      icon: const Icon(
+                                        Icons.handshake_outlined,
+                                      ),
+                                      label: Text(l.groupNetTwinInvite),
+                                      style: _stadium,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: OutlinedButton.icon(
+                                      key: const Key('twin-join'),
+                                      onPressed: _busy
+                                          ? null
+                                          : () => _join(twin: true),
+                                      icon: const Icon(Icons.input),
+                                      label: Text(l.groupNetTwinAccept),
+                                      style: _stadium,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              for (final inv in info.twinInvitations)
+                                ListRow(
+                                  key: Key('twin-code-${inv.code}'),
+                                  title: Text(
+                                    inv.code,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    l.groupNetCodeUntil(
+                                      Dates(context).fullDate(inv.expiresAt),
+                                    ),
+                                  ),
+                                  onTap: () => _showCode(inv, twin: true),
+                                  trailing: IconButton(
+                                    key: Key('revoke-${inv.code}'),
+                                    tooltip: l.groupNetRevoke,
+                                    onPressed: _busy
+                                        ? null
+                                        : () => _revoke(inv),
+                                    icon: const Icon(Icons.close),
+                                  ),
+                                ),
+                            ],
+                          ],
                           const SizedBox(height: 24),
                           Text(
                             l.groupNetAbout,
@@ -499,7 +664,8 @@ final _stadium = OutlinedButton.styleFrom(
 /// Type the umbrella's code; it is checked (who invites) before anything
 /// is joined.
 class _JoinDialog extends StatefulWidget {
-  const _JoinDialog();
+  const _JoinDialog({this.twin = false});
+  final bool twin;
 
   @override
   State<_JoinDialog> createState() => _JoinDialogState();
@@ -530,6 +696,7 @@ class _JoinDialogState extends State<_JoinDialog> {
     try {
       final from = await RepositoryLocator.instance.profile.previewInvitation(
         code,
+        twin: widget.twin,
       );
       if (mounted) Navigator.of(context).pop((code, from));
     } catch (e) {
@@ -543,12 +710,12 @@ class _JoinDialogState extends State<_JoinDialog> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(l.groupNetJoinWithCode),
+      title: Text(widget.twin ? l.groupNetTwinAccept : l.groupNetJoinWithCode),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.groupNetJoinHint),
+          Text(widget.twin ? l.groupNetTwinJoinHint : l.groupNetJoinHint),
           const SizedBox(height: 12),
           TextField(
             key: const Key('join-code'),
@@ -581,8 +748,9 @@ class _JoinDialogState extends State<_JoinDialog> {
 }
 
 class _LeaveDialog extends StatefulWidget {
-  const _LeaveDialog({required this.parent});
+  const _LeaveDialog({required this.parent, this.twin = false});
   final String parent;
+  final bool twin;
 
   @override
   State<_LeaveDialog> createState() => _LeaveDialogState();
@@ -602,12 +770,16 @@ class _LeaveDialogState extends State<_LeaveDialog> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(l.groupNetLeave(widget.parent)),
+      title: Text(
+        widget.twin
+            ? l.groupNetTwinEndTitle(widget.parent)
+            : l.groupNetLeave(widget.parent),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.groupNetLeaveBody),
+          Text(widget.twin ? l.groupNetTwinEndBody : l.groupNetLeaveBody),
           const SizedBox(height: 12),
           TextField(
             key: const Key('leave-reason'),

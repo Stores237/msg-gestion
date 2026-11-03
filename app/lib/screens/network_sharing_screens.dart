@@ -37,7 +37,10 @@ String _kindHint(AppLocalizations l, String kind) => switch (kind) {
 /// "Ce que nous partageons" (owner, 2026-11-03): kind by kind, what the
 /// groups above may see. Nothing until the président chooses; others read.
 class SharingScreen extends StatefulWidget {
-  const SharingScreen({super.key});
+  const SharingScreen({super.key, this.audience = 'up'});
+
+  /// up | neighbours | twins (build 43).
+  final String audience;
 
   @override
   State<SharingScreen> createState() => _SharingScreenState();
@@ -53,7 +56,7 @@ class _SharingScreenState extends State<SharingScreen> {
   void initState() {
     super.initState();
     RepositoryLocator.instance.profile
-        .sharing()
+        .sharing(audience: widget.audience)
         .then((s) {
           if (mounted) {
             setState(() {
@@ -71,7 +74,10 @@ class _SharingScreenState extends State<SharingScreen> {
     final l = AppLocalizations.of(context);
     setState(() => _busy = true);
     try {
-      await RepositoryLocator.instance.profile.saveSharing(_values);
+      await RepositoryLocator.instance.profile.saveSharing(
+        _values,
+        audience: widget.audience,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -94,7 +100,11 @@ class _SharingScreenState extends State<SharingScreen> {
         child: Column(
           children: [
             ScreenHeader(
-              title: l.groupNetSharingTitle,
+              title: switch (widget.audience) {
+                'neighbours' => l.groupNetSharingNeighbours,
+                'twins' => l.groupNetSharingTwins,
+                _ => l.groupNetSharingTitle,
+              },
               back: true,
               small: true,
             ),
