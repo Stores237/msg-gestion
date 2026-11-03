@@ -4,6 +4,7 @@ delete (two super admins), switch."""
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -157,7 +158,6 @@ def faq(request):
     """Aide → Questions fréquentes (owner, 2026-11-02): the questions common
     to every group, the current group's own, and the members' suggestions,
     which the platform team edits and publishes or declines."""
-    from django.utils import timezone
 
     from apps.core.groups import in_group
     from apps.core.models import FaqEntry, FaqSuggestion
@@ -215,4 +215,84 @@ def faq(request):
         "own": FaqEntry.objects.filter(group=group) if group else [],
         "pending": FaqSuggestion.objects.filter(status=FaqSuggestion.Status.PENDING).select_related("group", "author"),
         "done": FaqSuggestion.objects.exclude(status=FaqSuggestion.Status.PENDING).select_related("group", "author", "decided_by")[:20],
+    })
+
+
+def _tree(network):
+    """The network's groups as indented rows: umbrellas first, each followed
+    by the groups attached to it."""
+    groups = list(Group.objects.filter(network=network, is_active=True).select_related("parent"))
+    kids = {}
+    for g in groups:
+        kids.setdefault(g.parent_id, []).append(g)
+    ids = {g.pk for g in groups}
+    roots = [g for g in groups if g.parent_id is None or g.parent_id not in ids]
+    rows = []
+
+    def walk(g, depth):
+        g.depth, g.indent = depth, depth * 24
+        rows.append(g)
+        for c in sorted(kids.get(g.pk, []), key=lambda x: (-x.level, x.name)):
+            walk(c, depth + 1)
+
+    for r in sorted(roots, key=lambda x: (-x.level, x.name)):
+        walk(r, 0)
+    return rows
+
+
+@backoffice_view("backoffice.groups", "view")
+def networks(request):
+    """Réseaux (owner, 2026-11-03): networks of groups in levels (paroisse →
+    zone → diocèse…), umbrella groups' invitation codes, detaching."""
+    from apps.core import network as net
+    from apps.core.models import GroupInvitation, Network
+
+    if request.method == "POST":
+        if not request.user.can("backoffice.groups", "change"):
+            return render(request, "backoffice/forbidden.html", status=403)
+        P, action = request.POST, request.POST.get("action")
+        group = Group.objects.filter(pk=P.get("group"), is_active=True).first() if P.get("group") else None
+        try:
+            if action == "network":
+                n = Network.objects.filter(pk=P.get("id")).first() if P.get("id") else None
+                n = net.save_network(by=request.user, request=request, network=n, name=P.get("name"),
+                                     levels=[P.get(f"level{i}", "") for i in range(1, 5)])
+                messages.success(request, f"Réseau « {n.name} » enregistré.")
+            elif action == "place" and group is not None:
+                n = Network.objects.filter(pk=P.get("network")).first() if P.get("network") else None
+                net.place_group(group, network=n, level=P.get("level") or 1, by=request.user, request=request)
+                messages.success(request, f"« {group.name} » : {n.name + ' · ' + group.level_name if n else 'hors réseau'}.")
+            elif action == "invite" and group is not None:
+                inv = net.create_invitation(group, by=request.user, request=request, platform=True)
+                messages.success(request, f"Code d’invitation pour rejoindre « {group.name} » : {inv.pretty} "
+                                          f"(valable {net.INVITATION_DAYS} jours, une seule fois). Le président du groupe invité "
+                                          "le saisit dans l’application : Accueil → le nom du groupe → Réseau.")
+            elif action == "revoke":
+                inv = get_object_or_404(GroupInvitation, pk=P.get("id"))
+                net.revoke_invitation(inv, by=request.user, request=request, platform=True)
+                messages.success(request, "Invitation annulée : le code ne marche plus.")
+            elif action == "detach" and group is not None:
+                parent = net.detach(group, by=request.user, reason=P.get("reason"), request=request, platform=True)
+                messages.success(request, f"« {group.name} » n’est plus rattaché à « {parent.name} ». Les deux présidents sont prévenus.")
+        except net.NetworkRule as e:
+            audit.record("Réseau : modification refusée", actor=request.user, obj=group, request=request, platform=True,
+                         refused=True, detail={"action": action, "raison": e.message})
+            messages.error(request, e.message)
+        return redirect("backoffice:networks")
+    nets = list(Network.objects.all())
+    for n in nets:
+        n.rows = _tree(n)
+        n.levels = [(i, n.level_name(i)) for i in Network.LEVELS if n.level_name(i)]
+    pending = {}
+    for inv in GroupInvitation.objects.filter(status=GroupInvitation.Status.PENDING).select_related("created_by"):
+        if not inv.expires_at or inv.expires_at > timezone.now():
+            pending.setdefault(inv.umbrella_id, []).append(inv)
+    for n in nets:
+        for g in n.rows:
+            g.invites = pending.get(g.pk, [])
+    return render(request, "backoffice/networks.html", {
+        "nav": "networks", "networks": nets,
+        "outside": Group.objects.filter(network__isnull=True, is_active=True).order_by("name"),
+        "all_groups": Group.objects.filter(is_active=True).select_related("network").order_by("name"),
+        "days": net.INVITATION_DAYS,
     })

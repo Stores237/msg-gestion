@@ -205,6 +205,7 @@ REST_FRAMEWORK = {
         "pin_login": "120/hour",
         "pin_forgot": "30/hour",
         "faq_suggest": "100/day",
+        "network_code": "60/hour",
         "token_refresh": "1200/hour",
         "backoffice_login": "20/hour",
         "backoffice_otp": "20/hour",

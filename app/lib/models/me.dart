@@ -40,7 +40,14 @@ class GroupInfo {
     this.logo,
     this.shortName = '',
     String? initials,
+    this.levelName = '',
+    this.parent,
   }) : initials = initials ?? '';
+
+  /// Its level in a network ("Paroisse") and the group it is attached to
+  /// (owner, 2026-11-03), shown in the group sheet.
+  final String levelName;
+  final String? parent;
 
   /// Like a Slack workspace (owner, 2026-11-02): the group's logo (signed
   /// URL), its sigle, and what shows without a logo (sigle or initials).
@@ -88,6 +95,8 @@ class GroupInfo {
     logo: j['logo'] as String?,
     shortName: (j['short_name'] as String?) ?? '',
     initials: j['initials'] as String?,
+    levelName: (j['level_name'] as String?) ?? '',
+    parent: j['parent'] as String?,
   );
 }
 

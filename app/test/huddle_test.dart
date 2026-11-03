@@ -82,8 +82,12 @@ void main() {
     expect(find.byKey(const Key('home-group-name')), findsOneWidget);
     expect(find.text('Mouvement Garde Suisse'), findsWidgets);
     expect(find.byType(GroupLogo), findsWidgets);
-    // A plain member in one group: nothing to switch, nothing to edit.
-    expect(find.byKey(const Key('switch-group')), findsNothing);
+    // A plain member in one group: the line opens the sheet for Réseau
+    // (build 39), with nothing to edit.
+    await tester.tap(find.byKey(const Key('switch-group')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('open-network')), findsOneWidget);
+    expect(find.byKey(const Key('edit-group')), findsNothing);
   });
 
   testWidgets('the président renames the group and sets its sigle', (

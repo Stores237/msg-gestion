@@ -166,7 +166,6 @@ void main() {
     await pumpShell(tester, fakeMe(welcome: 'Bienvenue au mouvement !'));
     expect(find.byKey(const Key('welcome-card')), findsOneWidget);
     expect(find.text('Bienvenue au mouvement !'), findsOneWidget);
-    expect(find.byKey(const Key('switch-group')), findsNothing);
   });
 
   testWidgets('Accueil: one account in two groups can switch', (tester) async {

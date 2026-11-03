@@ -8,6 +8,13 @@
 - [ ] **Owner — events (2026-10-27):** after deploying, install build 16; give the new
   Vice-censeur role to someone in each group (back-office → Rôles), and check the "Int./Ext."
   and "Chef" switches in Paramètres → Types d’activités.
+- [ ] **Owner — build 39 (2026-11-03, networks of groups):** deploy on Render (migrations core
+  0017, accounts 0026), then back-office → Réseaux de groupes: create the MGS network and its
+  levels, place each group, create the zones/dioceses as groups (Groupes → Nouveau groupe) and
+  give each its président; send each parish président their zone's code. Install build 39.
+- [ ] **Engineering — networks, next phases (2026-11-03):** sharing settings per group (Rien /
+  Résumé / Détail), umbrella announcements and events reaching the groups below + joint planning,
+  links between groups (neighbours under one parent; "jumelage" elsewhere), dues between levels.
 - [ ] **Owner — build 38 (2026-11-03, export period):** deploy on Render (no migration of its own) and install build 38.
 - [ ] **Owner — build 37 (2026-11-02, group settings, FAQ, recovery code):** deploy on Render
   (migrations core 0016, accounts 0025, finances 0006; also builds 35–36's if not yet deployed),

@@ -1381,3 +1381,36 @@ back-office.
   du 01/… au …". Back-office → Finances → "Mois dernier" → the totals change → Livre de caisse
   (PDF) shows the balance at the start and end of last month.
 
+## 61. Build 39: networks of groups (phase 1, the tree)
+
+Owner (2026-11-03): the Garde Suisse groups of several parishes form a zone paroissiale, the zones
+a diocese, "similar to the government system". Agreed with the owner: an upper level is an
+**umbrella group** (the parish groups keep existing under it); the **back-office** creates
+networks and upper levels; an umbrella **only informs** the groups under it; four levels are
+enough.
+
+- **Back-office → Réseaux de groupes** (new, `backoffice.groups`): create a network and name its
+  levels (e.g. Paroisse · Zone paroissiale · Diocèse · National); place each group in a network at
+  a level; for a group of level 2+, **Code d’invitation** (8 characters, `ABCD-EFGH`, valid 14
+  days, single use; cancel with ×); **Détacher** a group (reason). The tree shows each umbrella
+  with the groups attached under it.
+- **App → Accueil → the group's name → Réseau** (everyone; the line now opens the sheet for every
+  member): the network and the group's level, the groups above it (nearest first) and the groups
+  attached to it. The président (`group.profile`, now "Nom, logo et rattachement du groupe"):
+  **Rejoindre avec un code** (shows who invites, then "Rattacher"), **Se détacher de …** (reason),
+  and in an umbrella group **Inviter un groupe** (code to copy, pending codes to cancel).
+- Rules: a group joins only a group of a higher level in the same network (a group outside any
+  network joins it); one parent at a time; no loops; a level change can't pass its parent or its
+  children; a group with links can't change network. Both présidents get a "Réseau" notification
+  and every change is in both groups' journal; refused codes are journaled too. Code lookups are
+  limited to 60 an hour per address.
+- Server: `core.Network`, `Group.network/level/parent/attached_at`, `core.GroupInvitation`
+  (migrations core 0017, accounts 0026); `apps/core/network.py`; `/api/network/`,
+  `/api/network/invitations/` (GET `?code=` preview, POST new, DELETE `?code=`),
+  `/api/network/join/`, `/api/network/leave/`; `/api/me/` groups carry `level_name` and `parent`.
+- Not yet (next phases): what each group shares with its network, announcements and events that
+  reach the groups below, links between groups, money between levels.
+- How to verify: back-office → Réseaux de groupes → Nouveau réseau → place the MGS group at level
+  1 and a new "Zone" group at level 2 → Code d’invitation. In the app, as the MGS président:
+  Accueil → group name → Réseau → Rejoindre avec un code → the zone shows under "Rattaché à";
+  the zone's président gets a notification. "Se détacher" with a reason undoes it.

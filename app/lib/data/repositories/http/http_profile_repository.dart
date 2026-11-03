@@ -131,6 +131,39 @@ class HttpProfileRepository implements ProfileRepository {
       );
 
   @override
+  Future<NetworkInfo> network() async =>
+      NetworkInfo.fromJson(await _api.get('/network/') as Map<String, dynamic>);
+
+  @override
+  Future<InvitationPreview> previewInvitation(String code) async =>
+      InvitationPreview.fromJson(
+        await _api.get('/network/invitations/', query: {'code': code})
+            as Map<String, dynamic>,
+      );
+
+  @override
+  Future<NetworkInfo> joinNetwork(String code) async => NetworkInfo.fromJson(
+    await _api.post('/network/join/', body: {'code': code})
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<NetworkInfo> leaveNetwork(String reason) async => NetworkInfo.fromJson(
+    await _api.post('/network/leave/', body: {'reason': reason})
+        as Map<String, dynamic>,
+  );
+
+  @override
+  Future<Invitation> createInvitation() async => Invitation.fromJson(
+    await _api.post('/network/invitations/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<void> revokeInvitation(String code) => _api.delete(
+    '/network/invitations/?code=${Uri.encodeQueryComponent(code)}',
+  );
+
+  @override
   Future<void> setReminders({bool? eve, bool? twoHours}) => _api.patch(
     '/me/preferences/',
     body: {'remind_eve': ?eve, 'remind_2h': ?twoHours},

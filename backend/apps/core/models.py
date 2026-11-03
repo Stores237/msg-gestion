@@ -5,6 +5,34 @@ from django.db import models
 from .groups import default_group_id, scoped
 
 
+class Network(models.Model):
+    """A family of groups in levels, like the MGS's parish groups, zones
+    paroissiales and dioceses (owner, 2026-11-03: "similar to the government
+    system"). Created in the back-office, which also names its levels. A
+    group of level 2 or more is an umbrella: a full group of its own (its
+    bureau, cash book, calendar) with groups of lower levels attached."""
+
+    LEVELS = (1, 2, 3, 4)
+
+    name = models.CharField("nom du réseau", max_length=120)
+    level1 = models.CharField("niveau 1", max_length=40, default="Groupe local")
+    level2 = models.CharField("niveau 2", max_length=40, default="Zone")
+    level3 = models.CharField("niveau 3", max_length=40, default="Région")
+    level4 = models.CharField("niveau 4", max_length=40, default="National")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "réseau"
+
+    def __str__(self):
+        return self.name
+
+    def level_name(self, level):
+        return getattr(self, f"level{level}", "") if level in self.LEVELS else ""
+
+
 class Group(models.Model):
     """A group using the Huddle platform (e.g. the Mouvement Garde Suisse).
     Its people are linked through Membership; its roles, money, calendar,
@@ -23,6 +51,14 @@ class Group(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    # Its place in a network (owner, 2026-11-03): the back-office sets the
+    # network and the level; the parent comes from an invitation the group
+    # accepted (apps.core.network). An umbrella only informs the groups
+    # under it; it has no say in how they run.
+    network = models.ForeignKey(Network, on_delete=models.SET_NULL, null=True, blank=True, related_name="groups")
+    level = models.PositiveSmallIntegerField("niveau", default=1, choices=[(n, str(n)) for n in Network.LEVELS])
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
+    attached_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -41,6 +77,59 @@ class Group(models.Model):
             return self.short_name.upper()
         words = [w for w in self.name.replace("’", " ").replace("'", " ").split() if w.lower() not in self.SMALL_WORDS]
         return "".join(w[0] for w in words[:3]).upper() or "?"
+
+    @property
+    def level_name(self):
+        return self.network.level_name(self.level) if self.network_id else ""
+
+    def ancestors(self):
+        """Parent, grand-parent… (nearest first)."""
+        out, g, seen = [], self.parent, {self.pk}
+        while g is not None and g.pk not in seen:
+            out.append(g)
+            seen.add(g.pk)
+            g = g.parent
+        return out
+
+    def descendants(self):
+        """Every group below, at any depth (active ones)."""
+        out, frontier = [], [self.pk]
+        while frontier:
+            kids = list(Group.objects.filter(parent_id__in=frontier, is_active=True))
+            out += kids
+            frontier = [k.pk for k in kids]
+        return out
+
+
+class GroupInvitation(models.Model):
+    """An umbrella group invites a group of a lower level to join it
+    (owner, 2026-11-03: "joind each group with invitation link"). The code
+    is single-use; the invited group's président accepts it in the app."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        USED = "used", "Utilisée"
+        REVOKED = "revoked", "Annulée"
+
+    umbrella = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="invitations")
+    code = models.CharField(max_length=8, unique=True)
+    status = models.CharField(max_length=8, choices=Status.choices, default=Status.PENDING)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_by_group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    used_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Invitation {self.code} · {self.umbrella}"
+
+    @property
+    def pretty(self):
+        return f"{self.code[:4]}-{self.code[4:]}"
 
 
 class GroupDeletion(models.Model):
@@ -193,6 +282,7 @@ class Notification(models.Model):
         REQUEST = "request", "Demande"
         REMINDER = "reminder", "Rappel"
         REPORT = "report", "Rapport"
+        NETWORK = "network", "Réseau"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     group = models.ForeignKey(Group, on_delete=models.CASCADE, default=default_group_id, related_name="+")

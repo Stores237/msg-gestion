@@ -17,6 +17,7 @@ import 'expenses/expenses_screen.dart';
 import 'account_screen.dart';
 import 'help_screens.dart';
 import 'members/member_profile_screen.dart';
+import 'network_screen.dart';
 import 'shell_screen.dart';
 import '../models/me.dart';
 
@@ -83,6 +84,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       page = AccountScreen(me: me);
     } else if (type == 'faq') {
       page = const FaqScreen();
+    } else if (type == 'network') {
+      page = const NetworkScreen();
     } else if (_tabFor[type] case final tab?) {
       // Cash book, my dues, the planning: their tab (owner, 2026-11-02:
       // these opened nothing).
@@ -113,6 +116,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     'duty' => Icons.event_available_outlined,
     'expense' => Icons.receipt_long_outlined,
     'faq' => Icons.help_outline,
+    'network' => Icons.hub_outlined,
     'reminder' => Icons.alarm,
     'announcement' || 'convocation' => Icons.campaign_outlined,
     'payment' => Icons.check_circle_outline,

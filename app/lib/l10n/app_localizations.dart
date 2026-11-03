@@ -5311,6 +5311,210 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Du {from} au {to}.'**
   String periodRange(String from, String to);
+
+  /// No description provided for @groupNetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau'**
+  String get groupNetTitle;
+
+  /// No description provided for @groupNetSheetHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les groupes au-dessus et rattachés'**
+  String get groupNetSheetHint;
+
+  /// No description provided for @groupNetNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe ne fait partie d’aucun réseau. L’équipe Huddle place les groupes dans un réseau (paroisses, zones, diocèses…).'**
+  String get groupNetNone;
+
+  /// No description provided for @groupNetIn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réseau {network} · votre groupe : {level}.'**
+  String groupNetIn(String network, String level);
+
+  /// No description provided for @groupNetAbove.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattaché à'**
+  String get groupNetAbove;
+
+  /// No description provided for @groupNetNoParent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe n’est rattaché à aucun groupe.'**
+  String get groupNetNoParent;
+
+  /// No description provided for @groupNetJoinWithCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rejoindre avec un code'**
+  String get groupNetJoinWithCode;
+
+  /// No description provided for @groupNetJoinHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saisissez le code d’invitation reçu du groupe de niveau supérieur (ex. votre zone).'**
+  String get groupNetJoinHint;
+
+  /// No description provided for @groupNetCodeLength.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le code a 8 caractères, ex. ABCD-EFGH.'**
+  String get groupNetCodeLength;
+
+  /// No description provided for @groupNetJoinAskTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattacher votre groupe à {name} ?'**
+  String groupNetJoinAskTitle(String name);
+
+  /// No description provided for @groupNetUnder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lui-même rattaché à {chain}'**
+  String groupNetUnder(String chain);
+
+  /// No description provided for @groupNetJoinAskBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce groupe pourra informer le vôtre (annonces, événements). Il ne décide pas pour votre groupe et ne voit que ce que vous choisirez de partager. Vous pourrez vous détacher à tout moment.'**
+  String get groupNetJoinAskBody;
+
+  /// No description provided for @groupNetJoin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattacher'**
+  String get groupNetJoin;
+
+  /// No description provided for @groupNetJoined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe est rattaché à {name}.'**
+  String groupNetJoined(String name);
+
+  /// No description provided for @groupNetLeave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se détacher de {name}'**
+  String groupNetLeave(String name);
+
+  /// No description provided for @groupNetLeaveBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les présidents des deux groupes seront prévenus. Pour revenir, il faudra un nouveau code d’invitation.'**
+  String get groupNetLeaveBody;
+
+  /// No description provided for @groupNetLeaveReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Indiquez le motif.'**
+  String get groupNetLeaveReason;
+
+  /// No description provided for @groupNetLeaveConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Se détacher'**
+  String get groupNetLeaveConfirm;
+
+  /// No description provided for @groupNetLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe n’est plus rattaché à {name}.'**
+  String groupNetLeft(String name);
+
+  /// No description provided for @groupNetBelow.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Groupes rattachés} =1{1 groupe rattaché} other{{count} groupes rattachés}}'**
+  String groupNetBelow(int count);
+
+  /// No description provided for @groupNetNoChildren.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun groupe rattaché pour l’instant.'**
+  String get groupNetNoChildren;
+
+  /// No description provided for @groupNetGroupsBelow.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 groupe en dessous} other{{count} groupes en dessous}}'**
+  String groupNetGroupsBelow(int count);
+
+  /// No description provided for @groupNetInvite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inviter un groupe'**
+  String get groupNetInvite;
+
+  /// No description provided for @groupNetInviteAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un code par groupe invité, valable 14 jours, une seule fois. Son président le saisit dans Réseau → Rejoindre avec un code.'**
+  String get groupNetInviteAbout;
+
+  /// No description provided for @groupNetInviteTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’invitation'**
+  String get groupNetInviteTitle;
+
+  /// No description provided for @groupNetInviteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyez ce code au président du groupe à inviter. Valable jusqu’au {date}, une seule fois.'**
+  String groupNetInviteHint(String date);
+
+  /// No description provided for @groupNetPendingCodes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Codes en attente'**
+  String get groupNetPendingCodes;
+
+  /// No description provided for @groupNetCodeUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valable jusqu’au {date}'**
+  String groupNetCodeUntil(String date);
+
+  /// No description provided for @groupNetRevoke.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler ce code'**
+  String get groupNetRevoke;
+
+  /// No description provided for @groupNetCodeCopied.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code copié.'**
+  String get groupNetCodeCopied;
+
+  /// No description provided for @groupNetCodeRevoked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code annulé : il ne marche plus.'**
+  String get groupNetCodeRevoked;
+
+  /// No description provided for @groupNetUnknownCode.
+  ///
+  /// In fr, this message translates to:
+  /// **'Code d’invitation inconnu. Vérifiez-le auprès du groupe qui vous invite.'**
+  String get groupNetUnknownCode;
+
+  /// No description provided for @groupNetAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux. Ce que chaque groupe partage avec son réseau se réglera bientôt ici.'**
+  String get groupNetAbout;
+
+  /// No description provided for @copy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Copier'**
+  String get copy;
 }
 
 class _AppLocalizationsDelegate

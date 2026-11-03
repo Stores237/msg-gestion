@@ -301,3 +301,128 @@ class GroupLogoView(APIView):
             group.logo.delete(save=True)
             audit.record("Logo du groupe retiré", actor=request.user, obj=group, request=request)
         return Response(group_identity(group, request))
+
+
+class _NetworkBase(APIView):
+    """A group's network (owner, 2026-11-03). Everyone in the group sees
+    where it stands; the président (group.profile) joins with a code,
+    leaves, and, in an umbrella group, issues codes."""
+
+    def _ctx(self, request):
+        from .models import Settings
+
+        return Settings.get().group, request.user.can("group.profile", "change")
+
+    def _refuse(self, request, group, action, err):
+        from . import audit
+
+        audit.record(action, actor=request.user, obj=group, request=request, sensitive=True, refused=True,
+                     detail={"raison": err.message})
+        return Response({"detail": err.message, "code": err.code}, status=err.status)
+
+    def _forbidden(self):
+        return Response({"detail": "Réservé au président du groupe.", "code": "forbidden"}, status=403)
+
+
+class NetworkView(_NetworkBase):
+    def get(self, request):
+        from .network import summary
+
+        group, manage = self._ctx(request)
+        return Response(summary(group, request, manage=manage))
+
+
+class NetworkInvitationView(_NetworkBase):
+    """GET ?code= — who invites (before accepting); POST — a new code
+    (umbrella only); DELETE ?code= — cancel one."""
+
+    throttle_scope = "network_code"
+
+    def get_throttles(self):
+        from .throttling import ClientIPScopedRateThrottle
+
+        return [ClientIPScopedRateThrottle()] if self.request.method == "GET" else super().get_throttles()
+
+    def get(self, request):
+        from .identity import group_identity
+        from .network import NetworkRule, find_invitation
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            inv = find_invitation(request.query_params.get("code"), group)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Code de rattachement refusé", e)
+        u = inv.umbrella
+        return Response({**group_identity(u, request), "level": u.level, "level_name": u.level_name,
+                         "network": u.network.name, "parents": [g.name for g in u.ancestors()]})
+
+    def post(self, request):
+        from .network import NetworkRule, create_invitation
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            inv = create_invitation(group, by=request.user, request=request)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Invitation de rattachement refusée", e)
+        return Response({"code": inv.pretty, "expires_at": inv.expires_at.isoformat()}, status=201)
+
+    def delete(self, request):
+        from .models import GroupInvitation
+        from .network import NetworkRule, clean_code, revoke_invitation
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        inv = GroupInvitation.objects.filter(umbrella=group, code=clean_code(request.query_params.get("code"))).first()
+        if inv is None:
+            return Response({"detail": "Invitation introuvable.", "code": "not_found"}, status=404)
+        try:
+            revoke_invitation(inv, by=request.user, request=request)
+        except NetworkRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response(status=204)
+
+
+class NetworkJoinView(_NetworkBase):
+    """POST {code} — the président accepts an umbrella's invitation."""
+
+    throttle_scope = "network_code"
+
+    def get_throttles(self):
+        from .throttling import ClientIPScopedRateThrottle
+
+        return [ClientIPScopedRateThrottle()]
+
+    def post(self, request):
+        from .network import NetworkRule, accept_invitation, summary
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            accept_invitation(request.data.get("code"), group, by=request.user, request=request)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Rattachement refusé", e)
+        group.refresh_from_db()
+        return Response(summary(group, request, manage=True))
+
+
+class NetworkLeaveView(_NetworkBase):
+    """POST {reason} — the président detaches the group from its umbrella."""
+
+    def post(self, request):
+        from .network import NetworkRule, detach, summary
+
+        group, manage = self._ctx(request)
+        if not manage:
+            return self._forbidden()
+        try:
+            detach(group, by=request.user, reason=request.data.get("reason"), request=request)
+        except NetworkRule as e:
+            return self._refuse(request, group, "Détachement refusé", e)
+        group.refresh_from_db()
+        return Response(summary(group, request, manage=True))

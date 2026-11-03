@@ -34,6 +34,7 @@ String describeError(BuildContext context, Object error) {
     ApiException(code: 'report_empty') => l.reportEmpty,
     ApiException(code: 'report_locked') => l.reportLocked,
     ApiException(code: 'event_ended') => l.eventEnded,
+    ApiException(code: 'unknown_invitation') => l.groupNetUnknownCode,
     ApiException(code: 'report_read') => l.reportReadLocked,
     ApiException(code: 'not_on_duty') => l.notOnDuty,
     ApiException(code: 'too_early') => l.reportTooEarly,

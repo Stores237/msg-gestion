@@ -157,6 +157,111 @@ class FaqSuggestion {
   final String note;
 }
 
+/// A group in a network, as the Réseau screen lists it (owner, 2026-11-03).
+class NetworkGroup {
+  const NetworkGroup({
+    required this.group,
+    this.levelName = '',
+    this.below = 0,
+  });
+  final GroupInfo group;
+  final String levelName;
+
+  /// Groups under it, at any depth (children list only).
+  final int below;
+
+  factory NetworkGroup.fromJson(Map<String, dynamic> j) => NetworkGroup(
+    group: GroupInfo.fromJson(j),
+    levelName: (j['level_name'] as String?) ?? '',
+    below: (j['children'] as int?) ?? 0,
+  );
+}
+
+/// Where the current group stands: its network, the groups above it (nearest
+/// first) and those attached to it. The président joins, leaves and, in an
+/// umbrella group, invites; everyone can look.
+class NetworkInfo {
+  const NetworkInfo({
+    this.networkName,
+    this.levels = const [],
+    this.levelName = '',
+    this.parents = const [],
+    this.children = const [],
+    this.canManage = false,
+    this.canInvite = false,
+    this.invitations = const [],
+  });
+  final String? networkName;
+  final List<String> levels;
+  final String levelName;
+  final List<NetworkGroup> parents;
+  final List<NetworkGroup> children;
+  final bool canManage;
+  final bool canInvite;
+  final List<Invitation> invitations;
+
+  factory NetworkInfo.fromJson(Map<String, dynamic> j) {
+    final net = j['network'] as Map<String, dynamic>?;
+    return NetworkInfo(
+      networkName: net?['name'] as String?,
+      levels: [
+        for (final l in (net?['levels'] as List?) ?? const []) l as String,
+      ],
+      levelName: (j['level_name'] as String?) ?? '',
+      parents: [
+        for (final g in (j['parents'] as List?) ?? const [])
+          NetworkGroup.fromJson(g as Map<String, dynamic>),
+      ],
+      children: [
+        for (final g in (j['children'] as List?) ?? const [])
+          NetworkGroup.fromJson(g as Map<String, dynamic>),
+      ],
+      canManage: j['can_manage'] == true,
+      canInvite: j['can_invite'] == true,
+      invitations: [
+        for (final i in (j['invitations'] as List?) ?? const [])
+          Invitation.fromJson(i as Map<String, dynamic>),
+      ],
+    );
+  }
+}
+
+/// An umbrella group's single-use code ("ABCD-EFGH").
+class Invitation {
+  const Invitation({required this.code, required this.expiresAt});
+  final String code;
+  final DateTime expiresAt;
+
+  factory Invitation.fromJson(Map<String, dynamic> j) => Invitation(
+    code: j['code'] as String,
+    expiresAt: DateTime.parse(j['expires_at'] as String).toLocal(),
+  );
+}
+
+/// Who a code comes from, shown before the président accepts.
+class InvitationPreview {
+  const InvitationPreview({
+    required this.group,
+    this.levelName = '',
+    this.network = '',
+    this.parents = const [],
+  });
+  final GroupInfo group;
+  final String levelName;
+  final String network;
+  final List<String> parents;
+
+  factory InvitationPreview.fromJson(Map<String, dynamic> j) =>
+      InvitationPreview(
+        group: GroupInfo.fromJson(j),
+        levelName: (j['level_name'] as String?) ?? '',
+        network: (j['network'] as String?) ?? '',
+        parents: [
+          for (final p in (j['parents'] as List?) ?? const []) p as String,
+        ],
+      );
+}
+
 abstract class ProfileRepository {
   Future<Me> fetchMe();
   Future<AppSettings> settings();
@@ -185,4 +290,12 @@ abstract class ProfileRepository {
   Future<FaqData> faq();
   Future<List<FaqSuggestion>> myFaqSuggestions();
   Future<void> suggestFaq({required String question, String answer = ''});
+
+  /// The group's network (owner, 2026-11-03).
+  Future<NetworkInfo> network();
+  Future<InvitationPreview> previewInvitation(String code);
+  Future<NetworkInfo> joinNetwork(String code);
+  Future<NetworkInfo> leaveNetwork(String reason);
+  Future<Invitation> createInvitation();
+  Future<void> revokeInvitation(String code);
 }

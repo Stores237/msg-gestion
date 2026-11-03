@@ -258,6 +258,84 @@ class FakeProfileRepository implements ProfileRepository {
     );
   }
 
+  // Networks (build 39): the zone "Zone Nord" invites with ABCD-EFGH.
+  NetworkInfo networkInfo = const NetworkInfo(
+    networkName: 'MGS Cameroun',
+    levels: ['Paroisse', 'Zone paroissiale', 'Diocèse'],
+    levelName: 'Paroisse',
+  );
+  static const zone = NetworkGroup(
+    group: GroupInfo(id: 7, name: 'Zone Nord', initials: 'ZN'),
+    levelName: 'Zone paroissiale',
+  );
+  final joined = <String>[];
+  final left = <String>[];
+  final revoked = <String>[];
+
+  @override
+  Future<NetworkInfo> network() async => networkInfo;
+
+  @override
+  Future<InvitationPreview> previewInvitation(String code) async {
+    if (code.replaceAll('-', '').toUpperCase() != 'ABCDEFGH') {
+      throw ApiException(
+        404,
+        '{"code":"unknown_invitation","detail":"Code d’invitation inconnu."}',
+      );
+    }
+    return InvitationPreview(
+      group: zone.group,
+      levelName: zone.levelName,
+      network: 'MGS Cameroun',
+      parents: const ['Diocèse de Douala'],
+    );
+  }
+
+  NetworkInfo _with({List<NetworkGroup>? parents}) => NetworkInfo(
+    networkName: networkInfo.networkName,
+    levels: networkInfo.levels,
+    levelName: networkInfo.levelName,
+    parents: parents ?? networkInfo.parents,
+    children: networkInfo.children,
+    canManage: networkInfo.canManage,
+    canInvite: networkInfo.canInvite,
+    invitations: networkInfo.invitations,
+  );
+
+  @override
+  Future<NetworkInfo> joinNetwork(String code) async {
+    joined.add(code);
+    return networkInfo = _with(parents: const [zone]);
+  }
+
+  @override
+  Future<NetworkInfo> leaveNetwork(String reason) async {
+    left.add(reason);
+    return networkInfo = _with(parents: const []);
+  }
+
+  @override
+  Future<Invitation> createInvitation() async {
+    final inv = Invitation(
+      code: 'WXYZ-2345',
+      expiresAt: DateTime.now().add(const Duration(days: 14)),
+    );
+    networkInfo = NetworkInfo(
+      networkName: networkInfo.networkName,
+      levels: networkInfo.levels,
+      levelName: networkInfo.levelName,
+      parents: networkInfo.parents,
+      children: networkInfo.children,
+      canManage: networkInfo.canManage,
+      canInvite: networkInfo.canInvite,
+      invitations: [...networkInfo.invitations, inv],
+    );
+    return inv;
+  }
+
+  @override
+  Future<void> revokeInvitation(String code) async => revoked.add(code);
+
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
 

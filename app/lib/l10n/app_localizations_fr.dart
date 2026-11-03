@@ -3202,4 +3202,146 @@ class AppLocalizationsFr extends AppLocalizations {
   String periodRange(String from, String to) {
     return 'Du $from au $to.';
   }
+
+  @override
+  String get groupNetTitle => 'Réseau';
+
+  @override
+  String get groupNetSheetHint => 'Les groupes au-dessus et rattachés';
+
+  @override
+  String get groupNetNone =>
+      'Votre groupe ne fait partie d’aucun réseau. L’équipe Huddle place les groupes dans un réseau (paroisses, zones, diocèses…).';
+
+  @override
+  String groupNetIn(String network, String level) {
+    return 'Réseau $network · votre groupe : $level.';
+  }
+
+  @override
+  String get groupNetAbove => 'Rattaché à';
+
+  @override
+  String get groupNetNoParent => 'Votre groupe n’est rattaché à aucun groupe.';
+
+  @override
+  String get groupNetJoinWithCode => 'Rejoindre avec un code';
+
+  @override
+  String get groupNetJoinHint =>
+      'Saisissez le code d’invitation reçu du groupe de niveau supérieur (ex. votre zone).';
+
+  @override
+  String get groupNetCodeLength => 'Le code a 8 caractères, ex. ABCD-EFGH.';
+
+  @override
+  String groupNetJoinAskTitle(String name) {
+    return 'Rattacher votre groupe à $name ?';
+  }
+
+  @override
+  String groupNetUnder(String chain) {
+    return 'Lui-même rattaché à $chain';
+  }
+
+  @override
+  String get groupNetJoinAskBody =>
+      'Ce groupe pourra informer le vôtre (annonces, événements). Il ne décide pas pour votre groupe et ne voit que ce que vous choisirez de partager. Vous pourrez vous détacher à tout moment.';
+
+  @override
+  String get groupNetJoin => 'Rattacher';
+
+  @override
+  String groupNetJoined(String name) {
+    return 'Votre groupe est rattaché à $name.';
+  }
+
+  @override
+  String groupNetLeave(String name) {
+    return 'Se détacher de $name';
+  }
+
+  @override
+  String get groupNetLeaveBody =>
+      'Les présidents des deux groupes seront prévenus. Pour revenir, il faudra un nouveau code d’invitation.';
+
+  @override
+  String get groupNetLeaveReason => 'Indiquez le motif.';
+
+  @override
+  String get groupNetLeaveConfirm => 'Se détacher';
+
+  @override
+  String groupNetLeft(String name) {
+    return 'Votre groupe n’est plus rattaché à $name.';
+  }
+
+  @override
+  String groupNetBelow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groupes rattachés',
+      one: '1 groupe rattaché',
+      zero: 'Groupes rattachés',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetNoChildren => 'Aucun groupe rattaché pour l’instant.';
+
+  @override
+  String groupNetGroupsBelow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groupes en dessous',
+      one: '1 groupe en dessous',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetInvite => 'Inviter un groupe';
+
+  @override
+  String get groupNetInviteAbout =>
+      'Un code par groupe invité, valable 14 jours, une seule fois. Son président le saisit dans Réseau → Rejoindre avec un code.';
+
+  @override
+  String get groupNetInviteTitle => 'Code d’invitation';
+
+  @override
+  String groupNetInviteHint(String date) {
+    return 'Envoyez ce code au président du groupe à inviter. Valable jusqu’au $date, une seule fois.';
+  }
+
+  @override
+  String get groupNetPendingCodes => 'Codes en attente';
+
+  @override
+  String groupNetCodeUntil(String date) {
+    return 'Valable jusqu’au $date';
+  }
+
+  @override
+  String get groupNetRevoke => 'Annuler ce code';
+
+  @override
+  String get groupNetCodeCopied => 'Code copié.';
+
+  @override
+  String get groupNetCodeRevoked => 'Code annulé : il ne marche plus.';
+
+  @override
+  String get groupNetUnknownCode =>
+      'Code d’invitation inconnu. Vérifiez-le auprès du groupe qui vous invite.';
+
+  @override
+  String get groupNetAbout =>
+      'Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux. Ce que chaque groupe partage avec son réseau se réglera bientôt ici.';
+
+  @override
+  String get copy => 'Copier';
 }

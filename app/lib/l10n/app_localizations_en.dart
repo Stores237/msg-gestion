@@ -3156,4 +3156,146 @@ class AppLocalizationsEn extends AppLocalizations {
   String periodRange(String from, String to) {
     return 'From $from to $to.';
   }
+
+  @override
+  String get groupNetTitle => 'Network';
+
+  @override
+  String get groupNetSheetHint => 'The groups above and attached';
+
+  @override
+  String get groupNetNone =>
+      'Your group isn’t part of a network. The Huddle team places groups in a network (parishes, zones, dioceses…).';
+
+  @override
+  String groupNetIn(String network, String level) {
+    return 'Network $network · your group: $level.';
+  }
+
+  @override
+  String get groupNetAbove => 'Attached to';
+
+  @override
+  String get groupNetNoParent => 'Your group isn’t attached to any group.';
+
+  @override
+  String get groupNetJoinWithCode => 'Join with a code';
+
+  @override
+  String get groupNetJoinHint =>
+      'Type the invitation code you received from the higher-level group (e.g. your zone).';
+
+  @override
+  String get groupNetCodeLength => 'The code has 8 characters, e.g. ABCD-EFGH.';
+
+  @override
+  String groupNetJoinAskTitle(String name) {
+    return 'Attach your group to $name?';
+  }
+
+  @override
+  String groupNetUnder(String chain) {
+    return 'Itself attached to $chain';
+  }
+
+  @override
+  String get groupNetJoinAskBody =>
+      'This group will be able to inform yours (announcements, events). It doesn’t decide for your group and only sees what you choose to share. You can detach at any time.';
+
+  @override
+  String get groupNetJoin => 'Attach';
+
+  @override
+  String groupNetJoined(String name) {
+    return 'Your group is attached to $name.';
+  }
+
+  @override
+  String groupNetLeave(String name) {
+    return 'Detach from $name';
+  }
+
+  @override
+  String get groupNetLeaveBody =>
+      'Both groups’ presidents will be told. To come back, you’ll need a new invitation code.';
+
+  @override
+  String get groupNetLeaveReason => 'Give the reason.';
+
+  @override
+  String get groupNetLeaveConfirm => 'Detach';
+
+  @override
+  String groupNetLeft(String name) {
+    return 'Your group is no longer attached to $name.';
+  }
+
+  @override
+  String groupNetBelow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attached groups',
+      one: '1 attached group',
+      zero: 'Attached groups',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetNoChildren => 'No attached group yet.';
+
+  @override
+  String groupNetGroupsBelow(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groups below',
+      one: '1 group below',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get groupNetInvite => 'Invite a group';
+
+  @override
+  String get groupNetInviteAbout =>
+      'One code per invited group, valid 14 days, single use. Its president types it in Network → Join with a code.';
+
+  @override
+  String get groupNetInviteTitle => 'Invitation code';
+
+  @override
+  String groupNetInviteHint(String date) {
+    return 'Send this code to the president of the group to invite. Valid until $date, single use.';
+  }
+
+  @override
+  String get groupNetPendingCodes => 'Pending codes';
+
+  @override
+  String groupNetCodeUntil(String date) {
+    return 'Valid until $date';
+  }
+
+  @override
+  String get groupNetRevoke => 'Cancel this code';
+
+  @override
+  String get groupNetCodeCopied => 'Code copied.';
+
+  @override
+  String get groupNetCodeRevoked => 'Code cancelled: it no longer works.';
+
+  @override
+  String get groupNetUnknownCode =>
+      'Unknown invitation code. Check it with the group inviting you.';
+
+  @override
+  String get groupNetAbout =>
+      'A higher group informs the groups attached to it; it doesn’t decide for them. What each group shares with its network will be set here soon.';
+
+  @override
+  String get copy => 'Copy';
 }

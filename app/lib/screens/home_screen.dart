@@ -124,10 +124,8 @@ class HomeScreen extends StatelessWidget {
               context,
             ).push(MaterialPageRoute(builder: (_) => AccountScreen(me: me))),
             group: me.group,
-            onGroupTap:
-                me.groups.length > 1 || me.can('group.profile', 'change')
-                ? () => showGroupSheet(context, me)
-                : null,
+            // Everyone: switch group, see its network (owner, 2026-11-03).
+            onGroupTap: () => showGroupSheet(context, me),
           ),
         ),
         const Padding(

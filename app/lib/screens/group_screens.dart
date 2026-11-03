@@ -11,6 +11,7 @@ import '../widgets/group_logo.dart';
 import '../widgets/huddle_logo.dart';
 import '../widgets/my_photo.dart' show pickPhoto;
 import '../widgets/ui.dart';
+import 'network_screen.dart';
 import 'splash_screen.dart';
 
 /// Huddle, like Slack (owner, 2026-11-02): someone in several groups picks
@@ -112,6 +113,21 @@ Future<void> showGroupSheet(BuildContext context, Me me) async {
                   : null,
               onTap: () => Navigator.of(context).pop(g.id),
             ),
+          ListTile(
+            key: const Key('open-network'),
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.hub_outlined),
+            title: Text(l.groupNetTitle),
+            subtitle: Text(
+              me.group?.parent != null
+                  ? [
+                      me.group!.levelName,
+                      me.group!.parent!,
+                    ].where((s) => s.isNotEmpty).join(' · ')
+                  : l.groupNetSheetHint,
+            ),
+            onTap: () => Navigator.of(context).pop(-2),
+          ),
           if (canEdit)
             ListTile(
               key: const Key('edit-group'),
@@ -126,6 +142,12 @@ Future<void> showGroupSheet(BuildContext context, Me me) async {
     ),
   );
   if (picked == null || !context.mounted) return;
+  if (picked == -2) {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const NetworkScreen()));
+    return;
+  }
   if (picked == -1) {
     final changed = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => GroupProfileScreen(group: me.group!)),

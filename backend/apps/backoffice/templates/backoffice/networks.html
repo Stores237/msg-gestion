@@ -1,0 +1,51 @@
+{% extends "backoffice/shell.html" %}{% load bo %}
+{% block title %}Réseaux de groupes{% endblock %}
+{% block crumb %}<div class="crumb">Plateforme Huddle · {{ networks|length }} réseau{{ networks|length|pluralize:"x" }}</div>{% endblock %}
+{% block heading %}Réseaux de groupes{% endblock %}
+{% block acts %}{% if 'backoffice.groups:change' in p %}<button class="btn btn-primary" type="button" onclick="document.getElementById('dlg-net-new').showModal()">{% icon 'plus' %}Nouveau réseau</button>{% endif %}{% endblock %}
+{% block body %}
+<div class="notice">{% icon 'info' %}<span>Un réseau relie des groupes par niveaux, comme les groupes de paroisse, les zones paroissiales et les diocèses. Placez chaque groupe à son niveau ici. Pour le rattacher, créez un <b>code d’invitation</b> pour le groupe de niveau supérieur : le président du groupe invité le saisit dans l’application (Accueil → nom du groupe → Réseau). Un groupe supérieur <b>informe</b> les groupes rattachés ; il ne décide pas pour eux.</span></div>
+
+{% for n in networks %}
+<section class="panel" style="margin-top:24px" id="network-{{ n.pk }}">
+  <div class="panel-h"><h2>{{ n.name }}</h2><span class="muted" style="font-size:13px">{% for i, label in n.levels %}{{ i }}. {{ label }}{% if not forloop.last %} · {% endif %}{% endfor %}</span>
+    {% if 'backoffice.groups:change' in p %}<button class="btn btn-secondary btn-sm" type="button" onclick="document.getElementById('dlg-net-{{ n.pk }}').showModal()">{% icon 'pencil' 16 %}Modifier</button>{% endif %}</div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Groupe</th><th>Niveau</th><th>Codes d’invitation</th><th></th></tr></thead><tbody>
+    {% for g in n.rows %}<tr id="net-group-{{ g.pk }}"><td><span style="display:inline-flex;align-items:center;gap:8px;padding-left:{{ g.indent }}px">{% if g.depth %}<span class="muted" aria-hidden="true">└</span>{% endif %}{% group_logo g 22 %}<b>{{ g.name }}</b></span>{% if g.parent and g.parent.network_id != n.pk %}<br><small class="muted">rattaché à {{ g.parent.name }}</small>{% endif %}</td>
+      <td>{{ g.level_name }}</td>
+      <td>{% for inv in g.invites %}<span style="display:inline-flex;gap:6px;align-items:center;margin:2px 8px 2px 0"><code class="tnum">{{ inv.pretty }}</code><small class="muted">jusqu’au {{ inv.expires_at|date:"d/m" }}</small>{% if 'backoffice.groups:change' in p %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="revoke"><input type="hidden" name="id" value="{{ inv.pk }}"><button class="btn btn-ghost btn-sm" title="Annuler ce code" aria-label="Annuler le code {{ inv.pretty }}">{% icon 'x' 14 %}</button></form>{% endif %}</span>{% empty %}{% if g.level > 1 %}<span class="muted">—</span>{% endif %}{% endfor %}</td>
+      <td class="amt">{% if 'backoffice.groups:change' in p %}<span style="display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        {% if g.level > 1 %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="invite"><input type="hidden" name="group" value="{{ g.pk }}"><button class="btn btn-secondary btn-sm">{% icon 'ticket' 16 %}Code d’invitation</button></form>{% endif %}
+        {% if g.parent %}<button class="btn btn-ghost btn-sm" type="button" style="color:var(--red-500)" onclick="document.getElementById('dlg-detach-{{ g.pk }}').showModal()">{% icon 'unlink' 16 %}Détacher</button>{% endif %}</span>{% endif %}</td></tr>
+    {% empty %}<tr class="empty-row"><td colspan="4">Aucun groupe dans ce réseau. Placez-en un ci-dessous.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% if 'backoffice.groups:change' in p %}
+<dialog id="dlg-net-{{ n.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%">{% include "backoffice/_network_form.html" with n=n %}</dialog>
+{% for g in n.rows %}{% if g.parent %}
+<dialog id="dlg-detach-{{ g.pk }}" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%"><form method="post" style="display:flex;flex-direction:column;gap:12px">{% csrf_token %}<input type="hidden" name="action" value="detach"><input type="hidden" name="group" value="{{ g.pk }}">
+  <h3>Détacher {{ g.name }} de {{ g.parent.name }}</h3>
+  <div class="notice warn">{% icon 'shield-alert' %}<span>Les présidents des deux groupes sont prévenus. Pour le rattacher à nouveau, il faudra un nouveau code d’invitation.</span></div>
+  <label class="fld"><span class="fld-l">Motif<em> *</em></span><span class="fld-box multi"><textarea name="reason" rows="3" required minlength="3" maxlength="300"></textarea></span></label>
+  <div class="acts" style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn btn-secondary" onclick="this.closest('dialog').close()">Annuler</button><button class="btn btn-danger">Détacher</button></div>
+</form></dialog>
+{% endif %}{% endfor %}
+{% endif %}
+{% empty %}
+<section class="panel" style="margin-top:24px"><div class="panel-b"><span class="muted">Aucun réseau. Créez-en un avec « Nouveau réseau », par exemple « Mouvement Garde Suisse · Cameroun », avec ses niveaux : Paroisse, Zone paroissiale, Diocèse, National.</span></div></section>
+{% endfor %}
+
+{% if 'backoffice.groups:change' in p %}
+<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Placer un groupe</h2></div><div class="panel-b">
+  <form method="post" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">{% csrf_token %}<input type="hidden" name="action" value="place">
+    <label class="fld" style="flex:2;min-width:200px"><span class="fld-l">Groupe</span><span class="fld-box"><select name="group" required>{% for g in all_groups %}<option value="{{ g.pk }}">{{ g.name }}{% if g.network %} · {{ g.network.name }} · {{ g.level_name }}{% endif %}</option>{% endfor %}</select></span></label>
+    <label class="fld" style="flex:2;min-width:200px"><span class="fld-l">Réseau</span><span class="fld-box"><select name="network"><option value="">Hors réseau</option>{% for n in networks %}<option value="{{ n.pk }}">{{ n.name }}</option>{% endfor %}</select></span></label>
+    <label class="fld" style="flex:1;min-width:140px"><span class="fld-l">Niveau</span><span class="fld-box"><select name="level">{% if networks|length == 1 %}{% for i, label in networks.0.levels %}<option value="{{ i }}">{{ i }} · {{ label }}</option>{% endfor %}{% else %}<option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>{% endif %}</select></span></label>
+    <button class="btn btn-primary">Placer</button>
+  </form>
+  <p class="muted" style="font-size:13px;margin-top:12px">Niveau 1 : le groupe de base (ex. la paroisse). Un groupe de niveau 2 ou plus peut inviter des groupes de niveau inférieur. Un groupe rattaché ne peut changer de réseau qu’après avoir été détaché.</p>
+</div></section>
+{% if outside %}<section class="panel" style="margin-top:24px"><div class="panel-h"><h2>Hors réseau · {{ outside|length }}</h2></div><div class="panel-b" style="display:flex;gap:12px;flex-wrap:wrap">{% for g in outside %}<span style="display:inline-flex;align-items:center;gap:6px">{% group_logo g 20 %}{{ g.name }}</span>{% endfor %}</div></section>{% endif %}
+<dialog id="dlg-net-new" class="dialog" style="border:none;padding:24px;max-width:520px;width:100%">{% include "backoffice/_network_form.html" with n=None %}</dialog>
+{% endif %}
+{% endblock %}

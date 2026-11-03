@@ -1962,5 +1962,112 @@
         "type": "String"
       }
     }
-  }
+  },
+  "groupNetTitle": "Réseau",
+  "groupNetSheetHint": "Les groupes au-dessus et rattachés",
+  "groupNetNone": "Votre groupe ne fait partie d’aucun réseau. L’équipe Huddle place les groupes dans un réseau (paroisses, zones, diocèses…).",
+  "groupNetIn": "Réseau {network} · votre groupe : {level}.",
+  "@groupNetIn": {
+    "placeholders": {
+      "network": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetAbove": "Rattaché à",
+  "groupNetNoParent": "Votre groupe n’est rattaché à aucun groupe.",
+  "groupNetJoinWithCode": "Rejoindre avec un code",
+  "groupNetJoinHint": "Saisissez le code d’invitation reçu du groupe de niveau supérieur (ex. votre zone).",
+  "groupNetCodeLength": "Le code a 8 caractères, ex. ABCD-EFGH.",
+  "groupNetJoinAskTitle": "Rattacher votre groupe à {name} ?",
+  "@groupNetJoinAskTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetUnder": "Lui-même rattaché à {chain}",
+  "@groupNetUnder": {
+    "placeholders": {
+      "chain": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetJoinAskBody": "Ce groupe pourra informer le vôtre (annonces, événements). Il ne décide pas pour votre groupe et ne voit que ce que vous choisirez de partager. Vous pourrez vous détacher à tout moment.",
+  "groupNetJoin": "Rattacher",
+  "groupNetJoined": "Votre groupe est rattaché à {name}.",
+  "@groupNetJoined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetLeave": "Se détacher de {name}",
+  "@groupNetLeave": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetLeaveBody": "Les présidents des deux groupes seront prévenus. Pour revenir, il faudra un nouveau code d’invitation.",
+  "groupNetLeaveReason": "Indiquez le motif.",
+  "groupNetLeaveConfirm": "Se détacher",
+  "groupNetLeft": "Votre groupe n’est plus rattaché à {name}.",
+  "@groupNetLeft": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetBelow": "{count, plural, =0{Groupes rattachés} =1{1 groupe rattaché} other{{count} groupes rattachés}}",
+  "@groupNetBelow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNetNoChildren": "Aucun groupe rattaché pour l’instant.",
+  "groupNetGroupsBelow": "{count, plural, =1{1 groupe en dessous} other{{count} groupes en dessous}}",
+  "@groupNetGroupsBelow": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "groupNetInvite": "Inviter un groupe",
+  "groupNetInviteAbout": "Un code par groupe invité, valable 14 jours, une seule fois. Son président le saisit dans Réseau → Rejoindre avec un code.",
+  "groupNetInviteTitle": "Code d’invitation",
+  "groupNetInviteHint": "Envoyez ce code au président du groupe à inviter. Valable jusqu’au {date}, une seule fois.",
+  "@groupNetInviteHint": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetPendingCodes": "Codes en attente",
+  "groupNetCodeUntil": "Valable jusqu’au {date}",
+  "@groupNetCodeUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "groupNetRevoke": "Annuler ce code",
+  "groupNetCodeCopied": "Code copié.",
+  "groupNetCodeRevoked": "Code annulé : il ne marche plus.",
+  "groupNetUnknownCode": "Code d’invitation inconnu. Vérifiez-le auprès du groupe qui vous invite.",
+  "groupNetAbout": "Un groupe supérieur informe les groupes rattachés ; il ne décide pas pour eux. Ce que chaque groupe partage avec son réseau se réglera bientôt ici.",
+  "copy": "Copier"
 }

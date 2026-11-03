@@ -255,7 +255,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         closed = Membership.all_groups.filter(user=self, status__in=["suspendu", "archive"]).values("group_id")
         return (Group.objects.filter(memberships__user=self, memberships__is_active=True, is_active=True)
-                .exclude(pk__in=closed).order_by("memberships__created_at"))
+                .exclude(pk__in=closed).select_related("network", "parent").order_by("memberships__created_at"))
 
     def tabs(self):
         perms = self.permission_set()
