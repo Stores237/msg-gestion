@@ -243,7 +243,8 @@ def summary(group, request=None, *, manage=False):
 
     net = group.network
     data = {
-        "network": {"name": net.name, "levels": [n for n in (net.level1, net.level2, net.level3, net.level4) if n]} if net else None,
+        "network": {"name": net.name, "levels": [n for n in (net.level1, net.level2, net.level3, net.level4, net.level5, net.level6) if n]}
+        if net else None,
         "level": group.level, "level_name": group.level_name,
         "parents": [item(g) for g in group.ancestors()],
         "children": [{**item(c), "children": len(c.descendants()),
@@ -263,6 +264,10 @@ def summary(group, request=None, *, manage=False):
     data["sharing_twins"] = settings_of(group, "twins") if linked else None
     data["twin_invitations"] = ([{"code": i.pretty, "expires_at": i.expires_at.isoformat()}
                                  for i in pending_invitations(group, GroupInvitation.Kind.TWIN)] if manage else [])
+    if manage:  # build 48: visibility requests waiting for the président
+        from .models import ShareRequest
+
+        data["requests_waiting"] = ShareRequest.objects.filter(target=group, status=ShareRequest.Status.PENDING).count()
     if manage and can_invite(group):
         data["invitations"] = [{"code": i.pretty, "expires_at": i.expires_at.isoformat()} for i in pending_invitations(group)]
     return data
@@ -276,17 +281,113 @@ def upper_ids(group_id):
     return [a.pk for a in g.ancestors() if a.is_active] if g else []
 
 
-def visible(model, group_id, **extra):
-    """`model` rows of this group plus those its upper groups sent down."""
-    from django.db.models import Q
+def visible(model, group_id, viewer=None, **extra):
+    """`model` rows of this group plus those other groups sent it (build 41;
+    chosen groups and audience, build 48). Without a reach list a row goes to
+    every group below its sender; with one, only to the groups listed. A row
+    for the bureau only is left out for a viewer outside this group's bureau
+    (no viewer: jobs, which pick their people themselves)."""
+    from django.db.models import Exists, OuterRef, Q
 
     if group_id is None:  # no group chosen (one group on the platform): as before
         return model.objects.all()
+    through = model.reach.through
+    fk = f"{model._meta.model_name}_id"
+    listed = Exists(through.objects.filter(**{fk: OuterRef("pk")}))
+    to_us = Exists(through.objects.filter(**{fk: OuterRef("pk"), "group_id": group_id}))
     cond = Q(group_id=group_id)
     up = upper_ids(group_id)
-    if up:
-        cond |= Q(group_id__in=up, cascade=True, **extra)
-    return model.all_groups.filter(cond)
+    sent = (Q(group_id__in=up) & ~listed) | to_us if up else to_us
+    sent = Q(cascade=True, **extra) & sent & ~Q(group_id=group_id)
+    if viewer is not None and not is_bureau(viewer, group_id):
+        sent &= ~Q(reach_audience="bureau")
+    return model.all_groups.filter(cond | sent)
+
+
+def is_bureau(user, group_id):
+    """Holds an active bureau role in this group (build 48: posts for the
+    bureau only)."""
+    from apps.accounts.models import Role, RoleAssignment
+
+    with in_group(group_id):
+        return RoleAssignment.objects.active().filter(user=user, role__group_id=group_id, role__kind=Role.Kind.BUREAU).exists()
+
+
+def reach_people(group, audience="all"):
+    """Who, in `group`, receives a post sent to it: active and on-leave
+    members, or only its bureau."""
+    from apps.accounts.models import Role, RoleAssignment, User
+
+    with in_group(group):
+        people = User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True)
+        if audience == "bureau":
+            ids = RoleAssignment.objects.active().filter(role__group=group, role__kind=Role.Kind.BUREAU).values("user")
+            people = people.filter(pk__in=ids)
+        return list(people)
+
+
+def reach_choices(group):
+    """The groups a post of `group` can go to (build 48), each with how it is
+    linked: below (any depth, nearest first), neighbour, twin."""
+    out, seen = [], {group.pk}
+    depth, frontier = 1, [group.pk]
+    while frontier:
+        kids = list(Group.objects.filter(parent_id__in=frontier, is_active=True).select_related("parent").order_by("name"))
+        for k in kids:
+            if k.pk not in seen:
+                seen.add(k.pk)
+                out.append((k, "below", depth))
+        frontier, depth = [k.pk for k in kids], depth + 1
+    for rel, gs in (("neighbour", neighbours(group)), ("twin", twins(group))):
+        for g in gs:
+            if g.pk not in seen:
+                seen.add(g.pk)
+                out.append((g, rel, 0))
+    return out
+
+
+def reached(obj):
+    """The groups a post sent from `obj.group` reaches."""
+    if not obj.cascade:
+        return []
+    chosen = list(obj.reach.filter(is_active=True))
+    return chosen or obj.group.descendants()
+
+
+def check_reach(group, groups, audience):
+    """The chosen recipients of a post: groups this one can reach. Raises
+    NetworkRule otherwise. Returns the groups."""
+    if audience not in ("all", "bureau"):
+        raise NetworkRule("bad_audience", "Destinataires invalides.")
+    allowed = {g.pk for g, _, _ in reach_choices(group)}
+    if not allowed:
+        raise NetworkRule("no_groups_below", "Aucun groupe n’est lié au vôtre.")
+    if any(g.pk not in allowed for g in groups):
+        raise NetworkRule("not_linked", "Un des groupes choisis n’est pas lié au vôtre.")
+    return groups
+
+
+def reach_summary(obj, request=None):
+    """For the sending group: where its post went."""
+    from .identity import group_identity
+
+    if not obj.cascade:
+        return None
+    chosen = list(obj.reach.all())
+    return {"all_below": not chosen, "audience": obj.reach_audience,
+            "groups": [group_identity(g, request) for g in sorted(chosen, key=lambda g: g.name)]}
+
+
+def send_to(obj, title, body, target, *, kind="announcement"):
+    """Notify the people of every group the post reaches, each in its group."""
+    from .notify import notify
+
+    n = 0
+    for g in reached(obj):
+        people = reach_people(g, obj.reach_audience)
+        with in_group(g):
+            n += notify(people, kind, title, body, target)
+    return n
 
 
 def origin(obj, group_id, request=None):

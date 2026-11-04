@@ -5528,12 +5528,6 @@ abstract class AppLocalizations {
   /// **'Avec {name} et les groupes au-dessus'**
   String groupNetSharingWith(String name);
 
-  /// No description provided for @groupNetSharingAbout.
-  ///
-  /// In fr, this message translates to:
-  /// **'Choisissez ce que les groupes au-dessus du vôtre peuvent voir. Là-haut, chaque partie n’est lue que par ceux dont le rôle la couvre (le trésorier pour les finances…). Rien n’est partagé tant que vous ne l’avez pas choisi.'**
-  String get groupNetSharingAbout;
-
   /// No description provided for @groupNetSharingSaved.
   ///
   /// In fr, this message translates to:
@@ -5543,7 +5537,7 @@ abstract class AppLocalizations {
   /// No description provided for @groupNetNeverShared.
   ///
   /// In fr, this message translates to:
-  /// **'Jamais partagés : numéros de téléphone, codes, contacts des mineurs, pièces jointes, relevés personnels.'**
+  /// **'Numéros de téléphone, codes, contacts des mineurs, relevés personnels, annonces adressées à des membres précis : jamais partagés, quel que soit le choix.'**
   String get groupNetNeverShared;
 
   /// No description provided for @groupNetKindMembers.
@@ -5594,36 +5588,6 @@ abstract class AppLocalizations {
   /// **'Détail'**
   String get groupNetLevelDetail;
 
-  /// No description provided for @groupNetHintMembers.
-  ///
-  /// In fr, this message translates to:
-  /// **'Résumé : le nombre de membres. Détail : + les noms et les rôles.'**
-  String get groupNetHintMembers;
-
-  /// No description provided for @groupNetHintFinances.
-  ///
-  /// In fr, this message translates to:
-  /// **'Résumé : le solde et les totaux de l’année. Détail : + les 30 dernières opérations validées.'**
-  String get groupNetHintFinances;
-
-  /// No description provided for @groupNetHintCalendar.
-  ///
-  /// In fr, this message translates to:
-  /// **'Résumé : le nombre d’événements à 30 jours. Détail : + leurs dates et lieux.'**
-  String get groupNetHintCalendar;
-
-  /// No description provided for @groupNetHintAnnouncements.
-  ///
-  /// In fr, this message translates to:
-  /// **'Détail : vos 10 dernières annonces (pas les convocations).'**
-  String get groupNetHintAnnouncements;
-
-  /// No description provided for @groupNetHintReports.
-  ///
-  /// In fr, this message translates to:
-  /// **'Résumé : le taux de présence sur 3 mois. Détail : + les présences par événement.'**
-  String get groupNetHintReports;
-
   /// No description provided for @groupNetSharesNone.
   ///
   /// In fr, this message translates to:
@@ -5647,12 +5611,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Ce groupe ne partage rien'**
   String get groupNetSharesNothing;
-
-  /// No description provided for @groupNetSharesNothingBody.
-  ///
-  /// In fr, this message translates to:
-  /// **'Son président choisit ce qu’il partage, dans Réseau → Ce que nous partageons.'**
-  String get groupNetSharesNothingBody;
 
   /// No description provided for @groupNetNotYourRole.
   ///
@@ -5731,24 +5689,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Événement de {name}, transmis à votre groupe. Il se modifie et l’appel se fait dans {name}.'**
   String groupNetEventFromAbove(String name);
-
-  /// No description provided for @groupNetSendDown.
-  ///
-  /// In fr, this message translates to:
-  /// **'Aussi pour les groupes rattachés'**
-  String get groupNetSendDown;
-
-  /// No description provided for @groupNetSendDownHint.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{Le groupe rattaché la reçoit aussi, avec une notification.} other{Les {count} groupes rattachés (et ceux en dessous) la reçoivent aussi, avec une notification.}}'**
-  String groupNetSendDownHint(int count);
-
-  /// No description provided for @groupNetSendDownEventHint.
-  ///
-  /// In fr, this message translates to:
-  /// **'{count, plural, =1{Il apparaît aussi dans le calendrier du groupe rattaché.} other{Il apparaît aussi dans le calendrier des {count} groupes rattachés et de ceux en dessous.}}'**
-  String groupNetSendDownEventHint(int count);
 
   /// No description provided for @contingentsTitle.
   ///
@@ -6169,6 +6109,660 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'À compléter (pas encore de président)'**
   String get groupNetWaiting;
+
+  /// No description provided for @reachTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diffuser dans le réseau'**
+  String get reachTitle;
+
+  /// No description provided for @reachNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas diffusé dans le réseau'**
+  String get reachNone;
+
+  /// No description provided for @reachEveryone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les membres'**
+  String get reachEveryone;
+
+  /// No description provided for @reachBureauOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le bureau seulement'**
+  String get reachBureauOnly;
+
+  /// No description provided for @reachGroupsCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 groupe} other{{count} groupes}}'**
+  String reachGroupsCount(int count);
+
+  /// No description provided for @reachNeighbour.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes voisins'**
+  String get reachNeighbour;
+
+  /// No description provided for @reachTwin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupes jumelés'**
+  String get reachTwin;
+
+  /// No description provided for @reachDirect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattachés directement'**
+  String get reachDirect;
+
+  /// No description provided for @reachDeeper.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus bas'**
+  String get reachDeeper;
+
+  /// No description provided for @reachFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get reachFilterAll;
+
+  /// No description provided for @reachFilterBelow.
+  ///
+  /// In fr, this message translates to:
+  /// **'En dessous'**
+  String get reachFilterBelow;
+
+  /// No description provided for @reachFilterNeighbours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voisins'**
+  String get reachFilterNeighbours;
+
+  /// No description provided for @reachFilterTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jumelés'**
+  String get reachFilterTwins;
+
+  /// No description provided for @reachLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les groupes.'**
+  String get reachLoadError;
+
+  /// No description provided for @reachAbout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez les groupes qui la reçoivent : ceux en dessous du vôtre, vos voisins, vos groupes jumelés. Ils la lisent, marquée du nom de votre groupe, sans pouvoir la modifier.'**
+  String get reachAbout;
+
+  /// No description provided for @reachWho.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qui la reçoit'**
+  String get reachWho;
+
+  /// No description provided for @reachWhere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quels groupes'**
+  String get reachWhere;
+
+  /// No description provided for @reachEveryoneHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les membres actifs et en congé des groupes choisis la voient et sont prévenus.'**
+  String get reachEveryoneHint;
+
+  /// No description provided for @reachBureauHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seuls les membres du bureau des groupes choisis la voient et sont prévenus.'**
+  String get reachBureauHint;
+
+  /// No description provided for @reachSearch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher un groupe'**
+  String get reachSearch;
+
+  /// No description provided for @reachNoGroups.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun groupe n’est lié au vôtre.'**
+  String get reachNoGroups;
+
+  /// No description provided for @reachNoMatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun groupe ne correspond.'**
+  String get reachNoMatch;
+
+  /// No description provided for @reachSelectAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout sélectionner'**
+  String get reachSelectAll;
+
+  /// No description provided for @reachUnselectAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout désélectionner'**
+  String get reachUnselectAll;
+
+  /// No description provided for @reachChosenCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun groupe choisi} =1{1 groupe choisi} other{{count} groupes choisis}}'**
+  String reachChosenCount(int count);
+
+  /// No description provided for @reachDontSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ne pas diffuser'**
+  String get reachDontSend;
+
+  /// No description provided for @reachConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{Diffuser à 1 groupe} other{Diffuser à {count} groupes}}'**
+  String reachConfirm(int count);
+
+  /// No description provided for @reachUnder.
+  ///
+  /// In fr, this message translates to:
+  /// **'sous {parent}'**
+  String reachUnder(String parent);
+
+  /// No description provided for @reachAllBelow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les groupes en dessous'**
+  String get reachAllBelow;
+
+  /// No description provided for @reachSentTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Diffusé à : {where}'**
+  String reachSentTo(String where);
+
+  /// No description provided for @shareIncNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien de cette partie n’est visible.'**
+  String get shareIncNone;
+
+  /// No description provided for @shareIncMembersSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nombre de membres, par statut (actifs, en congé…).'**
+  String get shareIncMembersSummary;
+
+  /// No description provided for @shareIncMembersDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'En plus : le nom et les rôles de chaque membre. Jamais les téléphones.'**
+  String get shareIncMembersDetail;
+
+  /// No description provided for @shareIncFinancesSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le solde de la caisse et les totaux d’entrées et de sorties de l’année.'**
+  String get shareIncFinancesSummary;
+
+  /// No description provided for @shareIncFinancesDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'En plus : les 30 dernières opérations validées (date, libellé, catégorie, montant).'**
+  String get shareIncFinancesDetail;
+
+  /// No description provided for @shareIncCalendarSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nombre d’événements des 30 prochains jours.'**
+  String get shareIncCalendarSummary;
+
+  /// No description provided for @shareIncCalendarDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'En plus : le titre, la date et le lieu de chacun.'**
+  String get shareIncCalendarDetail;
+
+  /// No description provided for @shareIncAnnouncementsSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le titre et le texte de vos 10 dernières annonces pour tout le groupe (pas celles adressées à des membres précis).'**
+  String get shareIncAnnouncementsSummary;
+
+  /// No description provided for @shareIncAnnouncementsDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'En plus : leurs photos et fichiers joints.'**
+  String get shareIncAnnouncementsDetail;
+
+  /// No description provided for @shareIncReportsSummary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le nombre d’activités des 3 derniers mois et le taux de présence.'**
+  String get shareIncReportsSummary;
+
+  /// No description provided for @shareIncReportsDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'En plus : présents, absents, excusés et rapport remis, activité par activité.'**
+  String get shareIncReportsDetail;
+
+  /// No description provided for @shareReaderMembers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans l’autre groupe, seuls ceux dont le rôle couvre les membres le lisent.'**
+  String get shareReaderMembers;
+
+  /// No description provided for @shareReaderFinances.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans l’autre groupe, seuls ceux dont le rôle couvre la caisse le lisent.'**
+  String get shareReaderFinances;
+
+  /// No description provided for @shareReaderCalendar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans l’autre groupe, seuls ceux dont le rôle couvre le calendrier le lisent.'**
+  String get shareReaderCalendar;
+
+  /// No description provided for @shareReaderAnnouncements.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans l’autre groupe, seuls ceux dont le rôle couvre les annonces le lisent.'**
+  String get shareReaderAnnouncements;
+
+  /// No description provided for @shareReaderReports.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dans l’autre groupe, seuls ceux dont le rôle couvre les rapports d’activité le lisent.'**
+  String get shareReaderReports;
+
+  /// No description provided for @shareAudienceUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'tous les groupes au-dessus du vôtre'**
+  String get shareAudienceUp;
+
+  /// No description provided for @shareAudienceNeighbours.
+  ///
+  /// In fr, this message translates to:
+  /// **'tous vos groupes voisins'**
+  String get shareAudienceNeighbours;
+
+  /// No description provided for @shareAudienceTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'tous vos groupes jumelés'**
+  String get shareAudienceTwins;
+
+  /// No description provided for @sharingAboutAudience.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez, partie par partie, ce que voient {audience}. Chaque niveau dit exactement ce qui est montré. Rien n’est partagé tant que vous ne l’avez pas choisi ; « Aperçu » montre le résultat avant d’enregistrer.'**
+  String sharingAboutAudience(String audience);
+
+  /// No description provided for @sharingPreview.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu'**
+  String get sharingPreview;
+
+  /// No description provided for @sharingPreviewTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce qu’ils verront'**
+  String get sharingPreviewTitle;
+
+  /// No description provided for @sharingPreviewHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre groupe tel que le verront {audience}, avec les choix de l’écran (pas encore enregistrés).'**
+  String sharingPreviewHint(String audience);
+
+  /// No description provided for @sharingPreviewHidden.
+  ///
+  /// In fr, this message translates to:
+  /// **'Masqué dans l’aperçu : votre rôle ne couvre pas cette partie dans votre groupe.'**
+  String get sharingPreviewHidden;
+
+  /// No description provided for @sharingPreviewEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien ne serait partagé.'**
+  String get sharingPreviewEmpty;
+
+  /// No description provided for @sharingAlwaysPrivate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toujours privé'**
+  String get sharingAlwaysPrivate;
+
+  /// No description provided for @sharingChanged.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifié'**
+  String get sharingChanged;
+
+  /// No description provided for @sharingOnlyPresident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul le président du groupe change ces choix.'**
+  String get sharingOnlyPresident;
+
+  /// No description provided for @sharingWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =1{1 demande de partage attend votre réponse} other{{count} demandes de partage attendent votre réponse}}'**
+  String sharingWaiting(int count);
+
+  /// No description provided for @sgRelationUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattaché à votre groupe'**
+  String get sgRelationUp;
+
+  /// No description provided for @sgRelationNeighbours.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe voisin'**
+  String get sgRelationNeighbours;
+
+  /// No description provided for @sgRelationTwins.
+  ///
+  /// In fr, this message translates to:
+  /// **'Groupe jumelé'**
+  String get sgRelationTwins;
+
+  /// No description provided for @sgVisible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visibles'**
+  String get sgVisible;
+
+  /// No description provided for @sgReserved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservés à d’autres rôles'**
+  String get sgReserved;
+
+  /// No description provided for @sgNotShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non partagés'**
+  String get sgNotShared;
+
+  /// No description provided for @sgFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tout'**
+  String get sgFilterAll;
+
+  /// No description provided for @sgFilterVisible.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visible'**
+  String get sgFilterVisible;
+
+  /// No description provided for @sgFilterReserved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réservé'**
+  String get sgFilterReserved;
+
+  /// No description provided for @sgFilterNotShared.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non partagé'**
+  String get sgFilterNotShared;
+
+  /// No description provided for @sgNoneBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce groupe ne partage pas cette partie avec vous.'**
+  String get sgNoneBody;
+
+  /// No description provided for @sgNothingAskHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Son président choisit ce qu’il partage. Vous pouvez lui demander une partie ci-dessous.'**
+  String get sgNothingAskHint;
+
+  /// No description provided for @sgNothingInFilter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien dans ce filtre.'**
+  String get sgNothingInFilter;
+
+  /// No description provided for @sgAskAccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander l’accès'**
+  String get sgAskAccess;
+
+  /// No description provided for @sgAskDetail.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander le détail'**
+  String get sgAskDetail;
+
+  /// No description provided for @sgAskTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander : {kind}'**
+  String sgAskTitle(String kind);
+
+  /// No description provided for @sgAskBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le président de {group} décide. S’il accepte, ce sera partagé avec {audience}, pas seulement avec vous.'**
+  String sgAskBody(String group, String audience);
+
+  /// No description provided for @sgAskNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message pour le président (facultatif)'**
+  String get sgAskNote;
+
+  /// No description provided for @sgAskSend.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer la demande'**
+  String get sgAskSend;
+
+  /// No description provided for @sgAsked.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande envoyée.'**
+  String get sgAsked;
+
+  /// No description provided for @sgRequestCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande annulée.'**
+  String get sgRequestCancelled;
+
+  /// No description provided for @sgPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandé le {date} ({level}) · en attente'**
+  String sgPending(String level, String date);
+
+  /// No description provided for @sgCancelRequest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annuler la demande'**
+  String get sgCancelRequest;
+
+  /// No description provided for @sgDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dernière demande refusée le {date}.'**
+  String sgDeclined(String date);
+
+  /// No description provided for @srTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demandes de partage'**
+  String get srTitle;
+
+  /// No description provided for @srRowHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce que d’autres groupes vous demandent de partager, et vos demandes.'**
+  String get srRowHint;
+
+  /// No description provided for @srReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reçues'**
+  String get srReceived;
+
+  /// No description provided for @srSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyées'**
+  String get srSent;
+
+  /// No description provided for @srWaiting.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get srWaiting;
+
+  /// No description provided for @srHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déjà traitées'**
+  String get srHistory;
+
+  /// No description provided for @srBy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Par {name} · {date}'**
+  String srBy(String name, String date);
+
+  /// No description provided for @srCurrently.
+  ///
+  /// In fr, this message translates to:
+  /// **'Partagé aujourd’hui : {level}'**
+  String srCurrently(String level);
+
+  /// No description provided for @srAnswerNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse : {note}'**
+  String srAnswerNote(String note);
+
+  /// No description provided for @srAccept.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter'**
+  String get srAccept;
+
+  /// No description provided for @srDecline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser'**
+  String get srDecline;
+
+  /// No description provided for @srAcceptTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accepter la demande ?'**
+  String get srAcceptTitle;
+
+  /// No description provided for @srAcceptBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'« {what} » sera partagé avec {audience}, pas seulement avec ce groupe. Vous pourrez le changer à tout moment dans Ce que nous partageons.'**
+  String srAcceptBody(String what, String audience);
+
+  /// No description provided for @srDeclineTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refuser la demande'**
+  String get srDeclineTitle;
+
+  /// No description provided for @srDeclineNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (facultatif, envoyé au groupe)'**
+  String get srDeclineNote;
+
+  /// No description provided for @srAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande acceptée : c’est partagé.'**
+  String get srAccepted;
+
+  /// No description provided for @srDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demande refusée.'**
+  String get srDeclined;
+
+  /// No description provided for @srStatusPending.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente'**
+  String get srStatusPending;
+
+  /// No description provided for @srStatusAccepted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Acceptée'**
+  String get srStatusAccepted;
+
+  /// No description provided for @srStatusDeclined.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refusée'**
+  String get srStatusDeclined;
+
+  /// No description provided for @srStatusCancelled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Annulée'**
+  String get srStatusCancelled;
+
+  /// No description provided for @srNoneReceived.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande reçue'**
+  String get srNoneReceived;
+
+  /// No description provided for @srNoneReceivedHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand un groupe lié vous demande de partager quelque chose, cela apparaît ici.'**
+  String get srNoneReceivedHint;
+
+  /// No description provided for @srNoneSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune demande envoyée'**
+  String get srNoneSent;
+
+  /// No description provided for @srNoneSentHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ouvrez un groupe lié dans Réseau : « Demander l’accès » sur une partie qu’il ne partage pas.'**
+  String get srNoneSentHint;
+
+  /// No description provided for @srOnlyPresident.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul le président répond aux demandes.'**
+  String get srOnlyPresident;
 }
 
 class _AppLocalizationsDelegate

@@ -178,6 +178,40 @@ class GroupShare(models.Model):
         return f"{self.group} · {self.audience} · {self.kind}: {self.level}"
 
 
+class ShareRequest(models.Model):
+    """A group asks a linked group to share more (owner, 2026-11-04: "how
+    to request for visibilities"). The asked group's président accepts —
+    which changes what it shares with that whole audience — or declines.
+    Nothing changes without them."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "En attente"
+        ACCEPTED = "accepted", "Acceptée"
+        DECLINED = "declined", "Refusée"
+        CANCELLED = "cancelled", "Annulée"
+
+    from_group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="+")
+    target = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="share_requests")
+    audience = models.CharField(max_length=12, choices=GroupShare.Audience.choices)
+    kind = models.CharField(max_length=16)
+    level = models.CharField(max_length=8, choices=GroupShare.Level.choices)
+    note = models.CharField(max_length=300, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    answered_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    answered_at = models.DateTimeField(null=True, blank=True)
+    answer_note = models.CharField(max_length=300, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["from_group", "target", "kind"], condition=models.Q(status="pending"),
+                                               name="one_pending_share_request")]
+
+    def __str__(self):
+        return f"{self.from_group} → {self.target} · {self.kind}: {self.level} ({self.status})"
+
+
 class GroupInvitation(models.Model):
     """An umbrella group invites a group of a lower level to join it
     (owner, 2026-11-03: "joind each group with invitation link"). The code

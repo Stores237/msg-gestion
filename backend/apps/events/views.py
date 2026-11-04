@@ -34,12 +34,31 @@ def _context(user, events):
     return {"mine": _mine(user, events), "viewer": user, "lineups": with_lineup, "duties": duties}
 
 
-def _visible():
-    """This group's events and those sent down from above (build 41)."""
+def _visible(viewer=None):
+    """This group's events and those other groups sent it (builds 41, 48)."""
     from apps.core.groups import current_group_id
     from apps.core.network import visible
 
-    return visible(Event, current_group_id())
+    return visible(Event, current_group_id(), viewer=viewer).prefetch_related("reach")
+
+
+def _tell_reached(event, before):
+    """The people of the groups an event newly reaches (builds 41, 48)."""
+    from apps.core.groups import in_group
+    from apps.core.network import reach_people, reached
+    from apps.core.notify import notify
+
+    if not event.cascade:
+        return 0
+    when = timezone.localtime(event.starts_at).strftime("%d/%m à %H:%M")
+    n = 0
+    for g in reached(event):
+        if g.pk not in before:
+            people = reach_people(g, event.reach_audience)
+            with in_group(g):
+                n += notify(people, "duty", f"Événement de {event.group.name}",
+                            f"{event.title} · {when}", {"type": "event", "id": event.pk})
+    return n
 
 
 def _day_start(d):
@@ -59,7 +78,7 @@ class EventListView(APIView):
         end = parse_date(request.query_params.get("to", "")) or start + timedelta(days=60)
         if end < start or (end - start).days > 400:
             return Response({"detail": "Période invalide.", "code": "bad_range"}, status=400)
-        events = list(_visible().select_related(*EVENT_RELATED, "group").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
+        events = list(_visible(request.user).select_related(*EVENT_RELATED, "group").filter(starts_at__gte=_day_start(start), starts_at__lt=_day_start(end + timedelta(days=1))))
         return Response(EventSerializer(events, many=True, context=_context(request.user, events)).data)
 
     @extend_schema(request=EventSerializer, responses=EventSerializer)
@@ -70,14 +89,8 @@ class EventListView(APIView):
         audit.record("Événement créé", actor=request.user, obj=event, request=request,
                      detail={"chef": event.chef.short_name} if event.chef else None)
         reports.tell_chef(event)
-        if event.cascade:
-            from apps.core.models import Settings
-            from apps.core.network import send_down
-
-            g = Settings.get().group
-            when = timezone.localtime(event.starts_at).strftime("%d/%m à %H:%M")
-            send_down(g, f"Événement de {g.name}", f"{event.title} · {when}", {"type": "event", "id": event.pk}, kind="duty")
-        return Response(EventSerializer(event, context={"viewer": request.user}).data, status=status.HTTP_201_CREATED)
+        _tell_reached(event, [])
+        return Response(EventSerializer(event, context={"viewer": request.user, "request": request}).data, status=status.HTTP_201_CREATED)
 
 
 class EventDetailView(APIView):
@@ -88,7 +101,7 @@ class EventDetailView(APIView):
 
     @extend_schema(responses=EventSerializer)
     def get(self, request, pk):
-        event = get_object_or_404(_visible().select_related(*EVENT_RELATED, "group"), pk=pk)
+        event = get_object_or_404(_visible(request.user).select_related(*EVENT_RELATED, "group"), pk=pk)
         body = dict(EventSerializer(event, context=_context(request.user, [event])).data)
         if request.user.can("calendar.attendance", "view") and body.get("from_group") is None:
             counts = {s: 0 for s in Attendance.Status.values}
@@ -105,9 +118,13 @@ class EventDetailView(APIView):
         if event.has_ended():
             return Response(ENDED, status=409)
         previous_chef = event.chef_id
+        from apps.core.network import reached
+
+        before = {g.pk for g in reached(event)}
         s = EventSerializer(event, data=request.data, partial=True, context={"viewer": request.user})
         s.is_valid(raise_exception=True)
         s.save()
+        _tell_reached(event, before)
         audit.record("Événement modifié", actor=request.user, obj=event, request=request, detail={"champs": sorted(request.data)})
         if event.chef_id and event.chef_id != previous_chef:
             reports.tell_chef(event)
@@ -325,7 +342,7 @@ class MyContingentView(APIView):
 
         from .models import EventContingent
 
-        event = get_object_or_404(_visible(), pk=pk)
+        event = get_object_or_404(_visible(self.request.user), pk=pk)
         return get_object_or_404(EventContingent.objects.select_related("event", "event__group", "group"),
                                  event=event, group_id=current_group_id())
 

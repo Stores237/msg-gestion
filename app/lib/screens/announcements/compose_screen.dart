@@ -7,6 +7,7 @@ import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/announcement.dart';
+import '../../models/network_reach.dart';
 import '../../models/event.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
@@ -15,6 +16,7 @@ import '../../widgets/member_picker.dart';
 import '../../widgets/attachments.dart';
 import '../../widgets/photo_frame.dart';
 import '../../widgets/ui.dart';
+import '../network_reach_picker.dart';
 
 /// A file chosen in the composer, uploaded after the announcement exists.
 class PickedFile {
@@ -43,9 +45,18 @@ class _ComposeScreenState extends State<ComposeScreen> {
   CalendarEvent? _event;
   bool _pinned = false;
 
-  /// Also for the groups attached below (build 41).
-  bool _cascade = false;
-  int get _below => currentUser.value?.group?.below ?? 0;
+  /// Also for groups of the network (build 41); which ones, and whether
+  /// only their bureau (build 48). Null or no group: not sent.
+  NetworkReach? _reach;
+  int get _reachable => currentUser.value?.group?.reach ?? 0;
+  bool get _sendsOut =>
+      (_reach?.groups.isNotEmpty ?? false) && _kind == 0 && _tagged.isEmpty;
+
+  Future<void> _pickReach() async {
+    final r = await pickNetworkReach(context, current: _reach);
+    if (r != null && mounted) setState(() => _reach = r);
+  }
+
   bool _busy = false;
   bool _eventMissing = false;
   final List<PickedFile> _files = [];
@@ -260,7 +271,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
               eventId: eventId,
               pinned: _pinned,
               tagged: [for (final r in _tagged) r.id],
-              cascade: _cascade && _kind == 0 && _tagged.isEmpty,
+              cascade: _sendsOut,
+              reach: _sendsOut ? _reach : null,
             );
       for (final f in [
         ..._files,
@@ -483,17 +495,19 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           onTap: _pickTagged,
                         ),
                         if (!_editing &&
-                            _below > 0 &&
+                            _reachable > 0 &&
                             _kind == 0 &&
                             _tagged.isEmpty)
                           ListRow(
-                            title: Text(l.groupNetSendDown),
-                            subtitle: Text(l.groupNetSendDownHint(_below)),
-                            trailing: Switch(
-                              key: const Key('a-cascade'),
-                              value: _cascade,
-                              onChanged: (v) => setState(() => _cascade = v),
+                            key: const Key('a-cascade'),
+                            lead: IconChip(
+                              Icons.hub_outlined,
+                              tone: _sendsOut ? Tone.green : Tone.neutral,
                             ),
+                            title: Text(l.reachTitle),
+                            subtitle: Text(reachSummary(l, _reach)),
+                            chevron: true,
+                            onTap: _pickReach,
                           ),
                         if (!_editing)
                           ListRow(
@@ -506,6 +520,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
                           ),
                       ],
                     ),
+                    if (_sendsOut) ...[
+                      const SizedBox(height: 12),
+                      ReachChips(groups: _reach!.groups),
+                    ],
                     if (_tagged.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       Wrap(

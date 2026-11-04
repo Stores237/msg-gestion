@@ -1,4 +1,5 @@
 import '../../models/me.dart';
+import '../../models/network_reach.dart';
 
 /// (slug, name) of one of the group's activity types or dress codes.
 typedef NamedItem = (String, String);
@@ -207,7 +208,11 @@ class NetworkInfo {
     this.sharingNeighbours,
     this.sharingTwins,
     this.twinInvitations = const [],
+    this.requestsWaiting = 0,
   });
+
+  /// Visibility requests waiting for the président (build 48).
+  final int requestsWaiting;
 
   /// Groups under the same parent, and twinned groups (build 43), each
   /// with what it shares with this group.
@@ -278,6 +283,7 @@ class NetworkInfo {
         for (final i in (j['twin_invitations'] as List?) ?? const [])
           Invitation.fromJson(i as Map<String, dynamic>),
       ],
+      requestsWaiting: (j['requests_waiting'] as int?) ?? 0,
     );
   }
 }
@@ -325,24 +331,42 @@ class SharedKind {
   final Map<String, dynamic>? data;
 }
 
-/// A group below, as far as it shares and the viewer may read.
+/// A linked group, as far as it shares and the viewer may read.
 class SharedGroup {
   const SharedGroup({
     required this.group,
     this.levelName = '',
     this.parent,
+    this.relation = 'up',
     this.shared = const {},
+    this.kinds = const [],
   });
   final GroupInfo group;
   final String levelName;
   final String? parent;
+
+  /// How the viewer's group sees it: up (it is below), neighbours, twins.
+  final String relation;
   final Map<String, SharedKind> shared;
+
+  /// Every kind, shared or not (build 48), for the filters and requests.
+  final List<KindStatus> kinds;
 
   factory SharedGroup.fromJson(Map<String, dynamic> j) => SharedGroup(
     group: GroupInfo.fromJson(j),
     levelName: (j['level_name'] as String?) ?? '',
     parent: j['parent'] as String?,
-    shared: ((j['shared'] as Map<String, dynamic>?) ?? const {}).map(
+    relation: (j['relation'] as String?) ?? 'up',
+    shared: sharedKinds(j['shared']),
+    kinds: [
+      for (final k in (j['kinds'] as List?) ?? const [])
+        KindStatus.fromJson(k as Map<String, dynamic>),
+    ],
+  );
+}
+
+Map<String, SharedKind> sharedKinds(Object? m) =>
+    ((m as Map<String, dynamic>?) ?? const {}).map(
       (k, v) => MapEntry(
         k,
         SharedKind(
@@ -351,7 +375,131 @@ class SharedGroup {
           data: v['data'] as Map<String, dynamic>?,
         ),
       ),
-    ),
+    );
+
+/// One kind of a linked group, as the viewer stands with it (build 48).
+class KindStatus {
+  const KindStatus({
+    required this.kind,
+    this.level = 'none',
+    this.state = 'none',
+    this.levels = const [],
+    this.data,
+    this.request,
+    this.lastAnswer,
+    this.canRequest = false,
+    this.nextLevel,
+  });
+  final String kind;
+  final String level;
+
+  /// shared (readable here) | hidden (shared, for other roles) | none
+  final String state;
+
+  /// The levels this kind offers (summary, detail).
+  final List<String> levels;
+  final Map<String, dynamic>? data;
+
+  /// This group's request waiting for an answer, and the last answered one.
+  final ShareRequestInfo? request;
+  final ShareRequestInfo? lastAnswer;
+  final bool canRequest;
+  final String? nextLevel;
+
+  factory KindStatus.fromJson(Map<String, dynamic> j) => KindStatus(
+    kind: j['kind'] as String,
+    level: (j['level'] as String?) ?? 'none',
+    state: (j['state'] as String?) ?? 'none',
+    levels: [for (final l in (j['levels'] as List?) ?? const []) l as String],
+    data: j['data'] as Map<String, dynamic>?,
+    request: j['request'] == null
+        ? null
+        : ShareRequestInfo.fromJson(j['request'] as Map<String, dynamic>),
+    lastAnswer: j['last_answer'] == null
+        ? null
+        : ShareRequestInfo.fromJson(j['last_answer'] as Map<String, dynamic>),
+    canRequest: j['can_request'] == true,
+    nextLevel: j['next_level'] as String?,
+  );
+}
+
+/// A group asking another to share more (build 48).
+class ShareRequestInfo {
+  const ShareRequestInfo({
+    required this.id,
+    required this.kind,
+    required this.level,
+    required this.fromGroup,
+    required this.target,
+    required this.createdAt,
+    this.audience = 'up',
+    this.note = '',
+    this.status = 'pending',
+    this.by = '',
+    this.answeredAt,
+    this.answerNote = '',
+    this.current,
+  });
+  final int id;
+  final String kind;
+  final String level;
+  final String audience;
+  final String note;
+
+  /// pending | accepted | declined | cancelled
+  final String status;
+  final GroupInfo fromGroup;
+  final GroupInfo target;
+  final String by;
+  final DateTime createdAt;
+  final DateTime? answeredAt;
+  final String answerNote;
+
+  /// What the asked group shares now (pending requests only).
+  final String? current;
+
+  bool get pending => status == 'pending';
+
+  factory ShareRequestInfo.fromJson(Map<String, dynamic> j) => ShareRequestInfo(
+    id: j['id'] as int,
+    kind: j['kind'] as String,
+    level: j['level'] as String,
+    audience: (j['audience'] as String?) ?? 'up',
+    note: (j['note'] as String?) ?? '',
+    status: (j['status'] as String?) ?? 'pending',
+    fromGroup: GroupInfo.fromJson(j['from_group'] as Map<String, dynamic>),
+    target: GroupInfo.fromJson(j['target'] as Map<String, dynamic>),
+    by: (j['by'] as String?) ?? '',
+    createdAt: DateTime.parse(j['created_at'] as String).toLocal(),
+    answeredAt: j['answered_at'] == null
+        ? null
+        : DateTime.parse(j['answered_at'] as String).toLocal(),
+    answerNote: (j['answer_note'] as String?) ?? '',
+    current: j['current'] as String?,
+  );
+}
+
+/// Requests this group received (the président answers) and sent.
+class ShareRequests {
+  const ShareRequests({
+    this.canAnswer = false,
+    this.incoming = const [],
+    this.outgoing = const [],
+  });
+  final bool canAnswer;
+  final List<ShareRequestInfo> incoming;
+  final List<ShareRequestInfo> outgoing;
+
+  factory ShareRequests.fromJson(Map<String, dynamic> j) => ShareRequests(
+    canAnswer: j['can_answer'] == true,
+    incoming: [
+      for (final r in (j['incoming'] as List?) ?? const [])
+        ShareRequestInfo.fromJson(r as Map<String, dynamic>),
+    ],
+    outgoing: [
+      for (final r in (j['outgoing'] as List?) ?? const [])
+        ShareRequestInfo.fromJson(r as Map<String, dynamic>),
+    ],
   );
 }
 
@@ -439,4 +587,21 @@ abstract class ProfileRepository {
     String audience = 'up',
   });
   Future<SharedGroup> sharedGroup(int id);
+
+  /// Build 48: this group as others would see it with [values] (not saved).
+  Future<Map<String, SharedKind>> previewSharing(Map<String, String> values);
+
+  /// Ask group [groupId] to share [kind] at [level].
+  Future<void> askShare(
+    int groupId, {
+    required String kind,
+    required String level,
+    String note = '',
+  });
+  Future<ShareRequests> shareRequests();
+  Future<void> answerShareRequest(int id, {required bool accept, String note});
+  Future<void> cancelShareRequest(int id);
+
+  /// The groups a post or an event can go to.
+  Future<List<ReachGroup>> recipients();
 }

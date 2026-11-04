@@ -484,9 +484,119 @@ class NetworkGroupView(_NetworkBase):
         rel = relation(group, target) if target is not None else None
         if rel is None:
             return Response({"detail": "Ce groupe n’est pas lié au vôtre.", "code": "not_linked"}, status=404)
+        from .sharing import kinds_view
+
         return Response({**group_identity(target, request), "level_name": target.level_name,
                          "parent": target.parent.name if target.parent_id else None, "relation": rel,
-                         "shared": shared_view(target, request.user, audience=rel)})
+                         "shared": shared_view(target, request.user, audience=rel, request=request),
+                         # Build 48: every kind, visible or not, and what can be asked.
+                         "kinds": kinds_view(group, target, request.user, rel, request)})
+
+
+class NetworkShareAskView(_NetworkBase):
+    """POST {kind, level, note} — ask group <pk> to share more (build 48)."""
+
+    throttle_scope = "network_code"
+
+    def post(self, request, pk):
+        from .models import Group
+        from .sharing import SharingRule, ask, kinds_view, request_row
+
+        group, _ = self._ctx(request)
+        target = Group.objects.filter(pk=pk, is_active=True).first()
+        if target is None:
+            return Response({"detail": "Groupe introuvable.", "code": "not_found"}, status=404)
+        try:
+            r = ask(group, target, str(request.data.get("kind") or ""), str(request.data.get("level") or ""),
+                    by=request.user, note=request.data.get("note") or "", request=request)
+        except SharingRule as e:
+            return self._refuse(request, group, "Demande de partage refusée", e)
+        return Response({"request": request_row(r, request),
+                         "kinds": kinds_view(group, target, request.user, r.audience, request)}, status=201)
+
+
+class NetworkShareRequestsView(_NetworkBase):
+    """GET the requests this group received (président answers them) and
+    those it sent (build 48)."""
+
+    def get(self, request):
+        from .models import ShareRequest
+        from .sharing import request_row
+
+        group, manage = self._ctx(request)
+        sel = ("from_group", "target", "created_by")
+        incoming = ShareRequest.objects.filter(target=group).select_related(*sel)
+        outgoing = ShareRequest.objects.filter(from_group=group).select_related(*sel)
+        return Response({"can_answer": manage,
+                         "incoming": [request_row(r, request) for r in incoming[:50]],
+                         "outgoing": [request_row(r, request) for r in outgoing[:50]]})
+
+
+class NetworkShareRequestView(_NetworkBase):
+    """POST {accept, note} — the président answers a request to this group;
+    DELETE — the asker (or their président) withdraws it."""
+
+    def _get(self, pk):
+        from .models import ShareRequest
+
+        return ShareRequest.objects.select_related("from_group", "target", "created_by").filter(pk=pk).first()
+
+    def post(self, request, pk):
+        from .sharing import SharingRule, answer, request_row
+
+        group, manage = self._ctx(request)
+        r = self._get(pk)
+        if r is None or r.target_id != group.pk:
+            return Response({"detail": "Demande introuvable.", "code": "not_found"}, status=404)
+        if not manage:
+            return self._forbidden()
+        try:
+            answer(r, bool(request.data.get("accept")), by=request.user, note=request.data.get("note") or "", request=request)
+        except SharingRule as e:
+            return self._refuse(request, group, "Réponse à une demande de partage refusée", e)
+        return Response(request_row(r, request))
+
+    def delete(self, request, pk):
+        from .sharing import SharingRule, cancel
+
+        group, manage = self._ctx(request)
+        r = self._get(pk)
+        if r is None or r.from_group_id != group.pk:
+            return Response({"detail": "Demande introuvable.", "code": "not_found"}, status=404)
+        if not (manage or r.created_by_id == request.user.pk):
+            return Response({"detail": "Seul l’auteur ou le président peut l’annuler.", "code": "forbidden"}, status=403)
+        try:
+            cancel(r, by=request.user, request=request)
+        except SharingRule as e:
+            return Response({"detail": e.message, "code": e.code}, status=e.status)
+        return Response(status=204)
+
+
+class NetworkSharingPreviewView(_NetworkBase):
+    """POST {"members": "summary", …} — this group as the chosen audience
+    would see it with these settings (build 48), before saving."""
+
+    def post(self, request):
+        from .sharing import preview
+
+        group, _ = self._ctx(request)
+        values = request.data if isinstance(request.data, dict) else {}
+        return Response({"shared": preview(group, request.user, values, request)})
+
+
+class NetworkRecipientsView(_NetworkBase):
+    """GET the groups a post of this group can go to (build 48): below at
+    any depth, neighbours, twins — for the "Diffuser dans le réseau" picker."""
+
+    def get(self, request):
+        from .identity import group_identity
+        from .network import reach_choices
+
+        group, _ = self._ctx(request)
+        rows = [{**group_identity(g, request), "level_name": g.level_name, "relation": rel, "depth": depth,
+                 "parent": g.parent.name if g.parent_id else None, "parent_id": g.parent_id}
+                for g, rel, depth in reach_choices(group)]
+        return Response({"groups": rows, "children": sum(1 for r in rows if r["relation"] == "below" and r["depth"] == 1)})
 
 
 class NetworkTwinJoinView(_NetworkBase):

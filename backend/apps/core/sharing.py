@@ -7,7 +7,11 @@ reads the finances, its secretary the members…), so sharing upward never
 shows more than the umbrella's own officers handle.
 
 Never shared, whatever the setting: phone numbers, PINs, minors' contacts,
-attachments, members' personal statements.
+members' personal statements. Announcements' photos and files only at
+"detail" (build 48; until then "detail" was the text, now "summary").
+
+A group may ask a linked group to share more (build 48): the asked group's
+président accepts — for that whole audience — or declines.
 """
 
 from datetime import timedelta
@@ -26,7 +30,7 @@ KINDS = {
     "members": ((SUMMARY, DETAIL), ("members.profile", "view")),
     "finances": ((SUMMARY, DETAIL), ("finances.cashbook", "view")),
     "calendar": ((SUMMARY, DETAIL), ("calendar.events", "view")),
-    "announcements": ((DETAIL,), ("announcements.posts", "view")),
+    "announcements": ((SUMMARY, DETAIL), ("announcements.posts", "view")),
     "reports": ((SUMMARY, DETAIL), ("calendar.reports", "view")),
 }
 LABELS = {"members": "Membres", "finances": "Finances", "calendar": "Calendrier",
@@ -78,7 +82,7 @@ def save_settings(group, values, *, by, request=None, audience=GroupShare.Audien
 
 # --- What is shown -------------------------------------------------------------------------
 
-def _members(level):
+def _members(level, request=None):
     from apps.accounts.models import RoleAssignment, User
 
     from .models import Membership
@@ -95,7 +99,7 @@ def _members(level):
     return data
 
 
-def _finances(level):
+def _finances(level, request=None):
     from apps.finances.models import Entry
     from apps.finances.services import balance, cur
 
@@ -115,7 +119,7 @@ def _sum(direction):
     return Sum("amount", filter=Q(direction=direction))
 
 
-def _calendar(level):
+def _calendar(level, request=None):
     from apps.events.models import Event
 
     now = timezone.now()
@@ -126,14 +130,29 @@ def _calendar(level):
     return data
 
 
-def _announcements(level):
+def _announcements(level, request=None):
+    """For the whole group (not the ones naming members), own posts only."""
     from apps.announcements.models import Announcement
 
-    rows = Announcement.objects.filter(kind=Announcement.Kind.ANNOUNCEMENT).order_by("-created_at")[:10]
-    return {"items": [{"title": a.title, "body": a.body[:600], "created_at": a.created_at.isoformat()} for a in rows]}
+    rows = (Announcement.objects.filter(kind=Announcement.Kind.ANNOUNCEMENT, tagged__isnull=True)
+            .prefetch_related("attachments").order_by("-created_at")[:10])
+    items = []
+    for a in rows:
+        item = {"title": a.title, "body": a.body[:600], "created_at": a.created_at.isoformat()}
+        if level == DETAIL:
+            item["attachments"] = [_file(f, request) for f in a.attachments.all()]
+        items.append(item)
+    return {"items": items}
 
 
-def _reports(level):
+def _file(f, request):
+    url = f.file.url  # signed and short-lived on S3/Supabase
+    if request is not None and url.startswith("/"):
+        url = request.build_absolute_uri(url)
+    return {"id": f.pk, "name": f.name, "size": f.size, "content_type": f.content_type, "url": url}
+
+
+def _reports(level, request=None):
     from apps.events.models import Event
 
     since = timezone.now() - timedelta(days=90)
@@ -161,20 +180,158 @@ def readable(kind, viewer):
     return viewer.can(*KINDS[kind][1])
 
 
-def shared_view(target, viewer, *, audience=GroupShare.Audience.UP):
-    """What `viewer`, in the current group, may see of `target`."""
-    levels = settings_of(target, audience)
+def shared_view(target, viewer, *, audience=GroupShare.Audience.UP, request=None, levels=None):
+    """What `viewer`, in the current group, may see of `target` (or, with
+    `levels`, would see: the président's preview of their own group)."""
+    levels = levels or settings_of(target, audience)
     allowed = {k for k in KINDS if readable(k, viewer)}  # in the viewer's group, before switching
     out = {}
     with in_group(target):
         for kind, level in levels.items():
-            if level == NONE:
+            if kind not in KINDS or level == NONE:
                 continue
             if kind not in allowed:
                 out[kind] = {"level": level, "hidden": True}
                 continue
-            out[kind] = {"level": level, "data": BUILDERS[kind](level)}
+            out[kind] = {"level": level, "data": BUILDERS[kind](level, request)}
     return out
+
+
+def preview(group, viewer, values, request=None):
+    """The président's "Aperçu": `group` as others would see it with
+    `values`. Kinds the viewer can't read in their own group stay hidden."""
+    levels = {k: v for k, v in (values or {}).items() if k in KINDS and (v == NONE or v in KINDS[k][0])}
+    return shared_view(group, viewer, request=request, levels=levels)
+
+
+def kinds_view(viewer_group, target, viewer, audience, request=None):
+    """Every kind, as the viewer stands with it (build 48): shared and
+    readable, shared but for other roles, or not shared (with what more it
+    could share and any request this group made)."""
+    from .models import ShareRequest
+
+    shown = shared_view(target, viewer, audience=audience, request=request)
+    pending = {r.kind: r for r in ShareRequest.objects.filter(from_group=viewer_group, target=target,
+                                                              status=ShareRequest.Status.PENDING)}
+    last = {}
+    for r in ShareRequest.objects.filter(from_group=viewer_group, target=target).exclude(
+            status=ShareRequest.Status.PENDING).order_by("created_at"):
+        last[r.kind] = r
+    asker = may_ask(viewer)
+    out = []
+    for kind, (levels, _) in KINDS.items():
+        got = shown.get(kind, {"level": NONE})
+        level = got["level"]
+        more = [lv for lv in levels if _rank(lv) > _rank(level)]
+        state = "hidden" if got.get("hidden") else ("shared" if level != NONE else "none")
+        row = {"kind": kind, "level": level, "state": state, "levels": list(levels), "data": got.get("data"),
+               "request": request_row(pending[kind], request) if kind in pending else None,
+               "last_answer": request_row(last[kind], request) if kind in last else None,
+               "can_request": bool(more) and state != "hidden" and kind not in pending and asker(kind),
+               "next_level": more[0] if more else None}
+        out.append(row)
+    return out
+
+
+def _rank(level):
+    return {NONE: 0, SUMMARY: 1, DETAIL: 2}.get(level, 0)
+
+
+def may_ask(viewer):
+    """Who in a group may ask for more: whoever would read that kind, or
+    the président."""
+    pres = viewer.can("group.profile", "change")
+    return lambda kind: pres or readable(kind, viewer)
+
+
+def request_row(r, request=None):
+    from .identity import group_identity
+
+    return {"id": r.pk, "kind": r.kind, "level": r.level, "audience": r.audience, "note": r.note, "status": r.status,
+            "from_group": group_identity(r.from_group, request), "target": group_identity(r.target, request),
+            "by": r.created_by.short_name if r.created_by else "", "created_at": r.created_at.isoformat(),
+            "answered_at": r.answered_at.isoformat() if r.answered_at else None, "answer_note": r.answer_note,
+            "current": settings_of(r.target, r.audience)[r.kind] if r.status == "pending" else None}
+
+
+# --- Asking for more (build 48) ----------------------------------------------------------------
+
+def ask(viewer_group, target, kind, level, *, by, note="", request=None):
+    from .models import ShareRequest
+    from .network import presidents, relation
+
+    rel = relation(viewer_group, target)
+    if rel is None:
+        raise SharingRule("not_linked", "Ce groupe n’est pas lié au vôtre.", 404)
+    if kind not in KINDS or level not in KINDS[kind][0]:
+        raise SharingRule("bad_level", "Niveau de partage impossible.")
+    if not may_ask(by)(kind):
+        raise SharingRule("forbidden", "Votre rôle ne permet pas de demander ce partage.", 403)
+    if _rank(level) <= _rank(settings_of(target, rel)[kind]):
+        raise SharingRule("already_shared", "Ce groupe partage déjà cela.")
+    if ShareRequest.objects.filter(from_group=viewer_group, target=target, kind=kind, status=ShareRequest.Status.PENDING).exists():
+        raise SharingRule("already_asked", "Une demande est déjà en attente.", 409)
+    note = (note or "").strip()[:300]
+    r = ShareRequest.objects.create(from_group=viewer_group, target=target, audience=rel, kind=kind, level=level,
+                                    note=note, created_by=by)
+    detail = {"groupe": target.name, "partage": f"{LABELS[kind]} ({LEVEL_LABELS[level].lower()})"}
+    with in_group(viewer_group):
+        audit.record("Demande de partage envoyée", actor=by, obj=viewer_group, request=request, detail=detail)
+    with in_group(target):
+        audit.record("Demande de partage reçue", actor=by, obj=target, request=request,
+                     detail={"de": viewer_group.name, "partage": detail["partage"]})
+    body = f"« {viewer_group.name} » demande : {LABELS[kind].lower()} ({LEVEL_LABELS[level].lower()})."
+    from .notify import notify
+
+    with in_group(target):
+        notify(presidents(target), "network", "Demande de partage", f"{body} {note}".strip(), {"type": "share_requests"})
+    return r
+
+
+def cancel(r, *, by, request=None):
+    from .models import ShareRequest
+
+    if r.status != ShareRequest.Status.PENDING:
+        raise SharingRule("not_pending", "Cette demande n’est plus en attente.", 409)
+    r.status, r.answered_by, r.answered_at = ShareRequest.Status.CANCELLED, by, timezone.now()
+    r.save(update_fields=["status", "answered_by", "answered_at"])
+    with in_group(r.from_group):
+        audit.record("Demande de partage annulée", actor=by, obj=r.from_group, request=request,
+                     detail={"groupe": r.target.name, "partage": LABELS[r.kind]})
+
+
+def answer(r, accept, *, by, note="", request=None):
+    """The asked group's président. Accepting shares that kind at that level
+    with the whole audience (every group above, every neighbour…)."""
+    from apps.accounts.models import User
+
+    from .models import ShareRequest
+    from .notify import notify
+
+    if r.status != ShareRequest.Status.PENDING:
+        raise SharingRule("not_pending", "Cette demande n’est plus en attente.", 409)
+    note = (note or "").strip()[:300]
+    if accept and _rank(settings_of(r.target, r.audience)[r.kind]) < _rank(r.level):
+        save_settings(r.target, {r.kind: r.level}, by=by, request=request, audience=r.audience)
+    r.status = ShareRequest.Status.ACCEPTED if accept else ShareRequest.Status.DECLINED
+    r.answered_by, r.answered_at, r.answer_note = by, timezone.now(), note
+    r.save(update_fields=["status", "answered_by", "answered_at", "answer_note"])
+    what = f"{LABELS[r.kind].lower()} ({LEVEL_LABELS[r.level].lower()})"
+    with in_group(r.target):
+        audit.record("Demande de partage acceptée" if accept else "Demande de partage refusée", actor=by, obj=r.target,
+                     request=request, detail={"de": r.from_group.name, "partage": what, **({"motif": note} if note else {})})
+    title = "Partage accepté" if accept else "Partage refusé"
+    body = (f"« {r.target.name} » partage maintenant : {what}." if accept
+            else f"« {r.target.name} » ne partage pas : {what}.") + (f" {note}" if note else "")
+    from .network import presidents
+
+    with in_group(r.from_group):
+        people = {u.pk: u for u in presidents(r.from_group)}
+        if r.created_by_id and r.created_by.is_active:
+            people.setdefault(r.created_by_id, r.created_by)
+        people = User.objects.members().filter(pk__in=list(people))
+        notify(people, "network", title, body, {"type": "network_group", "id": r.target_id})
+    return r
 
 
 def totals(groups):

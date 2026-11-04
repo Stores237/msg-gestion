@@ -6,6 +6,7 @@ import 'package:huddle/models/me.dart';
 import 'package:huddle/data/current_user.dart';
 import 'package:huddle/models/announcement.dart';
 import 'package:huddle/models/event.dart';
+import 'package:huddle/models/network_reach.dart';
 import 'package:huddle/screens/announcements/announcement_detail_screen.dart';
 import 'package:huddle/screens/announcements/compose_screen.dart';
 import 'package:huddle/screens/calendar/event_detail_screen.dart';
@@ -158,9 +159,15 @@ void main() {
     expect(find.text('Ne partage rien'), findsOneWidget);
     await tester.tap(find.byKey(const Key('network-sharing')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('share-members-detail')));
-    await tester.tap(find.byKey(const Key('share-finances-summary')));
-    await tester.pump();
+    for (final k in ['share-members-detail', 'share-finances-summary']) {
+      await tester.scrollUntilVisible(
+        find.byKey(Key(k)),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.byKey(Key(k)));
+      await tester.pump();
+    }
     await tester.scrollUntilVisible(
       find.byKey(const Key('sharing-save')),
       200,
@@ -229,8 +236,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ewane Brice'), findsOneWidget);
     expect(find.text('Président'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('shared-finances')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
-      find.text(
+      find.textContaining(
         'Partagé, mais votre rôle dans ce groupe ne couvre pas cette partie.',
       ),
       findsOneWidget,
@@ -277,15 +289,38 @@ void main() {
         {'id': 7, 'name': 'Zone Nord', 'below': 3},
       ],
     );
+    f.profile.reachGroups = const [
+      ReachGroup(
+        group: GroupInfo(id: 3, name: 'GS Yapoma'),
+        relation: 'below',
+        depth: 1,
+      ),
+    ];
     await tester.pumpWidget(const MsgApp(home: ComposeScreen()));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('a-title')), 'Pèlerinage');
-    // The bottom send bar covers the row in the test window; flip it directly.
-    tester.widget<Switch>(find.byKey(const Key('a-cascade'))).onChanged!(true);
-    await tester.pump();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('a-cascade')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    // The bottom send bar covers the row in the test window: tap it directly.
+    tester
+        .widget<InkWell>(
+          find.descendant(
+            of: find.byKey(const Key('a-cascade')),
+            matching: find.byType(InkWell),
+          ),
+        )
+        .onTap!();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('reach-all')));
+    await tester.tap(find.byKey(const Key('reach-done')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('a-send')));
     await tester.pumpAndSettle();
     expect(f.announcements.sent.last, 'annonce:Pèlerinage:-:down');
+    expect(f.announcements.lastReach!.ids, [3]);
     currentUser.value = null;
   });
 

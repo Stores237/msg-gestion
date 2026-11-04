@@ -19,6 +19,7 @@ import 'help_screens.dart';
 import 'members/member_profile_screen.dart';
 import 'finances/network_dues_screen.dart';
 import 'network_screen.dart';
+import 'network_sharing_screens.dart';
 import 'shell_screen.dart';
 import '../models/me.dart';
 
@@ -85,6 +86,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       page = AccountScreen(me: me);
     } else if (type == 'faq') {
       page = const FaqScreen();
+    } else if (type == 'share_requests') {
+      page = const ShareRequestsScreen();
+    } else if (type == 'network_group' && n.target['id'] is int) {
+      page = SharedGroupScreen(groupId: n.target['id'] as int);
     } else if (type == 'network') {
       page = const NetworkScreen();
     } else if (type == 'network_dues') {
@@ -120,6 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     'expense' => Icons.receipt_long_outlined,
     'faq' => Icons.help_outline,
     'network' => Icons.hub_outlined,
+    'share_requests' || 'network_group' => Icons.visibility_outlined,
     'reminder' => Icons.alarm,
     'announcement' || 'convocation' => Icons.campaign_outlined,
     'payment' => Icons.check_circle_outline,

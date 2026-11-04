@@ -5,7 +5,8 @@ import factory
 
 from .models import Role, RoleAssignment, User
 
-_numbers = itertools.count(1)
+# Far from the demo network's numbers (+237600000100…), which tests also create.
+_numbers = itertools.count(20_000_000)
 
 
 class UserFactory(factory.django.DjangoModelFactory):

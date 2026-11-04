@@ -412,6 +412,43 @@ class _NetworkScreenState extends State<NetworkScreen> {
                               ],
                             ),
                           ],
+                          if (info.parents.isNotEmpty ||
+                              info.children.isNotEmpty ||
+                              info.neighbours.isNotEmpty ||
+                              info.twins.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            GroupCard(
+                              children: [
+                                ListRow(
+                                  key: const Key('network-requests'),
+                                  lead: IconChip(
+                                    Icons.mark_email_unread_outlined,
+                                    tone: info.requestsWaiting > 0
+                                        ? Tone.amber
+                                        : Tone.neutral,
+                                  ),
+                                  title: Text(l.srTitle),
+                                  subtitle: Text(l.srRowHint),
+                                  trailing: info.requestsWaiting > 0
+                                      ? Badge2(
+                                          '${info.requestsWaiting}',
+                                          tone: Tone.amber,
+                                        )
+                                      : null,
+                                  chevron: true,
+                                  onTap: () async {
+                                    await Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const ShareRequestsScreen(),
+                                      ),
+                                    );
+                                    _load();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
                           if (info.children.isNotEmpty || info.canInvite) ...[
                             const SizedBox(height: 24),
                             SectionLabel(l.groupNetBelow(info.children.length)),

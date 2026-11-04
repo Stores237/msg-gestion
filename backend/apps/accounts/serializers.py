@@ -1,9 +1,19 @@
+from django.db import models
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .phone import InvalidPhone, normalize_phone
 
+
+def _reach_count(group):
+    """Groups a post can go to; 0 quickly for a group in no network."""
+    from apps.core.models import GroupLink
+    from apps.core.network import reach_choices
+
+    if group.network_id is None and not GroupLink.objects.filter(models.Q(a=group) | models.Q(b=group), is_active=True).exists():
+        return 0
+    return len(reach_choices(group))
 
 class PhoneField(serializers.CharField):
     def to_internal_value(self, data):
@@ -80,7 +90,9 @@ class MeSerializer(serializers.Serializer):
                 # Shown on every amount; the app's language until the member picks one (2026-11-02).
                 "currency": st.currency, "language": st.language,
                 # Groups attached below (build 41): posts can be sent down to them.
-                "below": st.group.children.filter(is_active=True).count()}
+                "below": st.group.children.filter(is_active=True).count(),
+                # Groups a post can go to (build 48): below, neighbours, twins.
+                "reach": _reach_count(st.group)}
 
     @extend_schema_field(OpenApiTypes.OBJECT)
     def get_groups(self, user) -> list:

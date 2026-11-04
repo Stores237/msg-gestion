@@ -1,4 +1,5 @@
 import '../../../models/me.dart';
+import '../../../models/network_reach.dart';
 import '../../api_client.dart';
 import '../profile_repository.dart';
 
@@ -209,6 +210,53 @@ class HttpProfileRepository implements ProfileRepository {
   Future<SharedGroup> sharedGroup(int id) async => SharedGroup.fromJson(
     await _api.get('/network/groups/$id/') as Map<String, dynamic>,
   );
+
+  @override
+  Future<Map<String, SharedKind>> previewSharing(
+    Map<String, String> values,
+  ) async => sharedKinds(
+    (await _api.post('/network/sharing/preview/', body: values)
+        as Map<String, dynamic>)['shared'],
+  );
+
+  @override
+  Future<void> askShare(
+    int groupId, {
+    required String kind,
+    required String level,
+    String note = '',
+  }) => _api.post(
+    '/network/groups/$groupId/requests/',
+    body: {'kind': kind, 'level': level, 'note': note},
+  );
+
+  @override
+  Future<ShareRequests> shareRequests() async => ShareRequests.fromJson(
+    await _api.get('/network/requests/') as Map<String, dynamic>,
+  );
+
+  @override
+  Future<void> answerShareRequest(
+    int id, {
+    required bool accept,
+    String note = '',
+  }) => _api.post(
+    '/network/requests/$id/',
+    body: {'accept': accept, 'note': note},
+  );
+
+  @override
+  Future<void> cancelShareRequest(int id) =>
+      _api.delete('/network/requests/$id/');
+
+  @override
+  Future<List<ReachGroup>> recipients() async {
+    final j = await _api.get('/network/recipients/') as Map<String, dynamic>;
+    return [
+      for (final g in (j['groups'] as List?) ?? const [])
+        ReachGroup.fromJson(g as Map<String, dynamic>),
+    ];
+  }
 
   @override
   Future<void> setReminders({bool? eve, bool? twoHours}) => _api.patch(

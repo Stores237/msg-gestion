@@ -2079,9 +2079,8 @@
       }
     }
   },
-  "groupNetSharingAbout": "Choisissez ce que les groupes au-dessus du vôtre peuvent voir. Là-haut, chaque partie n’est lue que par ceux dont le rôle la couvre (le trésorier pour les finances…). Rien n’est partagé tant que vous ne l’avez pas choisi.",
   "groupNetSharingSaved": "Partage enregistré. Les groupes au-dessus sont prévenus.",
-  "groupNetNeverShared": "Jamais partagés : numéros de téléphone, codes, contacts des mineurs, pièces jointes, relevés personnels.",
+  "groupNetNeverShared": "Numéros de téléphone, codes, contacts des mineurs, relevés personnels, annonces adressées à des membres précis : jamais partagés, quel que soit le choix.",
   "groupNetKindMembers": "Membres",
   "groupNetKindFinances": "Finances",
   "groupNetKindCalendar": "Calendrier",
@@ -2090,11 +2089,6 @@
   "groupNetLevelNone": "Rien",
   "groupNetLevelSummary": "Résumé",
   "groupNetLevelDetail": "Détail",
-  "groupNetHintMembers": "Résumé : le nombre de membres. Détail : + les noms et les rôles.",
-  "groupNetHintFinances": "Résumé : le solde et les totaux de l’année. Détail : + les 30 dernières opérations validées.",
-  "groupNetHintCalendar": "Résumé : le nombre d’événements à 30 jours. Détail : + leurs dates et lieux.",
-  "groupNetHintAnnouncements": "Détail : vos 10 dernières annonces (pas les convocations).",
-  "groupNetHintReports": "Résumé : le taux de présence sur 3 mois. Détail : + les présences par événement.",
   "groupNetSharesNone": "Ne partage rien",
   "groupNetSharesList": "Partage : {kinds}",
   "@groupNetSharesList": {
@@ -2119,7 +2113,6 @@
     }
   },
   "groupNetSharesNothing": "Ce groupe ne partage rien",
-  "groupNetSharesNothingBody": "Son président choisit ce qu’il partage, dans Réseau → Ce que nous partageons.",
   "groupNetNotYourRole": "Partagé, mais votre rôle dans ce groupe ne couvre pas cette partie.",
   "groupNetMembersActive": "Membres",
   "groupNetBalance": "Solde validé",
@@ -2157,23 +2150,6 @@
     "placeholders": {
       "name": {
         "type": "String"
-      }
-    }
-  },
-  "groupNetSendDown": "Aussi pour les groupes rattachés",
-  "groupNetSendDownHint": "{count, plural, =1{Le groupe rattaché la reçoit aussi, avec une notification.} other{Les {count} groupes rattachés (et ceux en dessous) la reçoivent aussi, avec une notification.}}",
-  "@groupNetSendDownHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "groupNetSendDownEventHint": "{count, plural, =1{Il apparaît aussi dans le calendrier du groupe rattaché.} other{Il apparaît aussi dans le calendrier des {count} groupes rattachés et de ceux en dessous.}}",
-  "@groupNetSendDownEventHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },
@@ -2359,5 +2335,238 @@
   "reportNetNone": "Aucune quote-part réglée sur le trimestre",
   "reportNetOwedOpen": "Restant à verser au groupe au-dessus",
   "reportNetAskedOpen": "Restant à recevoir des groupes rattachés",
-  "groupNetWaiting": "À compléter (pas encore de président)"
+  "groupNetWaiting": "À compléter (pas encore de président)",
+  "reachTitle": "Diffuser dans le réseau",
+  "reachNone": "Pas diffusé dans le réseau",
+  "reachEveryone": "Tous les membres",
+  "reachBureauOnly": "Le bureau seulement",
+  "reachGroupsCount": "{count, plural, =1{1 groupe} other{{count} groupes}}",
+  "@reachGroupsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reachNeighbour": "Groupes voisins",
+  "reachTwin": "Groupes jumelés",
+  "reachDirect": "Rattachés directement",
+  "reachDeeper": "Plus bas",
+  "reachFilterAll": "Tous",
+  "reachFilterBelow": "En dessous",
+  "reachFilterNeighbours": "Voisins",
+  "reachFilterTwins": "Jumelés",
+  "reachLoadError": "Impossible de charger les groupes.",
+  "reachAbout": "Choisissez les groupes qui la reçoivent : ceux en dessous du vôtre, vos voisins, vos groupes jumelés. Ils la lisent, marquée du nom de votre groupe, sans pouvoir la modifier.",
+  "reachWho": "Qui la reçoit",
+  "reachWhere": "Quels groupes",
+  "reachEveryoneHint": "Les membres actifs et en congé des groupes choisis la voient et sont prévenus.",
+  "reachBureauHint": "Seuls les membres du bureau des groupes choisis la voient et sont prévenus.",
+  "reachSearch": "Rechercher un groupe",
+  "reachNoGroups": "Aucun groupe n’est lié au vôtre.",
+  "reachNoMatch": "Aucun groupe ne correspond.",
+  "reachSelectAll": "Tout sélectionner",
+  "reachUnselectAll": "Tout désélectionner",
+  "reachChosenCount": "{count, plural, =0{Aucun groupe choisi} =1{1 groupe choisi} other{{count} groupes choisis}}",
+  "@reachChosenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reachDontSend": "Ne pas diffuser",
+  "reachConfirm": "{count, plural, =1{Diffuser à 1 groupe} other{Diffuser à {count} groupes}}",
+  "@reachConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reachUnder": "sous {parent}",
+  "@reachUnder": {
+    "placeholders": {
+      "parent": {
+        "type": "String"
+      }
+    }
+  },
+  "reachAllBelow": "Tous les groupes en dessous",
+  "reachSentTo": "Diffusé à : {where}",
+  "@reachSentTo": {
+    "placeholders": {
+      "where": {
+        "type": "String"
+      }
+    }
+  },
+  "shareIncNone": "Rien de cette partie n’est visible.",
+  "shareIncMembersSummary": "Le nombre de membres, par statut (actifs, en congé…).",
+  "shareIncMembersDetail": "En plus : le nom et les rôles de chaque membre. Jamais les téléphones.",
+  "shareIncFinancesSummary": "Le solde de la caisse et les totaux d’entrées et de sorties de l’année.",
+  "shareIncFinancesDetail": "En plus : les 30 dernières opérations validées (date, libellé, catégorie, montant).",
+  "shareIncCalendarSummary": "Le nombre d’événements des 30 prochains jours.",
+  "shareIncCalendarDetail": "En plus : le titre, la date et le lieu de chacun.",
+  "shareIncAnnouncementsSummary": "Le titre et le texte de vos 10 dernières annonces pour tout le groupe (pas celles adressées à des membres précis).",
+  "shareIncAnnouncementsDetail": "En plus : leurs photos et fichiers joints.",
+  "shareIncReportsSummary": "Le nombre d’activités des 3 derniers mois et le taux de présence.",
+  "shareIncReportsDetail": "En plus : présents, absents, excusés et rapport remis, activité par activité.",
+  "shareReaderMembers": "Dans l’autre groupe, seuls ceux dont le rôle couvre les membres le lisent.",
+  "shareReaderFinances": "Dans l’autre groupe, seuls ceux dont le rôle couvre la caisse le lisent.",
+  "shareReaderCalendar": "Dans l’autre groupe, seuls ceux dont le rôle couvre le calendrier le lisent.",
+  "shareReaderAnnouncements": "Dans l’autre groupe, seuls ceux dont le rôle couvre les annonces le lisent.",
+  "shareReaderReports": "Dans l’autre groupe, seuls ceux dont le rôle couvre les rapports d’activité le lisent.",
+  "shareAudienceUp": "tous les groupes au-dessus du vôtre",
+  "shareAudienceNeighbours": "tous vos groupes voisins",
+  "shareAudienceTwins": "tous vos groupes jumelés",
+  "sharingAboutAudience": "Choisissez, partie par partie, ce que voient {audience}. Chaque niveau dit exactement ce qui est montré. Rien n’est partagé tant que vous ne l’avez pas choisi ; « Aperçu » montre le résultat avant d’enregistrer.",
+  "@sharingAboutAudience": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
+  "sharingPreview": "Aperçu",
+  "sharingPreviewTitle": "Ce qu’ils verront",
+  "sharingPreviewHint": "Votre groupe tel que le verront {audience}, avec les choix de l’écran (pas encore enregistrés).",
+  "@sharingPreviewHint": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
+  "sharingPreviewHidden": "Masqué dans l’aperçu : votre rôle ne couvre pas cette partie dans votre groupe.",
+  "sharingPreviewEmpty": "Rien ne serait partagé.",
+  "sharingAlwaysPrivate": "Toujours privé",
+  "sharingChanged": "Modifié",
+  "sharingOnlyPresident": "Seul le président du groupe change ces choix.",
+  "sharingWaiting": "{count, plural, =1{1 demande de partage attend votre réponse} other{{count} demandes de partage attendent votre réponse}}",
+  "@sharingWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sgRelationUp": "Rattaché à votre groupe",
+  "sgRelationNeighbours": "Groupe voisin",
+  "sgRelationTwins": "Groupe jumelé",
+  "sgVisible": "Visibles",
+  "sgReserved": "Réservés à d’autres rôles",
+  "sgNotShared": "Non partagés",
+  "sgFilterAll": "Tout",
+  "sgFilterVisible": "Visible",
+  "sgFilterReserved": "Réservé",
+  "sgFilterNotShared": "Non partagé",
+  "sgNoneBody": "Ce groupe ne partage pas cette partie avec vous.",
+  "sgNothingAskHint": "Son président choisit ce qu’il partage. Vous pouvez lui demander une partie ci-dessous.",
+  "sgNothingInFilter": "Rien dans ce filtre.",
+  "sgAskAccess": "Demander l’accès",
+  "sgAskDetail": "Demander le détail",
+  "sgAskTitle": "Demander : {kind}",
+  "@sgAskTitle": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "sgAskBody": "Le président de {group} décide. S’il accepte, ce sera partagé avec {audience}, pas seulement avec vous.",
+  "@sgAskBody": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
+  "sgAskNote": "Message pour le président (facultatif)",
+  "sgAskSend": "Envoyer la demande",
+  "sgAsked": "Demande envoyée.",
+  "sgRequestCancelled": "Demande annulée.",
+  "sgPending": "Demandé le {date} ({level}) · en attente",
+  "@sgPending": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sgCancelRequest": "Annuler la demande",
+  "sgDeclined": "Dernière demande refusée le {date}.",
+  "@sgDeclined": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "srTitle": "Demandes de partage",
+  "srRowHint": "Ce que d’autres groupes vous demandent de partager, et vos demandes.",
+  "srReceived": "Reçues",
+  "srSent": "Envoyées",
+  "srWaiting": "En attente",
+  "srHistory": "Déjà traitées",
+  "srBy": "Par {name} · {date}",
+  "@srBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "srCurrently": "Partagé aujourd’hui : {level}",
+  "@srCurrently": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "srAnswerNote": "Réponse : {note}",
+  "@srAnswerNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "srAccept": "Accepter",
+  "srDecline": "Refuser",
+  "srAcceptTitle": "Accepter la demande ?",
+  "srAcceptBody": "« {what} » sera partagé avec {audience}, pas seulement avec ce groupe. Vous pourrez le changer à tout moment dans Ce que nous partageons.",
+  "@srAcceptBody": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      },
+      "audience": {
+        "type": "String"
+      }
+    }
+  },
+  "srDeclineTitle": "Refuser la demande",
+  "srDeclineNote": "Motif (facultatif, envoyé au groupe)",
+  "srAccepted": "Demande acceptée : c’est partagé.",
+  "srDeclined": "Demande refusée.",
+  "srStatusPending": "En attente",
+  "srStatusAccepted": "Acceptée",
+  "srStatusDeclined": "Refusée",
+  "srStatusCancelled": "Annulée",
+  "srNoneReceived": "Aucune demande reçue",
+  "srNoneReceivedHint": "Quand un groupe lié vous demande de partager quelque chose, cela apparaît ici.",
+  "srNoneSent": "Aucune demande envoyée",
+  "srNoneSentHint": "Ouvrez un groupe lié dans Réseau : « Demander l’accès » sur une partie qu’il ne partage pas.",
+  "srOnlyPresident": "Seul le président répond aux demandes."
 }

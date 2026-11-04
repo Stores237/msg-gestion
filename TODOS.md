@@ -22,6 +22,10 @@
   install build 43.
 - [ ] **Owner — build 44 (2026-11-03, contributions):** deploy (migration finances 0007); install
   build 44. Networks phases 1–6 are all in (39–44): try them together on staging.
+- [ ] **Owner — build 48 (2026-11-04, network: files, recipients, sharing requests):** deploy
+  (migrations core 0021, announcements 0007, events 0011); install build 48. To try it on the demo
+  network, remove it and create it again (back-office → Réseaux de groupes → Démonstration): the new
+  one has a bureau-only post and two sharing requests waiting.
 - [ ] **Owner — build 47 (2026-11-03, demo from the back-office; fixed 2026-11-04):** deploy
   staging again (the first version timed out: "Internal Server Error"); check
   Environment has `DEMO_TOOLS=true` (add it if the Blueprint didn't); back-office → Réseaux de

@@ -168,7 +168,7 @@ def test_nothing_is_shared_until_the_president_chooses(mgs):
     assert papi.get("/api/network/sharing/").json()["values"]["finances"] == "none"
     r = papi.put("/api/network/sharing/", {"members": "detail", "finances": "summary", "announcements": "detail"}, format="json")
     assert r.status_code == 200 and r.json()["values"]["members"] == "detail"
-    assert papi.put("/api/network/sharing/", {"announcements": "summary"}, format="json").json()["code"] == "bad_level"
+    assert papi.put("/api/network/sharing/", {"reports": "everything"}, format="json").json()["code"] == "bad_level"
     assert AuditLog.objects.filter(action="Partage avec le réseau modifié", group=parish).exists()
     assert Notification.all_groups.filter(user=pres_z, group=zone, title="Partage d’un groupe rattaché").exists()
 
@@ -242,7 +242,7 @@ def test_a_zone_announcement_reaches_the_parishes(mgs):
 def test_cascade_needs_groups_below(mgs):
     _, parish, zone, pres_p, *_ = mgs
     r = app_client(pres_p, parish).post("/api/announcements/", {"title": "Hello", "cascade": True}, format="json")
-    assert r.status_code == 400 and "cascade" in r.json()
+    assert r.status_code == 400 and r.json()["reach"][0] == "Aucun groupe n’est lié au vôtre."
 
 
 def test_a_zone_event_shows_in_the_parish_calendar(mgs):

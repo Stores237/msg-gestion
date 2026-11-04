@@ -1,4 +1,5 @@
 import '../../../models/announcement.dart';
+import '../../../models/network_reach.dart';
 import '../../api_client.dart';
 import '../../offline.dart';
 import '../announcements_repository.dart';
@@ -39,6 +40,7 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
     bool pinned = false,
     List<int> tagged = const [],
     bool cascade = false,
+    NetworkReach? reach,
   }) async => Announcement.fromJson(
     await _api.post(
           '/announcements/',
@@ -50,6 +52,10 @@ class HttpAnnouncementsRepository implements AnnouncementsRepository {
             'pinned': pinned,
             'tagged': tagged,
             if (cascade) 'cascade': true,
+            if (cascade && reach != null) ...{
+              'reach': reach.ids,
+              'reach_audience': reach.audience,
+            },
           },
         )
         as Map<String, dynamic>,

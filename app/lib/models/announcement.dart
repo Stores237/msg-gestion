@@ -1,4 +1,5 @@
 import 'me.dart';
+import 'network_reach.dart';
 
 class AttachmentInfo {
   const AttachmentInfo({
@@ -73,10 +74,14 @@ class Announcement {
     this.forMe = false,
     this.cascade = false,
     this.fromGroup,
+    this.sentTo,
   });
 
   /// Also sent to the groups attached below (build 41).
   final bool cascade;
+
+  /// Where this group sent it in the network (build 48).
+  final SentTo? sentTo;
 
   /// Sent down by a group above this one; read-only here.
   final GroupInfo? fromGroup;
@@ -137,6 +142,7 @@ class Announcement {
     forMe: forMe,
     cascade: cascade,
     fromGroup: fromGroup,
+    sentTo: sentTo,
   );
 
   factory Announcement.fromJson(Map<String, dynamic> j) {
@@ -176,6 +182,7 @@ class Announcement {
       fromGroup: j['from_group'] == null
           ? null
           : GroupInfo.fromJson(j['from_group'] as Map<String, dynamic>),
+      sentTo: SentTo.fromJson(j['sent_to']),
     );
   }
 }

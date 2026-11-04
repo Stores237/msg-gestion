@@ -3308,16 +3308,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get groupNetSharingAbout =>
-      'Choose what the groups above yours can see. Up there, each part is read only by those whose role covers it (the treasurer for finances…). Nothing is shared until you choose.';
-
-  @override
   String get groupNetSharingSaved =>
       'Sharing saved. The groups above are told.';
 
   @override
   String get groupNetNeverShared =>
-      'Never shared: phone numbers, codes, minors’ contacts, attachments, personal statements.';
+      'Phone numbers, codes, minors’ contacts, personal statements, announcements addressed to particular members: never shared, whatever the choice.';
 
   @override
   String get groupNetKindMembers => 'Members';
@@ -3344,26 +3340,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupNetLevelDetail => 'Detail';
 
   @override
-  String get groupNetHintMembers =>
-      'Summary: how many members. Detail: + names and roles.';
-
-  @override
-  String get groupNetHintFinances =>
-      'Summary: the balance and the year’s totals. Detail: + the last 30 validated operations.';
-
-  @override
-  String get groupNetHintCalendar =>
-      'Summary: how many events in the next 30 days. Detail: + their dates and places.';
-
-  @override
-  String get groupNetHintAnnouncements =>
-      'Detail: your last 10 announcements (not call-ups).';
-
-  @override
-  String get groupNetHintReports =>
-      'Summary: the attendance rate over 3 months. Detail: + attendance per event.';
-
-  @override
   String get groupNetSharesNone => 'Shares nothing';
 
   @override
@@ -3386,10 +3362,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupNetSharesNothing => 'This group shares nothing';
-
-  @override
-  String get groupNetSharesNothingBody =>
-      'Its president chooses what it shares, in Network → What we share.';
 
   @override
   String get groupNetNotYourRole =>
@@ -3435,33 +3407,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String groupNetEventFromAbove(String name) {
     return 'An event of $name, passed on to your group. It is changed, and the roll call taken, in $name.';
-  }
-
-  @override
-  String get groupNetSendDown => 'Also for the attached groups';
-
-  @override
-  String groupNetSendDownHint(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'The $count attached groups (and those below) get it too, with a notification.',
-      one: 'The attached group gets it too, with a notification.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String groupNetSendDownEventHint(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other:
-          'It also shows in the calendars of the $count attached groups and those below.',
-      one: 'It also shows in the attached group’s calendar.',
-    );
-    return '$_temp0';
   }
 
   @override
@@ -3720,4 +3665,412 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupNetWaiting => 'To complete (no president yet)';
+
+  @override
+  String get reachTitle => 'Send across the network';
+
+  @override
+  String get reachNone => 'Not sent across the network';
+
+  @override
+  String get reachEveryone => 'All members';
+
+  @override
+  String get reachBureauOnly => 'The bureau only';
+
+  @override
+  String reachGroupsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groups',
+      one: '1 group',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reachNeighbour => 'Neighbouring groups';
+
+  @override
+  String get reachTwin => 'Twinned groups';
+
+  @override
+  String get reachDirect => 'Attached directly';
+
+  @override
+  String get reachDeeper => 'Further down';
+
+  @override
+  String get reachFilterAll => 'All';
+
+  @override
+  String get reachFilterBelow => 'Below';
+
+  @override
+  String get reachFilterNeighbours => 'Neighbours';
+
+  @override
+  String get reachFilterTwins => 'Twins';
+
+  @override
+  String get reachLoadError => 'Couldn’t load the groups.';
+
+  @override
+  String get reachAbout =>
+      'Choose the groups that receive it: those below yours, your neighbours, your twinned groups. They read it, marked with your group’s name, and can’t change it.';
+
+  @override
+  String get reachWho => 'Who receives it';
+
+  @override
+  String get reachWhere => 'Which groups';
+
+  @override
+  String get reachEveryoneHint =>
+      'Active and on-leave members of the chosen groups see it and are notified.';
+
+  @override
+  String get reachBureauHint =>
+      'Only the bureau members of the chosen groups see it and are notified.';
+
+  @override
+  String get reachSearch => 'Search for a group';
+
+  @override
+  String get reachNoGroups => 'No group is linked to yours.';
+
+  @override
+  String get reachNoMatch => 'No group matches.';
+
+  @override
+  String get reachSelectAll => 'Select all';
+
+  @override
+  String get reachUnselectAll => 'Unselect all';
+
+  @override
+  String reachChosenCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count groups chosen',
+      one: '1 group chosen',
+      zero: 'No group chosen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reachDontSend => 'Don’t send';
+
+  @override
+  String reachConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Send to $count groups',
+      one: 'Send to 1 group',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String reachUnder(String parent) {
+    return 'under $parent';
+  }
+
+  @override
+  String get reachAllBelow => 'Every group below';
+
+  @override
+  String reachSentTo(String where) {
+    return 'Sent to: $where';
+  }
+
+  @override
+  String get shareIncNone => 'Nothing of this part is visible.';
+
+  @override
+  String get shareIncMembersSummary =>
+      'The number of members, by status (active, on leave…).';
+
+  @override
+  String get shareIncMembersDetail =>
+      'Also: each member’s name and roles. Never phone numbers.';
+
+  @override
+  String get shareIncFinancesSummary =>
+      'The cash balance and the year’s totals in and out.';
+
+  @override
+  String get shareIncFinancesDetail =>
+      'Also: the last 30 approved entries (date, label, category, amount).';
+
+  @override
+  String get shareIncCalendarSummary =>
+      'The number of events in the next 30 days.';
+
+  @override
+  String get shareIncCalendarDetail =>
+      'Also: each one’s title, date and place.';
+
+  @override
+  String get shareIncAnnouncementsSummary =>
+      'The title and text of your last 10 announcements to the whole group (not those addressed to particular members).';
+
+  @override
+  String get shareIncAnnouncementsDetail =>
+      'Also: their photos and attached files.';
+
+  @override
+  String get shareIncReportsSummary =>
+      'The number of activities in the last 3 months and the attendance rate.';
+
+  @override
+  String get shareIncReportsDetail =>
+      'Also: present, absent, excused and report handed in, activity by activity.';
+
+  @override
+  String get shareReaderMembers =>
+      'In the other group, only those whose role covers members read it.';
+
+  @override
+  String get shareReaderFinances =>
+      'In the other group, only those whose role covers the cash book read it.';
+
+  @override
+  String get shareReaderCalendar =>
+      'In the other group, only those whose role covers the calendar read it.';
+
+  @override
+  String get shareReaderAnnouncements =>
+      'In the other group, only those whose role covers announcements read it.';
+
+  @override
+  String get shareReaderReports =>
+      'In the other group, only those whose role covers activity reports read it.';
+
+  @override
+  String get shareAudienceUp => 'every group above yours';
+
+  @override
+  String get shareAudienceNeighbours => 'all your neighbouring groups';
+
+  @override
+  String get shareAudienceTwins => 'all your twinned groups';
+
+  @override
+  String sharingAboutAudience(String audience) {
+    return 'Choose, part by part, what $audience see. Each level says exactly what is shown. Nothing is shared until you choose; “Preview” shows the result before saving.';
+  }
+
+  @override
+  String get sharingPreview => 'Preview';
+
+  @override
+  String get sharingPreviewTitle => 'What they will see';
+
+  @override
+  String sharingPreviewHint(String audience) {
+    return 'Your group as $audience will see it, with the choices on screen (not saved yet).';
+  }
+
+  @override
+  String get sharingPreviewHidden =>
+      'Hidden in the preview: your role doesn’t cover this part in your group.';
+
+  @override
+  String get sharingPreviewEmpty => 'Nothing would be shared.';
+
+  @override
+  String get sharingAlwaysPrivate => 'Always private';
+
+  @override
+  String get sharingChanged => 'Changed';
+
+  @override
+  String get sharingOnlyPresident =>
+      'Only the group’s president changes these choices.';
+
+  @override
+  String sharingWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sharing requests wait for your answer',
+      one: '1 sharing request waits for your answer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get sgRelationUp => 'Attached to your group';
+
+  @override
+  String get sgRelationNeighbours => 'Neighbouring group';
+
+  @override
+  String get sgRelationTwins => 'Twinned group';
+
+  @override
+  String get sgVisible => 'Visible';
+
+  @override
+  String get sgReserved => 'For other roles';
+
+  @override
+  String get sgNotShared => 'Not shared';
+
+  @override
+  String get sgFilterAll => 'All';
+
+  @override
+  String get sgFilterVisible => 'Visible';
+
+  @override
+  String get sgFilterReserved => 'Reserved';
+
+  @override
+  String get sgFilterNotShared => 'Not shared';
+
+  @override
+  String get sgNoneBody => 'This group doesn’t share this part with you.';
+
+  @override
+  String get sgNothingAskHint =>
+      'Its president chooses what it shares. You can ask for a part below.';
+
+  @override
+  String get sgNothingInFilter => 'Nothing in this filter.';
+
+  @override
+  String get sgAskAccess => 'Ask for access';
+
+  @override
+  String get sgAskDetail => 'Ask for the detail';
+
+  @override
+  String sgAskTitle(String kind) {
+    return 'Ask for: $kind';
+  }
+
+  @override
+  String sgAskBody(String group, String audience) {
+    return '$group’s president decides. If they accept, it will be shared with $audience, not only with you.';
+  }
+
+  @override
+  String get sgAskNote => 'Message for the president (optional)';
+
+  @override
+  String get sgAskSend => 'Send the request';
+
+  @override
+  String get sgAsked => 'Request sent.';
+
+  @override
+  String get sgRequestCancelled => 'Request withdrawn.';
+
+  @override
+  String sgPending(String level, String date) {
+    return 'Asked on $date ($level) · waiting';
+  }
+
+  @override
+  String get sgCancelRequest => 'Withdraw';
+
+  @override
+  String sgDeclined(String date) {
+    return 'Last request declined on $date.';
+  }
+
+  @override
+  String get srTitle => 'Sharing requests';
+
+  @override
+  String get srRowHint =>
+      'What other groups ask you to share, and your requests.';
+
+  @override
+  String get srReceived => 'Received';
+
+  @override
+  String get srSent => 'Sent';
+
+  @override
+  String get srWaiting => 'Waiting';
+
+  @override
+  String get srHistory => 'Answered';
+
+  @override
+  String srBy(String name, String date) {
+    return 'By $name · $date';
+  }
+
+  @override
+  String srCurrently(String level) {
+    return 'Shared today: $level';
+  }
+
+  @override
+  String srAnswerNote(String note) {
+    return 'Answer: $note';
+  }
+
+  @override
+  String get srAccept => 'Accept';
+
+  @override
+  String get srDecline => 'Decline';
+
+  @override
+  String get srAcceptTitle => 'Accept the request?';
+
+  @override
+  String srAcceptBody(String what, String audience) {
+    return '“$what” will be shared with $audience, not only with this group. You can change it at any time in What we share.';
+  }
+
+  @override
+  String get srDeclineTitle => 'Decline the request';
+
+  @override
+  String get srDeclineNote => 'Reason (optional, sent to the group)';
+
+  @override
+  String get srAccepted => 'Request accepted: it’s shared.';
+
+  @override
+  String get srDeclined => 'Request declined.';
+
+  @override
+  String get srStatusPending => 'Waiting';
+
+  @override
+  String get srStatusAccepted => 'Accepted';
+
+  @override
+  String get srStatusDeclined => 'Declined';
+
+  @override
+  String get srStatusCancelled => 'Withdrawn';
+
+  @override
+  String get srNoneReceived => 'No request received';
+
+  @override
+  String get srNoneReceivedHint =>
+      'When a linked group asks you to share something, it shows here.';
+
+  @override
+  String get srNoneSent => 'No request sent';
+
+  @override
+  String get srNoneSentHint =>
+      'Open a linked group in Network: “Ask for access” on a part it doesn’t share.';
+
+  @override
+  String get srOnlyPresident => 'Only the president answers requests.';
 }

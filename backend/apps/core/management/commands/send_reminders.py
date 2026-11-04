@@ -39,6 +39,9 @@ class Command(BaseCommand):
         members = list(User.objects.members().filter(gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True, remind_eve=True))
         today_start = timezone.make_aware(datetime.combine(timezone.localdate(), time.min))
         sent = 0
+        from apps.core.network import reach_people
+
+        bureau = {u.pk for u in reach_people(gid, "bureau")}
         dresses = {gid: dress_names()}
         for e in events:
             if Notification.objects.filter(kind="reminder", target__type="event", target__id=e.pk, created_at__gte=today_start).exists():
@@ -56,6 +59,9 @@ class Command(BaseCommand):
                 sent += notify(named, "reminder", f"Rappel : vous êtes attendu(e) demain {when:%H:%M}",
                                " · ".join(x for x in [e.title, e.group.name, body] if x), target)
             ids = {u.pk for u in named}
+            # For the bureau only (build 48): the others don't see it.
+            if e.group_id != gid and e.reach_audience == "bureau":
+                ids |= {m.pk for m in members if m.pk not in bureau}
             sent += notify([m for m in members if m.pk not in ids], "reminder", f"Rappel : {e.title} demain {when:%H:%M}",
                            " · ".join(x for x in [body, e.group.name if e.group_id != gid else ""] if x), target)
         self.stdout.write(f"{sent} reminders for {events.count()} event(s).")

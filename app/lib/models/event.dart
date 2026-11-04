@@ -1,4 +1,5 @@
 import 'me.dart';
+import 'network_reach.dart';
 
 /// Kind and dress keys are the group's own (back-office → Paramètres); the
 /// server also sends their names (kindName, dressName).
@@ -38,7 +39,15 @@ class CalendarEvent {
     this.cascade = false,
     this.fromGroup,
     this.contingent,
+    this.reach,
+    this.sentTo,
   });
+
+  /// Chosen recipients to send with a save (build 48); null: unchanged.
+  final NetworkReach? reach;
+
+  /// Where this group sent it in the network (build 48).
+  final SentTo? sentTo;
 
   /// Joint planning (build 42): from above, what this group is asked and
   /// whether the viewer is named; on an event this group sent down, totals.
@@ -154,6 +163,7 @@ class CalendarEvent {
     contingent: j['contingent'] == null
         ? null
         : ContingentSummary.fromJson(j['contingent'] as Map<String, dynamic>),
+    sentTo: SentTo.fromJson(j['sent_to']),
   );
 
   Map<String, dynamic> toJson() => {
@@ -169,6 +179,7 @@ class CalendarEvent {
     'scope': scope,
     'chef': chefId,
     'cascade': cascade,
+    if (reach case final r?) ...{'reach': r.ids, 'reach_audience': r.audience},
   };
 }
 

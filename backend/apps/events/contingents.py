@@ -55,7 +55,7 @@ def set_requests(event, requests, *, by, request=None):
     _open(event)
     if not event.cascade:
         raise ContingentRule("not_sent_down", "Envoyez d’abord l’événement aux groupes rattachés.")
-    kids = {g.pk: g for g in event.group.children.filter(is_active=True)}
+    kids = {g.pk: g for g in _asked(event)}
     changed = []
     for r in requests or []:
         try:
@@ -92,10 +92,19 @@ def set_requests(event, requests, *, by, request=None):
     return contingents_of(event)
 
 
+def _asked(event):
+    """The groups directly below that the event reaches (build 48: its
+    sender may have chosen some only)."""
+    from apps.core.network import reached
+
+    ids = {g.pk for g in reached(event)}
+    return [g for g in event.group.children.filter(is_active=True).order_by("name") if g.pk in ids]
+
+
 def contingents_of(event):
     rows = {c.group_id: c for c in EventContingent.objects.filter(event=event).prefetch_related("members")}
     out = []
-    for g in event.group.children.filter(is_active=True).order_by("name"):
+    for g in _asked(event):
         c = rows.get(g.pk)
         out.append({"group": g, "contingent": c})
     return out

@@ -43,10 +43,14 @@ class GroupInfo {
     this.levelName = '',
     this.parent,
     this.below = 0,
+    this.reach = 0,
   }) : initials = initials ?? '';
 
   /// How many groups are attached directly below (build 41).
   final int below;
+
+  /// How many groups a post can go to: below, neighbours, twins (build 48).
+  final int reach;
 
   /// Its level in a network ("Paroisse") and the group it is attached to
   /// (owner, 2026-11-03), shown in the group sheet.
@@ -102,6 +106,7 @@ class GroupInfo {
     levelName: (j['level_name'] as String?) ?? '',
     parent: j['parent'] as String?,
     below: (j['below'] as int?) ?? 0,
+    reach: (j['reach'] as int?) ?? (j['below'] as int?) ?? 0,
   );
 }
 

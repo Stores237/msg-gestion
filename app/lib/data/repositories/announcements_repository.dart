@@ -1,4 +1,5 @@
 import '../../models/announcement.dart';
+import '../../models/network_reach.dart';
 
 abstract class AnnouncementsRepository {
   /// [filter]: all | convocations | unread | sent | for_me
@@ -12,6 +13,7 @@ abstract class AnnouncementsRepository {
     bool pinned = false,
     List<int> tagged = const [],
     bool cascade = false,
+    NetworkReach? reach,
   });
 
   /// The author (or someone who manages announcements) edits or deletes it.

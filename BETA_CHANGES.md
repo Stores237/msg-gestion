@@ -1629,3 +1629,52 @@ Owner (2026-11-04): "Créer le réseau de démonstration" answered *Internal Ser
 - No migration, no new APK (the app is unchanged; build 47 stays current).
 - How to verify: deploy staging → back-office → Réseaux de groupes → Démonstration → Créer → the
   page shows "Création en cours…", then the PIN and the accounts.
+
+## 71. Build 48: networks — files reach other groups, choose who receives, clearer sharing, ask for more
+
+Owner (2026-11-04): photos and files of announcements sent to the network weren't visible; the
+sender should choose who receives (like the member picker of a group announcement), also for the
+calendar; the sharing levels weren't explained; a linked group's page should show, with filters,
+what is visible, what isn't and how to ask for it.
+
+- **Photos and files reach the other groups.** The list and the detail of announcements read the
+  attachments with the scoped manager, which kept only the current group's: an announcement from
+  the zone came without its files in a parish. Fixed (`_with_files`).
+- **"Diffuser dans le réseau"** replaces the on/off switch, in a new announcement and in an event:
+  a full page lists the groups this one can reach — below at any depth, neighbours, twins — with
+  filters (Tous · En dessous · Voisins · Jumelés), search past 6 groups, "Tout sélectionner", and
+  **Qui la reçoit: Tous les membres / Le bureau seulement** (holders of a bureau role in each
+  chosen group; the others neither see it nor get reminders). The sender's card then says
+  "Diffusé à : GS Kotto · Le bureau seulement". Events: only the chosen groups directly below can
+  be asked for people (contingents); adding a group to an event later tells that group only.
+  Server: `Announcement.reach` / `Event.reach` (M2M) and `reach_audience`; no list = every group
+  below, as before (older posts keep working). `GET /api/network/recipients/`.
+- **What we share, spelled out.** Each part has its levels as cards that say exactly what is shown
+  (e.g. Finances · Résumé: the balance and the year's totals; Détail: + the last 30 approved
+  entries), who reads it in the other group, an "Always private" card, and **Aperçu**: the group
+  as the audience would see it with the choices on screen, before saving
+  (`POST /api/network/sharing/preview/`; only parts the viewer reads in their own group).
+  Announcements now have two levels: Résumé = title and text (what "Détail" was), Détail = + photos
+  and files. Groups that had chosen "Détail" are moved to "Résumé" by the migration, so nothing
+  more is shown than they agreed to.
+- **A linked group's page**: header with its relation (Rattaché · Voisin · Jumelé), three counters
+  (Visibles · Réservés à d'autres rôles · Non partagés) that filter, filter chips, one card per
+  part with its state and data, and **Demander l'accès / Demander le détail** (choose the level, a
+  message). A waiting request shows on the card with "Annuler la demande"; a declined one says when
+  and why. Who may ask: whoever would read that part in their group, or the président.
+- **Demandes de partage** (Réseau → new row, with a count for the président; the notification opens
+  it): Reçues / Envoyées. The président accepts — which shares that part at that level with the
+  whole audience (every group above, every neighbour…), said before confirming — or declines with an
+  optional reason; the asking group is told. All audited in both groups. `ShareRequest`,
+  `/api/network/groups/<pk>/requests/`, `/api/network/requests/`, `/api/network/requests/<pk>/`.
+- Demo network: a zone post for two parishes' bureaux only, and two requests waiting (Zone Wouri 9
+  → GS Kotto: finances in detail; Zone Akwa → GS Bonapriso: finances).
+- Also: the network's level names in Réseau now include levels 5 and 6; test phone numbers no longer
+  collide with the demo's.
+- Migrations: core 0021, announcements 0007, events 0011.
+- How to verify (demo network): as Zone Wouri 9's président, new announcement → Diffuser dans le
+  réseau → pick GS Kotto, "Le bureau seulement" → send; GS Kotto's président sees it, a plain
+  member doesn't. Attach a PDF to a zone announcement sent to all: a parish member opens it. As
+  GS Kotto's président: Réseau → Demandes de partage → accept the zone's request; as the zone's
+  treasurer, Réseau → GS Kotto shows finances in detail. Réseau → Ce que nous partageons → Aperçu.
+

@@ -258,6 +258,25 @@ class Command(BaseCommand):
             Read.objects.create(announcement=a, member=officers[DIOCESE]["conseiller"])
             send_down(d, f"Annonce de {d.name}", a.title, {"type": "announcement", "id": a.pk})
 
+        # Build 48: a zone post for two parishes' bureaux only, and requests
+        # for more sharing waiting for the parishes' présidents.
+        from apps.core.network import send_to
+        from apps.core.sharing import ask
+
+        with in_group(zb):
+            b = Announcement.objects.create(title="Réunion des présidents de la zone",
+                                            body="Pour les bureaux de Yapoma et Kotto : préparation de la fête de zone.",
+                                            author=officers[ZONE]["president"], author_role="Coordinateur de zone",
+                                            cascade=True, reach_audience="bureau")
+            b.reach.set([groups["GS Yapoma"], groups["GS Kotto"]])
+            Read.objects.create(announcement=b, member=officers[ZONE]["president"])
+            send_to(b, f"Annonce de {zb.name}", b.title, {"type": "announcement", "id": b.pk})
+            ask(zb, groups["GS Kotto"], "finances", "detail", by=officers[ZONE]["tresorier"],
+                note="Pour le rapport trimestriel de la zone.")
+        with in_group(za):
+            ask(za, groups["GS Bonapriso"], "finances", "summary", by=officers[ZONE2]["president"],
+                note="Toutes les paroisses de la zone le partagent, sauf vous.")
+
         for zone, when, title in ((zb, today + timedelta(days=3), "Messe de zone"), (za, today + timedelta(days=1), "Service extérieur de zone")):
             o = officers[zone.name.removesuffix(SUFFIX)]
             with in_group(zone):

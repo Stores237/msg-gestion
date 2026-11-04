@@ -138,6 +138,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         FromGroupMark(group: g, key: const Key('event-origin')),
                         const SizedBox(height: 8),
                       ],
+                      if (e.sentTo case final t?) ...[
+                        SentToMark(sentTo: t, key: const Key('event-sent-to')),
+                        const SizedBox(height: 8),
+                      ],
                       EventTypeLine(event: e),
                       const SizedBox(height: 4),
                       Text(

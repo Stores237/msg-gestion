@@ -6,6 +6,7 @@ import '../l10n/app_localizations.dart';
 import '../models/announcement.dart';
 import '../models/event.dart';
 import '../models/me.dart';
+import '../models/network_reach.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'attachments.dart';
@@ -1023,6 +1024,10 @@ class AnnouncementCard extends StatelessWidget {
                   FromGroupMark(group: g, key: Key('from-group-${a.id}')),
                   const SizedBox(height: 8),
                 ],
+                if (a.sentTo case final t?) ...[
+                  SentToMark(sentTo: t, key: Key('sent-to-${a.id}')),
+                  const SizedBox(height: 8),
+                ],
                 Row(
                   children: [
                     // Wraps instead of overflowing on narrow phones / large text.
@@ -1386,6 +1391,45 @@ class OwnerActions extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// "Diffusée à GS Kotto · le bureau": where this group sent a post or an
+/// event in the network (build 48).
+class SentToMark extends StatelessWidget {
+  const SentToMark({super.key, required this.sentTo});
+  final SentTo sentTo;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.msg;
+    final l = AppLocalizations.of(context);
+    final t = sentTo;
+    final where = t.allBelow
+        ? l.reachAllBelow
+        : (t.groups.length == 1
+              ? t.groups.first.name
+              : l.reachGroupsCount(t.groups.length));
+    return Row(
+      children: [
+        Icon(Icons.hub_outlined, size: 16, color: c.primaryText),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            l.reachSentTo(
+              t.audience == 'bureau' ? '$where · ${l.reachBureauOnly}' : where,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: c.primaryText,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

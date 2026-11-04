@@ -5,12 +5,14 @@ import '../../data/current_user.dart';
 import '../../data/repository_locator.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/event.dart';
+import '../../models/network_reach.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/dates.dart';
 import '../../widgets/errors.dart';
 import '../../widgets/labels.dart';
 import '../../widgets/member_picker.dart';
 import '../../widgets/ui.dart';
+import '../network_reach_picker.dart';
 
 /// "Nouvel événement" for roles allowed to create events; with [existing],
 /// "Modifier l’événement" (its author, or the calendar's managers).
@@ -41,9 +43,31 @@ class _EventFormScreenState extends State<EventFormScreen> {
   Set<String> _noChef = AppSettings.defaultTypesWithoutChef;
   String _dress = 'interieure';
 
-  /// Also in the calendars of the groups attached below (build 41).
-  bool _cascade = false;
-  int get _below => currentUser.value?.group?.below ?? 0;
+  /// Also in the calendars of groups of the network (build 41); which
+  /// ones and whether only their bureau (build 48).
+  NetworkReach? _reach;
+
+  /// Sent to every group below before build 48, until changed here.
+  bool _allBelow = false;
+  bool _reachTouched = false;
+  int get _reachable => currentUser.value?.group?.reach ?? 0;
+  bool get _sendsOut =>
+      (_reach?.groups.isNotEmpty ?? false) || (_allBelow && !_reachTouched);
+
+  Future<void> _pickReach() async {
+    final r = await pickNetworkReach(
+      context,
+      current: _reach,
+      allBelow: _allBelow && !_reachTouched,
+    );
+    if (r != null && mounted) {
+      setState(() {
+        _reach = r;
+        _reachTouched = true;
+      });
+    }
+  }
+
   late DateTime _day;
   TimeOfDay _start = const TimeOfDay(hour: 15, minute: 0);
   TimeOfDay? _end;
@@ -63,7 +87,10 @@ class _EventFormScreenState extends State<EventFormScreen> {
       _place.text = e.place;
       _placeDetail.text = e.placeDetail;
       _notes.text = e.notes;
-      _cascade = e.cascade;
+      if (e.sentTo case final t?) {
+        _reach = NetworkReach(groups: t.groups, audience: t.audience);
+        _allBelow = t.allBelow;
+      }
       _kindOther.text = e.kindOther;
       _scope = e.scope;
       if (e.chefId != null) _chef = (e.chefId!, e.chefName ?? '');
@@ -136,7 +163,8 @@ class _EventFormScreenState extends State<EventFormScreen> {
         kindOther: _kind == 'autre' ? _kindOther.text.trim() : '',
         scope: _hasScope ? _scope : '',
         chefId: _needsChef ? _chef?.$1 : null,
-        cascade: _cascade && _below > 0,
+        cascade: _sendsOut,
+        reach: _reachTouched ? _reach : null,
       );
       final repo = RepositoryLocator.instance.events;
       if (widget.existing == null) {
@@ -415,16 +443,32 @@ class _EventFormScreenState extends State<EventFormScreen> {
                       maxLines: 4,
                       decoration: deco(),
                     ),
-                    if (_below > 0) ...[
+                    if (_reachable > 0 || _sendsOut) ...[
                       const SizedBox(height: 12),
-                      SwitchListTile(
-                        key: const Key('e-cascade'),
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(l.groupNetSendDown),
-                        subtitle: Text(l.groupNetSendDownEventHint(_below)),
-                        value: _cascade,
-                        onChanged: (v) => setState(() => _cascade = v),
+                      GroupCard(
+                        children: [
+                          ListRow(
+                            key: const Key('e-cascade'),
+                            lead: IconChip(
+                              Icons.hub_outlined,
+                              tone: _sendsOut ? Tone.green : Tone.neutral,
+                            ),
+                            title: Text(l.reachTitle),
+                            subtitle: Text(
+                              _allBelow && !_reachTouched
+                                  ? l.reachAllBelow
+                                  : reachSummary(l, _reach),
+                            ),
+                            chevron: true,
+                            onTap: _pickReach,
+                          ),
+                        ],
                       ),
+                      if (_sendsOut && (_reach?.groups.isNotEmpty ?? false))
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: ReachChips(groups: _reach!.groups),
+                        ),
                     ],
                   ],
                 ),

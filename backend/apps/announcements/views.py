@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -36,11 +36,18 @@ def _notify_new(item, users):
 
 
 def _visible(request):
-    """This group's announcements and those sent down from above (build 41)."""
+    """This group's announcements and those other groups sent it (builds 41, 48)."""
     from apps.core.groups import current_group_id
     from apps.core.network import visible
 
-    return visible(Announcement, current_group_id(), kind=Announcement.Kind.ANNOUNCEMENT)
+    return visible(Announcement, current_group_id(), viewer=request.user, kind=Announcement.Kind.ANNOUNCEMENT)
+
+
+def _with_files(qs):
+    """Photos and files, also of announcements from other groups: the scoped
+    manager would keep only this group's (owner, 2026-11-04: "attachments
+    are not visible to networks")."""
+    return qs.prefetch_related(Prefetch("attachments", queryset=Attachment.all_groups.order_by("created_at")), "tagged", "reach")
 
 
 def _context(request, items):
@@ -59,8 +66,7 @@ class AnnouncementListView(APIView):
         # Explicit order_by: Django drops Meta.ordering from GROUP BY queries,
         # and annotate(Count) makes this one.
         qs = (
-            _visible(request).select_related("author", "event", "group")
-            .prefetch_related("attachments", "tagged")
+            _with_files(_visible(request).select_related("author", "event", "group"))
             .annotate(read_count=Count("reads"))
             .order_by("-pinned", "-created_at")
         )
@@ -86,11 +92,9 @@ class AnnouncementListView(APIView):
         tagged = item.tagged.all()
         n = _notify_new(item, (tagged if tagged else _audience()).exclude(pk=request.user.pk))
         if item.cascade:
-            from apps.core.models import Settings
-            from apps.core.network import send_down
+            from apps.core.network import send_to
 
-            g = Settings.get().group
-            n += send_down(g, f"Annonce de {g.name}", item.title, {"type": "announcement", "id": item.pk})
+            n += send_to(item, f"Annonce de {item.group.name}", item.title, {"type": "announcement", "id": item.pk})
         audit.record("Convocation envoyée" if item.kind == Announcement.Kind.CONVOCATION else "Annonce publiée",
                      actor=request.user, obj=item, request=request,
                      detail={"notifiés": n, **({"mentionnés": len(tagged)} if tagged else {})})
@@ -104,7 +108,7 @@ class AnnouncementDetailView(APIView):
     permission_classes = [require("announcements.posts", "view")]
 
     def get(self, request, pk):
-        item = get_object_or_404(_visible(request).select_related("author", "event", "group").prefetch_related("tagged"), pk=pk)
+        item = get_object_or_404(_with_files(_visible(request).select_related("author", "event", "group")), pk=pk)
         return Response(AnnouncementSerializer(item, context=_context(request, [item])).data)
 
     @extend_schema(request=AnnouncementSerializer, responses=AnnouncementSerializer)

@@ -5,6 +5,28 @@ from apps.events.models import Event
 from .models import Announcement, Attachment
 
 
+def check_network_reach(data):
+    """Recipients in the network (build 48): only with cascade, only groups
+    linked to this one. No list: every group below (must exist)."""
+    from apps.core.models import Settings
+    from apps.core.network import NetworkRule, check_reach
+
+    groups, audience = data.get("reach") or [], data.get("reach_audience", "all")
+    if not data.get("cascade"):
+        if groups or audience != "all":
+            raise serializers.ValidationError({"reach": serializers.ErrorDetail(
+                "Choisissez d’abord d’envoyer dans le réseau.", code="reach_without_cascade")})
+        return
+    group = Settings.get().group
+    try:
+        check_reach(group, groups, audience)
+    except NetworkRule as e:
+        raise serializers.ValidationError({"reach": serializers.ErrorDetail(e.message, code=e.code)}) from None
+    if not groups and not group.children.filter(is_active=True).exists():
+        raise serializers.ValidationError({"cascade": serializers.ErrorDetail(
+            "Aucun groupe n’est rattaché au vôtre : choisissez les groupes.", code="no_groups_below")})
+
+
 class AttachmentSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
 
@@ -34,6 +56,15 @@ class TaggedField(serializers.PrimaryKeyRelatedField):
         return _audience()
 
 
+class ReachField(serializers.PrimaryKeyRelatedField):
+    """A group of the network the post goes to (checked in validate)."""
+
+    def get_queryset(self):
+        from apps.core.models import Group
+
+        return Group.objects.filter(is_active=True)
+
+
 class AnnouncementSerializer(serializers.ModelSerializer):
     event = EventField(required=False, allow_null=True)
     event_title = serializers.CharField(source="event.title", read_only=True, default=None)
@@ -50,11 +81,14 @@ class AnnouncementSerializer(serializers.ModelSerializer):
     tagged_members = serializers.SerializerMethodField()
     for_me = serializers.SerializerMethodField()
     from_group = serializers.SerializerMethodField()
+    reach = ReachField(many=True, required=False, write_only=True)
+    sent_to = serializers.SerializerMethodField()
 
     class Meta:
         model = Announcement
         fields = ["id", "kind", "title", "body", "event", "event_title", "event_starts_at", "pinned", "author_name", "author_role", "created_at", "unread", "reads", "attachments",
-                  "can_edit", "can_delete", "tagged", "tagged_members", "for_me", "cascade", "from_group"]
+                  "can_edit", "can_delete", "tagged", "tagged_members", "for_me", "cascade", "from_group", "reach", "reach_audience",
+                  "sent_to"]
         read_only_fields = ["created_at"]
 
     # The author edits and deletes their own post (owner, 2026-10-26); people
@@ -70,6 +104,12 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         from apps.core.network import origin
 
         return origin(a, current_group_id(), self.context.get("request")) if self._foreign(a) else None
+
+    def get_sent_to(self, a) -> dict | None:
+        """Where this group sent it (build 48); None from other groups."""
+        from apps.core.network import reach_summary
+
+        return None if self._foreign(a) else reach_summary(a, self.context.get("request"))
 
     def get_can_edit(self, a) -> bool:
         v = self.context.get("viewer")
@@ -110,27 +150,20 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         if viewer is None or self._foreign(a) or not (a.author_id == viewer.pk or viewer.can("announcements.posts", "change")):
             return None
         total = self.context.get("audience", 0)
-        if a.cascade:  # + the members of every group below (build 41)
-            from apps.accounts.models import User
-            from apps.core.groups import in_group
+        if a.cascade:  # + the people of every group it reached (builds 41, 48)
+            from apps.core.network import reach_people, reached
 
-            for g in a.group.descendants():
-                with in_group(g):
-                    total += User.objects.members().filter(
-                        gstatus__in=[User.Status.ACTIVE, User.Status.LEAVE], is_active=True).count()
+            for g in reached(a):
+                total += len(reach_people(g, a.reach_audience))
         return {"read": getattr(a, "read_count", a.reads.count()), "total": total}
 
     def validate(self, data):
         kind = data.get("kind", getattr(self.instance, "kind", Announcement.Kind.ANNOUNCEMENT))
         if data.get("cascade"):
-            from apps.core.models import Settings
-
             if kind != Announcement.Kind.ANNOUNCEMENT or data.get("tagged"):
                 raise serializers.ValidationError({"cascade": serializers.ErrorDetail(
                     "Seule une annonce pour tout le groupe peut aller aux groupes rattachés.", code="cascade_announcement_only")})
-            if not Settings.get().group.children.filter(is_active=True).exists():
-                raise serializers.ValidationError({"cascade": serializers.ErrorDetail(
-                    "Aucun groupe n’est rattaché au vôtre.", code="no_groups_below")})
+        check_network_reach(data)
         if kind == Announcement.Kind.CONVOCATION and not data.get("event", getattr(self.instance, "event", None)):
             raise serializers.ValidationError({"event": serializers.ErrorDetail("Une convocation doit être liée à un événement.", code="event_required")})
         return data

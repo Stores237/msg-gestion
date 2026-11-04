@@ -7,6 +7,7 @@ import 'package:huddle/data/repositories/members_repository.dart';
 import 'package:huddle/data/repositories/planning_repository.dart';
 import 'package:huddle/data/repositories/profile_repository.dart';
 import 'package:huddle/models/announcement.dart';
+import 'package:huddle/models/network_reach.dart';
 import 'package:huddle/models/event.dart';
 import 'package:huddle/models/expense.dart';
 import 'package:huddle/models/finance.dart';
@@ -409,6 +410,47 @@ class FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<SharedGroup> sharedGroup(int id) async => shared!;
+
+  // Build 48.
+  Map<String, SharedKind> preview = const {};
+  final previewed = <Map<String, String>>[];
+  final asked = <String>[];
+  final answered = <String>[];
+  final cancelled = <int>[];
+  ShareRequests requests = const ShareRequests();
+  List<ReachGroup> reachGroups = const [];
+
+  @override
+  Future<Map<String, SharedKind>> previewSharing(
+    Map<String, String> values,
+  ) async {
+    previewed.add(values);
+    return preview;
+  }
+
+  @override
+  Future<void> askShare(
+    int groupId, {
+    required String kind,
+    required String level,
+    String note = '',
+  }) async => asked.add('$groupId:$kind:$level:$note');
+
+  @override
+  Future<ShareRequests> shareRequests() async => requests;
+
+  @override
+  Future<void> answerShareRequest(
+    int id, {
+    required bool accept,
+    String note = '',
+  }) async => answered.add('$id:$accept:$note');
+
+  @override
+  Future<void> cancelShareRequest(int id) async => cancelled.add(id);
+
+  @override
+  Future<List<ReachGroup>> recipients() async => reachGroups;
 
   final reminders = <String>[];
   BureauHome bureau = const BureauHome();
@@ -871,9 +913,11 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
     bool pinned = false,
     List<int> tagged = const [],
     bool cascade = false,
+    NetworkReach? reach,
   }) async {
     sent.add('$kind:$title:${eventId ?? '-'}${cascade ? ':down' : ''}');
     lastTagged = tagged;
+    lastReach = reach;
     final a = Announcement(
       id: 100 + sent.length,
       kind: kind,
@@ -945,6 +989,7 @@ class FakeAnnouncementsRepository implements AnnouncementsRepository {
 
   /// The ids sent with the last create or update.
   List<int> lastTagged = const [];
+  NetworkReach? lastReach;
   List<Recipient> people = const [
     Recipient(id: 11, name: 'Essomba Kévin', status: 'actif'),
     Recipient(id: 12, name: 'Mbarga Rose', status: 'actif'),

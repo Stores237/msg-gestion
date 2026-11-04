@@ -114,6 +114,12 @@ class Event(models.Model):
     # Shown in the calendars of the groups attached below (owner, 2026-11-03),
     # read-only there.
     cascade = models.BooleanField("aussi pour les groupes rattachés", default=False)
+    # Which groups of the network receive it (owner, 2026-11-04: "select who
+    # should receive"): groups below, neighbours or twins. None chosen: every
+    # group below, as before build 48. "bureau": only their bureau sees it.
+    reach = models.ManyToManyField("core.Group", blank=True, related_name="+")
+    reach_audience = models.CharField(max_length=8, choices=[("all", "Tous les membres"), ("bureau", "Le bureau seulement")],
+                                      default="all")
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
     # The author's role when they created it (owner, 2026-10-26: shown on it).
     created_by_role = models.CharField(max_length=100, blank=True)

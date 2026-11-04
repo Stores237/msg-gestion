@@ -6,6 +6,13 @@ from . import reports
 from .models import ActivityType, Attendance, DressCode, Event, EventReport, dress_descriptions, dress_names, kind_names
 
 
+class ReachField(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        from apps.core.models import Group
+
+        return Group.objects.filter(is_active=True)
+
+
 class EventSerializer(serializers.ModelSerializer):
     my_attendance = serializers.SerializerMethodField()
     kind_name = serializers.SerializerMethodField()
@@ -27,13 +34,15 @@ class EventSerializer(serializers.ModelSerializer):
     my_duty = serializers.SerializerMethodField()
     from_group = serializers.SerializerMethodField()
     contingent = serializers.SerializerMethodField()
+    reach = ReachField(many=True, required=False, write_only=True)
+    sent_to = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = ["id", "kind", "kind_name", "kind_other", "scope", "title", "starts_at", "ends_at", "place", "place_detail", "dress", "dress_name", "dress_detail",
                   "notes", "my_attendance", "created_by_name", "created_by_role", "can_edit", "can_delete", "ended",
                   "chef", "chef_name", "report_due_at", "report_status", "can_report", "can_read_report", "report_read_by",
-                  "has_lineup", "my_duty", "cascade", "from_group", "contingent"]
+                  "has_lineup", "my_duty", "cascade", "from_group", "contingent", "reach", "reach_audience", "sent_to"]
         read_only_fields = ["created_by_name", "created_by_role", "can_edit", "can_delete", "ended"]
 
     def __init__(self, *args, **kwargs):
@@ -85,6 +94,12 @@ class EventSerializer(serializers.ModelSerializer):
         from apps.core.network import origin
 
         return origin(event, current_group_id(), self.context.get("request")) if self._foreign(event) else None
+
+    def get_sent_to(self, event) -> dict | None:
+        """Where this group sent it (build 48); None from other groups."""
+        from apps.core.network import reach_summary
+
+        return None if self._foreign(event) else reach_summary(event, self.context.get("request"))
 
     def get_contingent(self, event) -> dict | None:
         """Joint planning (build 42). From above: what this group is asked
@@ -158,13 +173,16 @@ class EventSerializer(serializers.ModelSerializer):
     def get_dress_name(self, event) -> str:
         return self._in_origin(event, "dresses", dress_names).get(event.dress, event.dress) if event.dress else ""
 
-    def validate_cascade(self, value):
-        if value:
-            from apps.core.models import Settings
+    def _validate_reach(self, data):
+        if "cascade" in data or "reach" in data or "reach_audience" in data:
+            from apps.announcements.serializers import check_network_reach
 
-            if not Settings.get().group.children.filter(is_active=True).exists():
-                raise serializers.ValidationError("Aucun groupe n’est rattaché au vôtre.", code="no_groups_below")
-        return value
+            merged = {"cascade": data.get("cascade", getattr(self.instance, "cascade", False)),
+                      "reach": data.get("reach", list(self.instance.reach.all()) if self.instance else []),
+                      "reach_audience": data.get("reach_audience", getattr(self.instance, "reach_audience", "all"))}
+            check_network_reach(merged)
+            if not merged["cascade"] and self.instance is not None:
+                data["reach"], data["reach_audience"] = [], "all"
 
     def validate_kind(self, value):
         # The group's own list (back-office → Paramètres).
@@ -181,6 +199,7 @@ class EventSerializer(serializers.ModelSerializer):
         return self.context.get("mine", {}).get(event.pk)
 
     def validate(self, data):
+        self._validate_reach(data)
         starts = data.get("starts_at", getattr(self.instance, "starts_at", None))
         ends = data.get("ends_at", getattr(self.instance, "ends_at", None))
         if starts and ends and ends <= starts:
