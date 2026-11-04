@@ -618,15 +618,26 @@ def test_backoffice_creates_a_group_in_place(boss, mgs):  # noqa: F811
 # --- Build 47: the demo network from the back-office (staging only) ---------------------------
 
 def test_backoffice_demo_page_only_on_staging(boss, settings):  # noqa: F811
+    from django.core.cache import cache
+
+    cache.delete("network-demo-job")
+    settings.DEMO_INLINE = True  # the thread runs inline in tests
     settings.DEMO_TOOLS = False
     assert boss.get("/bo/reseaux/demonstration/").status_code == 404
     assert "Démonstration" not in boss.get("/bo/reseaux/").content.decode()
     settings.DEMO_TOOLS = True
     assert "Démonstration" in boss.get("/bo/reseaux/").content.decode()
-    page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}).content.decode()
+    page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}, follow=True).content.decode()
     assert 'id="demo-pin"' in page and "Zone Wouri 9 (démo)" in page and "Aumônier diocésain" in page
+    # Shown once: the next visit doesn't show the PIN again.
+    assert 'id="demo-pin"' not in boss.get("/bo/reseaux/demonstration/").content.decode()
     assert Group.objects.filter(name="Archidiocèse de Douala (démo)").exists()
     assert AuditLog.objects.filter(action="Réseau de démonstration créé").exists()
+    # A running job: the page refreshes itself and says so.
+    cache.set("network-demo-job", {"status": "running", "user": 0}, 60)
+    page = boss.get("/bo/reseaux/demonstration/").content.decode()
+    assert 'id="demo-running"' in page and 'http-equiv="refresh"' in page
+    cache.delete("network-demo-job")
     # Twice: refused, the PIN isn't shown again.
     page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}, follow=True).content.decode()
     assert "existe déjà" in page and 'id="demo-pin"' not in page
@@ -648,4 +659,22 @@ def test_demo_page_is_for_super_admins_only(settings):
     c.force_login(u)
     assert c.get("/bo/reseaux/demonstration/").status_code in (302, 403, 404)
     assert c.post("/bo/reseaux/demonstration/", {"action": "create"}).status_code in (302, 403, 404)
+    assert not Group.objects.filter(name__endswith=" (démo)").exists()
+
+
+
+def test_demo_failure_is_shown_and_nothing_is_kept(boss, settings, monkeypatch):  # noqa: F811
+    from django.core.cache import cache
+
+    from apps.core.management.commands import seed_network_demo as demo
+
+    cache.delete("network-demo-job")
+    settings.DEMO_INLINE, settings.DEMO_TOOLS = True, True
+
+    def boom(self, pin):
+        raise RuntimeError("base indisponible")
+
+    monkeypatch.setattr(demo.Command, "build", boom)
+    page = boss.post("/bo/reseaux/demonstration/", {"action": "create"}, follow=True).content.decode()
+    assert 'id="demo-failed"' in page and "base indisponible" in page
     assert not Group.objects.filter(name__endswith=" (démo)").exists()

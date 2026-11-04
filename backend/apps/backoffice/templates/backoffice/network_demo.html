@@ -1,10 +1,17 @@
 {% extends "backoffice/shell.html" %}{% load bo %}
 {% block title %}Réseau de démonstration{% endblock %}
+{% block head %}{% if running %}<meta http-equiv="refresh" content="4">{% endif %}{% endblock %}
 {% block crumb %}<div class="crumb"><a href="{% url 'backoffice:networks' %}">Réseaux de groupes</a> · démonstration (serveur de test)</div>{% endblock %}
 {% block heading %}Réseau de démonstration{% endblock %}
 {% block body %}
 <div class="notice warn">{% icon 'flask-conical' %}<span>Serveur de test seulement. Crée « {{ network }} » : Archidiocèse de Douala › Zone Wouri 9 (GS Yapoma, GS Bonamoussadi, GS Kotto et 4 paroisses « à compléter ») et Zone Akwa (2 paroisses), plus une chorale jumelée. Des membres fictifs (numéros +237 600 000 1xx) partagent un même code PIN. Rien d’autre n’est touché : seuls les groupes dont le nom finit par « (démo) ».</span></div>
 
+{% if running %}
+<section class="panel" style="margin-top:24px" id="demo-running"><div class="panel-b" style="display:flex;gap:12px;align-items:center">{% icon 'loader' %}<span><b>Création en cours…</b> Cela prend environ une minute sur le serveur de test. Cette page se met à jour toute seule ; le PIN s’affichera ici.</span></div></section>
+{% endif %}
+{% if failed %}
+<div class="notice alert" role="alert" style="margin-top:24px" id="demo-failed">{% icon 'triangle-alert' %}<span><b>La création a échoué</b> ; rien n’a été créé. Détail : {{ failed }}</span></div>
+{% endif %}
 {% if created %}
 <section class="panel" style="margin-top:24px" id="demo-created"><div class="panel-h"><h2>Créé · notez le PIN maintenant</h2></div><div class="panel-b">
   <p style="font-size:18px">PIN de tous les comptes de démonstration : <b class="tnum" id="demo-pin" style="font-size:24px;letter-spacing:2px">{{ created.pin }}</b></p>
@@ -18,7 +25,9 @@
 {% endif %}
 
 <section class="panel" style="margin-top:24px"><div class="panel-b" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
-  {% if exists %}
+  {% if running %}
+    <span class="muted">Patientez pendant la création.</span>
+  {% elif exists %}
     <span>Le réseau de démonstration existe.</span>
     <form method="post" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">{% csrf_token %}<input type="hidden" name="action" value="delete">
       <label class="fld"><span class="fld-l">Tapez SUPPRIMER pour confirmer</span><span class="fld-box"><input name="confirm" autocomplete="off" required></span></label>

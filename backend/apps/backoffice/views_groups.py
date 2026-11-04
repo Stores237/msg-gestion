@@ -366,36 +366,55 @@ def network_dues(request):
 
 @backoffice_view("backoffice.groups", "view")
 def network_demo(request):
-    """Réseaux → Réseau de démonstration (build 47): the seed_network_demo
+    """Réseaux → Réseau de démonstration (builds 47–48): the seed_network_demo
     command as two buttons, for a super admin, on staging only (owner: the
-    Render shell isn't on his plan). The shared PIN shows once, on the page
-    that created it; it is never stored in clear."""
+    Render shell isn't on his plan). Building runs in the background — on
+    Render it outlasts a request (build 47 hit the 60 s limit) — and the page
+    refreshes itself until done; the shared PIN shows once, to whoever
+    started it, then is forgotten."""
     from django.http import Http404
 
     from apps.core.management.commands import seed_network_demo as demo
 
     if not settings.DEMO_TOOLS or not request.user.is_super_admin:
         raise Http404
-    created = None
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "create":
             if demo.exists():
                 messages.error(request, "Le réseau de démonstration existe déjà. Supprimez-le d’abord pour repartir de zéro.")
+            elif not demo.start_demo(request.user.pk):
+                messages.error(request, "Une création est déjà en cours : patientez.")
             else:
-                pin, listing = demo.create_demo()
-                audit.record("Réseau de démonstration créé", actor=request.user, request=request, platform=True,
-                             detail={"groupes": len(listing)})
-                created = {"pin": pin, "listing": listing}
+                audit.record("Réseau de démonstration demandé", actor=request.user, request=request, platform=True)
         elif action == "delete":
-            if request.POST.get("confirm") != "SUPPRIMER":
+            j = demo.job()
+            if j and j["status"] == "running":
+                messages.error(request, "Une création est en cours : attendez qu’elle se termine.")
+            elif request.POST.get("confirm") != "SUPPRIMER":
                 messages.error(request, "Tapez SUPPRIMER pour confirmer.")
             else:
                 n, _rows = demo.delete_demo()
+                demo.clear_job()
                 audit.record("Réseau de démonstration supprimé", actor=request.user, request=request, platform=True,
                              sensitive=True, detail={"groupes": n})
                 messages.success(request, f"Réseau de démonstration supprimé ({n} groupes et leurs membres).")
-                return redirect("backoffice:network_demo")
+        return redirect("backoffice:network_demo")
+    j, created, failed, running = demo.job(), None, None, False
+    if j:
+        if j["status"] == "running":
+            running = True
+        elif j["user"] == request.user.pk:
+            demo.clear_job()  # shown once
+            if j["status"] == "done":
+                created = {"pin": j["pin"], "listing": j["listing"]}
+                audit.record("Réseau de démonstration créé", actor=request.user, request=request, platform=True,
+                             detail={"groupes": len(j["listing"])})
+            else:
+                failed = j["error"]
+                audit.record("Réseau de démonstration : échec", actor=request.user, request=request, platform=True,
+                             refused=True, detail={"erreur": failed})
     return render(request, "backoffice/network_demo.html", {
-        "nav": "networks", "exists": demo.exists(), "created": created, "network": demo.NETWORK,
+        "nav": "networks", "exists": demo.exists(), "created": created, "failed": failed, "running": running,
+        "network": demo.NETWORK,
     })

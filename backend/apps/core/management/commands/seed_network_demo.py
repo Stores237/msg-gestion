@@ -162,13 +162,18 @@ class Command(BaseCommand):
         return listing
 
     def person(self, group, slug, last, first, phone, pin):
+        from django.contrib.auth.hashers import make_password
+
         from apps.accounts.models import Role, RoleAssignment, User
         from apps.core.models import Membership
 
-        u = User.objects.create(phone=f"+237{phone}", last_name=last, first_name=first, status="actif", city="Douala",
-                                birth_date=date(1990 + phone % 15, 1 + phone % 12, 1 + phone % 27))
+        # One hash for everyone: hashing is deliberately slow (~0.2 s each),
+        # and 68 of them pushed the back-office request past its time limit.
+        if getattr(self, "_pin_hash", None) is None:
+            self._pin_hash = make_password(pin)
+        u = User(phone=f"+237{phone}", last_name=last, first_name=first, status="actif", city="Douala",
+                 birth_date=date(1990 + phone % 15, 1 + phone % 12, 1 + phone % 27), pin=self._pin_hash)
         u.set_unusable_password()
-        u.set_pin(pin)
         u.save()
         Membership.join(u, group.pk)
         role = Role.all_groups.get(group=group, slug=slug)
@@ -322,6 +327,58 @@ def create_demo():
     pin = cmd.pick_pin()
     with transaction.atomic():
         return pin, cmd.build(pin)
+
+
+# The back-office runs creation in the background (build 48): on Render's
+# small instance it takes longer than a request may last.
+JOB = "network-demo-job"
+
+
+def start_demo(user_id):
+    """Start building in a thread; the result waits in the cache for
+    `user_id` (the PIN shows once). Returns False when a job is running."""
+    import threading
+
+    from django.conf import settings
+    from django.core.cache import cache
+    from django.db import connection
+
+    if not cache.add(JOB, {"status": "running", "user": user_id}, timeout=600):
+        return False
+
+    def build():
+        try:
+            pin, listing = create_demo()
+            cache.set(JOB, {"status": "done", "user": user_id, "pin": pin, "listing": listing}, timeout=900)
+        except Exception as e:  # shown to the super admin, and in the logs
+            import logging
+
+            logging.getLogger(__name__).exception("demo network")
+            cache.set(JOB, {"status": "error", "user": user_id, "error": f"{type(e).__name__}: {e}"[:500]}, timeout=900)
+
+    def run():
+        try:
+            build()
+        finally:
+            connection.close()  # the thread's own connection
+
+    if getattr(settings, "DEMO_INLINE", False):  # tests: same thread, same transaction
+        build()
+    else:
+        threading.Thread(target=run, name="network-demo", daemon=True).start()
+    return True
+
+
+def job():
+    from django.core.cache import cache
+
+    return cache.get(JOB)
+
+
+def clear_job():
+    from django.core.cache import cache
+
+    cache.delete(JOB)
 
 
 def delete_demo():

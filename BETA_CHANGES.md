@@ -1611,3 +1611,21 @@ Owner (2026-11-03): "I can't use the Render shell due to my plan."
 - How to verify: deploy staging → back-office as super admin → Réseaux de groupes → Démonstration
   → Créer → note the PIN → sign in to the app with a listed number, e.g. the Zone Wouri 9
   coordinateur → Accueil → group name → Réseau.
+
+## 70. Fix (server only, after build 47): creating the demo network on staging
+
+Owner (2026-11-04): "Créer le réseau de démonstration" answered *Internal Server Error*.
+
+- Cause: the whole demo (13 groups, 68 accounts, ~2 250 queries) was built inside the request,
+  including 68 slow PIN hashes (~0.2 s each here, more on Render's small instance). On staging it
+  ran past gunicorn's 60 s limit, so the request was cut off (and, being one transaction, nothing
+  was kept).
+- Fix: the PIN is hashed once and shared (16 s → 2 s locally), and the back-office now starts the
+  creation in the background: the page says "Création en cours…" and refreshes itself every few
+  seconds, then shows the PIN and the accounts once, to whoever started it. A failure is shown
+  with its reason, and nothing is kept. A second "Créer" while one runs is refused; so is
+  "Supprimer". The progress waits in Redis (15 min at most), so it works whichever server worker
+  answers.
+- No migration, no new APK (the app is unchanged; build 47 stays current).
+- How to verify: deploy staging → back-office → Réseaux de groupes → Démonstration → Créer → the
+  page shows "Création en cours…", then the PIN and the accounts.

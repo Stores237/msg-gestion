@@ -22,7 +22,8 @@
   install build 43.
 - [ ] **Owner — build 44 (2026-11-03, contributions):** deploy (migration finances 0007); install
   build 44. Networks phases 1–6 are all in (39–44): try them together on staging.
-- [ ] **Owner — build 47 (2026-11-03, demo from the back-office):** deploy staging; check
+- [ ] **Owner — build 47 (2026-11-03, demo from the back-office; fixed 2026-11-04):** deploy
+  staging again (the first version timed out: "Internal Server Error"); check
   Environment has `DEMO_TOOLS=true` (add it if the Blueprint didn't); back-office → Réseaux de
   groupes → Démonstration → Créer; note the PIN; install build 47 and try the demo accounts.
 - [ ] **Owner — build 46 (2026-11-03, network setup):** deploy (migration core 0020). In the
