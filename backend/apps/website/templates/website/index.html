@@ -489,7 +489,7 @@ footer nav a:hover{color:var(--ink)}
       <h2 data-i18n="steps.title">Votre groupe sur Huddle en trois étapes</h2>
     </div>
     <div class="steps">
-      <div class="step reveal"><h3 data-i18n="steps.1.t">On crée votre groupe</h3><p data-i18n="steps.1.d">Contactez STORES : nous ouvrons votre espace avec son nom, son logo et ses rôles.</p></div>
+      <div class="step reveal"><h3 data-i18n="steps.1.t">On crée votre groupe</h3><p data-i18n="steps.1.d">Contactez STORES : nous ouvrons votre espace avec son nom, son logo et ses rôles.</p><p style="margin-top:12px"><a href="mailto:storefix237@gmail.com?subject=Huddle%20pour%20notre%20groupe" style="color:var(--deep);font-weight:700;text-decoration:none">storefix237@gmail.com →</a></p></div>
       <div class="step reveal"><h3 data-i18n="steps.2.t">Le bureau inscrit les membres</h3><p data-i18n="steps.2.d">Un numéro de téléphone par personne, et le rôle de chacun.</p></div>
       <div class="step reveal"><h3 data-i18n="steps.3.t">Chacun se connecte</h3><p data-i18n="steps.3.d">Avec son numéro et son code PIN. L’application montre ce que son rôle permet.</p></div>
     </div>
@@ -565,7 +565,7 @@ footer nav a:hover{color:var(--ink)}
       <a href="#reseaux" data-i18n="nav.networks">Réseaux</a>
       <a href="{% url 'website:download' %}" data-i18n="nav.download">Télécharger</a>
     </nav>
-    {% if p.support_email or p.support_whatsapp or p.support_phone %}<span class="contact"><span data-i18n="ft.contact">Contact</span> :{% if p.support_email %} <a href="mailto:{{ p.support_email }}">{{ p.support_email }}</a>{% endif %}{% if p.support_whatsapp %} · <a href="https://wa.me/237{{ p.support_whatsapp|cut:' ' }}" rel="noopener">WhatsApp</a>{% endif %}{% if p.support_phone %} · <a href="tel:+237{{ p.support_phone|cut:' ' }}">{{ p.support_phone }}</a>{% endif %}</span>{% endif %}
+    <span class="contact"><span data-i18n="ft.contact">Contact</span> : <a href="mailto:storefix237@gmail.com">storefix237@gmail.com</a>{% if p.support_whatsapp %} · <a href="https://wa.me/237{{ p.support_whatsapp|cut:' ' }}" rel="noopener">WhatsApp</a>{% endif %}{% if p.support_phone %} · <a href="tel:+237{{ p.support_phone|cut:' ' }}">{{ p.support_phone }}</a>{% endif %}</span>
     <span>© {% now "Y" %} STORES</span>
   </div>
 </footer>
