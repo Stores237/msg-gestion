@@ -1678,3 +1678,15 @@ what is visible, what isn't and how to ask for it.
   GS Kotto's président: Réseau → Demandes de partage → accept the zone's request; as the zone's
   treasurer, Réseau → GS Kotto shows finances in detail. Réseau → Ce que nous partageons → Aperçu.
 
+## 72. Website (no app or server change)
+
+`website/` is the public site: `index.html` (Huddle, its features, networks, security, how to
+start, download, and STORES' other projects: Spekooh, S@Learn, Emergensis) and `telecharger.html`
+(the tester download page, moved from `~/msg-beta/index.html`). Static files only; `assets/` holds
+the screenshots and the products' logos. Publishing copies `website/` into `~/msg-beta/`
+(`RELEASING.md` step 6).
+
+**Verify:** open the tunnel address: the site opens in French; EN switches every text and is
+remembered; the five tabs change the phone's screen (also with the arrow keys); "Télécharger"
+goes to `telecharger.html`, whose button downloads the build 48 APK; at phone width nothing
+scrolls sideways.

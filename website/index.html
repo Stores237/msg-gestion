@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="fr" data-lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huddle · La gestion de groupe, simplement</title>
+<meta name="description" content="Huddle réunit les membres, la caisse, le calendrier, le planning et les annonces de votre groupe dans une seule application. Propulsé par STORES.">
+<meta property="og:title" content="Huddle · La gestion de groupe, simplement">
+<meta property="og:description" content="Membres, caisse, calendrier, planning et annonces de votre groupe, dans une seule application.">
+<meta property="og:image" content="assets/shot-home.jpg">
+<meta name="theme-color" content="#F6F3EE">
+<link rel="icon" href="assets/huddle-mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F3EE; --sunken:#EFEAE2; --card:#FFFFFF; --line:#E4DED4;
+  --ink:#1B1D24; --text:#262420; --muted:#5F5A52; --faint:#8A8378;
+  --teal:#0E9F8F; --deep:#00695C; --tint:#D5ECE7; --coral:#E8553D; --gold:#D9A93F;
+  --navy:#123B4E; --navy2:#1B3F6E;
+  --r:24px; --shadow:0 1px 2px rgba(27,29,36,.04),0 12px 32px -12px rgba(27,29,36,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:17px;line-height:1.6;overflow-x:hidden}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+h1,h2,h3{color:var(--ink);line-height:1.12;letter-spacing:-.02em;margin:0}
+h1{font-size:clamp(40px,6vw,68px);font-weight:800}
+h2{font-size:clamp(30px,4vw,46px);font-weight:800}
+h3{font-size:20px;font-weight:700;letter-spacing:-.01em}
+p{margin:0}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--deep)}
+.lead{font-size:clamp(17px,1.6vw,20px);color:var(--muted);max-width:620px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:700;font-size:16px;text-decoration:none;border-radius:999px;padding:15px 26px;border:0;cursor:pointer;transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--deep);color:#fff;box-shadow:0 8px 20px -8px rgba(0,105,92,.6)}
+.btn-primary:hover{background:#005a4f}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{background:var(--card)}
+.btn svg{width:20px;height:20px;flex:none}
+:focus-visible{outline:3px solid var(--teal);outline-offset:3px;border-radius:8px}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(246,243,238,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:24px;height:72px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:800;font-size:26px;letter-spacing:-.04em}
+.brand svg{width:34px;height:34px}
+.nav-links{display:flex;gap:28px;margin-left:auto;font-size:15px;font-weight:600}
+.nav-links a{text-decoration:none;color:var(--muted)}
+.nav-links a:hover{color:var(--ink)}
+.lang{display:inline-flex;background:var(--sunken);border-radius:999px;padding:4px}
+.lang button{font:inherit;font-size:13px;font-weight:700;border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:999px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.nav .btn{padding:10px 18px;font-size:14px}
+@media (max-width:900px){.nav-links{display:none}.nav .lang{margin-left:auto}}
+@media (max-width:520px){.nav .btn-primary{display:none}}
+
+/* Hero */
+.hero{position:relative;padding:64px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero h1 .accent{color:var(--deep)}
+.hero .lead{margin-top:22px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.origin{display:flex;align-items:center;gap:12px;margin-top:32px;font-size:14px;color:var(--muted)}
+.origin .tile{width:38px;height:38px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--deep)}
+.hero-art{position:relative;height:620px}
+.blob{position:absolute;inset:6% -10% 0 6%;background:radial-gradient(60% 60% at 60% 40%,rgba(14,159,143,.22),transparent 70%),radial-gradient(40% 40% at 25% 80%,rgba(232,85,61,.14),transparent 70%);filter:blur(10px);z-index:0}
+.phone{position:absolute;width:280px;border-radius:44px;background:#16181E;padding:10px;box-shadow:0 30px 60px -20px rgba(27,29,36,.45),0 0 0 1px rgba(255,255,255,.04) inset}
+.phone img{border-radius:34px;width:100%;height:auto;aspect-ratio:576/1214;object-fit:cover;object-position:top;background:var(--bg)}
+.hero .p1{right:8%;top:0;z-index:2;transform:rotate(2deg)}
+.hero .p2{left:0;top:90px;z-index:1;width:240px;transform:rotate(-6deg);opacity:.96}
+.float{position:absolute;z-index:3;background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:var(--ink)}
+.float small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.float .dot{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none}
+.f1{right:-2%;top:62%}
+.f2{left:4%;bottom:2%}
+@media (max-width:960px){
+  .hero .wrap{grid-template-columns:1fr}
+  .hero-art{height:540px;max-width:460px;margin:0 auto;width:100%}
+  .hero .p1{right:2%}
+}
+@media (max-width:520px){
+  .hero{padding-top:32px}
+  .hero-art{height:470px}
+  .phone{width:230px;border-radius:38px}
+  .phone img{border-radius:29px}
+  .hero .p2{width:190px;top:70px}
+  .f1{right:0}
+}
+
+/* Kente strip, from Accueil's header */
+.strip{height:22px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='22'%3E%3Cpath d='M22 2l14 9-14 9-14-9z' fill='none' stroke='%23D9A93F' stroke-width='2'/%3E%3Ccircle cx='22' cy='11' r='2.5' fill='%23D9A93F'/%3E%3Cpath d='M66 2l14 9-14 9-14-9z' fill='none' stroke='%23E8553D' stroke-width='2'/%3E%3Ccircle cx='66' cy='11' r='2.5' fill='%23E8553D'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;opacity:.9}
+
+/* Stats band */
+.band{margin:24px 0 0}
+.band .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{background:var(--card);border-radius:20px;padding:22px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.stat span{font-size:14px;color:var(--muted)}
+@media (max-width:760px){.band .wrap{grid-template-columns:1fr 1fr}}
+
+section{padding:96px 0}
+.head{max-width:720px;margin-bottom:48px}
+.head h2{margin-top:12px}
+.head .lead{margin-top:16px}
+
+/* Feature tour */
+.tour{display:grid;grid-template-columns:1fr 360px;gap:56px;align-items:start}
+.tabs{display:flex;flex-direction:column;gap:12px}
+.tab{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px;border-radius:var(--r);background:transparent;border:1.5px solid transparent;transition:background .2s,border-color .2s,box-shadow .2s}
+.tab:hover{background:rgba(255,255,255,.55)}
+.tab[aria-selected="true"]{background:var(--card);box-shadow:var(--shadow);border-color:var(--line)}
+.tab:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.ico{width:48px;height:48px;border-radius:14px;background:var(--sunken);display:grid;place-items:center;color:var(--ink)}
+.tab[aria-selected="true"] .ico{background:var(--tint);color:var(--deep)}
+.ico svg{width:24px;height:24px}
+.tab .h3{display:block;font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+.tab .d{display:block;color:var(--muted);font-size:15px;margin-top:4px}
+.tab .ul{display:none;margin-top:12px;font-size:15px;color:var(--text)}
+.tab[aria-selected="true"] .ul{display:grid;gap:6px}
+.tab .li{display:flex;gap:10px;align-items:flex-start}
+.tab .li::before{content:"";flex:none;width:18px;height:18px;margin-top:3px;border-radius:50%;background:var(--tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300695C' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/11px no-repeat}
+.tour-phone{position:sticky;top:100px}
+.tour-phone .phone{position:relative;width:100%;max-width:340px;margin:0 auto}
+.tour-phone .phone img{transition:opacity .25s ease}
+.tour-phone .caption{text-align:center;font-size:13px;color:var(--faint);margin-top:14px}
+@media (max-width:900px){
+  .tour{grid-template-columns:1fr}
+  .tour-phone{position:relative;top:0;order:-1}
+  .tour-phone .phone{max-width:270px}
+}
+
+/* Networks */
+.dark{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#D9E4EA;position:relative;overflow:hidden}
+.dark h2,.dark h3{color:#fff}
+.dark .eyebrow{color:#7FD8CB}
+.dark .lead{color:#B9C9D2}
+.net{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.tree{display:flex;flex-direction:column;align-items:center;gap:0}
+.node{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px 16px;min-width:230px;backdrop-filter:blur(6px)}
+.node .logo{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:12px;flex:none}
+.node b{color:#fff;font-size:15px;display:block;line-height:1.3}
+.node small{font-size:12px;color:#9FB3BF}
+.link{width:2px;height:28px;background:linear-gradient(#7FD8CB,rgba(127,216,203,.2))}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.row .node{min-width:0;padding:10px 12px}
+.row .node .logo{width:32px;height:32px;font-size:10px}
+.twin{display:flex;align-items:center;gap:8px;margin-top:20px;font-size:13px;color:#9FB3BF}
+.twin i{flex:1;height:0;border-top:2px dashed rgba(232,85,61,.6)}
+.pills{display:grid;gap:14px;margin-top:32px}
+.pill{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
+.pill .ico{width:40px;height:40px;border-radius:12px;background:rgba(127,216,203,.14);color:#7FD8CB}
+.pill .ico svg{width:20px;height:20px}
+.pill b{color:#fff;display:block}
+.pill span{font-size:15px;color:#B9C9D2}
+.net-shots{display:flex;gap:20px;justify-content:center;margin-top:56px}
+.net-shots .phone{position:relative;width:250px}
+.net-shots .phone:nth-child(2){transform:translateY(40px)}
+@media (max-width:900px){.net{grid-template-columns:1fr}}
+@media (max-width:600px){.net-shots .phone{width:44%;border-radius:30px;padding:7px}.net-shots .phone img{border-radius:24px}}
+
+/* Workspaces */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.spaces{background:var(--card);border-radius:28px;box-shadow:var(--shadow);padding:28px}
+.spaces h4{margin:0 0 4px;font-size:22px;font-weight:800;color:var(--ink)}
+.spaces .sub{color:var(--muted);font-size:14px;margin-bottom:18px}
+.space{display:flex;align-items:center;gap:14px;padding:14px 4px;border-top:1px solid var(--line)}
+.space .logo{width:44px;height:44px;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;flex:none}
+.space b{display:block;color:var(--ink)}
+.space small{color:var(--muted);font-size:13px}
+.space .chev{margin-left:auto;color:var(--faint)}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+
+/* Security */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
+.card .ico{margin-bottom:16px}
+.card p{color:var(--muted);font-size:15px;margin-top:8px}
+@media (max-width:900px){.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.grid3{grid-template-columns:1fr}}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.step{position:relative;padding:28px;border-radius:var(--r);background:var(--sunken)}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;font-weight:800;margin-bottom:16px}
+.step p{color:var(--muted);font-size:15px;margin-top:8px}
+@media (max-width:800px){.steps{grid-template-columns:1fr}}
+
+/* Download */
+.download{background:var(--card);border-radius:36px;box-shadow:var(--shadow);padding:56px;display:grid;grid-template-columns:1.3fr .7fr;gap:40px;align-items:center;overflow:hidden;position:relative}
+.download::after{content:"";position:absolute;right:-120px;bottom:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(14,159,143,.18),transparent 70%)}
+.download .lead{margin-top:14px}
+.download .meta{margin-top:18px;font-size:14px;color:var(--faint)}
+.download .phone{position:relative;width:220px;margin:0 auto;transform:rotate(4deg)}
+@media (max-width:800px){.download{grid-template-columns:1fr;padding:32px 24px}.download .phone{display:none}}
+
+/* STORES */
+.stores-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.smark{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-weight:800;font-size:22px}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.product{background:var(--card);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px;transition:transform .2s ease,box-shadow .2s ease}
+.product:hover{transform:translateY(-4px);box-shadow:0 1px 2px rgba(27,29,36,.04),0 22px 40px -16px rgba(27,29,36,.22)}
+.product .plogo{width:72px;height:72px;border-radius:16px;display:grid;place-items:center;overflow:hidden}
+.product .plogo img{width:100%;height:100%;object-fit:contain}
+.product h3{font-size:22px}
+.product p{color:var(--muted);font-size:15px;flex:1}
+.tag{align-self:flex-start;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.product.here{outline:2px solid var(--teal);outline-offset:-2px}
+@media (max-width:1000px){.products{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.products{grid-template-columns:1fr}}
+
+/* Footer */
+footer{padding:48px 0 56px;border-top:1px solid var(--line);margin-top:40px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between;font-size:14px;color:var(--muted)}
+.powered{display:inline-flex;align-items:center;gap:8px}
+.powered .s{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--ink);color:#fff;font-size:12px;font-weight:800}
+footer nav{display:flex;gap:20px}
+footer nav a{text-decoration:none}
+footer nav a:hover{color:var(--ink)}
+
+/* Reveal */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}.product:hover{transform:none}}
+@media (max-width:600px){section{padding:72px 0}.wrap{padding:0 16px}}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Huddle">
+      <svg viewBox="0 0 170 170" aria-hidden="true"><path d="M45.5 27.5V147.5" fill="none" stroke="#1B1D24" stroke-width="35" stroke-linecap="round"/><path d="M45.5 102A39.5 39.5 0 0 1 124.5 102V147.5" fill="none" stroke="#0E9F8F" stroke-width="35" stroke-linecap="round"/><circle cx="123.5" cy="29.5" r="20.5" fill="#E8553D"/></svg>
+      huddle
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#fonctionnalites" data-i18n="nav.features">Fonctionnalités</a>
+      <a href="#reseaux" data-i18n="nav.networks">Réseaux</a>
+      <a href="#securite" data-i18n="nav.security">Sécurité</a>
+      <a href="#stores">STORES</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Langue / Language">
+      <button type="button" data-set-lang="fr" aria-pressed="true">FR</button>
+      <button type="button" data-set-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <a class="btn btn-primary" href="#telecharger" data-i18n="nav.download">Télécharger</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow" data-i18n="hero.eyebrow">Gestion de groupe · Android</span>
+      <h1 style="margin-top:16px" data-i18n-html="hero.title">Votre groupe,<br><span class="accent">enfin organisé.</span></h1>
+      <p class="lead" data-i18n="hero.lead">Huddle réunit les membres, la caisse, le calendrier, le planning et les annonces de votre association, mouvement ou paroisse, dans une seule application. En français et en anglais.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#telecharger">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+          <span data-i18n="hero.cta">Télécharger la bêta</span>
+        </a>
+        <a class="btn btn-ghost" href="#fonctionnalites" data-i18n="hero.more">Découvrir l’application</a>
+      </div>
+      <div class="origin">
+        <span class="tile">MSG</span>
+        <span data-i18n="hero.origin">Né avec le Mouvement Garde Suisse de Yapoma, à Douala.</span>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="blob"></div>
+      <div class="phone p2"><img src="assets/shot-month.jpg" alt="" loading="eager"></div>
+      <div class="phone p1"><img src="assets/shot-home.jpg" alt="" loading="eager"></div>
+      <div class="float f1">
+        <span class="dot" style="background:var(--tint);color:var(--deep)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        <span><span data-i18n="float.validated">Dépense validée</span><small data-i18n="float.validatedSub">Livre de caisse · à l’instant</small></span>
+      </div>
+      <div class="float f2">
+        <span class="dot" style="background:#FBE3DE;color:var(--coral)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5"/></svg></span>
+        <span><span data-i18n="float.read">Lu par 18 sur 21</span><small data-i18n="float.readSub">Annonce · Assemblée générale</small></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="strip" aria-hidden="true"></div>
+
+<div class="band">
+  <div class="wrap">
+    <div class="stat reveal"><b>5</b><span data-i18n="band.tabs">espaces : accueil, membres, finances, calendrier, annonces</span></div>
+    <div class="stat reveal"><b>FR · EN</b><span data-i18n="band.lang">l’application et le back-office, dans les deux langues</span></div>
+    <div class="stat reveal"><b data-i18n="band.levelsN">6 niveaux</b><span data-i18n="band.levels">de la paroisse au diocèse, en réseau</span></div>
+    <div class="stat reveal"><b data-i18n="band.offlineN">Hors ligne</b><span data-i18n="band.offline">consultez tout, la synchronisation suit</span></div>
+  </div>
+</div>
+
+<!-- Feature tour -->
+<section id="fonctionnalites">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-i18n="tour.eyebrow">L’application</span>
+      <h2 data-i18n="tour.title">Tout le groupe, à portée de main</h2>
+      <p class="lead" data-i18n="tour.lead">Chacun voit ce que son rôle lui permet : le garde son planning et les annonces, le trésorier la caisse, le président l’ensemble.</p>
+    </div>
+    <div class="tour">
+      <div class="tabs" role="tablist" aria-label="Fonctionnalités">
+        <button class="tab" role="tab" aria-selected="true" data-shot="shot-home.jpg" id="t-home">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>
+          <span>
+            <span class="h3" data-i18n="f.home.t">Accueil</span>
+            <span class="d" data-i18n="f.home.d">L’essentiel du jour, selon votre rôle.</span>
+            <span class="ul">
+              <span class="li" data-i18n="f.home.1">Solde de la caisse, masqué d’un geste</span>
+              <span class="li" data-i18n="f.home.2">Opérations à valider et demandes de dépense</span>
+              <span class="li" data-i18n="f.home.3">Le prochain rendez-vous, avec lieu et tenue</span>
+            </span>
+          </span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-shot="shot-members.jpg" id="t-members">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="8.5" r="2.8"/><path d="M17.5 14.6c2.3.4 3.7 2 4 5.4"/></svg></span>
+          <span>
+            <span class="h3" data-i18n="f.members.t">Membres</span>
+            <span class="d" data-i18n="f.members.d">Un annuaire vivant, à jour pour tout le monde.</span>
+            <span class="ul">
+              <span class="li" data-i18n="f.members.1">Recherche par nom ou numéro, filtres par statut</span>
+              <span class="li" data-i18n="f.members.2">Le bureau, ses rôles et ses mandats</span>
+              <span class="li" data-i18n="f.members.3">Les membres à l’étranger restent dans le groupe</span>
+            </span>
+          </span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-shot="shot-finances.jpg" id="t-fin">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M16 12.5h2M3 9h18"/></svg></span>
+          <span>
+            <span class="h3" data-i18n="f.fin.t">Finances</span>
+            <span class="d" data-i18n="f.fin.d">Une caisse transparente, où chaque franc est validé.</span>
+            <span class="ul">
+              <span class="li" data-i18n="f.fin.1">Livre de caisse groupé par jour, type ou statut</span>
+              <span class="li" data-i18n="f.fin.2">Celui qui saisit n’est pas celui qui valide</span>
+              <span class="li" data-i18n="f.fin.3">Solidarité, rapport trimestriel en PDF</span>
+            </span>
+          </span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-shot="shot-agenda.jpg" id="t-cal">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span>
+          <span>
+            <span class="h3" data-i18n="f.cal.t">Calendrier et planning</span>
+            <span class="d" data-i18n="f.cal.d">Qui sert, où, quand, et dans quelle tenue.</span>
+            <span class="ul">
+              <span class="li" data-i18n="f.cal.1">Vues mois, agenda et planning des services</span>
+              <span class="li" data-i18n="f.cal.2">Rappels la veille au soir et deux heures avant</span>
+              <span class="li" data-i18n="f.cal.3">Synchronisé sur tous les téléphones du groupe</span>
+            </span>
+          </span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" data-shot="shot-announces.jpg" id="t-ann">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5M20 9.5v3"/></svg></span>
+          <span>
+            <span class="h3" data-i18n="f.ann.t">Annonces</span>
+            <span class="d" data-i18n="f.ann.d">Le bon message, aux bonnes personnes.</span>
+            <span class="ul">
+              <span class="li" data-i18n="f.ann.1">Photos et fichiers joints, annonces épinglées</span>
+              <span class="li" data-i18n="f.ann.2">« Lu par 6 sur 21 » : vous savez qui a vu</span>
+              <span class="li" data-i18n="f.ann.3">À tout le groupe, ou à quelques personnes</span>
+            </span>
+          </span>
+        </button>
+      </div>
+      <div class="tour-phone">
+        <div class="phone"><img id="tour-img" src="assets/shot-home.jpg" alt="Écran Accueil de Huddle" width="576" height="1214"></div>
+        <p class="caption" data-i18n="tour.caption">Captures de la version de test</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Networks -->
+<section class="dark" id="reseaux">
+  <div class="wrap">
+    <div class="net">
+      <div class="reveal">
+        <span class="eyebrow" data-i18n="net.eyebrow">Réseaux de groupes</span>
+        <h2 style="margin-top:12px" data-i18n="net.title">Des groupes qui avancent ensemble</h2>
+        <p class="lead" style="margin-top:16px" data-i18n="net.lead">Une paroisse, sa zone, son diocèse : chaque groupe garde son autonomie et choisit ce qu’il partage avec les autres.</p>
+        <div class="pills">
+          <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12l8 4.5 8-4.5M4 16.5L12 21l8-4.5"/></svg></span><span><b data-i18n="net.p1.t">Jusqu’à six niveaux</b><span data-i18n="net.p1.d">Le groupe du dessus informe et coordonne ; il ne décide pas à la place des groupes rattachés.</span></span></div>
+          <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span><span><b data-i18n="net.p2.t">Partage au choix</b><span data-i18n="net.p2.d">Membres, finances, calendrier, annonces : rien, un résumé ou le détail. Un aperçu montre ce que l’autre groupe verra.</span></span></div>
+          <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></span><span><b data-i18n="net.p3.t">Diffuser dans le réseau</b><span data-i18n="net.p3.d">Une annonce ou un événement envoyé aux groupes choisis, à tous leurs membres ou à leur bureau seulement.</span></span></div>
+          <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span><span><b data-i18n="net.p4.t">Demander l’accès</b><span data-i18n="net.p4.d">Ce qui n’est pas partagé se demande ; le président accepte ou refuse, et tout est tracé.</span></span></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="tree" aria-label="Exemple de réseau">
+          <div class="node"><span class="logo" style="background:#6B4BA0">AD</span><span><b data-i18n="tree.dio">Archidiocèse</b><small data-i18n="tree.dioS">Niveau diocésain</small></span></div>
+          <div class="link"></div>
+          <div class="node"><span class="logo" style="background:#2B6CB0">ZW9</span><span><b>Zone Wouri 9</b><small data-i18n="tree.zoneS">Zone · 7 groupes rattachés</small></span></div>
+          <div class="link"></div>
+          <div class="row">
+            <div class="node"><span class="logo" style="background:#00695C">MSG</span><span><b>Yapoma</b><small data-i18n="tree.par">Paroisse</small></span></div>
+            <div class="node"><span class="logo" style="background:#B7552B">GSK</span><span><b>Kotto</b><small data-i18n="tree.par">Paroisse</small></span></div>
+            <div class="node"><span class="logo" style="background:#8A6D1E">GSB</span><span><b>Bonapriso</b><small data-i18n="tree.par">Paroisse</small></span></div>
+          </div>
+          <div class="twin"><span data-i18n="tree.twin">Jumelage avec un groupe d’un autre réseau</span><i></i><span class="node" style="min-width:0;padding:8px 10px"><span class="logo" style="background:#C2410C;width:28px;height:28px;font-size:9px">CH</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="net-shots reveal" aria-hidden="true">
+      <div class="phone"><img src="assets/shot-network.jpg" alt="" loading="lazy"></div>
+      <div class="phone"><img src="assets/shot-shared.jpg" alt="" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Workspaces -->
+<section>
+  <div class="wrap split">
+    <div class="reveal">
+      <span class="eyebrow" data-i18n="ws.eyebrow">Un espace par groupe</span>
+      <h2 style="margin-top:12px" data-i18n="ws.title">Chaque groupe chez lui</h2>
+      <p class="lead" style="margin-top:16px" data-i18n="ws.lead">Comme un espace de travail : chaque groupe a son nom, son sigle, son logo et ses couleurs. Avec un seul compte, vous passez d’un groupe à l’autre, et les données de chacun restent les siennes.</p>
+    </div>
+    <div class="spaces reveal">
+      <h4 data-i18n="ws.pick">Choisissez votre groupe</h4>
+      <p class="sub" data-i18n="ws.pickSub">Un compte, plusieurs groupes</p>
+      <div class="space"><span class="logo" style="background:#00695C">MSG</span><span><b>Mouvement Garde Suisse</b><small>Yapoma · <span data-i18n="ws.role1">Président</span></small></span><span class="chev">›</span></div>
+      <div class="space"><span class="logo" style="background:#2B6CB0">ZW9</span><span><b>Zone Wouri 9</b><small data-i18n="ws.role2">Zone · Trésorier</small></span><span class="chev">›</span></div>
+      <div class="space"><span class="logo" style="background:#5B3A8C">ADD</span><span><b data-i18n="ws.g3">Chorale diocésaine</b><small data-i18n="ws.role3">Membre</small></span><span class="chev">›</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section id="securite" style="padding-top:24px">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-i18n="sec.eyebrow">Confiance</span>
+      <h2 data-i18n="sec.title">Sûr par conception</h2>
+      <p class="lead" data-i18n="sec.lead">L’argent et les informations d’un groupe méritent des règles claires. Huddle les applique pour vous.</p>
+    </div>
+    <div class="grid3">
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11c0 3-1 5.5-2.5 7.5M15.5 13c0 2.5-.7 4.7-1.8 6.5M8.5 9.5A4 4 0 0 1 16 11M6 13.5c.2-1 .3-2 .3-3A5.7 5.7 0 0 1 17.6 9M4.5 6.5A9 9 0 0 1 20.5 10"/></svg></span><h3 data-i18n="sec.1.t">Code PIN et empreinte</h3><p data-i18n="sec.1.d">Connexion avec votre numéro et un code PIN ; déverrouillage par empreinte ou visage si vous le souhaitez.</p></div>
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z"/></svg></span><h3 data-i18n="sec.2.t">Rôles et permissions</h3><p data-i18n="sec.2.d">Chaque rôle ouvre seulement les écrans dont il a besoin. Le groupe décide qui voit quoi.</p></div>
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="M10.5 10.5l3 3"/></svg></span><h3 data-i18n="sec.3.t">Séparation des tâches</h3><p data-i18n="sec.3.d">Personne ne valide sa propre dépense. Les opérations sensibles demandent un second regard.</p></div>
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20z"/><path d="M10 12h5M10 15.5h5"/></svg></span><h3 data-i18n="sec.4.t">Journal d’audit</h3><p data-i18n="sec.4.d">Chaque changement sensible est enregistré avec son auteur, sa date et un motif obligatoire.</p></div>
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><path d="M4 4l16 16"/></svg></span><h3 data-i18n="sec.5.t">Discret en public</h3><p data-i18n="sec.5.d">Le solde reste masqué tant que vous ne touchez pas l’œil ; personne ne le lit par-dessus votre épaule.</p></div>
+      <div class="card reveal"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2.5"/><path d="M8 20.5h8M12 17v3.5"/></svg></span><h3 data-i18n="sec.6.t">Back-office web</h3><p data-i18n="sec.6.d">Une console d’administration pour l’équipe de la plateforme : création des groupes et des réseaux, assistance, suivi.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Steps -->
+<section style="padding-top:24px">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-i18n="steps.eyebrow">Démarrer</span>
+      <h2 data-i18n="steps.title">Votre groupe sur Huddle en trois étapes</h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><h3 data-i18n="steps.1.t">On crée votre groupe</h3><p data-i18n="steps.1.d">Contactez STORES : nous ouvrons votre espace avec son nom, son logo et ses rôles.</p></div>
+      <div class="step reveal"><h3 data-i18n="steps.2.t">Le bureau inscrit les membres</h3><p data-i18n="steps.2.d">Un numéro de téléphone par personne, et le rôle de chacun.</p></div>
+      <div class="step reveal"><h3 data-i18n="steps.3.t">Chacun se connecte</h3><p data-i18n="steps.3.d">Avec son numéro et son code PIN. L’application montre ce que son rôle permet.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Download -->
+<section id="telecharger" style="padding-top:24px">
+  <div class="wrap">
+    <div class="download reveal">
+      <div style="position:relative;z-index:1">
+        <span class="eyebrow" data-i18n="dl.eyebrow">Version de test</span>
+        <h2 style="margin-top:12px" data-i18n="dl.title">Essayez Huddle sur Android</h2>
+        <p class="lead" data-i18n="dl.lead">La bêta est ouverte aux groupes qui testent avec nous. Votre responsable de groupe vous inscrit, puis vous vous connectez avec votre numéro.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="telecharger.html">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.5l1.8-3.1a.4.4 0 0 0-.7-.4l-1.8 3.1A11 11 0 0 0 12 8.2c-1.8 0-3.4.3-4.9 1L5.3 6a.4.4 0 0 0-.7.4l1.8 3.1A9.6 9.6 0 0 0 1.5 17h21a9.6 9.6 0 0 0-4.9-7.5zM7 14.4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
+            <span data-i18n="dl.cta">Télécharger pour Android</span>
+          </a>
+        </div>
+        <p class="meta" data-i18n="dl.meta">Android · iOS bientôt · français / English</p>
+      </div>
+      <div class="phone" aria-hidden="true"><img src="assets/shot-login.jpg" alt="" loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORES -->
+<section id="stores">
+  <div class="wrap">
+    <div class="head reveal">
+      <div class="stores-head"><span class="smark">S</span><span class="eyebrow" style="color:var(--ink)" data-i18n="st.eyebrow">Une création STORES</span></div>
+      <h2 data-i18n="st.title">Les autres projets de STORES</h2>
+      <p class="lead" data-i18n="st.lead">STORES conçoit des applications pensées pour l’Afrique, simples à utiliser et solides en coulisses.</p>
+    </div>
+    <div class="products">
+      <article class="product here reveal">
+        <span class="plogo" style="background:#fff;border:1px solid var(--line)"><img src="assets/huddle-mark.svg" alt="" style="width:70%;height:70%"></span>
+        <h3>Huddle</h3>
+        <p data-i18n="st.huddle">La gestion de groupe : membres, caisse, calendrier, planning et annonces, en réseau.</p>
+        <span class="tag" style="background:var(--tint);color:var(--deep)" data-i18n="st.here">Vous êtes ici</span>
+      </article>
+      <article class="product reveal">
+        <span class="plogo"><img src="assets/spekooh-icon.jpg" alt="" style="object-fit:cover"></span>
+        <h3>Spekooh</h3>
+        <p data-i18n="st.spekooh">Les sujets d’examen de tout le Cameroun, anglophone et francophone (GCE, BEPC, Probatoire, Bac), avec des corrigés rédigés par des enseignants vérifiés.</p>
+        <span class="tag" style="background:#FBEFD2;color:#7A5A12" data-i18n="st.edu">Éducation · Mobile</span>
+      </article>
+      <article class="product reveal">
+        <span class="plogo" style="background:#1B1D24"><img src="assets/slearn.png" alt="" style="width:80%;height:80%"></span>
+        <h3>S@Learn</h3>
+        <p data-i18n="st.slearn">L’apprentissage en ligne pour l’Afrique : cours, quiz, certificats, et Kairos Mind, un tuteur IA dans chaque leçon. Enseignants vérifiés.</p>
+        <span class="tag" style="background:#FBEFD2;color:#7A5A12" data-i18n="st.eduWeb">Éducation · Web</span>
+      </article>
+      <article class="product reveal">
+        <span class="plogo" style="background:#EAF7EC"><img src="assets/emergensis.png" alt="" style="width:86%;height:86%"></span>
+        <h3>Emergensis</h3>
+        <p data-i18n="st.emergensis">Les urgences de santé, localisées : trouver vite l’aide la plus proche.</p>
+        <span class="tag" style="background:#DDF3E1;color:#17653A" data-i18n="st.health">Santé · Urgences</span>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span class="powered"><b style="color:var(--ink)">Huddle</b> · <span data-i18n="ft.powered">Propulsé par</span> <span class="s">S</span> <b style="color:var(--ink)">STORES</b></span>
+    <nav aria-label="Pied de page">
+      <a href="#fonctionnalites" data-i18n="nav.features">Fonctionnalités</a>
+      <a href="#reseaux" data-i18n="nav.networks">Réseaux</a>
+      <a href="telecharger.html" data-i18n="nav.download">Télécharger</a>
+    </nav>
+    <span>© 2026 STORES</span>
+  </div>
+</footer>
+
+<script>
+const EN = {
+  "nav.features":"Features","nav.networks":"Networks","nav.security":"Security","nav.download":"Download",
+  "hero.eyebrow":"Group management · Android",
+  "hero.title":"Your group,<br><span class=\"accent\">finally organised.</span>",
+  "hero.lead":"Huddle brings your association, movement or parish’s members, cash book, calendar, duty planning and announcements together in one app. In French and English.",
+  "hero.cta":"Download the beta","hero.more":"Explore the app",
+  "hero.origin":"Born with the Mouvement Garde Suisse of Yapoma, Douala.",
+  "float.validated":"Expense approved","float.validatedSub":"Cash book · just now",
+  "float.read":"Read by 18 of 21","float.readSub":"Announcement · General assembly",
+  "band.tabs":"spaces: home, members, finances, calendar, announcements",
+  "band.lang":"the app and the back-office, in both languages",
+  "band.levelsN":"6 levels","band.levels":"from parish to diocese, as a network",
+  "band.offlineN":"Offline","band.offline":"read everything; syncing catches up",
+  "tour.eyebrow":"The app","tour.title":"The whole group, in your hand",
+  "tour.lead":"Everyone sees what their role allows: a member their duties and announcements, the treasurer the cash book, the president everything.",
+  "f.home.t":"Home","f.home.d":"Today’s essentials, for your role.",
+  "f.home.1":"Cash balance, hidden with one tap","f.home.2":"Entries to approve and spending requests","f.home.3":"The next meeting, with place and dress code",
+  "f.members.t":"Members","f.members.d":"A living directory, current for everyone.",
+  "f.members.1":"Search by name or number, filter by status","f.members.2":"The committee, its roles and terms","f.members.3":"Members abroad stay in the group",
+  "f.fin.t":"Finances","f.fin.d":"A transparent cash book where every franc is approved.",
+  "f.fin.1":"Cash book grouped by day, type or status","f.fin.2":"Whoever records an entry doesn’t approve it","f.fin.3":"Solidarity fund, quarterly PDF report",
+  "f.cal.t":"Calendar and planning","f.cal.d":"Who serves, where, when, and what to wear.",
+  "f.cal.1":"Month, agenda and duty-planning views","f.cal.2":"Reminders the evening before and two hours ahead","f.cal.3":"In sync on every phone in the group",
+  "f.ann.t":"Announcements","f.ann.d":"The right message to the right people.",
+  "f.ann.1":"Photos and attached files, pinned posts","f.ann.2":"“Read by 6 of 21”: you know who saw it","f.ann.3":"To the whole group, or to a few people",
+  "tour.caption":"Screenshots from the test version",
+  "net.eyebrow":"Networks of groups","net.title":"Groups that move forward together",
+  "net.lead":"A parish, its zone, its diocese: each group stays independent and chooses what it shares with the others.",
+  "net.p1.t":"Up to six levels","net.p1.d":"The group above informs and coordinates; it never decides for the groups below.",
+  "net.p2.t":"Share what you choose","net.p2.d":"Members, finances, calendar, announcements: nothing, a summary or the detail. A preview shows what the other group will see.",
+  "net.p3.t":"Send across the network","net.p3.d":"An announcement or event sent to chosen groups, to all their members or to their committee only.",
+  "net.p4.t":"Ask for access","net.p4.d":"What isn’t shared can be requested; the president accepts or declines, and everything is logged.",
+  "tree.dio":"Archdiocese","tree.dioS":"Diocese level","tree.zoneS":"Zone · 7 groups below","tree.par":"Parish",
+  "tree.twin":"Twinned with a group from another network",
+  "ws.eyebrow":"One space per group","ws.title":"Every group at home",
+  "ws.lead":"Like a workspace: each group has its own name, initials, logo and colours. With one account you move between groups, and each group’s data stays its own.",
+  "ws.pick":"Choose your group","ws.pickSub":"One account, several groups","ws.role1":"President","ws.role2":"Zone · Treasurer","ws.g3":"Diocesan choir","ws.role3":"Member",
+  "sec.eyebrow":"Trust","sec.title":"Safe by design","sec.lead":"A group’s money and information deserve clear rules. Huddle enforces them for you.",
+  "sec.1.t":"PIN and fingerprint","sec.1.d":"Sign in with your number and a PIN; unlock with fingerprint or face if you like.",
+  "sec.2.t":"Roles and permissions","sec.2.d":"Each role opens only the screens it needs. The group decides who sees what.",
+  "sec.3.t":"Separation of duties","sec.3.d":"Nobody approves their own expense. Sensitive operations need a second pair of eyes.",
+  "sec.4.t":"Audit log","sec.4.d":"Every sensitive change is recorded with who, when and a mandatory reason.",
+  "sec.5.t":"Discreet in public","sec.5.d":"The balance stays hidden until you tap the eye; nobody reads it over your shoulder.",
+  "sec.6.t":"Web back-office","sec.6.d":"An admin console for the platform team: creating groups and networks, support, follow-up.",
+  "steps.eyebrow":"Getting started","steps.title":"Your group on Huddle in three steps",
+  "steps.1.t":"We set up your group","steps.1.d":"Contact STORES: we open your space with its name, logo and roles.",
+  "steps.2.t":"The committee adds members","steps.2.d":"One phone number per person, and each person’s role.",
+  "steps.3.t":"Everyone signs in","steps.3.d":"With their number and PIN. The app shows what their role allows.",
+  "dl.eyebrow":"Test version","dl.title":"Try Huddle on Android",
+  "dl.lead":"The beta is open to the groups testing with us. Your group’s leader registers you, then you sign in with your number.",
+  "dl.cta":"Download for Android","dl.meta":"Android · iOS soon · français / English",
+  "st.eyebrow":"Made by STORES","st.title":"More from STORES",
+  "st.lead":"STORES builds apps designed for Africa: simple to use, solid behind the scenes.",
+  "st.huddle":"Group management: members, cash book, calendar, planning and announcements, as a network.",
+  "st.here":"You are here",
+  "st.spekooh":"Exam papers from all of Cameroon, Anglophone and Francophone (GCE, BEPC, Probatoire, Bac), with marking guides written by verified teachers.",
+  "st.edu":"Education · Mobile",
+  "st.slearn":"Online learning for Africa: courses, quizzes, certificates, and Kairos Mind, an AI tutor in every lesson. Verified instructors.",
+  "st.eduWeb":"Education · Web",
+  "st.emergensis":"Health emergencies, located: find the nearest help, fast.",
+  "st.health":"Health · Emergencies",
+  "ft.powered":"Powered by"
+};
+const FR = {};
+document.querySelectorAll("[data-i18n]").forEach(el => FR[el.dataset.i18n] ??= el.textContent);
+document.querySelectorAll("[data-i18n-html]").forEach(el => FR[el.dataset.i18nHtml] ??= el.innerHTML);
+
+function setLang(lang){
+  const dict = lang === "en" ? EN : FR;
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { const v = dict[el.dataset.i18n]; if (v) el.textContent = v; });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { const v = dict[el.dataset.i18nHtml]; if (v) el.innerHTML = v; });
+  document.querySelectorAll("[data-set-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.setLang === lang)));
+  try { localStorage.setItem("huddle-lang", lang); } catch (e) {}
+}
+document.querySelectorAll("[data-set-lang]").forEach(b => b.addEventListener("click", () => setLang(b.dataset.setLang)));
+let saved = null;
+try { saved = localStorage.getItem("huddle-lang"); } catch (e) {}
+const initial = saved || "fr"; // French first
+if (initial === "en") setLang("en");
+
+// Feature tour: the phone shows the chosen screen.
+const tabs = [...document.querySelectorAll(".tab")];
+const img = document.getElementById("tour-img");
+function pick(t){
+  tabs.forEach(x => { x.setAttribute("aria-selected", String(x === t)); x.tabIndex = x === t ? 0 : -1; });
+  if (!img.src.endsWith(t.dataset.shot)) {
+    img.style.opacity = 0;
+    setTimeout(() => { img.src = "assets/" + t.dataset.shot; img.alt = t.querySelector(".h3").textContent; img.onload = () => img.style.opacity = 1; }, 160);
+  }
+}
+tabs.forEach((t, i) => {
+  t.tabIndex = i === 0 ? 0 : -1;
+  t.addEventListener("click", () => pick(t));
+  t.addEventListener("keydown", e => {
+    const d = e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? -1 : 0;
+    if (d) { e.preventDefault(); const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); pick(n); }
+  });
+});
+// Preload the tour's screens.
+tabs.forEach(t => { const i = new Image(); i.src = "assets/" + t.dataset.shot; });
+
+// Nav border once scrolled; sections fade in.
+const nav = document.getElementById("nav");
+addEventListener("scroll", () => nav.classList.toggle("scrolled", scrollY > 8), { passive: true });
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+}
+</script>
+</body>
+</html>
