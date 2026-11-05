@@ -1,6 +1,8 @@
 """The platform's groups (back-office → Groupes): list, create, edit,
 delete (two super admins), switch."""
 
+import re
+
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Count, Q
@@ -116,7 +118,10 @@ def group_switch(request):
     return redirect(nxt or "backoffice:dashboard")
 
 
-PLATFORM_FIELDS = ["support_phone", "support_whatsapp", "support_email", "website", "privacy_text", "terms_text"]
+PLATFORM_FIELDS = [
+    "support_phone", "support_whatsapp", "support_email", "website", "privacy_text", "terms_text",
+    "app_download_url", "app_version", "app_size", "app_sha256", "app_notes",
+]
 
 
 @backoffice_view("backoffice.platform", "view")
@@ -137,6 +142,10 @@ def platform(request):
             value = request.POST[f].strip().replace("\r\n", "\n")  # browsers send CRLF; don't count it as a new text
             try:
                 field.run_validators(value) if value else None
+                if f == "app_download_url" and value and not value.startswith("https://"):
+                    raise ValueError("https only")
+                if f == "app_sha256" and value and not re.fullmatch(r"[0-9a-fA-F]{64}", value):
+                    raise ValueError("64 hex characters")
             except Exception:
                 messages.error(request, f"Valeur invalide : {field.verbose_name}.")
                 return redirect("backoffice:platform")
@@ -149,7 +158,7 @@ def platform(request):
         p.save()
         if changed:
             audit.record("Réglages de la plateforme modifiés", actor=request.user, request=request, platform=True, detail=changed)
-        messages.success(request, "Enregistré. L’application l’affiche dans Mon compte → Aide.")
+        messages.success(request, "Enregistré. L’application l’affiche dans Mon compte → Aide ; le site public, dans Télécharger.")
         return redirect("backoffice:platform")
     return render(request, "backoffice/platform.html", {"nav": "platform", "p": p})
 

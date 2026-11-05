@@ -193,6 +193,15 @@ def test_platform_help_contacts_and_texts(login, choir):
     assert p.terms_version == 3 and p.terms_text == "Conditions relues.\nSuite."
     r = a.post("/bo/plateforme/", {"website": "pas une adresse"}, follow=True)
     assert "Valeur invalide" in r.content.decode()
+    # The public site's download link: https only, a real SHA-256, audited.
+    for bad in ({"app_download_url": "http://example.org/a.apk"}, {"app_sha256": "abc"}):
+        assert "Valeur invalide" in a.post("/bo/plateforme/", bad, follow=True).content.decode()
+    a.post("/bo/plateforme/", {"app_download_url": "https://example.org/huddle-48.apk", "app_version": "0.1.0 (build 48)",
+                               "app_sha256": "a" * 64, "app_size": "68 Mo", "app_notes": "Réseaux."})
+    p.refresh_from_db()
+    assert (p.app_download_url, p.app_version, p.app_sha256) == ("https://example.org/huddle-48.apk", "0.1.0 (build 48)", "a" * 64)
+    assert AuditLog.objects.filter(action="Réglages de la plateforme modifiés", detail__app_download_url="https://example.org/huddle-48.apk").exists()
+    assert Client().get("/telecharger/apk/")["Location"] == "https://example.org/huddle-48.apk"
     member = UserFactory(membership=Group.objects.order_by("pk").first())
     data = app_get(member).json()  # /api/me/ works; now the platform view
     api = APIClient()

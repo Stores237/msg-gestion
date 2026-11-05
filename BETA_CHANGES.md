@@ -1678,15 +1678,27 @@ what is visible, what isn't and how to ask for it.
   GS Kotto's président: Réseau → Demandes de partage → accept the zone's request; as the zone's
   treasurer, Réseau → GS Kotto shows finances in detail. Réseau → Ce que nous partageons → Aperçu.
 
-## 72. Website (no app or server change)
+## 72. Public website and a lasting download link (server; no app change)
 
-`website/` is the public site: `index.html` (Huddle, its features, networks, security, how to
-start, download, and STORES' other projects: Spekooh, S@Learn, Emergensis) and `telecharger.html`
-(the tester download page, moved from `~/msg-beta/index.html`). Static files only; `assets/` holds
-the screenshots and the products' logos. Publishing copies `website/` into `~/msg-beta/`
-(`RELEASING.md` step 6).
+The site is now served by the server itself (`apps/website`): `/` is the Huddle page (it used to
+redirect to the back-office, which stays at `/bo/`), `/telecharger/` the download page, and
+`/telecharger/apk/` sends to the APK. Nothing depends on a tunnel from a laptop any more.
 
-**Verify:** open the tunnel address: the site opens in French; EN switches every text and is
-remembered; the five tabs change the phone's screen (also with the arrow keys); "Télécharger"
-goes to `telecharger.html`, whose button downloads the build 48 APK; at phone width nothing
-scrolls sideways.
+- **Back-office → Plateforme → "Application à télécharger · site public"** (new card): the APK's
+  link (https only, e.g. the GitHub release of the build), version, size, SHA-256 (64 hex) and
+  "Nouveautés". Saved like the other platform settings (audited). The site changes at once; a new
+  build only needs a new link here, no deploy. Empty link: the page says the download is back soon.
+- **Wording for every group** (owner, 2026-11-05: Huddle is for every group that manages its
+  activities digitally, not the Garde Suisse): a "Pour qui" section (associations, faith
+  communities, clubs, savings groups and mutuals, NGOs and cooperatives, alumni and hometown
+  associations, unions and federations, youth and scouting); neutral examples for networks
+  (fédération › région › sections) and for one account in several groups.
+- The rest as before: feature tour on real screens, networks, security, three steps, download,
+  STORES' other projects (Spekooh, S@Learn, Emergensis); French first, EN toggle. The footer shows
+  the support contacts from Plateforme when filled.
+- Migration `core 0022_platform_app_download`.
+
+**Verify:** after deploying, open the staging address: the Huddle page opens (not the back-office
+login); `/bo/` still leads to the back-office. In Plateforme, paste the build 48 link → "Voir la
+page" shows version, size, SHA-256; the button downloads the APK. An `http://` link or a short
+SHA-256 is refused ("Valeur invalide").

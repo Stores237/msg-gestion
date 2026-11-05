@@ -48,12 +48,11 @@ One version for the whole platform, `MAJOR.MINOR.PATCH`, plus a build number for
 
    Production: the production API URL instead (`RENDER_PRODUCTION.md`). The release key is
    `app/android/key.properties` + `app/android/keystore/` (git-ignored; back them up).
-6. **Publish** for testers: copy `build/app/outputs/flutter-apk/app-release.apk` to
-   `~/msg-beta/huddle-X.Y.Z-buildN.apk`, update `website/telecharger.html` (version, file name,
-   what's new, SHA-256), copy `website/` into `~/msg-beta/` (`cp -r website/. ~/msg-beta/`; the
-   site is `index.html`, the download page `telecharger.html`),
-   serve and tunnel it (`python3 -m http.server 8790` + `cloudflared tunnel --url
-   http://127.0.0.1:8790`), and check the download's SHA-256 matches the file three times.
+6. **Publish** for testers: copy the APK to `huddle-X.Y.Z-buildN.apk`, upload it to a GitHub
+   release of the repo (`gh release create build-N huddle-X.Y.Z-buildN.apk`), then in back-office
+   → Plateforme → "Application à télécharger" paste the asset's link, the version, size, SHA-256
+   and what's new. The public site (`/telecharger/`) follows at once; no deploy, no tunnel.
+   Download it once from the site and check the SHA-256 matches.
 7. **Check** on a phone: login screen and Mon compte show `Version X.Y.Z (N)`.
 
 ## Deploying the server

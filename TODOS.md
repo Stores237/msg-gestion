@@ -22,11 +22,14 @@
   install build 43.
 - [ ] **Owner — build 44 (2026-11-03, contributions):** deploy (migration finances 0007); install
   build 44. Networks phases 1–6 are all in (39–44): try them together on staging.
-- [ ] **Owner — website (2026-11-05):** check the texts in `website/index.html`, above all the
-  Emergensis line (written from its logo: "Les urgences de santé, localisées : trouver vite l'aide
-  la plus proche") and the Spekooh / S@Learn lines; send the links of the other products if they
-  should be clickable; choose where the site lives (domain, e.g. a Render static site) and a
-  contact (phone, WhatsApp or e-mail) for "Contactez STORES".
+- [ ] **Owner — website (2026-11-05):** deploy staging (migration core 0022); the address's
+  root is now the Huddle site (back-office at `/bo/`). In back-office → Plateforme → "Application
+  à télécharger", paste the build 48 link from the GitHub release `build-48`, version
+  "0.1.0 (build 48)", size "68 Mo" and the SHA-256 shown on the release. Check the Emergensis line
+  (written from its logo) and the Spekooh / S@Learn lines; send the products' links if the cards
+  should be clickable; fill the support contacts (shown in the footer). The screenshots still
+  show the Garde Suisse group: take new ones in a neutral demo group to replace them. Later: a
+  domain of its own pointed at the production server.
 - [ ] **Owner — build 48 (2026-11-04, network: files, recipients, sharing requests):** deploy
   (migrations core 0021, announcements 0007, events 0011); install build 48. To try it on the demo
   network, remove it and create it again (back-office → Réseaux de groupes → Démonstration): the new

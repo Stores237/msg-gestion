@@ -347,6 +347,14 @@ class PlatformSettings(models.Model):
     terms_text = models.TextField("conditions d’utilisation", default=TERMS_DRAFT)
     # Goes up each time terms_text changes; members accept it again at login.
     terms_version = models.PositiveIntegerField("version des conditions", default=1)
+    # The public site's download (owner, 2026-11-05): a lasting link to the
+    # APK (e.g. a GitHub release), replaced in the back-office at each build,
+    # so the site never depends on a tunnel from someone's machine.
+    app_download_url = models.URLField("lien de téléchargement de l’application", max_length=500, blank=True)
+    app_version = models.CharField("version proposée", max_length=40, blank=True)
+    app_size = models.CharField("taille du fichier", max_length=20, blank=True)
+    app_sha256 = models.CharField("empreinte SHA-256", max_length=64, blank=True)
+    app_notes = models.TextField("nouveautés", blank=True)
 
     class Meta:
         verbose_name = "réglages de la plateforme"

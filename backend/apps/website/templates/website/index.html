@@ -1,15 +1,15 @@
-<!doctype html>
+{% load static %}<!doctype html>
 <html lang="fr" data-lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Huddle · La gestion de groupe, simplement</title>
-<meta name="description" content="Huddle réunit les membres, la caisse, le calendrier, le planning et les annonces de votre groupe dans une seule application. Propulsé par STORES.">
+<meta name="description" content="Huddle : la gestion de groupe pour associations, clubs, communautés, ONG, coopératives et tontines. Membres, caisse, calendrier, planning et annonces dans une seule application. Propulsé par STORES.">
 <meta property="og:title" content="Huddle · La gestion de groupe, simplement">
 <meta property="og:description" content="Membres, caisse, calendrier, planning et annonces de votre groupe, dans une seule application.">
-<meta property="og:image" content="assets/shot-home.jpg">
+<meta property="og:image" content="{% static 'website/shot-home.jpg' %}\">
 <meta name="theme-color" content="#F6F3EE">
-<link rel="icon" href="assets/huddle-mark.svg" type="image/svg+xml">
+<link rel="icon" href="{% static 'website/huddle-mark.svg' %}\" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@ p{margin:0}
 .hero .lead{margin-top:22px}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
 .origin{display:flex;align-items:center;gap:12px;margin-top:32px;font-size:14px;color:var(--muted)}
-.origin .tile{width:38px;height:38px;border-radius:10px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--deep)}
+.tiles{display:flex}.tiles span{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;border:2px solid var(--bg);margin-left:-8px}.tiles span:first-child{margin-left:0}
 .hero-art{position:relative;height:620px}
 .blob{position:absolute;inset:6% -10% 0 6%;background:radial-gradient(60% 60% at 60% 40%,rgba(14,159,143,.22),transparent 70%),radial-gradient(40% 40% at 25% 80%,rgba(232,85,61,.14),transparent 70%);filter:blur(10px);z-index:0}
 .phone{position:absolute;width:280px;border-radius:44px;background:#16181E;padding:10px;box-shadow:0 30px 60px -20px rgba(27,29,36,.45),0 0 0 1px rgba(255,255,255,.04) inset}
@@ -103,6 +103,12 @@ p{margin:0}
 .stat span{font-size:14px;color:var(--muted)}
 @media (max-width:760px){.band .wrap{grid-template-columns:1fr 1fr}}
 
+.who{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.w{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px}
+.w .ico{margin-bottom:12px;background:var(--tint);color:var(--deep)}
+.w b{color:var(--ink);font-size:16px;line-height:1.3}
+.w span:last-child{color:var(--muted);font-size:14px}
+@media (max-width:900px){.who{grid-template-columns:1fr 1fr}}
 section{padding:96px 0}
 .head{max-width:720px;margin-bottom:48px}
 .head h2{margin-top:12px}
@@ -238,6 +244,7 @@ footer nav a:hover{color:var(--ink)}
       huddle
     </a>
     <nav class="nav-links" aria-label="Sections">
+      <a href="#pour-qui" data-i18n="nav.who">Pour qui</a>
       <a href="#fonctionnalites" data-i18n="nav.features">Fonctionnalités</a>
       <a href="#reseaux" data-i18n="nav.networks">Réseaux</a>
       <a href="#securite" data-i18n="nav.security">Sécurité</a>
@@ -259,7 +266,7 @@ footer nav a:hover{color:var(--ink)}
     <div>
       <span class="eyebrow" data-i18n="hero.eyebrow">Gestion de groupe · Android</span>
       <h1 style="margin-top:16px" data-i18n-html="hero.title">Votre groupe,<br><span class="accent">enfin organisé.</span></h1>
-      <p class="lead" data-i18n="hero.lead">Huddle réunit les membres, la caisse, le calendrier, le planning et les annonces de votre association, mouvement ou paroisse, dans une seule application. En français et en anglais.</p>
+      <p class="lead" data-i18n="hero.lead">Associations, clubs, communautés religieuses, ONG, coopératives, tontines, amicales : Huddle réunit vos membres, votre caisse, votre calendrier, vos plannings et vos annonces dans une seule application. En français et en anglais.</p>
       <div class="cta">
         <a class="btn btn-primary" href="#telecharger">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
@@ -268,14 +275,14 @@ footer nav a:hover{color:var(--ink)}
         <a class="btn btn-ghost" href="#fonctionnalites" data-i18n="hero.more">Découvrir l’application</a>
       </div>
       <div class="origin">
-        <span class="tile">MSG</span>
-        <span data-i18n="hero.origin">Né avec le Mouvement Garde Suisse de Yapoma, à Douala.</span>
+        <span class="tiles" aria-hidden="true"><span style="background:#00695C">A</span><span style="background:#2B6CB0">C</span><span style="background:#B7552B">T</span><span style="background:#5B3A8C">O</span></span>
+        <span data-i18n="hero.origin">Pour tout groupe qui veut gérer ses activités en ligne, quelle que soit sa taille.</span>
       </div>
     </div>
     <div class="hero-art" aria-hidden="true">
       <div class="blob"></div>
-      <div class="phone p2"><img src="assets/shot-month.jpg" alt="" loading="eager"></div>
-      <div class="phone p1"><img src="assets/shot-home.jpg" alt="" loading="eager"></div>
+      <div class="phone p2"><img src="{% static 'website/shot-month.jpg' %}\" alt="" loading="eager"></div>
+      <div class="phone p1"><img src="{% static 'website/shot-home.jpg' %}\" alt="" loading="eager"></div>
       <div class="float f1">
         <span class="dot" style="background:var(--tint);color:var(--deep)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
         <span><span data-i18n="float.validated">Dépense validée</span><small data-i18n="float.validatedSub">Livre de caisse · à l’instant</small></span>
@@ -294,10 +301,32 @@ footer nav a:hover{color:var(--ink)}
   <div class="wrap">
     <div class="stat reveal"><b>5</b><span data-i18n="band.tabs">espaces : accueil, membres, finances, calendrier, annonces</span></div>
     <div class="stat reveal"><b>FR · EN</b><span data-i18n="band.lang">l’application et le back-office, dans les deux langues</span></div>
-    <div class="stat reveal"><b data-i18n="band.levelsN">6 niveaux</b><span data-i18n="band.levels">de la paroisse au diocèse, en réseau</span></div>
+    <div class="stat reveal"><b data-i18n="band.levelsN">6 niveaux</b><span data-i18n="band.levels">de la section locale à la fédération, en réseau</span></div>
     <div class="stat reveal"><b data-i18n="band.offlineN">Hors ligne</b><span data-i18n="band.offline">consultez tout, la synchronisation suit</span></div>
   </div>
 </div>
+
+
+<!-- Who it's for -->
+<section id="pour-qui" style="padding-bottom:24px">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="eyebrow" data-i18n="who.eyebrow">Pour qui</span>
+      <h2 data-i18n="who.title">Pour tous les groupes qui s’organisent</h2>
+      <p class="lead" data-i18n="who.lead">Dès qu’un groupe a des membres, de l’argent en commun, des activités à planifier et des messages à faire passer, Huddle lui sert.</p>
+    </div>
+    <div class="who">
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-4 4 3 3-3 7 6"/><path d="M7 16l3 3 3-2 3 2 3-3"/><path d="M3 12l4 4M21 14l-2 2"/></svg></span><b data-i18n="who.1">Associations</b><span data-i18n="who.1d">de quartier, culturelles, d’entraide</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v5M10 4h4"/><path d="M5 21V11l7-4 7 4v10"/><path d="M10 21v-5h4v5"/></svg></span><b data-i18n="who.2">Communautés religieuses</b><span data-i18n="who.2d">mouvements, chorales, groupes de prière</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M3 10h5M7 19l2.5-4.5M17 19l-2.5-4.5"/></svg></span><b data-i18n="who.3">Clubs</b><span data-i18n="who.3d">sport, loisirs, lecture</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg></span><b data-i18n="who.4">Tontines et mutuelles</b><span data-i18n="who.4d">cotisations, solidarité, comptes clairs</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M12 12C12 7 8 5 4 5c0 4 3 7 8 7z"/><path d="M12 14c0-4 3-6 8-6 0 4-3 6-8 6z"/></svg></span><b data-i18n="who.5">ONG et coopératives</b><span data-i18n="who.5d">sections, bénévoles, terrain</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/><path d="M22 9v5"/></svg></span><b data-i18n="who.6">Amicales et associations d’anciens</b><span data-i18n="who.6d">promotions, ressortissants, diaspora</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-5 9 5z"/><path d="M5 9v9M9.5 9v9M14.5 9v9M19 9v9M3 21h18"/></svg></span><b data-i18n="who.7">Syndicats et fédérations</b><span data-i18n="who.7d">du local au national</span></div>
+      <div class="w reveal"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l9-15 9 15z"/><path d="M12 5v15M9 20l3-5 3 5"/></svg></span><b data-i18n="who.8">Jeunesse et scoutisme</b><span data-i18n="who.8d">unités, encadrants, camps</span></div>
+    </div>
+  </div>
+</section>
 
 <!-- Feature tour -->
 <section id="fonctionnalites">
@@ -305,11 +334,11 @@ footer nav a:hover{color:var(--ink)}
     <div class="head reveal">
       <span class="eyebrow" data-i18n="tour.eyebrow">L’application</span>
       <h2 data-i18n="tour.title">Tout le groupe, à portée de main</h2>
-      <p class="lead" data-i18n="tour.lead">Chacun voit ce que son rôle lui permet : le garde son planning et les annonces, le trésorier la caisse, le président l’ensemble.</p>
+      <p class="lead" data-i18n="tour.lead">Chacun voit ce que son rôle lui permet : le membre son planning et les annonces, le trésorier la caisse, le président l’ensemble.</p>
     </div>
     <div class="tour">
       <div class="tabs" role="tablist" aria-label="Fonctionnalités">
-        <button class="tab" role="tab" aria-selected="true" data-shot="shot-home.jpg" id="t-home">
+        <button class="tab" role="tab" aria-selected="true" data-shot="{% static 'website/shot-home.jpg' %}\" id="t-home">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>
           <span>
             <span class="h3" data-i18n="f.home.t">Accueil</span>
@@ -317,11 +346,11 @@ footer nav a:hover{color:var(--ink)}
             <span class="ul">
               <span class="li" data-i18n="f.home.1">Solde de la caisse, masqué d’un geste</span>
               <span class="li" data-i18n="f.home.2">Opérations à valider et demandes de dépense</span>
-              <span class="li" data-i18n="f.home.3">Le prochain rendez-vous, avec lieu et tenue</span>
+              <span class="li" data-i18n="f.home.3">Le prochain rendez-vous, avec son lieu et ses consignes</span>
             </span>
           </span>
         </button>
-        <button class="tab" role="tab" aria-selected="false" data-shot="shot-members.jpg" id="t-members">
+        <button class="tab" role="tab" aria-selected="false" data-shot="{% static 'website/shot-members.jpg' %}\" id="t-members">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17" cy="8.5" r="2.8"/><path d="M17.5 14.6c2.3.4 3.7 2 4 5.4"/></svg></span>
           <span>
             <span class="h3" data-i18n="f.members.t">Membres</span>
@@ -333,7 +362,7 @@ footer nav a:hover{color:var(--ink)}
             </span>
           </span>
         </button>
-        <button class="tab" role="tab" aria-selected="false" data-shot="shot-finances.jpg" id="t-fin">
+        <button class="tab" role="tab" aria-selected="false" data-shot="{% static 'website/shot-finances.jpg' %}\" id="t-fin">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="3"/><path d="M16 12.5h2M3 9h18"/></svg></span>
           <span>
             <span class="h3" data-i18n="f.fin.t">Finances</span>
@@ -345,19 +374,19 @@ footer nav a:hover{color:var(--ink)}
             </span>
           </span>
         </button>
-        <button class="tab" role="tab" aria-selected="false" data-shot="shot-agenda.jpg" id="t-cal">
+        <button class="tab" role="tab" aria-selected="false" data-shot="{% static 'website/shot-agenda.jpg' %}\" id="t-cal">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span>
           <span>
             <span class="h3" data-i18n="f.cal.t">Calendrier et planning</span>
-            <span class="d" data-i18n="f.cal.d">Qui sert, où, quand, et dans quelle tenue.</span>
+            <span class="d" data-i18n="f.cal.d">Qui fait quoi, où et quand.</span>
             <span class="ul">
-              <span class="li" data-i18n="f.cal.1">Vues mois, agenda et planning des services</span>
+              <span class="li" data-i18n="f.cal.1">Vues mois, agenda et planning des tâches</span>
               <span class="li" data-i18n="f.cal.2">Rappels la veille au soir et deux heures avant</span>
               <span class="li" data-i18n="f.cal.3">Synchronisé sur tous les téléphones du groupe</span>
             </span>
           </span>
         </button>
-        <button class="tab" role="tab" aria-selected="false" data-shot="shot-announces.jpg" id="t-ann">
+        <button class="tab" role="tab" aria-selected="false" data-shot="{% static 'website/shot-announces.jpg' %}\" id="t-ann">
           <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l14-6v14L3 13z"/><path d="M7 13v5M20 9.5v3"/></svg></span>
           <span>
             <span class="h3" data-i18n="f.ann.t">Annonces</span>
@@ -371,7 +400,7 @@ footer nav a:hover{color:var(--ink)}
         </button>
       </div>
       <div class="tour-phone">
-        <div class="phone"><img id="tour-img" src="assets/shot-home.jpg" alt="Écran Accueil de Huddle" width="576" height="1214"></div>
+        <div class="phone"><img id="tour-img" src="{% static 'website/shot-home.jpg' %}\" alt="Écran Accueil de Huddle" width="576" height="1214"></div>
         <p class="caption" data-i18n="tour.caption">Captures de la version de test</p>
       </div>
     </div>
@@ -385,7 +414,7 @@ footer nav a:hover{color:var(--ink)}
       <div class="reveal">
         <span class="eyebrow" data-i18n="net.eyebrow">Réseaux de groupes</span>
         <h2 style="margin-top:12px" data-i18n="net.title">Des groupes qui avancent ensemble</h2>
-        <p class="lead" style="margin-top:16px" data-i18n="net.lead">Une paroisse, sa zone, son diocèse : chaque groupe garde son autonomie et choisit ce qu’il partage avec les autres.</p>
+        <p class="lead" style="margin-top:16px" data-i18n="net.lead">Une section locale, sa région, sa fédération nationale : chaque groupe garde son autonomie et choisit ce qu’il partage avec les autres.</p>
         <div class="pills">
           <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12l8 4.5 8-4.5M4 16.5L12 21l8-4.5"/></svg></span><span><b data-i18n="net.p1.t">Jusqu’à six niveaux</b><span data-i18n="net.p1.d">Le groupe du dessus informe et coordonne ; il ne décide pas à la place des groupes rattachés.</span></span></div>
           <div class="pill"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg></span><span><b data-i18n="net.p2.t">Partage au choix</b><span data-i18n="net.p2.d">Membres, finances, calendrier, annonces : rien, un résumé ou le détail. Un aperçu montre ce que l’autre groupe verra.</span></span></div>
@@ -395,22 +424,22 @@ footer nav a:hover{color:var(--ink)}
       </div>
       <div class="reveal">
         <div class="tree" aria-label="Exemple de réseau">
-          <div class="node"><span class="logo" style="background:#6B4BA0">AD</span><span><b data-i18n="tree.dio">Archidiocèse</b><small data-i18n="tree.dioS">Niveau diocésain</small></span></div>
+          <div class="node"><span class="logo" style="background:#6B4BA0">FN</span><span><b data-i18n="tree.dio">Fédération nationale</b><small data-i18n="tree.dioS">Niveau national</small></span></div>
           <div class="link"></div>
-          <div class="node"><span class="logo" style="background:#2B6CB0">ZW9</span><span><b>Zone Wouri 9</b><small data-i18n="tree.zoneS">Zone · 7 groupes rattachés</small></span></div>
+          <div class="node"><span class="logo" style="background:#2B6CB0">RL</span><span><b data-i18n="tree.zone">Région Littoral</b><small data-i18n="tree.zoneS">Région · 7 sections rattachées</small></span></div>
           <div class="link"></div>
           <div class="row">
-            <div class="node"><span class="logo" style="background:#00695C">MSG</span><span><b>Yapoma</b><small data-i18n="tree.par">Paroisse</small></span></div>
-            <div class="node"><span class="logo" style="background:#B7552B">GSK</span><span><b>Kotto</b><small data-i18n="tree.par">Paroisse</small></span></div>
-            <div class="node"><span class="logo" style="background:#8A6D1E">GSB</span><span><b>Bonapriso</b><small data-i18n="tree.par">Paroisse</small></span></div>
+            <div class="node"><span class="logo" style="background:#00695C">SA</span><span><b>Section A</b><small data-i18n="tree.par">Section locale</small></span></div>
+            <div class="node"><span class="logo" style="background:#B7552B">SB</span><span><b>Section B</b><small data-i18n="tree.par">Section locale</small></span></div>
+            <div class="node"><span class="logo" style="background:#8A6D1E">SC</span><span><b>Section C</b><small data-i18n="tree.par">Section locale</small></span></div>
           </div>
-          <div class="twin"><span data-i18n="tree.twin">Jumelage avec un groupe d’un autre réseau</span><i></i><span class="node" style="min-width:0;padding:8px 10px"><span class="logo" style="background:#C2410C;width:28px;height:28px;font-size:9px">CH</span></span></div>
+          <div class="twin"><span data-i18n="tree.twin">Jumelage avec un groupe d’un autre réseau</span><i></i><span class="node" style="min-width:0;padding:8px 10px"><span class="logo" style="background:#C2410C;width:28px;height:28px;font-size:9px">P</span></span></div>
         </div>
       </div>
     </div>
     <div class="net-shots reveal" aria-hidden="true">
-      <div class="phone"><img src="assets/shot-network.jpg" alt="" loading="lazy"></div>
-      <div class="phone"><img src="assets/shot-shared.jpg" alt="" loading="lazy"></div>
+      <div class="phone"><img src="{% static 'website/shot-network.jpg' %}\" alt="" loading="lazy"></div>
+      <div class="phone"><img src="{% static 'website/shot-shared.jpg' %}\" alt="" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -426,9 +455,9 @@ footer nav a:hover{color:var(--ink)}
     <div class="spaces reveal">
       <h4 data-i18n="ws.pick">Choisissez votre groupe</h4>
       <p class="sub" data-i18n="ws.pickSub">Un compte, plusieurs groupes</p>
-      <div class="space"><span class="logo" style="background:#00695C">MSG</span><span><b>Mouvement Garde Suisse</b><small>Yapoma · <span data-i18n="ws.role1">Président</span></small></span><span class="chev">›</span></div>
-      <div class="space"><span class="logo" style="background:#2B6CB0">ZW9</span><span><b>Zone Wouri 9</b><small data-i18n="ws.role2">Zone · Trésorier</small></span><span class="chev">›</span></div>
-      <div class="space"><span class="logo" style="background:#5B3A8C">ADD</span><span><b data-i18n="ws.g3">Chorale diocésaine</b><small data-i18n="ws.role3">Membre</small></span><span class="chev">›</span></div>
+      <div class="space"><span class="logo" style="background:#00695C">AJS</span><span><b data-i18n="ws.g1">Association des jeunes du quartier</b><small data-i18n="ws.role1">Président</small></span><span class="chev">›</span></div>
+      <div class="space"><span class="logo" style="background:#2B6CB0">TF</span><span><b data-i18n="ws.g2">Tontine des femmes</b><small data-i18n="ws.role2">Trésorière</small></span><span class="chev">›</span></div>
+      <div class="space"><span class="logo" style="background:#5B3A8C">FC</span><span><b data-i18n="ws.g3">Football club du lycée</b><small data-i18n="ws.role3">Membre</small></span><span class="chev">›</span></div>
     </div>
   </div>
 </section>
@@ -476,14 +505,15 @@ footer nav a:hover{color:var(--ink)}
         <h2 style="margin-top:12px" data-i18n="dl.title">Essayez Huddle sur Android</h2>
         <p class="lead" data-i18n="dl.lead">La bêta est ouverte aux groupes qui testent avec nous. Votre responsable de groupe vous inscrit, puis vous vous connectez avec votre numéro.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="telecharger.html">
+          <a class="btn btn-primary" href="{% url 'website:download' %}">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.5l1.8-3.1a.4.4 0 0 0-.7-.4l-1.8 3.1A11 11 0 0 0 12 8.2c-1.8 0-3.4.3-4.9 1L5.3 6a.4.4 0 0 0-.7.4l1.8 3.1A9.6 9.6 0 0 0 1.5 17h21a9.6 9.6 0 0 0-4.9-7.5zM7 14.4a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>
             <span data-i18n="dl.cta">Télécharger pour Android</span>
           </a>
         </div>
-        <p class="meta" data-i18n="dl.meta">Android · iOS bientôt · français / English</p>
+        {% if p.app_version %}<p class="meta">Version {{ p.app_version }}{% if p.app_size %} · {{ p.app_size }}{% endif %}</p>{% endif %}
+        <p class="meta" style="margin-top:4px" data-i18n="dl.meta">Android · iOS bientôt · français / English</p>
       </div>
-      <div class="phone" aria-hidden="true"><img src="assets/shot-login.jpg" alt="" loading="lazy"></div>
+      <div class="phone" aria-hidden="true"><img src="{% static 'website/shot-login.jpg' %}\" alt="" loading="lazy"></div>
     </div>
   </div>
 </section>
@@ -498,25 +528,25 @@ footer nav a:hover{color:var(--ink)}
     </div>
     <div class="products">
       <article class="product here reveal">
-        <span class="plogo" style="background:#fff;border:1px solid var(--line)"><img src="assets/huddle-mark.svg" alt="" style="width:70%;height:70%"></span>
+        <span class="plogo" style="background:#fff;border:1px solid var(--line)"><img src="{% static 'website/huddle-mark.svg' %}\" alt="" style="width:70%;height:70%"></span>
         <h3>Huddle</h3>
         <p data-i18n="st.huddle">La gestion de groupe : membres, caisse, calendrier, planning et annonces, en réseau.</p>
         <span class="tag" style="background:var(--tint);color:var(--deep)" data-i18n="st.here">Vous êtes ici</span>
       </article>
       <article class="product reveal">
-        <span class="plogo"><img src="assets/spekooh-icon.jpg" alt="" style="object-fit:cover"></span>
+        <span class="plogo"><img src="{% static 'website/spekooh-icon.jpg' %}\" alt="" style="object-fit:cover"></span>
         <h3>Spekooh</h3>
         <p data-i18n="st.spekooh">Les sujets d’examen de tout le Cameroun, anglophone et francophone (GCE, BEPC, Probatoire, Bac), avec des corrigés rédigés par des enseignants vérifiés.</p>
         <span class="tag" style="background:#FBEFD2;color:#7A5A12" data-i18n="st.edu">Éducation · Mobile</span>
       </article>
       <article class="product reveal">
-        <span class="plogo" style="background:#1B1D24"><img src="assets/slearn.png" alt="" style="width:80%;height:80%"></span>
+        <span class="plogo" style="background:#1B1D24"><img src="{% static 'website/slearn.png' %}\" alt="" style="width:80%;height:80%"></span>
         <h3>S@Learn</h3>
         <p data-i18n="st.slearn">L’apprentissage en ligne pour l’Afrique : cours, quiz, certificats, et Kairos Mind, un tuteur IA dans chaque leçon. Enseignants vérifiés.</p>
         <span class="tag" style="background:#FBEFD2;color:#7A5A12" data-i18n="st.eduWeb">Éducation · Web</span>
       </article>
       <article class="product reveal">
-        <span class="plogo" style="background:#EAF7EC"><img src="assets/emergensis.png" alt="" style="width:86%;height:86%"></span>
+        <span class="plogo" style="background:#EAF7EC"><img src="{% static 'website/emergensis.png' %}\" alt="" style="width:86%;height:86%"></span>
         <h3>Emergensis</h3>
         <p data-i18n="st.emergensis">Les urgences de santé, localisées : trouver vite l’aide la plus proche.</p>
         <span class="tag" style="background:#DDF3E1;color:#17653A" data-i18n="st.health">Santé · Urgences</span>
@@ -533,50 +563,51 @@ footer nav a:hover{color:var(--ink)}
     <nav aria-label="Pied de page">
       <a href="#fonctionnalites" data-i18n="nav.features">Fonctionnalités</a>
       <a href="#reseaux" data-i18n="nav.networks">Réseaux</a>
-      <a href="telecharger.html" data-i18n="nav.download">Télécharger</a>
+      <a href="{% url 'website:download' %}" data-i18n="nav.download">Télécharger</a>
     </nav>
-    <span>© 2026 STORES</span>
+    {% if p.support_email or p.support_whatsapp or p.support_phone %}<span class="contact"><span data-i18n="ft.contact">Contact</span> :{% if p.support_email %} <a href="mailto:{{ p.support_email }}">{{ p.support_email }}</a>{% endif %}{% if p.support_whatsapp %} · <a href="https://wa.me/237{{ p.support_whatsapp|cut:' ' }}" rel="noopener">WhatsApp</a>{% endif %}{% if p.support_phone %} · <a href="tel:+237{{ p.support_phone|cut:' ' }}">{{ p.support_phone }}</a>{% endif %}</span>{% endif %}
+    <span>© {% now "Y" %} STORES</span>
   </div>
 </footer>
 
 <script>
 const EN = {
-  "nav.features":"Features","nav.networks":"Networks","nav.security":"Security","nav.download":"Download",
+  "nav.who":"Who it’s for","nav.features":"Features","nav.networks":"Networks","nav.security":"Security","nav.download":"Download",
   "hero.eyebrow":"Group management · Android",
   "hero.title":"Your group,<br><span class=\"accent\">finally organised.</span>",
-  "hero.lead":"Huddle brings your association, movement or parish’s members, cash book, calendar, duty planning and announcements together in one app. In French and English.",
+  "hero.lead":"Associations, clubs, faith communities, NGOs, cooperatives, savings groups, alumni networks: Huddle brings your members, cash book, calendar, planning and announcements together in one app. In French and English.",
   "hero.cta":"Download the beta","hero.more":"Explore the app",
-  "hero.origin":"Born with the Mouvement Garde Suisse of Yapoma, Douala.",
+  "hero.origin":"For any group that wants to run its activities online, whatever its size.",
   "float.validated":"Expense approved","float.validatedSub":"Cash book · just now",
   "float.read":"Read by 18 of 21","float.readSub":"Announcement · General assembly",
   "band.tabs":"spaces: home, members, finances, calendar, announcements",
   "band.lang":"the app and the back-office, in both languages",
-  "band.levelsN":"6 levels","band.levels":"from parish to diocese, as a network",
+  "band.levelsN":"6 levels","band.levels":"from local branch to federation, as a network",
   "band.offlineN":"Offline","band.offline":"read everything; syncing catches up",
   "tour.eyebrow":"The app","tour.title":"The whole group, in your hand",
-  "tour.lead":"Everyone sees what their role allows: a member their duties and announcements, the treasurer the cash book, the president everything.",
+  "tour.lead":"Everyone sees what their role allows: a member their tasks and announcements, the treasurer the cash book, the president everything.",
   "f.home.t":"Home","f.home.d":"Today’s essentials, for your role.",
-  "f.home.1":"Cash balance, hidden with one tap","f.home.2":"Entries to approve and spending requests","f.home.3":"The next meeting, with place and dress code",
+  "f.home.1":"Cash balance, hidden with one tap","f.home.2":"Entries to approve and spending requests","f.home.3":"The next meeting, with its place and instructions",
   "f.members.t":"Members","f.members.d":"A living directory, current for everyone.",
   "f.members.1":"Search by name or number, filter by status","f.members.2":"The committee, its roles and terms","f.members.3":"Members abroad stay in the group",
   "f.fin.t":"Finances","f.fin.d":"A transparent cash book where every franc is approved.",
   "f.fin.1":"Cash book grouped by day, type or status","f.fin.2":"Whoever records an entry doesn’t approve it","f.fin.3":"Solidarity fund, quarterly PDF report",
-  "f.cal.t":"Calendar and planning","f.cal.d":"Who serves, where, when, and what to wear.",
-  "f.cal.1":"Month, agenda and duty-planning views","f.cal.2":"Reminders the evening before and two hours ahead","f.cal.3":"In sync on every phone in the group",
+  "f.cal.t":"Calendar and planning","f.cal.d":"Who does what, where and when.",
+  "f.cal.1":"Month, agenda and task-planning views","f.cal.2":"Reminders the evening before and two hours ahead","f.cal.3":"In sync on every phone in the group",
   "f.ann.t":"Announcements","f.ann.d":"The right message to the right people.",
   "f.ann.1":"Photos and attached files, pinned posts","f.ann.2":"“Read by 6 of 21”: you know who saw it","f.ann.3":"To the whole group, or to a few people",
   "tour.caption":"Screenshots from the test version",
   "net.eyebrow":"Networks of groups","net.title":"Groups that move forward together",
-  "net.lead":"A parish, its zone, its diocese: each group stays independent and chooses what it shares with the others.",
+  "net.lead":"A local branch, its region, its national federation: each group stays independent and chooses what it shares with the others.",
   "net.p1.t":"Up to six levels","net.p1.d":"The group above informs and coordinates; it never decides for the groups below.",
   "net.p2.t":"Share what you choose","net.p2.d":"Members, finances, calendar, announcements: nothing, a summary or the detail. A preview shows what the other group will see.",
   "net.p3.t":"Send across the network","net.p3.d":"An announcement or event sent to chosen groups, to all their members or to their committee only.",
   "net.p4.t":"Ask for access","net.p4.d":"What isn’t shared can be requested; the president accepts or declines, and everything is logged.",
-  "tree.dio":"Archdiocese","tree.dioS":"Diocese level","tree.zoneS":"Zone · 7 groups below","tree.par":"Parish",
+  "tree.dio":"National federation","tree.dioS":"National level","tree.zone":"Littoral region","tree.zoneS":"Region · 7 branches below","tree.par":"Local branch",
   "tree.twin":"Twinned with a group from another network",
   "ws.eyebrow":"One space per group","ws.title":"Every group at home",
   "ws.lead":"Like a workspace: each group has its own name, initials, logo and colours. With one account you move between groups, and each group’s data stays its own.",
-  "ws.pick":"Choose your group","ws.pickSub":"One account, several groups","ws.role1":"President","ws.role2":"Zone · Treasurer","ws.g3":"Diocesan choir","ws.role3":"Member",
+  "ws.pick":"Choose your group","ws.pickSub":"One account, several groups","ws.g1":"Neighbourhood youth association","ws.role1":"President","ws.g2":"Women’s savings group","ws.role2":"Treasurer","ws.g3":"High-school football club","ws.role3":"Member",
   "sec.eyebrow":"Trust","sec.title":"Safe by design","sec.lead":"A group’s money and information deserve clear rules. Huddle enforces them for you.",
   "sec.1.t":"PIN and fingerprint","sec.1.d":"Sign in with your number and a PIN; unlock with fingerprint or face if you like.",
   "sec.2.t":"Roles and permissions","sec.2.d":"Each role opens only the screens it needs. The group decides who sees what.",
@@ -601,7 +632,17 @@ const EN = {
   "st.eduWeb":"Education · Web",
   "st.emergensis":"Health emergencies, located: find the nearest help, fast.",
   "st.health":"Health · Emergencies",
-  "ft.powered":"Powered by"
+  "ft.powered":"Powered by",
+  "who.eyebrow":"Who it’s for","who.title":"For every group that gets organised",
+  "who.lead":"As soon as a group has members, shared money, activities to plan and messages to pass on, Huddle helps.",
+  "who.1":"Associations","who.1d":"neighbourhood, cultural, mutual aid",
+  "who.2":"Faith communities","who.2d":"movements, choirs, prayer groups",
+  "who.3":"Clubs","who.3d":"sport, leisure, reading",
+  "who.4":"Savings groups and mutuals","who.4d":"contributions, solidarity, clear accounts",
+  "who.5":"NGOs and cooperatives","who.5d":"branches, volunteers, field work",
+  "who.6":"Alumni and hometown associations","who.6d":"classes, hometown groups, diaspora",
+  "who.7":"Unions and federations","who.7d":"from local to national",
+  "who.8":"Youth and scouting","who.8d":"units, leaders, camps","ft.contact":"Contact"
 };
 const FR = {};
 document.querySelectorAll("[data-i18n]").forEach(el => FR[el.dataset.i18n] ??= el.textContent);
@@ -626,9 +667,9 @@ const tabs = [...document.querySelectorAll(".tab")];
 const img = document.getElementById("tour-img");
 function pick(t){
   tabs.forEach(x => { x.setAttribute("aria-selected", String(x === t)); x.tabIndex = x === t ? 0 : -1; });
-  if (!img.src.endsWith(t.dataset.shot)) {
+  if (img.getAttribute("src") !== t.dataset.shot) {
     img.style.opacity = 0;
-    setTimeout(() => { img.src = "assets/" + t.dataset.shot; img.alt = t.querySelector(".h3").textContent; img.onload = () => img.style.opacity = 1; }, 160);
+    setTimeout(() => { img.src = t.dataset.shot; img.alt = t.querySelector(".h3").textContent; img.onload = () => img.style.opacity = 1; }, 160);
   }
 }
 tabs.forEach((t, i) => {
@@ -640,7 +681,7 @@ tabs.forEach((t, i) => {
   });
 });
 // Preload the tour's screens.
-tabs.forEach(t => { const i = new Image(); i.src = "assets/" + t.dataset.shot; });
+tabs.forEach(t => { const i = new Image(); i.src = t.dataset.shot; });
 
 // Nav border once scrolled; sections fade in.
 const nav = document.getElementById("nav");

@@ -17,6 +17,16 @@
     <label class="fld"><span class="fld-l">Conditions d’utilisation</span><span class="fld-box multi"><textarea name="terms_text" rows="10">{{ p.terms_text }}</textarea></span><span class="fld-h">Les textes proposés sont des brouillons : faites-les relire avant l’ouverture au public. Version {{ p.terms_version }} : toute modification passe à la version suivante et chaque membre l’accepte à nouveau à sa prochaine connexion.</span></label>
   </div></section>
 </div>
+<section class="panel" style="margin-top:16px" id="telechargement"><div class="panel-h"><h2>Application à télécharger · site public</h2>{% if p.app_download_url %}<a class="btn btn-ghost btn-sm" href="/telecharger/" target="_blank" rel="noopener">Voir la page</a>{% endif %}</div><div class="panel-b" style="display:flex;flex-direction:column;gap:16px">
+  <div class="notice">{% icon 'info' %}<span>Le bouton « Télécharger » du site public mène à ce lien. À chaque nouvelle version, collez ici le lien durable du fichier APK (par exemple la publication GitHub de la version), son numéro, sa taille et son empreinte : le site change aussitôt, sans rien redéployer. Vide : le site annonce que le téléchargement revient bientôt.</span></div>
+  <label class="fld"><span class="fld-l">Lien du fichier APK (https)</span><span class="fld-box"><input name="app_download_url" type="url" value="{{ p.app_download_url }}" placeholder="https://github.com/…/huddle-0.1.0-build48.apk"></span></label>
+  <div class="bo-cols half" style="gap:16px">
+    <label class="fld"><span class="fld-l">Version</span><span class="fld-box"><input name="app_version" value="{{ p.app_version }}" placeholder="0.1.0 (build 48)" maxlength="40"></span></label>
+    <label class="fld"><span class="fld-l">Taille</span><span class="fld-box"><input name="app_size" value="{{ p.app_size }}" placeholder="68 Mo" maxlength="20"></span></label>
+  </div>
+  <label class="fld"><span class="fld-l">Empreinte SHA-256</span><span class="fld-box"><input name="app_sha256" value="{{ p.app_sha256 }}" maxlength="64" spellcheck="false" style="font-family:ui-monospace,monospace"></span><span class="fld-h">64 caractères, affichés sous le bouton pour vérifier le fichier.</span></label>
+  <label class="fld"><span class="fld-l">Nouveautés de cette version</span><span class="fld-box multi"><textarea name="app_notes" rows="4">{{ p.app_notes }}</textarea></span></label>
+</div></section>
 <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-primary">Enregistrer</button></div>
 </form>
 {% endblock %}
