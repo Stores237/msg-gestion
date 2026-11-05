@@ -19,6 +19,10 @@ def test_site_is_public_and_says_huddle_and_stores():
     for name in ("Spekooh", "S@Learn", "Emergensis"):
         assert name in html
     assert "/telecharger/" in html
+    # Every picture's address is clean (a stray backslash once broke them all live).
+    import re
+    urls = re.findall(r'(?:src|data-shot|href)="([^"]*/static/[^"]*)"', html)
+    assert len(urls) >= 10 and not any("\\" in u for u in urls)
     # Huddle is for every group (owner, 2026-11-05), not one movement's site.
     assert "Garde Suisse" not in html and "Pour tous les groupes qui s’organisent" in html
 
